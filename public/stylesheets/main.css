@@ -3,3 +3,11 @@ body {
     padding-top: 50px;
     padding-bottom: 20px;
 }
+
+/* Flatstrap */
+.btn {
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    font-size: 21px;
+}

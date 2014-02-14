@@ -1,0 +1,25 @@
+.form-control {
+    border: 1px solid #D6D6D6;
+    border-radius: 0;
+    box-shadow: none;
+    height: 50px;
+    padding: 6px 15px;
+}
+
+.row {
+    background: #ededed;
+    padding: 20px 50px 20px 50px;
+    margin: 100px;
+}
+
+legend {
+    border: medium none;
+    color: #7F7F7F;
+    display: block;
+    font-size: 20px;
+    line-height: inherit;
+    margin-bottom: 15px;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+}
