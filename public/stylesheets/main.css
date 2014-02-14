@@ -1,6 +1,6 @@
 /* Fix for top bar in bootstrap */
 body {
-    padding-top: 50px;
+    padding-top: 60px;
     padding-bottom: 20px;
 }
 
@@ -10,4 +10,12 @@ body {
     border-radius: 0;
     border: none;
     font-size: 21px;
+}
+
+.form-control {
+    border: 1px solid #D6D6D6;
+    border-radius: 0;
+    box-shadow: none;
+    height: 50px;
+    padding: 6px 15px;
 }
