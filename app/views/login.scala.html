@@ -1,0 +1,38 @@
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
+}
+
+@main("Login", stylesheets) {
+    <div class="row">
+        <div class="page-header"><h2>Login</h2></div>
+        <form class="form-horizontal">
+            <fieldset>
+                @* Source: http://bootsnipp.com/snippets/featured/login-form-flat *@
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="username"></label>
+                    <div class="col-md-12">
+                        <input id="username" name="username" type="text" placeholder="Gebruikersnaam" class="form-control input-md">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="password"></label>
+                    <div class="col-md-12">
+                        <input id="password" name="password" type="password" placeholder="Wachtwoord" class="form-control input-md">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="login"></label>
+                    <div class="col-md-5">
+                        <button id="login" name="login" class="btn btn-block btn-success">Login</button>
+                    </div>
+                    <div class="col-md-5">
+                        <button id="register" name="register" class="btn btn-block btn-warning">Registreer</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div> <!--./row -->
+}
