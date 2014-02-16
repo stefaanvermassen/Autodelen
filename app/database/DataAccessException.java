@@ -6,19 +6,14 @@ package database;
 public class DataAccessException extends RuntimeException {
 
     private Exception innerException;
-    private String desc;
 
     public DataAccessException(String desc, Exception exception){
+        super(desc);
         this.innerException = exception;
-        this.desc = desc;
     }
 
     public Exception getInnerException() {
         return innerException;
-    }
-
-    public String getDesc() {
-        return desc;
     }
 
     @Override
