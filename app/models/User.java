@@ -5,14 +5,40 @@ package models;
  */
 public class User {
 
+    private int id;
     private String email;
-    private String name;
+    private String firstName;
+    private String lastName;
     private String password;
+    private UserRole role;
 
-    public User(String email, String name, String password) {
+    public User(String email) {
         this.email = email;
-        this.name = name;
+        this.role = UserRole.USER;
+    }
+
+    public User(int id, String email, String firstName, String lastName, String password){
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.password = password;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getEmail() {
@@ -23,12 +49,12 @@ public class User {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPassword() {
@@ -37,5 +63,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 }
