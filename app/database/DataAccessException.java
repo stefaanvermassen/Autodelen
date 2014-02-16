@@ -20,4 +20,9 @@ public class DataAccessException extends RuntimeException {
     public String getDesc() {
         return desc;
     }
+
+    @Override
+    public String getMessage(){
+        return super.getMessage() + " -- " + (innerException != null ? innerException.getMessage() : "");
+    }
 }
