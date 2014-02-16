@@ -34,7 +34,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getCreateUserStatement() throws SQLException {
         if (createUserStatement == null) {
-            createUserStatement = connection.prepareStatement("INSERT INTO personen(email, password, firstname, lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
+            createUserStatement = connection.prepareStatement("INSERT INTO users(email, password, firstname, lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
     }
