@@ -12,7 +12,7 @@ public class DatabaseHelper {
 
     public static DataAccessProvider getDataAccessProvider() {
         if(accessProvider == null){
-            accessProvider = new JDBCDataAccessProvider("/conf/database.properties");
+            accessProvider = new JDBCDataAccessProvider("conf/database.properties");
         }
         return accessProvider;
     }

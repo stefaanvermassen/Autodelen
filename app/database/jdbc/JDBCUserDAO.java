@@ -15,7 +15,7 @@ import java.sql.SQLException;
  */
 public class JDBCUserDAO implements UserDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = { "ID" };
+    private static final String[] AUTO_GENERATED_KEYS = {"ID"};
 
     private Connection connection;
     private PreparedStatement getUserByEmailStatement;
@@ -26,14 +26,14 @@ public class JDBCUserDAO implements UserDAO {
     }
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
-        if(getUserByEmailStatement == null){
+        if (getUserByEmailStatement == null) {
             getUserByEmailStatement = connection.prepareStatement("SELECT id, email, password, firstname, lastname, role FROM users WHERE email = ?");
         }
         return getUserByEmailStatement;
     }
 
     private PreparedStatement getCreateUserStatement() throws SQLException {
-        if(createUserStatement == null){
+        if (createUserStatement == null) {
             createUserStatement = connection.prepareStatement("INSERT INTO personen(email, password, firstname, lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
@@ -44,7 +44,7 @@ public class JDBCUserDAO implements UserDAO {
         try {
             PreparedStatement ps = getUserByEmailStatement();
             ps.setString(1, email);
-            try(ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 User user = new User(email);
                 user.setId(rs.getInt("ID"));
                 user.setFirstName(rs.getString("firstname"));
@@ -53,11 +53,11 @@ public class JDBCUserDAO implements UserDAO {
                 user.setRole(Enum.valueOf(UserRole.class, rs.getString("role")));
 
                 return user;
-            } catch(SQLException ex){
+            } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
             }
 
-        } catch(SQLException ex){
+        } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
         }
 
@@ -73,15 +73,14 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(4, lastName);
             ps.executeUpdate();
 
-            try(ResultSet keys = ps.getGeneratedKeys()) {
-                if(keys.next()){
-                    return new User(keys.getInt(1), email, firstName, lastName, password);
-                }
-            } catch(SQLException ex){
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+                return new User(keys.getInt(1), email, firstName, lastName, password);
+            } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
             }
 
-        } catch(SQLException ex){
+        } catch (SQLException ex) {
             throw new DataAccessException("Failed to create user.", ex);
         }
     }

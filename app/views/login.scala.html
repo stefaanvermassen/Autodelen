@@ -17,7 +17,7 @@
                     <div class="form-group">
                         <label class="col-md-1 control-label" for="username"></label>
                         <div class="col-md-12">
-                            <input id="username" name="email" type="text" placeholder="Gebruikersnaam" class="form-control input-md" value="@form("email").value">
+                            <input id="username" name="email" type="text" placeholder="E-mail" class="form-control input-md" value="@form("email").value">
                         </div>
                     </div>
 
@@ -34,7 +34,7 @@
                             <button id="login" name="login" class="btn btn-block btn-success">Login</button>
                         </div>
                         <div class="col-md-5">
-                            <button id="register" name="register" class="btn btn-block btn-warning">Registreer</button>
+                            <button id="register" type="button" role="button" name="register" class="btn btn-block btn-warning" href="@routes.Login.register">Registreer</button>
                         </div>
                     </div>
                 </fieldset>
