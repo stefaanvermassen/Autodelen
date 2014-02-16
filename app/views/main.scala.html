@@ -1,4 +1,4 @@
-@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
+@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(user: User = null)(content: Html)
 
 <!DOCTYPE html>
 
@@ -41,7 +41,24 @@
                     </form>
                 </div> -->
                 <div class="navbar-collapse navbar-right collapse ">
-                    <a class="btn btn-primary" role="button" href="@routes.Login.login">Login</a>
+                    @if(user != null){
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> @user.getName()
+                                    <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">Profiel</a></li>
+                                        <li><a href="#">...</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="@routes.Login.logout">Logout</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <!---->
+                    } else {
+                        <a class="btn btn-primary" role="button" href="@routes.Login.login">Login</a>
+                    }
                 </div>
             </div>
         </div>

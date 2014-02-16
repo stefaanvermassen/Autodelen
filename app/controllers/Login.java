@@ -31,9 +31,15 @@ public class Login extends Controller {
      * @return The login index page
      */
     public static Result login() {
-        return ok(
-                login.render(Form.form(LoginModel.class))
-        );
+        if(session("email") == null) {
+            return ok(
+                    login.render(Form.form(LoginModel.class))
+            );
+        } else {
+            return redirect(
+                    routes.Application.index()
+            );
+        }
     }
 
     /**
@@ -57,10 +63,14 @@ public class Login extends Controller {
     /**
      * Method: GET
      * Logs the user out
-     * @return Redirect to indexpage
+     * @return Redirect to index page
      */
+    @Security.Authenticated(Secured.class)
     public static Result logout() {
-
+        session().clear();
+        return redirect(
+                routes.Application.index()
+        );
     }
 
 }
