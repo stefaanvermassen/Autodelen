@@ -10,7 +10,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.webjars"             %% "webjars-play"                % "2.2.0",
-  "org.webjars"             %  "bootstrap"                   % "3.1.1"
+  "org.webjars"             %  "bootstrap"                   % "3.1.1",
+  "com.typesafe"            %% "play-plugins-mailer"         % "2.1-RC2"
 )
 
 play.Project.playJavaSettings
