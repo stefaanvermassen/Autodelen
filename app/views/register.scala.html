@@ -1,0 +1,52 @@
+@(form: Form[Login.RegisterModel])
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
+    }
+@main("Registreer", stylesheets)(null) {
+    <div class="row">
+        <div class="page-header"><h2>Register</h2></div>
+        @helper.form(routes.Login.register_process, 'class -> "form-horizontal") {
+            @if(form.hasGlobalErrors) {
+                <div class="alert alert-danger alert-dismissable">
+                    <strong>Error!</strong> @form.globalError.message
+                </div>
+            }
+            <fieldset>
+                @* Source: http://bootsnipp.com/snippets/featured/login-form-flat *@
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="username"></label>
+                    <div class="col-md-12">
+                        <input id="username" name="email" type="text" placeholder="E-mail" class="form-control input-md" value="@form("email").value">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="password"></label>
+                    <div class="col-md-12">
+                        <input id="password" name="password" type="password" placeholder="Wachtwoord" class="form-control input-md">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="firstname"></label>
+                    <div class="col-md-12">
+                        <input id="firstname" name="firstName" type="text" placeholder="Voornaam" class="form-control input-md" value="@form("firstName").value">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="lastname"></label>
+                    <div class="col-md-12">
+                        <input id="lastname" name="lastName" type="text" placeholder="Achternaam" class="form-control input-md" value="@form("lastName").value">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="login"></label>
+                    <button id="register" name="register" class="btn btn-block btn-success">Registreer</button>
+                </div>
+            </fieldset>
+        }
+    </div> <!--./row -->
+}

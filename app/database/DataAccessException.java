@@ -1,0 +1,23 @@
+package database;
+
+/**
+ * Created by Cedric on 2/16/14.
+ */
+public class DataAccessException extends RuntimeException {
+
+    private Exception innerException;
+
+    public DataAccessException(String desc, Exception exception){
+        super(desc);
+        this.innerException = exception;
+    }
+
+    public Exception getInnerException() {
+        return innerException;
+    }
+
+    @Override
+    public String getMessage(){
+        return super.getMessage() + " -- " + (innerException != null ? innerException.getMessage() : "");
+    }
+}

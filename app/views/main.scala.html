@@ -1,4 +1,4 @@
-@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
+@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(user: User = null)(content: Html)
 
 <!DOCTYPE html>
 
@@ -25,11 +25,11 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Zelensis</a> @*TODO: load from config*@
+                    <a class="navbar-brand" href="@routes.Application.index">Zelensis</a> @*TODO: load from config*@
                 </div>
 
                 @*TODO: hide this screen when user is logged in & show username instead *@
-                <div class="navbar-collapse collapse">
+                    <!--<div class="navbar-collapse collapse">
                     <form class="navbar-form navbar-right" role="form">
                         <div class="form-group">
                             <input type="text" placeholder="Gebruikersnaam" class="form-control">
@@ -39,17 +39,37 @@
                         </div>
                         <button type="submit" class="btn btn-success">Login</button>
                     </form>
+                </div> -->
+                <div class="navbar-collapse navbar-right collapse ">
+                    @if(user != null){
+                        <div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> @user.getEmail()
+                                    <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">Profiel</a></li>
+                                        <li><a href="#">...</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="@routes.Login.logout">Logout</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <!---->
+                    } else {
+                        <a class="btn btn-primary" role="button" href="@routes.Login.login">Login</a>
+                        <a class="btn btn-primary" role="button" href="@routes.Login.register">Registreer</a>
+                    }
                 </div>
             </div>
         </div>
 
 
-
         <div class="container">
             @content
-        <footer>
-            <p>&copy; Zelensis - UGent 2014</p>
-        </footer>
+            <footer>
+                <p>&copy; Zelensis - UGent 2014</p>
+            </footer>
         </div>
 
     </body>
