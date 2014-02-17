@@ -1,6 +1,6 @@
 package controllers;
 
-import play.*;
+import models.User;
 import play.mvc.*;
 
 import views.html.*;
@@ -8,11 +8,7 @@ import views.html.*;
 public class Application extends Controller {
 
     public static Result index() {
-        return ok(index.render());
-    }
-
-    public static Result login() {
-        return ok(login.render());
+        return ok(index.render(session("email") == null ? null : new User(session("email"))));
     }
 
 }

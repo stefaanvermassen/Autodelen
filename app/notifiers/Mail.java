@@ -14,7 +14,7 @@ public class Mail extends Mailer {
     public static final String noReply = "Zelensis <noreply@zelensis.ugent.be>";
 
     public static void welcome(User user) {
-        setSubject("Welcome %s", user.getName());
+        setSubject("Welcome %s", user.getFirstName());
         addRecipient(user.getEmail());
         addFrom(noReply);
         // get html and process the args in the view
