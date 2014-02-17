@@ -13,8 +13,7 @@ public class DatabaseHelper {
     public static DataAccessProvider getDataAccessProvider() {
         if(accessProvider == null){
             try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            accessProvider = new JDBCDataAccessProvider("conf/database.properties");
+            accessProvider = new JDBCDataAccessProvider();
             } catch(Exception ex){
                 throw new DataAccessException("Failed to load MySQL driver", ex);
             }
