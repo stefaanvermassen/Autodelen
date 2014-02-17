@@ -45,6 +45,8 @@ public class JDBCUserDAO implements UserDAO {
             PreparedStatement ps = getUserByEmailStatement();
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+
                 User user = new User(email);
                 user.setId(rs.getInt("ID"));
                 user.setFirstName(rs.getString("firstname"));
