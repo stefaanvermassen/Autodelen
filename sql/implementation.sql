@@ -10,7 +10,7 @@ CREATE TABLE `Files` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Place` (
+CREATE TABLE `Places` (
 	`place_zip` VARCHAR(16) NOT NULL,
 	`place_city` VARCHAR(64) NOT NULL,
 	PRIMARY KEY (`place_zip`)	
@@ -43,7 +43,7 @@ CREATE TABLE `Addresses` (
 	`address_street_number` INT UNSIGNED NOT NULL DEFAULT '0',
 	`address_street_bus` VARCHAR(4),
 	PRIMARY KEY (`address_id`),
-	FOREIGN KEY (`address_place_zip`) REFERENCES Place(`place_zip`)	
+	FOREIGN KEY (`address_place_zip`) REFERENCES Places(`place_zip`)	
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
