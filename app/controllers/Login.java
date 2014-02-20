@@ -20,13 +20,11 @@ import views.html.*;
 public class Login extends Controller {
 
     private static boolean checkLoginModel(LoginModel model) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(model.email);
+        User user = DatabaseHelper.getUserProvider().getUser(model.email);
+        if(user != null)
             return BCrypt.checkpw(model.password, user.getPassword());
-        } catch (DataAccessException ex) { //TODO: remove this logic from inside model to seperate function
+        else
             return false;
-        }
     }
 
     public static class LoginModel {

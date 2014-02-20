@@ -22,8 +22,17 @@ public class UserProvider implements UserDAO {
 
     @Override
     public User getUser(String email) throws DataAccessException {
+       return getUser(email, true);
+    }
+
+    public User getUser(String email, boolean cached)  throws DataAccessException {
         String key = String.format(USER_BY_EMAIL, email);
-        Object obj = Cache.get(key);
+
+        Object obj = null;
+        if(cached) {
+            obj = Cache.get(key);
+        }
+
         if (obj == null || !(obj instanceof User)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();

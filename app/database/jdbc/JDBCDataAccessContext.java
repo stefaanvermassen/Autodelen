@@ -22,14 +22,14 @@ public class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public UserDAO getUserDAO() {
         if (userDAO == null) {
-            userDAO = new UserCachedProxy(new JDBCUserDAO(connection));
+            userDAO = new JDBCUserDAO(connection);
         }
         return userDAO;
     }
 
     @Override
     public void begin() {
-
+        //TODO What happens here?
     }
 
     @Override
