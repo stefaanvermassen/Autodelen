@@ -25,7 +25,15 @@ public class UserProvider implements UserDAO {
        return getUser(email, true);
     }
 
+    public void invalidateUser(String email){
+        Cache.remove(String.format(USER_BY_EMAIL, email));
+    }
+
     public User getUser(String email, boolean cached)  throws DataAccessException {
+        if(email == null) {
+            return null;
+        }
+
         String key = String.format(USER_BY_EMAIL, email);
 
         Object obj = null;

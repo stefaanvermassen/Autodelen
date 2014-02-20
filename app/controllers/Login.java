@@ -21,10 +21,7 @@ public class Login extends Controller {
 
     private static boolean checkLoginModel(LoginModel model) {
         User user = DatabaseHelper.getUserProvider().getUser(model.email);
-        if(user != null)
-            return BCrypt.checkpw(model.password, user.getPassword());
-        else
-            return false;
+        return user != null && BCrypt.checkpw(model.password, user.getPassword());
     }
 
     public static class LoginModel {
@@ -147,6 +144,8 @@ public class Login extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public static Result logout() {
+        DatabaseHelper.getUserProvider().invalidateUser(session("email"));
+        
         session().clear();
         return redirect(
                 routes.Application.index()

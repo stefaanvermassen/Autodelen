@@ -13,7 +13,7 @@ public class DatabaseHelper {
     private static UserProvider userProvider;
 
     public static UserProvider getUserProvider() {
-        if (userProvider != null) {
+        if (userProvider == null) {
             userProvider = new UserProvider(getDataAccessProvider());
         }
         return userProvider;
