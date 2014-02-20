@@ -145,7 +145,7 @@ public class Login extends Controller {
     @Security.Authenticated(Secured.class)
     public static Result logout() {
         DatabaseHelper.getUserProvider().invalidateUser(session("email"));
-        
+
         session().clear();
         return redirect(
                 routes.Application.index()
