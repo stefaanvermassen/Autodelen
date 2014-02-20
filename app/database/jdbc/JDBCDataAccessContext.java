@@ -2,7 +2,6 @@ package database.jdbc;
 
 import database.DataAccessContext;
 import database.UserDAO;
-import database.cache.EHCache.UserCachedProxy;
 
 import java.sql.Connection;
 import java.sql.SQLException;

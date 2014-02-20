@@ -9,7 +9,7 @@ import views.html.*;
 public class Application extends Controller {
 
     public static Result index() {
-        return ok(index.render(DatabaseHelper.getUserProvider().getUser(session("email"))));
+        return ok(index.render());
     }
 
 }
