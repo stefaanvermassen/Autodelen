@@ -68,10 +68,13 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     private PreparedStatement freePeriodStatement() throws SQLException {
-        if (freePeriodStatement == null) {
-            freePeriodStatement = connection.prepareStatement("TODO", AUTO_GENERATED_KEYS);
-        }
-        return freePeriodStatement;
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void updateReservation(Reservation reservation) throws DataAccessException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
