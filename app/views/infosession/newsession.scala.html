@@ -1,0 +1,40 @@
+@scripts = {
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#datepicker').datetimepicker({
+                weekStart: 1,
+                language: 'nl',
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                startDate: new Date()
+            });
+        });
+    </script>
+}
+
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+}
+
+@main("Nieuwe infosessie", stylesheets, scripts) {
+    <h1>Nieuwe infosessie</h1>
+    <form action="" class="form-horizontal"  role="form">
+        <fieldset>
+            <div class="form-group">
+                <div id="datepicker" class="input-group date form_datetime col-md-5" data-date="1979-09-16T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
+                    <input class="form-control" size="16" type="text" value="" readonly>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+                <input type="hidden" id="dtp_input1" value="" /><br/>
+            </div>
+        </fieldset>
+    </form>
+}
