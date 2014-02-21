@@ -2,19 +2,19 @@ DROP DATABASE IF EXISTS autodelentest;
 CREATE DATABASE autodelentest;
 USE autodelentest;
 
-CREATE TABLE `Files` (
-	`file_id` INT NOT NULL AUTO_INCREMENT,
-	`file_url` VARCHAR(255) NOT NULL,
-	`driver_license_file` INT,
-	PRIMARY KEY (`file_id`),
-	FOREIGN KEY (`file_group_id`) REFERENCES FileGroups(`file_group_id`)
+CREATE TABLE `FileGroups` (
+	`file_group_id` INT NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `FileGroups` (
-	`file_group_id` INT NOT NULL AUTO_INCREMENT
-	PRIMARY KEY (`file_group_id`)
+CREATE TABLE `Files` (
+	`file_id` INT NOT NULL AUTO_INCREMENT,
+	`file_url` VARCHAR(255) NOT NULL,
+	`file_file_group_id` INT,
+	PRIMARY KEY (`file_id`),
+	FOREIGN KEY (`file_file_group_id`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -23,7 +23,7 @@ CREATE TABLE `DriverLicenses` (
 	`driver_license_id` INT NOT NULL, # Moet gebruiker zelf invullen!
 	`driver_license_file` INT NOT NULL,
 	PRIMARY KEY (`driver_license_id`),
-	FOREIGN KEY (`driver_license_file`) REFERENCES Files(`file_group_id`)
+	FOREIGN KEY (`driver_license_file`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -33,7 +33,7 @@ CREATE TABLE `IdentityCards` (
 	`identity_card_registration_nr` INT NOT NULL, # Rijksregisternummer
 	`identity_card_file` INT NOT NULL,
 	PRIMARY KEY (`identity_card_id`),
-	FOREIGN KEY (`identity_card_file`) REFERENCES Files(`file_group_id`)
+	FOREIGN KEY (`identity_card_file`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -66,8 +66,8 @@ CREATE TABLE `Users` (
 	`user_identity_card_id` INT,
 	`user_status` ENUM('VALIDATING', 'REGISTERED', 'INFOSESSION_ENROLLMENT', 'INFOSESSION_PRESENT', 'INFOSESSION_ABSENT', 'DROPPED', 'POTENTIAL', 'FULL') NOT NULL DEFAULT 'REGISTERED', # Stadia die de gebruiker moet doorlopen
 	PRIMARY KEY (`user_id`),
-	FOREIGN KEY (`user_address_domicile__id`) REFERENCES Addresses(`address_id`),
-	FOREIGN KEY (`user_address__residence_id`) REFERENCES Addresses(`address_id`),
+	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
+	FOREIGN KEY (`user_address_residence_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_driver_license_id`) REFERENCES DriverLicenses(`driver_license_id`),
 	FOREIGN KEY (`user_identity_card_id`) REFERENCES IdentityCards(`identity_card_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
@@ -191,7 +191,7 @@ CREATE TABLE `CarCosts` (
 	`car_cost_mileage` DECIMAL(10,1),
 	PRIMARY KEY (`car_cost_id`),
 	FOREIGN KEY (`car_cost_car_id`) REFERENCES Cars(`car_id`),
-	FOREIGN KEY (`car_cost_proof`) REFERENCES Files(`file_group_id`)
+	FOREIGN KEY (`car_cost_proof`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
