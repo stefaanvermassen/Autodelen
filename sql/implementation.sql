@@ -58,13 +58,21 @@ CREATE TABLE `Users` (
 	`user_address_id` INT UNSIGNED,
 	`user_driver_license_id` INT UNSIGNED,
 	`user_identity_card_id` INT UNSIGNED,
-	`user_role` ENUM('USER','ADMIN') NOT NULL DEFAULT 'USER',
 	`user_status` ENUM('REGISTERED', 'INFOSESSION_ENROLLMENT', 'INFOSESSION_PRESENT', 'INFOSESSION_ABSENT', 'DROPPED', 'POTENTIAL', 'FULL') NOT NULL DEFAULT 'REGISTERED', # Stadia die de gebruiker moet doorlopen
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_driver_license_id`) REFERENCES DriverLicenses(`driver_license_id`),
 	FOREIGN KEY (`user_identity_card_id`) REFERENCES IdentityCards(`identity_card_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `UserRole` (
+	`user_id` INT(10) UNSIGNED NOT NULL,
+	`user_role` ENUM('SUPER_USER','ADMIN') NOT NULL,
+	PRIMARY KEY (`user_id`, `user_role`),
+	FOREIGN KEY (`user_id`) REFERENCES Users(`user_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

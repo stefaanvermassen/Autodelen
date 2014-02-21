@@ -1,5 +1,7 @@
 package models;
 
+import java.util.*;
+
 /**
  * Created by Cedric on 2/16/14.
  */
@@ -10,11 +12,11 @@ public class User {
     private String firstName;
     private String lastName;
     private String password;
-    private UserRole role;
+    private EnumSet<UserRole> roles = EnumSet.noneOf(UserRole.class);
 
     public User(String email) {
         this.email = email;
-        this.role = UserRole.USER;
+        roles.add(UserRole.USER);
     }
 
     public User(int id, String email, String firstName, String lastName, String password){
@@ -65,11 +67,7 @@ public class User {
         this.password = password;
     }
 
-    public UserRole getRole() {
-        return role;
-    }
+    public boolean gotRole(UserRole role) { return roles.contains(role); }
 
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+    public void addRole(UserRole role) { roles.add(role); }
 }
