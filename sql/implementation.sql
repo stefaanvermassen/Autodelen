@@ -10,14 +10,6 @@ CREATE TABLE `Files` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Places` (
-	`place_zip` VARCHAR(16) NOT NULL,
-	`place_city` VARCHAR(64) NOT NULL,
-	PRIMARY KEY (`place_zip`)	
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
-
 CREATE TABLE `DriverLicenses` (
 	`driver_license_id` INT UNSIGNED NOT NULL, # Moet gebruiker zelf invullen!
 	`driver_license_file` INT UNSIGNED NOT NULL,
@@ -37,16 +29,18 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `Addresses` (
-	`address_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`address_place_zip` VARCHAR(16) NOT NULL,
-	`address_street` VARCHAR(64) NOT NULL DEFAULT '0',
-	`address_street_number` INT UNSIGNED NOT NULL DEFAULT '0',
-	`address_street_bus` VARCHAR(4),
-	PRIMARY KEY (`address_id`),
-	FOREIGN KEY (`address_place_zip`) REFERENCES Places(`place_zip`)	
+  `address_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `address_city` VARCHAR(64) NOT NULL,
+  `address_zipcode` VARCHAR(12) NOT NULL,
+  `address_street` VARCHAR(64) NOT NULL DEFAULT '0',
+  `address_street_number` VARCHAR(8) NOT NULL DEFAULT '0',
+  `address_street_bus` VARCHAR(4) NULL DEFAULT NULL,
+  PRIMARY KEY (`address_id`),
+  INDEX `address_place_zip` (`address_city`)
 )
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
+  COLLATE='latin1_swedish_ci'
+  ENGINE=InnoDB
+  AUTO_INCREMENT=2;
 
 CREATE TABLE `Users` (
 	`user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

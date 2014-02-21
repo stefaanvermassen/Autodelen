@@ -29,6 +29,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="col-md-1 control-label" for="password_repeat"></label>
+                    <div class="col-md-12">
+                        <input id="password_repeat" name="password_repeat" type="password" placeholder="Herhaal wachtwoord" class="form-control input-md">
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="col-md-1 control-label" for="firstname"></label>
                     <div class="col-md-12">
                         <input id="firstname" name="firstName" type="text" placeholder="Voornaam" class="form-control input-md" value="@form("firstName").value">
@@ -43,8 +50,59 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-md-1 control-label" for="login"></label>
-                    <button id="register" name="register" class="btn btn-block btn-success">Registreer</button>
+                    <label class="col-md-1 control-label" for="phone"></label>
+                    <div class="col-md-12">
+                        <input id="phone" name="phone" type="text" placeholder="Telefoon" class="form-control input-md" value="@form("phone").value">
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Adres</h3>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="address_street"></label>
+                            <div class="col-md-12">
+                                <input id="address_street" name="address_street" type="text" placeholder="Straat" class="form-control input-md" value="@form("address_street").value">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="address_number"></label>
+                            <div class="col-md-12">
+                                <input id="address_number" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="address_bus"></label>
+                            <div class="col-md-12">
+                                <input id="address_bus" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="address_zip"></label>
+                            <div class="col-md-12">
+                                <input id="address_zip" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="address_city"></label>
+                            <div class="col-md-12">
+                                <input id="address_city" name="address_city" type="text" placeholder="Plaats" class="form-control input-md" value="@form("address_city").value">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="register"></label>
+                    <input type="submit" id="register" name="register" class="btn btn-block btn-success" value="Registreer">
                 </div>
             </fieldset>
         }

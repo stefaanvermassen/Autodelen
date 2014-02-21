@@ -56,9 +56,9 @@ public class JDBCUserDAO implements UserDAO {
 
                 //TODO: user clean inner join on address instead of using the seperate DAO through helper function!
                 Address address = null;
-                if(address_id != null){
+                if (address_id != null) {
                     AddressDAO adao = new JDBCAddressDAO(connection);
-                    address = adao.getAddress((Integer)address_id);
+                    address = adao.getAddress((Integer) address_id);
                 }
                 user.setAddress(address);
 
@@ -78,26 +78,36 @@ public class JDBCUserDAO implements UserDAO {
     @Override
     public User createUser(String email, String password, String firstName, String lastName, String phone, Address address) throws DataAccessException {
         try {
-            PreparedStatement ps = getCreateUserStatement();
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ps.setString(3, firstName);
-            ps.setString(4, lastName);
-            ps.setString(5, phone);
-            if(address != null){ // Create a new address object
-                AddressDAO adao = new JDBCAddressDAO(connection);
-                address = adao.createAddress(address.getZip(), address.getStreet(), address.getNumber(), address.getBus()); //TODO: pass fields, or address object to this function?
-                ps.setInt(6, address.getId());
-            } else ps.setNull(6, Types.INTEGER);
-            ps.executeUpdate();
+            connection.setAutoCommit(false);
+            try (PreparedStatement ps = getCreateUserStatement()) {
+                ps.setString(1, email);
+                ps.setString(2, password);
+                ps.setString(3, firstName);
+                ps.setString(4, lastName);
+                ps.setString(5, phone);
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
-                return new User(keys.getInt(1), email, firstName, lastName, password, address);
+                if (address != null) { // Create a new address object
+                    AddressDAO adao = new JDBCAddressDAO(connection);
+                    address = adao.createAddress(address.getZip(), address.getCity(), address.getStreet(), address.getNumber(), address.getBus()); //TODO: pass fields, or address object to this function?
+                    ps.setInt(6, address.getId());
+                } else ps.setNull(6, Types.INTEGER);
+
+                ps.executeUpdate();
+                connection.commit();
+                connection.setAutoCommit(true);
+
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    keys.next(); //if this fails we want an exception anyway
+
+                    return new User(keys.getInt(1), email, firstName, lastName, password, address);
+                } catch (SQLException ex) {
+                    throw new DataAccessException("Failed to get primary key for new user.", ex);
+                }
             } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for new user.", ex);
+                connection.rollback();
+                connection.setAutoCommit(true);
+                throw new DataAccessException("Failed to commit new user transaction.", ex);
             }
-
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create user.", ex);
         }

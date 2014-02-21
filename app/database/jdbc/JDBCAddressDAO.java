@@ -23,14 +23,14 @@ public class JDBCAddressDAO implements AddressDAO {
 
     private PreparedStatement getGetAddressStatement() throws SQLException {
         if (getAddressStatement == null) {
-            getAddressStatement = connection.prepareStatement("SELECT address_place_zip, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
+            getAddressStatement = connection.prepareStatement("SELECT address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
         }
         return getAddressStatement;
     }
 
     private PreparedStatement getCreateAddressStatement() throws SQLException {
         if (createAddressStatement == null) {
-            createAddressStatement = connection.prepareStatement("INSERT INTO addresses(address_place_zip, address_street, address_street_number, address_street_bus) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
+            createAddressStatement = connection.prepareStatement("INSERT INTO addresses(address_city, address_zipcode, address_street, address_street_number, address_street_bus) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createAddressStatement;
     }
@@ -46,7 +46,7 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
-                    return new Address(id, rs.getString("address_place_zip"), rs.getString("address_street"), rs.getInt("address_street_number"), rs.getString("address_street_bus"));
+                    return new Address(id, rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
                 } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading address resultset", ex);
@@ -58,18 +58,19 @@ public class JDBCAddressDAO implements AddressDAO {
     }
 
     @Override
-    public Address createAddress(String zip, String street, int number, String bus) throws DataAccessException {
+    public Address createAddress(String zip, String city, String street, String number, String bus) throws DataAccessException {
         try {
             PreparedStatement ps = getCreateAddressStatement();
-            ps.setString(1, zip);
-            ps.setString(2, street);
-            ps.setInt(3, number);
-            ps.setString(4, bus);
+            ps.setString(1, city);
+            ps.setString(2, zip);
+            ps.setString(3, street);
+            ps.setString(4, number);
+            ps.setString(5, bus);
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Address(keys.getInt(1), zip, street, number, bus);
+                return new Address(keys.getInt(1), zip, city, street, number, bus);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new address.", ex);
             }

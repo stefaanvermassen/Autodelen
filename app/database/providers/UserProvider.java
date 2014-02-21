@@ -4,6 +4,7 @@ import database.DataAccessContext;
 import database.DataAccessException;
 import database.DataAccessProvider;
 import database.UserDAO;
+import models.Address;
 import play.cache.Cache;
 import models.User;
 
@@ -22,22 +23,39 @@ public class UserProvider implements UserDAO {
 
     @Override
     public User getUser(String email) throws DataAccessException {
-       return getUser(email, true);
+        return getUser(email, true);
     }
 
-    public void invalidateUser(String email){
+    @Override
+    public User createUser(String email, String password, String firstName, String lastName, String phone, Address address) throws DataAccessException {
+        String key = String.format(USER_BY_EMAIL, email);
+        try (DataAccessContext context = provider.getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.createUser(email, password, firstName, lastName, phone, address);
+            if (user != null) { // cache and return
+                Cache.set(key, user);
+                return user;
+            } else {
+                return null;
+            }
+        } catch (DataAccessException ex) {
+            return null; //TODO: log
+        }
+    }
+
+    public void invalidateUser(String email) {
         Cache.remove(String.format(USER_BY_EMAIL, email));
     }
 
-    public User getUser(String email, boolean cached)  throws DataAccessException {
-        if(email == null) {
+    public User getUser(String email, boolean cached) throws DataAccessException {
+        if (email == null) {
             return null;
         }
 
         String key = String.format(USER_BY_EMAIL, email);
 
         Object obj = null;
-        if(cached) {
+        if (cached) {
             obj = Cache.get(key);
         }
 
@@ -56,23 +74,6 @@ public class UserProvider implements UserDAO {
             }
         } else {
             return (User) obj;
-        }
-    }
-
-    @Override
-    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        String key = String.format(USER_BY_EMAIL, email);
-        try (DataAccessContext context = provider.getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.createUser(email, password, firstName, lastName);
-            if (user != null) { // cache and return
-                Cache.set(key, user);
-                return user;
-            } else {
-                return null;
-            }
-        } catch (DataAccessException ex) {
-            return null; //TODO: log
         }
     }
 }
