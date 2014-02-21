@@ -2,6 +2,7 @@ package controllers;
 
 import database.*;
 import database.jdbc.JDBCDataAccessProvider;
+import models.Address;
 import models.User;
 import play.*;
 import play.data.*;
@@ -40,6 +41,13 @@ public class Login extends Controller {
         public String password;
         public String firstName;
         public String lastName;
+        public String phone;
+
+        // Address fields
+        public String address_place;
+        public String address_street;
+        public int address_number;
+        public String address_bus;
 
         public String validate() {
             //TODO: check valid email format, valid name etc etc
@@ -123,7 +131,9 @@ public class Login extends Controller {
             session().clear();
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName);
+                User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName, registerForm.get().phone,
+                        new Address(registerForm.get().address_place, registerForm.get().address_street, registerForm.get().address_number, registerForm.get().address_bus));
+
                 session("email", user.getEmail());
                 return redirect(
                         routes.Application.index() // return to index page, registration success
