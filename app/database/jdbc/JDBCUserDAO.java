@@ -26,14 +26,14 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone FROM users WHERE user_email = ?");
+            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_address_id FROM users WHERE user_email = ?");
         }
         return getUserByEmailStatement;
     }
 
     private PreparedStatement getCreateUserStatement() throws SQLException {
         if (createUserStatement == null) {
-            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname, user_phone, user_address) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname, user_phone, user_address_id) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
     }
@@ -52,13 +52,13 @@ public class JDBCUserDAO implements UserDAO {
                 user.setLastName(rs.getString("user_lastname"));
                 user.setPassword(rs.getString("user_password"));
                 user.setPhone(rs.getString("user_phone"));
-                Object address_id = rs.getObject("user_address");
+                Object address_id = rs.getObject("user_address_id");
 
                 //TODO: user clean inner join on address instead of using the seperate DAO through helper function!
                 Address address = null;
                 if (address_id != null) {
                     AddressDAO adao = new JDBCAddressDAO(connection);
-                    address = adao.getAddress((Integer) address_id);
+                    address = adao.getAddress(((Long) address_id).intValue()); //TODO: fix PK's signed
                 }
                 user.setAddress(address);
 

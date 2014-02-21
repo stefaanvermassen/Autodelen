@@ -70,7 +70,7 @@ public class UserProvider implements UserDAO {
                     return null;
                 }
             } catch (DataAccessException ex) {
-                return null; //TODO: log
+                throw ex; //TODO: log
             }
         } else {
             return (User) obj;
