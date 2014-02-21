@@ -5,7 +5,16 @@ USE autodelentest;
 CREATE TABLE `Files` (
 	`file_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`file_url` VARCHAR(255) NOT NULL,
-	PRIMARY KEY (`file_id`)
+	`driver_license_file` INT UNSIGNED,
+	PRIMARY KEY (`file_id`),
+	FOREIGN KEY (`file_group_id`) REFERENCES FileGroups(`file_group_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `FileGroups` (
+	`file_group_id` INT UNSIGNED NOT NULL AUTO_INCREMENT
+	PRIMARY KEY (`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -14,16 +23,17 @@ CREATE TABLE `DriverLicenses` (
 	`driver_license_id` INT UNSIGNED NOT NULL, # Moet gebruiker zelf invullen!
 	`driver_license_file` INT UNSIGNED NOT NULL,
 	PRIMARY KEY (`driver_license_id`),
-	FOREIGN KEY (`driver_license_file`) REFERENCES Files(`file_id`)
+	FOREIGN KEY (`driver_license_file`) REFERENCES Files(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `IdentityCards` (
-	`identity_card_id` INT UNSIGNED NOT NULL, # Rijksregisternummer
+	`identity_card_id` INT UNSIGNED NOT NULL, # Identiteitskaartnummer
+	`identity_card_registration_nr` INT UNSIGNED NOT NULL, # Rijksregisternummer
 	`identity_card_file` INT UNSIGNED NOT NULL,
 	PRIMARY KEY (`identity_card_id`),
-	FOREIGN KEY (`identity_card_file`) REFERENCES Files(`file_id`)
+	FOREIGN KEY (`identity_card_file`) REFERENCES Files(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -48,13 +58,16 @@ CREATE TABLE `Users` (
 	`user_password` CHAR(64) NOT NULL,
 	`user_firstname` VARCHAR(64) NOT NULL,
 	`user_lastname` VARCHAR(64) NOT NULL,
+	`user_cellphone` VARCHAR(16),
 	`user_phone` VARCHAR(16),
-	`user_address_id` INT UNSIGNED,
+	`user_address_domicile_id` INT UNSIGNED,
+	`user_address_residence_id` INT UNSIGNED,
 	`user_driver_license_id` INT UNSIGNED,
 	`user_identity_card_id` INT UNSIGNED,
-	`user_status` ENUM('REGISTERED', 'INFOSESSION_ENROLLMENT', 'INFOSESSION_PRESENT', 'INFOSESSION_ABSENT', 'DROPPED', 'POTENTIAL', 'FULL') NOT NULL DEFAULT 'REGISTERED', # Stadia die de gebruiker moet doorlopen
+	`user_status` ENUM('VALIDATING', 'REGISTERED', 'INFOSESSION_ENROLLMENT', 'INFOSESSION_PRESENT', 'INFOSESSION_ABSENT', 'DROPPED', 'POTENTIAL', 'FULL') NOT NULL DEFAULT 'REGISTERED', # Stadia die de gebruiker moet doorlopen
 	PRIMARY KEY (`user_id`),
-	FOREIGN KEY (`user_address_id`) REFERENCES Addresses(`address_id`),
+	FOREIGN KEY (`user_address_domicile__id`) REFERENCES Addresses(`address_id`),
+	FOREIGN KEY (`user_address__residence_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_driver_license_id`) REFERENCES DriverLicenses(`driver_license_id`),
 	FOREIGN KEY (`user_identity_card_id`) REFERENCES IdentityCards(`identity_card_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
@@ -178,7 +191,7 @@ CREATE TABLE `CarCosts` (
 	`car_cost_mileage` DECIMAL(10,1),
 	PRIMARY KEY (`car_cost_id`),
 	FOREIGN KEY (`car_cost_car_id`) REFERENCES Cars(`car_id`),
-	FOREIGN KEY (`car_cost_proof`) REFERENCES Files(`file_id`)
+	FOREIGN KEY (`car_cost_proof`) REFERENCES Files(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
