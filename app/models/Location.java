@@ -12,6 +12,11 @@ public class Location {
     
     private int zip;
     private String location;
+
+    public Location(int zip, String location) {
+        this.zip = zip;
+        this.location = location;
+    }
     
     public int getZip() {
         return zip;

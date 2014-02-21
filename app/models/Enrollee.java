@@ -14,6 +14,12 @@ class Enrollee {
     private User user;
     private EnrollementStatus status;
 
+    public Enrollee(int id, User user, EnrollementStatus status) {
+        this.id = id;
+        this.user = user;
+        this.status = status;
+    }
+    
     public int getId() {
         return id;
     }
