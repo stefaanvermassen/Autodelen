@@ -112,4 +112,9 @@ public class JDBCUserDAO implements UserDAO {
             throw new DataAccessException("Failed to create user.", ex);
         }
     }
+
+    @Override
+    public void updateUser(User user) throws DataAccessException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
