@@ -10,7 +10,12 @@ public class User {
     private String firstName;
     private String lastName;
     private String password;
+    private String phone;
+    private String address;
     private UserRole role;
+    private DriverLicense license;
+    private UserStatus status;
+    private IdentityCard identityCard;
 
     public User(String email) {
         this.email = email;
@@ -72,4 +77,47 @@ public class User {
     public void setRole(UserRole role) {
         this.role = role;
     }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public DriverLicense getLicense() {
+        return license;
+    }
+
+    public void setLicense(DriverLicense license) {
+        this.license = license;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public IdentityCard getIdentityCard() {
+        return identityCard;
+    }
+
+    public void setIdentityCard(IdentityCard identityCard) {
+        this.identityCard = identityCard;
+    }
+
+    
+    
 }
