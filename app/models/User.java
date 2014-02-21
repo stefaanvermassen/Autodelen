@@ -12,6 +12,11 @@ public class User {
     private String firstName;
     private String lastName;
     private String password;
+    private String phone;
+    private String address;
+    private DriverLicense license;
+    private UserStatus status;
+    private IdentityCard identityCard;
     private EnumSet<UserRole> roles = EnumSet.noneOf(UserRole.class);
 
     public User(String email) {
@@ -70,4 +75,47 @@ public class User {
     public boolean gotRole(UserRole role) { return roles.contains(role); }
 
     public void addRole(UserRole role) { roles.add(role); }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public DriverLicense getLicense() {
+        return license;
+    }
+
+    public void setLicense(DriverLicense license) {
+        this.license = license;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public IdentityCard getIdentityCard() {
+        return identityCard;
+    }
+
+    public void setIdentityCard(IdentityCard identityCard) {
+        this.identityCard = identityCard;
+    }
+
+    
+    
 }

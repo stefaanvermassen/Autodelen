@@ -68,11 +68,11 @@ CREATE TABLE `Users` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `UserRole` (
-	`user_id` INT(10) UNSIGNED NOT NULL,
-	`user_role` ENUM('SUPER_USER','ADMIN') NOT NULL,
-	PRIMARY KEY (`user_id`, `user_role`),
-	FOREIGN KEY (`user_id`) REFERENCES Users(`user_id`)
+CREATE TABLE `UserRoles` (
+	`userrole_userid` INT(10) UNSIGNED NOT NULL,
+	`userrole_role` ENUM('SUPER_USER','ADMIN') NOT NULL,
+	PRIMARY KEY (`userrole_userid`, `userrole_role`),
+	FOREIGN KEY (`userrole_userid`) REFERENCES Users(`user_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
