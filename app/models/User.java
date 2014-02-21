@@ -1,5 +1,7 @@
 package models;
 
+import java.util.*;
+
 /**
  * Created by Cedric on 2/16/14.
  */
@@ -11,23 +13,25 @@ public class User {
     private String lastName;
     private String password;
     private String phone;
-    private String address;
-    private UserRole role;
+    private Address address;
     private DriverLicense license;
     private UserStatus status;
     private IdentityCard identityCard;
+    private EnumSet<UserRole> roles = EnumSet.noneOf(UserRole.class);
 
     public User(String email) {
-        this.email = email;
-        this.role = UserRole.USER;
+        this(0, email, null, null, null, null);
     }
 
-    public User(int id, String email, String firstName, String lastName, String password){
+    public User(int id, String email, String firstName, String lastName, String password, Address address){
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
+        this.address = address;
+
+        roles.add(UserRole.USER);
     }
 
     public void setId(int id){
@@ -70,13 +74,9 @@ public class User {
         this.password = password;
     }
 
-    public UserRole getRole() {
-        return role;
-    }
+    public boolean gotRole(UserRole role) { return roles.contains(role); }
 
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+    public void addRole(UserRole role) { roles.add(role); }
 
     public String getPhone() {
         return phone;
@@ -86,11 +86,11 @@ public class User {
         this.phone = phone;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
