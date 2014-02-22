@@ -42,7 +42,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getGetInfoSessionsAfterStatement() throws SQLException {
         if (getInfoSessionsAfterStatement == null) {
-            getInfoSessionsAfterStatement = connection.prepareStatement(INFOSESSION_SELECTOR + " WHERE infosession_timestamp > ?");
+            getInfoSessionsAfterStatement = connection.prepareStatement(INFOSESSION_SELECTOR + " WHERE infosession_timestamp > ? ORDER BY infosession_timestamp ASC");
         }
         return getInfoSessionsAfterStatement;
     }
