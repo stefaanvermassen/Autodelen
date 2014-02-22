@@ -3,41 +3,54 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
     }
     @main("Login", stylesheets) {
+
+    <div class="container">
         <div class="row">
-            <div class="page-header"><h2>Login</h2></div>
-            @helper.form(routes.Login.authenticate, 'class -> "form-horizontal") {
-                @if(form.hasGlobalErrors) {
-                    <div class="alert alert-danger alert-dismissable">
-                        <strong>Error!</strong> @form.globalError.message
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Gelieve in te loggen</h3>
                     </div>
-                }
-                <fieldset>
-                    @* Source: http://bootsnipp.com/snippets/featured/login-form-flat *@
+                    <div class="panel-body">
+                        @helper.form(routes.Login.authenticate, 'class -> "form-horizontal") {
+                            @if(form.hasGlobalErrors) {
+                                <div class="alert alert-danger alert-dismissable">
+                                    <strong>Error!</strong> @form.globalError.message
+                                </div>
+                            }
+                            <fieldset>
+                                @* Source: http://bootsnipp.com/snippets/featured/login-form-flat *@
 
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="email"></label>
-                        <div class="col-md-12">
-                            <input id="email" name="email" type="text" placeholder="E-mail" class="form-control input-md" value="@form("email").value">
-                        </div>
-                    </div>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="email"></label>
+                                    <div class="col-md-12">
+                                        <input id="email" name="email" type="text" placeholder="E-mail" class="form-control input-md" value="@form("email").value">
+                                    </div>
+                                </div>
 
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="password"></label>
-                        <div class="col-md-12">
-                            <input id="password" name="password" type="password" placeholder="Wachtwoord" class="form-control input-md">
-                        </div>
-                    </div>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="password"></label>
+                                    <div class="col-md-12">
+                                        <input id="password" name="password" type="password" placeholder="Wachtwoord" class="form-control input-md">
+                                    </div>
+                                </div>
 
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="login"></label>
-                        <div class="col-md-5">
-                            <button id="login" name="login" class="btn btn-block btn-success">Login</button>
-                        </div>
-                        <div class="col-md-5">
-                            <button id="register" type="button" role="button" name="register" class="btn btn-block btn-warning" href="@routes.Login.register">Registreer</button>
-                        </div>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="login"></label>
+                                    <div class="col-md-12">
+                                        <button id="login" name="login" class="btn btn-block btn-success">Login</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        <button id="register" type="button" role="button" name="register" class="btn btn-block btn-warning" href="@routes.Login.register">Registreer</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        }
                     </div>
-                </fieldset>
-            }
-        </div> <!--./row -->
-    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
