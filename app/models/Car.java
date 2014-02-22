@@ -13,7 +13,7 @@ public class Car {
     private int id;
     private String brand;
     private String type;
-    private Location location;
+    private Address location;
     private int seats;
     private int doors;
     private int year;
@@ -31,7 +31,7 @@ public class Car {
         this(0,null,null,null,0,0,0,false,false,null,0,0,0,null,null,null);
     }
 
-    public Car(int id, String brand, String type, Location location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments, String lastEdit) {
+    public Car(int id, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments, String lastEdit) {
         this.id = id;
         this.brand = brand;
         this.type = type;
@@ -74,11 +74,11 @@ public class Car {
         this.type = type;
     }
 
-    public Location getLocation() {
+    public Address getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(Address location) {
         this.location = location;
     }
 
