@@ -26,14 +26,14 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_address_domicile_id FROM users WHERE user_email = ?");
+            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_address_domicile_id FROM Users WHERE user_email = ?");
         }
         return getUserByEmailStatement;
     }
 
     private PreparedStatement getCreateUserStatement() throws SQLException {
         if (createUserStatement == null) {
-            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname, user_phone, user_address_domicile_id) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createUserStatement = connection.prepareStatement("INSERT INTO Users(user_email, user_password, user_firstname, user_lastname, user_phone, user_address_domicile_id) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
     }

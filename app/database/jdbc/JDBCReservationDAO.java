@@ -61,7 +61,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     
     private PreparedStatement createReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
-            createReservationStatement = connection.prepareStatement("INSERT INTO carreservations (reservations_user_id, reservations_car_id, reservations_status"
+            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservations_user_id, reservations_car_id, reservations_status"
                     + "reservations_from, reservations_to) VALUES (?,?,?,?,?)");
         }
         return createReservationStatement;

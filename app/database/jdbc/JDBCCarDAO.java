@@ -34,21 +34,21 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         }
         return createCarStatement;
     }
     
     private PreparedStatement updateCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("UPDATE cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? , car_last_edit=? ");
+            createCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? , car_last_edit=? ");
         }
         return createCarStatement;
     }
     
     private PreparedStatement getCarStatement() throws SQLException {
         if (getCarStatement == null) {
-            getCarStatement = connection.prepareStatement("SELECT * FROM cars WHERE car_id=?");
+            getCarStatement = connection.prepareStatement("SELECT * FROM Cars WHERE car_id=?");
         }
         return getCarStatement;
     }
