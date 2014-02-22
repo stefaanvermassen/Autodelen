@@ -12,6 +12,11 @@ public class DriverLicense {
     
     private int id;
     private String file;
+
+    public DriverLicense(int id, String file) {
+        this.id = id;
+        this.file = file;
+    }
     
     public int getId() {
         return id;

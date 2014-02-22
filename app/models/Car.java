@@ -27,8 +27,35 @@ public class Car {
     private String comments;
     private String lastEdit;
 
+    public Car() {
+        this(0,null,null,null,0,0,0,false,false,null,0,0,0,null,null,null);
+    }
+
+    public Car(int id, String brand, String type, Location location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments, String lastEdit) {
+        this.id = id;
+        this.brand = brand;
+        this.type = type;
+        this.location = location;
+        this.seats = seats;
+        this.doors = doors;
+        this.year = year;
+        this.gps = gps;
+        this.hook = hook;
+        this.fuel = fuel;
+        this.fuelEconomy = fuelEconomy;
+        this.estimatedValue = estimatedValue;
+        this.ownerAnnualKm = ownerAnnualKm;
+        this.owner = owner;
+        this.comments = comments;
+        this.lastEdit = lastEdit;
+    }
+   
     public int getId() {
         return id;
+    }
+    
+    public void setId(int id){
+        this.id=id;
     }
 
     public String getBrand() {

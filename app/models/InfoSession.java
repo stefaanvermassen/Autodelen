@@ -18,6 +18,14 @@ public class InfoSession {
     private User host;
     private List<Enrollee> enrolled;
 
+    public InfoSession(int id, String time, String address, User host, List<Enrollee> enrolled) {
+        this.id = id;
+        this.time = time;
+        this.address = address;
+        this.host = host;
+        this.enrolled = enrolled;
+    }
+
     public int getId() {
         return id;
     }

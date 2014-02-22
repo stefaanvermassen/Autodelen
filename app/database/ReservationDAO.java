@@ -14,5 +14,6 @@ import models.User;
  */
 public interface ReservationDAO {
     public Reservation createReservation(String from, String to, Car car, User user) throws DataAccessException;
+    public void updateReservation(Reservation reservation) throws DataAccessException;
     public boolean freePeriod(String from, String to, Car car) throws DataAccessException;
 }

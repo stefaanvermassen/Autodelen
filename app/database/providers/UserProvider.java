@@ -76,4 +76,9 @@ public class UserProvider implements UserDAO {
             return (User) obj;
         }
     }
+
+    @Override
+    public void updateUser(User user) throws DataAccessException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

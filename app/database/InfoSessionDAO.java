@@ -14,5 +14,6 @@ import models.User;
 public interface InfoSessionDAO {
     public InfoSession createInfoSession(User host, String address, String time) throws DataAccessException;
     public InfoSession getInfoSession(int id) throws DataAccessException;
+    public void updateInfoSession(InfoSession session) throws DataAccessException;
     public void registerUser(InfoSession session, User user) throws DataAccessException;
 }
