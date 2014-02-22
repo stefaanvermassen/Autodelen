@@ -33,7 +33,9 @@ public class InfoSessions extends Controller {
         }
 
         public String validate() {
-            //TODO: validation messages
+            if(DateTime.now().isAfter(getDateTime())) {
+                return "Je kan enkel een infosessie plannen na de huidige datum.";
+            }
             return null;
         }
 
