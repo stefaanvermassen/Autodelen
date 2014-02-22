@@ -3,23 +3,24 @@
 # ~~~~
 
 # Home page
-GET         /                     controllers.Application.index()
+GET         /                       controllers.Application.index()
 
 # Login screen
-GET         /login                controllers.Login.login()
-POST        /login                controllers.Login.authenticate()
-GET         /logout               controllers.Login.logout()
-GET         /register             controllers.Login.register()
-POST        /register             controllers.Login.register_process()
+GET         /login                  controllers.Login.login()
+POST        /login                  controllers.Login.authenticate()
+GET         /logout                 controllers.Login.logout()
+GET         /register               controllers.Login.register()
+POST        /register               controllers.Login.register_process()
 
 # Calendar
-GET         /calendar             controllers.Calendar.index()
+GET         /calendar               controllers.Calendar.index()
 
 # Infosessions
-GET         /infosession/new      controllers.InfoSession.newSession()
+GET         /infosession/new        controllers.InfoSessions.newSession()
+POST        /infosession/new       controllers.InfoSessions.createNewSession()
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file         controllers.Assets.at(path="/public", file)
+GET         /assets/*file           controllers.Assets.at(path="/public", file)
 
 # Support for webjar packages such as bootstrap
-GET         /webjars/*file        controllers.WebJarAssets.at(file)
+GET         /webjars/*file          controllers.WebJarAssets.at(file)
