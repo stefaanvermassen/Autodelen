@@ -23,14 +23,14 @@ public class JDBCAddressDAO implements AddressDAO {
 
     private PreparedStatement getGetAddressStatement() throws SQLException {
         if (getAddressStatement == null) {
-            getAddressStatement = connection.prepareStatement("SELECT address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
+            getAddressStatement = connection.prepareStatement("SELECT address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM Addresses WHERE address_id = ?");
         }
         return getAddressStatement;
     }
 
     private PreparedStatement getCreateAddressStatement() throws SQLException {
         if (createAddressStatement == null) {
-            createAddressStatement = connection.prepareStatement("INSERT INTO addresses(address_city, address_zipcode, address_street, address_street_number, address_street_bus) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createAddressStatement = connection.prepareStatement("INSERT INTO Addresses(address_city, address_zipcode, address_street, address_street_number, address_street_bus) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createAddressStatement;
     }
