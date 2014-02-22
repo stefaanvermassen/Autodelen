@@ -12,6 +12,10 @@ public class DataAccessException extends RuntimeException {
         this.innerException = exception;
     }
 
+    public DataAccessException(String desc){
+        this(desc, null);
+    }
+
     public Exception getInnerException() {
         return innerException;
     }

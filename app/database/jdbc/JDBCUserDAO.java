@@ -26,7 +26,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, "+
+            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email "+
                     "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
                     "FROM users INNER JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
         }
@@ -40,6 +40,12 @@ public class JDBCUserDAO implements UserDAO {
         return createUserStatement;
     }
 
+    public static User populateUser(ResultSet rs, boolean withPassword, boolean withAddress) throws SQLException {
+        return new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname"),
+                withPassword ? rs.getString("user_password") : null,
+                withAddress ? JDBCAddressDAO.populateAddress(rs) : null); //TODO: handle null address
+    }
+
     @Override
     public User getUser(String email) {
         try {
@@ -47,23 +53,10 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
-
-                User user = new User(email);
-                user.setId(rs.getInt("user_id"));
-                user.setFirstName(rs.getString("user_firstname"));
-                user.setLastName(rs.getString("user_lastname"));
-                user.setPassword(rs.getString("user_password"));
-                user.setPhone(rs.getString("user_phone"));
-
-                user.setAddress(JDBCAddressDAO.populateAddress(rs)); //TODO: handle null address
-
-                //TODO: drivers license etc
-
-                return user;
+                return populateUser(rs, true, true);
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
             }
-
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
         }
@@ -81,6 +74,7 @@ public class JDBCUserDAO implements UserDAO {
                 ps.setString(4, lastName);
                 ps.setString(5, phone);
 
+                //TODO: move this logic to controller (which will be responsible for rollback) and pass Address object to createUser
                 if (address != null) { // Create a new address object
                     AddressDAO adao = new JDBCAddressDAO(connection);
                     address = adao.createAddress(address.getZip(), address.getCity(), address.getStreet(), address.getNumber(), address.getBus()); //TODO: pass fields, or address object to this function?
