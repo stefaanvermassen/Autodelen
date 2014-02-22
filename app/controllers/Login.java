@@ -1,18 +1,17 @@
 package controllers;
 
 import database.*;
-import database.jdbc.JDBCDataAccessProvider;
 import models.Address;
 import models.User;
 import play.*;
 import play.data.*;
 
+import views.html.login.*;
+
 import static play.data.Form.*;
 
 import play.mvc.*;
 import org.mindrot.jbcrypt.BCrypt;
-
-import views.html.*;
 
 
 /**
@@ -135,13 +134,20 @@ public class Login extends Controller {
             session().clear();
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName, registerForm.get().phone,
-                        new Address(registerForm.get().address_zip, registerForm.get().address_city, registerForm.get().address_street, registerForm.get().address_number, registerForm.get().address_bus));
+                AddressDAO adao = context.getAddressDAO();
+                try {
+                    Address address = adao.createAddress(registerForm.get().address_zip, registerForm.get().address_city, registerForm.get().address_street, registerForm.get().address_number, registerForm.get().address_bus);
+                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName, registerForm.get().phone,address);
+                    context.commit();
 
-                session("email", user.getEmail());
-                return redirect(
-                        routes.Application.index() // return to index page, registration success
-                );
+                    session("email", user.getEmail());
+                    return redirect(
+                            routes.Application.index() // return to index page, registration success
+                    );
+                } catch(DataAccessException ex){
+                    context.rollback();
+                    throw ex;
+                }
             } catch (DataAccessException ex) {
                 //TODO: send fail message
 

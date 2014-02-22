@@ -1,0 +1,38 @@
+@(sessions: List[InfoSession])
+
+@main("Infosessies"){
+
+    <h1>Infosessies</h1>
+
+    <!-- TODO: only show button when admin -->
+    <a class="btn btn-primary btn-lg" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Datum</th>
+                <th>Host</th>
+                <th>Adres</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @for((session, index) <- sessions.zipWithIndex) {
+                <tr>
+                    <td>@(index + 1)</td>
+                    <td>@session.getTime.toString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@session.getHost</td>
+                    <td>@session.getAddress</td>
+                    <td>
+                            <div class="btn-group btn-group-xs">
+                            <button type="button" class="btn btn-success">Inschrijven</button>
+                            <button type="button" class="btn btn-warning">Uitschrijven</button>
+                            <button type="button" class="btn btn-primary">Bewerken</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

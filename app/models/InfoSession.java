@@ -4,26 +4,34 @@
  */
 package models;
 
+import org.joda.time.DateTime;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Laurent
  */
 public class InfoSession {
-    
+
+    public static final List<Enrollee> NO_ENROLLEES = new ArrayList<Enrollee>(0);
+
     private int id;
-    private String time;
-    private String address;
+    private DateTime time;
+    private Address address;
     private User host;
     private List<Enrollee> enrolled;
 
-    public InfoSession(int id, String time, String address, User host, List<Enrollee> enrolled) {
+    public InfoSession(int id, DateTime time, Address address, User host, List<Enrollee> enrolled) {
         this.id = id;
         this.time = time;
         this.address = address;
         this.host = host;
         this.enrolled = enrolled;
+    }
+
+    public InfoSession(int id, DateTime time, Address address, User host) {
+        this(id, time, address, host, null);
     }
 
     public int getId() {
@@ -34,19 +42,19 @@ public class InfoSession {
         this.id = id;
     }
 
-    public String getTime() {
+    public DateTime getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(DateTime time) {
         this.time = time;
     }
 
-    public String getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
@@ -65,15 +73,16 @@ public class InfoSession {
     public void setEnrolled(List<Enrollee> enrolled) {
         this.enrolled = enrolled;
     }
-    
-    public void addEnrollee(Enrollee enrollee){
+
+    public void addEnrollee(Enrollee enrollee) {
+        if (this.enrolled == NO_ENROLLEES) //lazy loading
+            this.enrolled = new ArrayList<Enrollee>();
+
         this.enrolled.add(enrollee);
     }
-    
-    public void deleteEnrollee(Enrollee enrollee){
-        if(this.enrolled.contains(enrollee)){
-            this.enrolled.remove(enrollee);
-        }        
+
+    public void deleteEnrollee(Enrollee enrollee) {
+        this.enrolled.remove(enrollee);
     }
-    
+
 }

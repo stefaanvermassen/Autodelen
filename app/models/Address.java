@@ -68,4 +68,9 @@ public class Address {
     public void setBus(String bus) {
         this.bus = bus;
     }
+
+    @Override
+    public String toString(){
+        return String.format("%s %s, %s %s", street, number, zip, city);
+    }
 }

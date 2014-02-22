@@ -1,6 +1,8 @@
 package database.jdbc;
 
+import database.AddressDAO;
 import database.DataAccessContext;
+import database.InfoSessionDAO;
 import database.UserDAO;
 
 import java.sql.Connection;
@@ -13,9 +15,16 @@ public class JDBCDataAccessContext implements DataAccessContext {
 
     private Connection connection;
     private UserDAO userDAO;
+    private InfoSessionDAO infoSessionDAO;
+    private AddressDAO addressDAO;
 
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
+        try {
+            this.connection.setAutoCommit(false); //we don't want to commit ourselves
+        }catch(SQLException ex){
+            //TODO: log?
+        }
     }
 
     @Override
@@ -24,6 +33,22 @@ public class JDBCDataAccessContext implements DataAccessContext {
             userDAO = new JDBCUserDAO(connection);
         }
         return userDAO;
+    }
+
+    @Override
+    public InfoSessionDAO getInfoSessionDAO() {
+        if(infoSessionDAO == null){
+            infoSessionDAO = new JDBCInfoSessionDAO(connection);
+        }
+        return infoSessionDAO;
+    }
+
+    @Override
+    public AddressDAO getAddressDAO() {
+        if(addressDAO == null){
+            addressDAO = new JDBCAddressDAO(connection);
+        }
+        return addressDAO;
     }
 
     @Override
@@ -52,6 +77,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public void close() {
         try {
+            connection.commit(); //finalize commit if necessary
             connection.close();
         } catch(SQLException ex){
             //TODO ??

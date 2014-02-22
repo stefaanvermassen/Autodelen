@@ -118,6 +118,9 @@ public class User {
         this.identityCard = identityCard;
     }
 
-    
+    @Override
+    public String toString(){
+        return firstName + " " + lastName;
+    }
     
 }

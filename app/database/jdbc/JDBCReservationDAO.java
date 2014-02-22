@@ -20,11 +20,12 @@ import models.User;
  */
 public class JDBCReservationDAO implements ReservationDAO{
 
-    private static final String[] AUTO_GENERATED_KEYS = {"ID"};
+    private static final String[] AUTO_GENERATED_KEYS = {"reservation_id"};
 
     private Connection connection;
     private PreparedStatement createReservationStatement;
-    private PreparedStatement freePeriodStatement;
+    private PreparedStatement updateReservationStatement;
+    private PreparedStatement getReservationStatement;
 
     public JDBCReservationDAO(Connection connection) {
         this.connection = connection;
@@ -51,13 +52,7 @@ public class JDBCReservationDAO implements ReservationDAO{
         } catch (SQLException e){
             throw new DataAccessException("Unable to create reservation", e);
         }
-    }
-
-    @Override
-    public boolean freePeriod(String from, String to, Car car) throws DataAccessException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+    }    
     
     private PreparedStatement createReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
@@ -66,15 +61,63 @@ public class JDBCReservationDAO implements ReservationDAO{
         }
         return createReservationStatement;
     }
-
-    private PreparedStatement freePeriodStatement() throws SQLException {
-        //TODO
-        return null;
+    
+    private PreparedStatement updateReservationStatement() throws SQLException {
+       if (updateReservationStatement == null) {
+            updateReservationStatement = connection.prepareStatement("UPDATE carreservations SET reservations_user_id=? , reservations_car_id=? , reservations_status =? ,"
+                    + "reservations_from=? , reservations_to=? )");
+        }
+        return updateReservationStatement; 
     }
+    
+    private PreparedStatement getReservationStatement() throws SQLException {
+       if (getReservationStatement == null) {
+            getReservationStatement = connection.prepareStatement("SELECT * FROM carreservations WHERE reservation_id=?");
+        }
+        return getReservationStatement; 
+    }
+
 
     @Override
     public void updateReservation(Reservation reservation) throws DataAccessException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            PreparedStatement ps = updateReservationStatement();
+            ps.setInt(1, reservation.getUser().getId());
+            ps.setInt(2, reservation.getCar().getId());
+            ps.setString(3, reservation.getStatus().toString());
+            ps.setString(4, reservation.getFrom());
+            ps.setString(5, reservation.getTo());
+
+            ps.executeUpdate();
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update reservation", e);
+        }
+    }
+
+    @Override
+    public Reservation getReservation(int id) throws DataAccessException {
+        try {
+            PreparedStatement ps = getReservationStatement();
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+
+                throw new RuntimeException();
+                /*
+                Reservation reservation = new Reservation(id,
+                        , 
+                        , 
+                        rs.getString("reservation_from"), 
+                        rs.getString("reservation_to"));
+            }catch (SQLException e){
+                throw new DataAccessException("Error reading reservation resultset", e);
+                */
+            }
+            
+            
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update reservation", e);
+        }
     }
     
 }
