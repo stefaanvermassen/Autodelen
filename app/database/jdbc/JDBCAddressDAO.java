@@ -23,7 +23,7 @@ public class JDBCAddressDAO implements AddressDAO {
 
     private PreparedStatement getGetAddressStatement() throws SQLException {
         if (getAddressStatement == null) {
-            getAddressStatement = connection.prepareStatement("SELECT address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
+            getAddressStatement = connection.prepareStatement("SELECT address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
         }
         return getAddressStatement;
     }
@@ -46,7 +46,7 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
-                    return new Address(id, rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
+                    return populateAddress(rs);
                 } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading address resultset", ex);
@@ -55,6 +55,10 @@ public class JDBCAddressDAO implements AddressDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch address by id.", ex);
         }
+    }
+
+    public static Address populateAddress(ResultSet rs) throws SQLException {
+        return new Address(rs.getInt("address_id"), rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
     }
 
     @Override
