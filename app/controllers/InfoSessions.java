@@ -4,7 +4,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.data.Form;
-import play.data.format.Formats;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
@@ -15,7 +14,7 @@ import views.html.infosession.*;
  */
 public class InfoSessions extends Controller {
 
-  //  private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("dd MM yyyy - HH:ii p");
+    private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
 
     public static class InfoSessionCreationModel {
         public String time; //TODO: use date format here
@@ -29,8 +28,8 @@ public class InfoSessions extends Controller {
         public String address_bus;
 
         public DateTime getDateTime(){
-            //return DATEFORMATTER.parseDateTime(time);
-            return null;
+            return DATEFORMATTER.parseDateTime(time);
+            //return null;
         }
 
         public String validate() {
