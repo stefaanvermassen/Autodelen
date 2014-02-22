@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS autodelentest;
-CREATE DATABASE autodelentest;
-USE autodelentest;
+DROP DATABASE IF EXISTS autodelen;
+CREATE DATABASE autodelen;
+USE autodelen;
 
 CREATE TABLE `FileGroups` (
 	`file_group_id` INT NOT NULL AUTO_INCREMENT,
