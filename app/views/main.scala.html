@@ -6,74 +6,343 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <title>@title</title>
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
+        <!-- Core CSS - Include with every page -->
         <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        @stylesheets @* To include stylesheets from external templates *@
 
-        <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script> @* TODO: include these scripts at bottom of page, loads faster *@
-        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
-        @scripts @* To include scripts from external templates *@
+        @stylesheets @* To include stylesheets from external templates *@
+        <!-- SB Admin CSS - Include with every page -->
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/font-awesome.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/sb-admin.css")">
+
+        <!-- Page-Level Plugin CSS - Main -->
     </head>
     <body>
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-            <div class="container">
+        <div id="wrapper">
+            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="@routes.Application.index">Zelensis</a> @*TODO: load from config*@
+                    <a class="navbar-brand" href="@routes.Application.index">Zelensis</a>
                 </div>
+                <!-- /.navbar-header -->
 
-                @*TODO: hide this screen when user is logged in & show username instead *@
-                    <!--<div class="navbar-collapse collapse">
-                    <form class="navbar-form navbar-right" role="form">
-                        <div class="form-group">
-                            <input type="text" placeholder="Gebruikersnaam" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <input type="password" placeholder="Wachtwoord" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-success">Login</button>
-                    </form>
-                </div> -->
-                <div class="navbar-collapse navbar-right collapse ">
-                    @if(user != null){
-                        <div class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav navbar-right">
-                                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> @user.getEmail()
-                                    <b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#">Profiel</a></li>
-                                        <li><a href="#">...</a></li>
-                                        <li class="divider"></li>
-                                        <li><a href="@routes.Login.logout">Logout</a></li>
-                                    </ul>
+                <ul class="nav navbar-top-links navbar-right">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-envelope fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-messages">
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <strong>John Smith</strong>
+                                        <span class="pull-right text-muted">
+                                            <em>Yesterday</em>
+                                        </span>
+                                    </div>
+                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <strong>John Smith</strong>
+                                        <span class="pull-right text-muted">
+                                            <em>Yesterday</em>
+                                        </span>
+                                    </div>
+                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <strong>John Smith</strong>
+                                        <span class="pull-right text-muted">
+                                            <em>Yesterday</em>
+                                        </span>
+                                    </div>
+                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="text-center" href="#">
+                                    <strong>Read All Messages</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-messages -->
+                    </li>
+                    <!-- /.dropdown -->
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-tasks fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-tasks">
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <p>
+                                            <strong>Task 1</strong>
+                                            <span class="pull-right text-muted">40% Complete</span>
+                                        </p>
+                                        <div class="progress progress-striped active">
+                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                                <span class="sr-only">40% Complete (success)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <p>
+                                            <strong>Task 2</strong>
+                                            <span class="pull-right text-muted">20% Complete</span>
+                                        </p>
+                                        <div class="progress progress-striped active">
+                                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                                <span class="sr-only">20% Complete</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <p>
+                                            <strong>Task 3</strong>
+                                            <span class="pull-right text-muted">60% Complete</span>
+                                        </p>
+                                        <div class="progress progress-striped active">
+                                            <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
+                                                <span class="sr-only">60% Complete (warning)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <p>
+                                            <strong>Task 4</strong>
+                                            <span class="pull-right text-muted">80% Complete</span>
+                                        </p>
+                                        <div class="progress progress-striped active">
+                                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+                                                <span class="sr-only">80% Complete (danger)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="text-center" href="#">
+                                    <strong>See All Tasks</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-tasks -->
+                    </li>
+                    <!-- /.dropdown -->
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-alerts">
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <i class="fa fa-comment fa-fw"></i> New Comment
+                                        <span class="pull-right text-muted small">4 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <i class="fa fa-twitter fa-fw"></i> 3 New Followers
+                                        <span class="pull-right text-muted small">12 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <i class="fa fa-envelope fa-fw"></i> Message Sent
+                                        <span class="pull-right text-muted small">4 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <i class="fa fa-tasks fa-fw"></i> New Task
+                                        <span class="pull-right text-muted small">4 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <div>
+                                        <i class="fa fa-upload fa-fw"></i> Server Rebooted
+                                        <span class="pull-right text-muted small">4 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a class="text-center" href="#">
+                                    <strong>See All Alerts</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-alerts -->
+                    </li>
+                    <!-- /.dropdown -->
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user">
+                            <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                            </li>
+                            <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-user -->
+                    </li>
+                    <!-- /.dropdown -->
+                </ul>
+                <!-- /.navbar-top-links -->
+            </nav>
+            <!-- /.navbar-static-top -->
+
+            <nav class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <div class="avatar"><img src="@routes.Assets.at("images/avatar.jpg")" alt="profile picture"></div>
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Zoek...">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                        <li class="active">
+                            <a href="@routes.Application.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Login.login"><i class="fa fa-toggle-right fa-fw"></i> Login</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-plus-square fa-fw"></i> Register</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
+                        </li>
+                        <li>
+                            <a href="@routes.Application.index"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a href="@routes.Application.index">Reservaties</a>
                                 </li>
                             </ul>
-                        </div>
-                        <!---->
-                    } else {
-                        <a class="btn btn-primary" role="button" href="@routes.Login.login">Login</a>
-                        <a class="btn btn-primary" role="button" href="@routes.Login.register">Registreer</a>
-                    }
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-wrench fa-fw"></i> Beheerder<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a href="">Infosessies</a>
+                                </li>
+                                <li>
+                                    <a href="">Leden</a>
+                                </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
+                            <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
+                        </li>
+                    </ul>
+                    <!-- /#side-menu -->
                 </div>
+                <!-- /.sidebar-collapse -->
+            </nav>
+            <!-- /.navbar-static-side -->
+
+            <div id="page-wrapper">
+                @content
             </div>
+            <!-- /#page-wrapper -->
         </div>
+        <!-- /#wrapper -->
 
+        <!-- Core Scripts - Include with every page -->
+        <script src="@routes.Assets.at("javascripts/jquery-1.10.2.js")" type="text/javascript"></script>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
+        <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
 
-        <div class="container">
-            @content
-            <footer>
-                <p>&copy; Zelensis - UGent 2014</p>
-            </footer>
-        </div>
+        <!-- SB Admin Scripts - Include with every page -->
+        <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
 
+        <!-- Page-Level Plugin Scripts - Main -->
+
+        <!-- Page-Level Demo Scripts - Main - Use for reference -->
     </body>
 </html>
 }
