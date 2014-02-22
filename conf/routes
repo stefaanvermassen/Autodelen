@@ -17,7 +17,8 @@ GET         /calendar               controllers.Calendar.index()
 
 # Infosessions
 GET         /infosession/new        controllers.InfoSessions.newSession()
-POST        /infosession/new       controllers.InfoSessions.createNewSession()
+POST        /infosession/new        controllers.InfoSessions.createNewSession()
+GET         /infosession            controllers.InfoSessions.showUpcomingSessions()
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file           controllers.Assets.at(path="/public", file)

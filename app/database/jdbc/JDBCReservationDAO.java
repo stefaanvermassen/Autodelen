@@ -101,7 +101,9 @@ public class JDBCReservationDAO implements ReservationDAO{
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
-                
+
+                throw new RuntimeException();
+                /*
                 Reservation reservation = new Reservation(id,
                         , 
                         , 
@@ -109,13 +111,13 @@ public class JDBCReservationDAO implements ReservationDAO{
                         rs.getString("reservation_to"));
             }catch (SQLException e){
                 throw new DataAccessException("Error reading reservation resultset", e);
+                */
             }
             
             
         } catch (SQLException e){
             throw new DataAccessException("Unable to update reservation", e);
         }
-        return null;
     }
     
 }

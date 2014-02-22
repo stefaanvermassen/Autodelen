@@ -6,7 +6,6 @@ import models.Address;
 import models.InfoSession;
 import models.User;
 import org.joda.time.DateTime;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import java.util.List;
 public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private Connection connection;
-
 
     private static String INFOSESSION_SELECTOR = "SELECT infosession_id, infosession_timestamp, " +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
@@ -99,6 +97,11 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
+    public boolean deleteInfoSession(int id) throws DataAccessException {
+        throw new RuntimeException();
+    }
+
+    @Override
     public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException {
         List<InfoSession> sessions = new ArrayList<InfoSession>();
         try {
@@ -119,11 +122,11 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     @Override
     public void updateInfoSession(InfoSession session) throws DataAccessException {
-        throw new NotImplementedException();
+        throw new RuntimeException();
     }
 
     @Override
     public void registerUser(InfoSession session, User user) throws DataAccessException {
-        throw new NotImplementedException();
+        throw new RuntimeException();
     }
 }

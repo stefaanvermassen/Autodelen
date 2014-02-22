@@ -1,5 +1,9 @@
 package controllers;
 
+import database.*;
+import models.Address;
+import models.InfoSession;
+import models.User;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -27,13 +31,13 @@ public class InfoSessions extends Controller {
         public String address_number;
         public String address_bus;
 
-        public DateTime getDateTime(){
+        public DateTime getDateTime() {
             return DATEFORMATTER.parseDateTime(time);
             //return null;
         }
 
         public String validate() {
-            if(DateTime.now().isAfter(getDateTime())) {
+            if (DateTime.now().isAfter(getDateTime())) {
                 return "Je kan enkel een infosessie plannen na de huidige datum.";
             }
             return null;
@@ -45,6 +49,7 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @return
      */
     //TODO: admin attribute
@@ -55,17 +60,52 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: POST
+     *
      * @return
      */
     @Security.Authenticated(Secured.class)
-    public static Result createNewSession(){
+    public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
             return badRequest(newsession.render(createForm));
         } else {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                InfoSessionDAO dao = context.getInfoSessionDAO();
 
+                try {
+                    User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
-            return ok("Sessie aangemaakt. TODO: toon flash op aanmaakpagina." + createForm.get().getDateTime());
+                    Address address;
+                    if ("other".equals(createForm.get().addresstype)) {
+                        AddressDAO adao = context.getAddressDAO();
+                        address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
+                    } else {
+                        address = user.getAddress();
+                    }
+
+                    InfoSession session = dao.createInfoSession(user, address, createForm.get().getDateTime()); //TODO: allow other hosts
+                    context.commit();
+
+                    if (session != null) {
+                        return redirect(
+                                routes.InfoSessions.showUpcomingSessions() // return to infosession list
+                        );
+                    } else {
+                        createForm.error("Failed to create session in database. Contact administrator.");
+                        return badRequest(newsession.render(createForm));
+                    }
+                } catch(DataAccessException ex){
+                    context.rollback();
+                    throw ex;
+                }
+            } catch (DataAccessException ex) {
+                throw ex; //TODO: show gracefully
+            }
         }
+    }
+
+    @Security.Authenticated(Secured.class)
+    public static Result showUpcomingSessions() {
+        return ok("list");
     }
 }

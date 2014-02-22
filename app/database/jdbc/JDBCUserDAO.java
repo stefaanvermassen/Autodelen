@@ -26,7 +26,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email "+
+            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email " +
                     "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
                     "FROM users INNER JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
         }
@@ -65,40 +65,26 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public User createUser(String email, String password, String firstName, String lastName, String phone, Address address) throws DataAccessException {
-        try {
-            connection.setAutoCommit(false);
-            try (PreparedStatement ps = getCreateUserStatement()) {
-                ps.setString(1, email);
-                ps.setString(2, password);
-                ps.setString(3, firstName);
-                ps.setString(4, lastName);
-                ps.setString(5, phone);
+        try (PreparedStatement ps = getCreateUserStatement()) {
+            ps.setString(1, email);
+            ps.setString(2, password);
+            ps.setString(3, firstName);
+            ps.setString(4, lastName);
+            ps.setString(5, phone);
 
-                //TODO: move this logic to controller (which will be responsible for rollback) and pass Address object to createUser
-                if (address != null) { // Create a new address object
-                    AddressDAO adao = new JDBCAddressDAO(connection);
-                    address = adao.createAddress(address.getZip(), address.getCity(), address.getStreet(), address.getNumber(), address.getBus()); //TODO: pass fields, or address object to this function?
-                    ps.setInt(6, address.getId());
-                } else ps.setNull(6, Types.INTEGER);
+            if (address != null) {
+                ps.setInt(6, address.getId());
+            } else ps.setNull(6, Types.INTEGER);
 
-                ps.executeUpdate();
-                connection.commit();
-                connection.setAutoCommit(true);
-
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    keys.next(); //if this fails we want an exception anyway
-
-                    return new User(keys.getInt(1), email, firstName, lastName, password, address);
-                } catch (SQLException ex) {
-                    throw new DataAccessException("Failed to get primary key for new user.", ex);
-                }
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+                return new User(keys.getInt(1), email, firstName, lastName, password, address);
             } catch (SQLException ex) {
-                connection.rollback();
-                connection.setAutoCommit(true);
-                throw new DataAccessException("Failed to commit new user transaction.", ex);
+                throw new DataAccessException("Failed to get primary key for new user.", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create user.", ex);
+            throw new DataAccessException("Failed to commit new user transaction.", ex);
         }
     }
 
