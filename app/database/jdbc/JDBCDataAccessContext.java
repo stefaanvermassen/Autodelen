@@ -28,7 +28,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
 
     @Override
     public void begin() {
-
+        //TODO What happens here?
     }
 
     @Override

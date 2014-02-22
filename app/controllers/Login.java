@@ -2,6 +2,7 @@ package controllers;
 
 import database.*;
 import database.jdbc.JDBCDataAccessProvider;
+import models.Address;
 import models.User;
 import play.*;
 import play.data.*;
@@ -20,13 +21,8 @@ import views.html.*;
 public class Login extends Controller {
 
     private static boolean checkLoginModel(LoginModel model) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(model.email);
-            return BCrypt.checkpw(model.password, user.getPassword());
-        } catch (DataAccessException ex) { //TODO: remove this logic from inside model to seperate function
-            return false;
-        }
+        User user = DatabaseHelper.getUserProvider().getUser(model.email);
+        return user != null && BCrypt.checkpw(model.password, user.getPassword());
     }
 
     public static class LoginModel {
@@ -43,13 +39,24 @@ public class Login extends Controller {
     public static class RegisterModel {
         public String email;
         public String password;
+        public String password_repeat;
         public String firstName;
         public String lastName;
+        public String phone;
+
+        // Address fields
+        public String address_city;
+        public String address_zip;
+        public String address_street;
+        public String address_number;
+        public String address_bus;
 
         public String validate() {
             //TODO: check valid email format, valid name etc etc
-            if (password.length() < 8)
+            if (password == null || password.length() < 8)
                 return "Wachtwoord moet minstens 8 tekens bevatten.";
+            else if(!password.equals(password_repeat))
+                return "Wachtwoord komt niet overeen.";
             else
                 return null;
         }
@@ -128,13 +135,16 @@ public class Login extends Controller {
             session().clear();
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName);
+                User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName, registerForm.get().phone,
+                        new Address(registerForm.get().address_zip, registerForm.get().address_city, registerForm.get().address_street, registerForm.get().address_number, registerForm.get().address_bus));
+
                 session("email", user.getEmail());
                 return redirect(
                         routes.Application.index() // return to index page, registration success
                 );
             } catch (DataAccessException ex) {
                 //TODO: send fail message
+
                 throw ex;
             }
         }
@@ -149,6 +159,8 @@ public class Login extends Controller {
      */
     @Security.Authenticated(Secured.class)
     public static Result logout() {
+        DatabaseHelper.getUserProvider().invalidateUser(session("email"));
+
         session().clear();
         return redirect(
                 routes.Application.index()

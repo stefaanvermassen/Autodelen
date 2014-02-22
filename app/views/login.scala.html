@@ -2,7 +2,7 @@
     @stylesheets = {
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
     }
-    @main("Login", stylesheets)(null) {
+    @main("Login", stylesheets) {
         <div class="row">
             <div class="page-header"><h2>Login</h2></div>
             @helper.form(routes.Login.authenticate, 'class -> "form-horizontal") {
@@ -15,9 +15,9 @@
                     @* Source: http://bootsnipp.com/snippets/featured/login-form-flat *@
 
                     <div class="form-group">
-                        <label class="col-md-1 control-label" for="username"></label>
+                        <label class="col-md-1 control-label" for="email"></label>
                         <div class="col-md-12">
-                            <input id="username" name="email" type="text" placeholder="E-mail" class="form-control input-md" value="@form("email").value">
+                            <input id="email" name="email" type="text" placeholder="E-mail" class="form-control input-md" value="@form("email").value">
                         </div>
                     </div>
 

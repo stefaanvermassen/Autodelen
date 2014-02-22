@@ -1,7 +1,9 @@
-@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(user: User = null)(content: Html)
+@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
+
+@import database.DatabaseHelper;
+@defining(DatabaseHelper.getUserProvider().getUser(session.get("email"))) { user =>
 
 <!DOCTYPE html>
-
 <html>
     <head>
         <title>@title</title>
@@ -74,3 +76,4 @@
 
     </body>
 </html>
+}
