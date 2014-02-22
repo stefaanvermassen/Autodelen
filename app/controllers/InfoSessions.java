@@ -13,6 +13,8 @@ import play.mvc.Result;
 import play.mvc.Security;
 import views.html.infosession.*;
 
+import java.util.List;
+
 /**
  * Created by Cedric on 2/21/14.
  */
@@ -106,6 +108,12 @@ public class InfoSessions extends Controller {
 
     @Security.Authenticated(Secured.class)
     public static Result showUpcomingSessions() {
-        return ok("list");
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
+            return ok(list.render(sessions));
+        } catch(DataAccessException ex){
+            throw ex;
+        }
     }
 }
