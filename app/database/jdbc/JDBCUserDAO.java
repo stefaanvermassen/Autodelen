@@ -58,7 +58,7 @@ public class JDBCUserDAO implements UserDAO {
                 Address address = null;
                 if (address_id != null) {
                     AddressDAO adao = new JDBCAddressDAO(connection);
-                    address = adao.getAddress(((Long) address_id).intValue()); //TODO: fix PK's signed
+                    address = adao.getAddress((Integer) address_id);
                 }
                 user.setAddress(address);
 
