@@ -26,7 +26,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email " +
+            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
                     "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
                     "FROM users INNER JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
         }
