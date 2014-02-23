@@ -91,7 +91,7 @@ CREATE TABLE `Cars` (
 	`car_location` INT,
 	`car_seats` TINYINT UNSIGNED,
 	`car_doors` TINYINT UNSIGNED,
-	`car_year` DATE,
+	`car_year` INT,
 	`car_gps` BIT(1),
 	`car_hook` BIT(1),
 	`car_fuel` ENUM('PETROL','DIESEL', 'BIODIESEL', 'GAS', 'HYBRID', 'ELECTRIC'),
@@ -147,7 +147,7 @@ CREATE TABLE `CarReservations` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Infosessions` (
+CREATE TABLE `InfoSessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
 	`infosession_timestamp` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`infosession_address_id` INT NOT NULL,
@@ -159,13 +159,13 @@ CREATE TABLE `Infosessions` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `InfosessionEnrollees` ( # Wie is ingeschreven?
+CREATE TABLE `InfoSessionEnrollees` ( # Wie is ingeschreven?
 	`infosession_id` INT NOT NULL,
 	`infosession_enrollee_id` INT NOT NULL,
 	`enrollment_status` ENUM('ENROLLED', 'PRESENT', 'ABSENT') NOT NULL DEFAULT 'ENROLLED',
 	PRIMARY KEY (`infosession_enrollee_id`),
 	FOREIGN KEY (`infosession_enrollee_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`infosession_id`) REFERENCES Infosessions(`infosession_id`)
+	FOREIGN KEY (`infosession_id`) REFERENCES InfoSessions(`infosession_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

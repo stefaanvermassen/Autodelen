@@ -20,9 +20,9 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_SELECTOR = "SELECT infosession_id, infosession_timestamp, " +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email FROM infosessions " +
-            "JOIN users ON infosession_host_user_id = user_id " +
-            "JOIN addresses ON infosession_address_id = address_id";
+            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email FROM InfoSessions " +
+            "JOIN Users ON infosession_host_user_id = user_id " +
+            "JOIN Addresses ON infosession_address_id = address_id";
 
     private PreparedStatement createInfoSessionStatement;
     private PreparedStatement getInfoSessionsAfterStatement;
@@ -34,7 +34,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getCreateInfoSessionStatement() throws SQLException {
         if (createInfoSessionStatement == null) {
-            createInfoSessionStatement = connection.prepareStatement("INSERT INTO infosessions(infosession_timestamp, infosession_address_id, infosession_host_user_id) VALUES (?,?,?)",
+            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_timestamp, infosession_address_id, infosession_host_user_id) VALUES (?,?,?)",
                     new String[]{"infosession_id"});
         }
         return createInfoSessionStatement;
@@ -77,7 +77,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                 throw new DataAccessException("Failed to get primary key for new infosession.", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch infosessions after date.", ex);
+            throw new DataAccessException("Could not create infosession.", ex);
         }
     }
 

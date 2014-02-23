@@ -4,15 +4,18 @@
  */
 package database.jdbc;
 
+import database.CarDAO;
 import database.DataAccessException;
 import database.ReservationDAO;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
+
+import database.UserDAO;
 import models.Car;
 import models.Reservation;
+import models.ReservationStatus;
 import models.User;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -30,16 +33,47 @@ public class JDBCReservationDAO implements ReservationDAO{
     public JDBCReservationDAO(Connection connection) {
         this.connection = connection;
     }
-    
+
+    public static Reservation populateReservation(ResultSet rs) throws SQLException {
+
+        Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs), JDBCUserDAO.populateUser(rs, false, false), new DateTime(rs.getTimestamp("reservation_from")), new DateTime(rs.getTimestamp("reservation_to")));
+        reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+        return reservation;
+    }
+
+    private PreparedStatement getCreateReservationStatement() throws SQLException {
+        if (createReservationStatement == null) {
+            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservations_user_id, reservations_car_id, reservations_status"
+                    + "reservations_from, reservations_to) VALUES (?,?,?,?,?)");
+        }
+        return createReservationStatement;
+    }
+
+    private PreparedStatement getUpdateReservationStatement() throws SQLException {
+        if (updateReservationStatement == null) {
+            updateReservationStatement = connection.prepareStatement("UPDATE CarReservations SET reservations_user_id=? , reservations_car_id=? , reservations_status =? ,"
+                    + "reservations_from=? , reservations_to=? )");
+        }
+        return updateReservationStatement;
+    }
+
+    private PreparedStatement getGetReservationStatement() throws SQLException {
+        if (getReservationStatement == null) {
+            // TODO: INNER JOINS with Cars, Users, Addresses (for Users), Addresses (for Cars)
+            getReservationStatement = connection.prepareStatement("SELECT * FROM CarReservations WHERE reservation_id=?");
+        }
+        return getReservationStatement;
+    }
+
     @Override
-    public Reservation createReservation(String from, String to, Car car, User user) throws DataAccessException {
+    public Reservation createReservation(DateTime from, DateTime to, Car car, User user) throws DataAccessException {
         try{
-            PreparedStatement ps = createReservationStatement();
+            PreparedStatement ps = getCreateReservationStatement();
             ps.setInt(1, user.getId());
             ps.setInt(2, car.getId());
             ps.setString(3,"REQUEST");
-            ps.setString(4, from);
-            ps.setString(5, to);
+            ps.setTimestamp(4, new Timestamp(from.getMillis()));
+            ps.setTimestamp(5, new Timestamp(to.getMillis()));
             
             ps.executeUpdate();
             
@@ -52,41 +86,18 @@ public class JDBCReservationDAO implements ReservationDAO{
         } catch (SQLException e){
             throw new DataAccessException("Unable to create reservation", e);
         }
-    }    
-    
-    private PreparedStatement createReservationStatement() throws SQLException {
-        if (createReservationStatement == null) {
-            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservations_user_id, reservations_car_id, reservations_status"
-                    + "reservations_from, reservations_to) VALUES (?,?,?,?,?)");
-        }
-        return createReservationStatement;
-    }
-    
-    private PreparedStatement updateReservationStatement() throws SQLException {
-       if (updateReservationStatement == null) {
-            updateReservationStatement = connection.prepareStatement("UPDATE carreservations SET reservations_user_id=? , reservations_car_id=? , reservations_status =? ,"
-                    + "reservations_from=? , reservations_to=? )");
-        }
-        return updateReservationStatement; 
-    }
-    
-    private PreparedStatement getReservationStatement() throws SQLException {
-       if (getReservationStatement == null) {
-            getReservationStatement = connection.prepareStatement("SELECT * FROM carreservations WHERE reservation_id=?");
-        }
-        return getReservationStatement; 
     }
 
 
     @Override
     public void updateReservation(Reservation reservation) throws DataAccessException {
         try {
-            PreparedStatement ps = updateReservationStatement();
+            PreparedStatement ps = getUpdateReservationStatement();
             ps.setInt(1, reservation.getUser().getId());
             ps.setInt(2, reservation.getCar().getId());
             ps.setString(3, reservation.getStatus().toString());
-            ps.setString(4, reservation.getFrom());
-            ps.setString(5, reservation.getTo());
+            ps.setTimestamp(4, new Timestamp(reservation.getFrom().getMillis()));
+            ps.setTimestamp(5, new Timestamp(reservation.getTo().getMillis()));
 
             ps.executeUpdate();
         } catch (SQLException e){
@@ -97,24 +108,15 @@ public class JDBCReservationDAO implements ReservationDAO{
     @Override
     public Reservation getReservation(int id) throws DataAccessException {
         try {
-            PreparedStatement ps = getReservationStatement();
+            PreparedStatement ps = getGetReservationStatement();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
-
-                throw new RuntimeException();
-                /*
-                Reservation reservation = new Reservation(id,
-                        , 
-                        , 
-                        rs.getString("reservation_from"), 
-                        rs.getString("reservation_to"));
+                return populateReservation(rs);
             }catch (SQLException e){
                 throw new DataAccessException("Error reading reservation resultset", e);
-                */
+
             }
-            
-            
         } catch (SQLException e){
             throw new DataAccessException("Unable to update reservation", e);
         }

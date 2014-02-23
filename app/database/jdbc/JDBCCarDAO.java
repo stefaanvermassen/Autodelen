@@ -36,23 +36,47 @@ public class JDBCCarDAO implements CarDAO{
         this.connection = connection;
     }
 
+    public static Car populateCar(ResultSet rs) throws SQLException {
+        Car car = new Car();
+        car.setId(rs.getInt("car_id"));
+        car.setBrand(rs.getString("car_brand"));
+        car.setType(rs.getString("car_brand"));
+        car.setComments(rs.getString("car_comments"));
+        car.setDoors(rs.getInt("car_doors"));
+        car.setEstimatedValue(rs.getInt("car_estimated_value"));
+        car.setFuelEconomy(rs.getInt("car_fuel_economy"));
+        car.setGps(rs.getBoolean("car_gps"));
+        car.setHook(rs.getBoolean("car_hook"));
+        car.setOwnerAnnualKm(rs.getInt("car_owner_annual_km"));
+        car.setSeats(rs.getInt("car_seats"));
+        car.setYear(rs.getInt("car_year"));
+        Address location = JDBCAddressDAO.populateAddress(rs);
+        car.setLocation(location);
+
+        // Why not populateUser?
+        UserProvider up = new UserProvider(new JDBCDataAccessProvider());
+        car.setOwner(up.getUser(rs.getString("user_id")));
+        car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
+        return car;
+    }
+
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         }
         return createCarStatement;
     }
     
     private PreparedStatement updateCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("UPDATE cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? , car_last_edit=? ");
+            createCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? , car_last_edit=? ");
         }
         return createCarStatement;
     }
     
     private PreparedStatement getCarStatement() throws SQLException {
         if (getCarStatement == null) {
-            getCarStatement = connection.prepareStatement("SELECT * FROM cars INNER JOIN addresses ON addresses.car_location=cars.address_id INNER JOIN users ON users.user_id=cars.car_owner_user_id WHERE car_id=?");
+            getCarStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.car_location=Cars.address_id INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE car_id=?");
         }
         return getCarStatement;
     }
@@ -150,33 +174,7 @@ public class JDBCCarDAO implements CarDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
 
-                Car car = new Car();
-                car.setId(id);
-                car.setBrand(rs.getString("car_brand"));
-                car.setType(rs.getString("car_brand"));
-                car.setComments(rs.getString("car_comments"));
-                car.setDoors(rs.getInt("car_doord"));
-                car.setEstimatedValue(rs.getInt("car_estimated_value"));
-                car.setFuelEconomy(rs.getInt("car_fuel_economy"));
-                car.setGps(rs.getBoolean("car_gps"));
-                car.setHook(rs.getBoolean("car_hook"));
-                car.setOwnerAnnualKm(rs.getInt("car_owner_annual_km"));
-                car.setSeats(rs.getInt("car_seats"));
-                car.setYear(rs.getInt("car_year"));
-                Address location = new Address(
-                        rs.getInt("address_id"),
-                        rs.getString("address_zipcode"),
-                        rs.getString("address_city"),
-                        rs.getString("address_street"),
-                        rs.getString("address_number"),
-                        rs.getString("address_bus")
-                        );
-                car.setLocation(location);
-                UserProvider up = new UserProvider(new JDBCDataAccessProvider());
-                car.setOwner(up.getUser(rs.getString("user_id")));
-                car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
-
-                return car;
+                return populateCar(rs);
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading car resultset", ex);
             }
