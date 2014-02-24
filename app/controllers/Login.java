@@ -3,6 +3,7 @@ package controllers;
 import database.*;
 import models.Address;
 import models.User;
+import models.UserRole;
 import play.*;
 import play.data.*;
 
@@ -68,6 +69,10 @@ public class Login extends Controller {
      * @return The login index page
      */
     public static Result login() {
+        if(!(Secured.isAuthorized(UserRole.ADMIN)))
+            return redirect(
+                    controllers.routes.Application.index()
+            );
         if (session("email") == null) {
             return ok(
                     login.render(Form.form(LoginModel.class))
