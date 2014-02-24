@@ -37,7 +37,7 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 
-@main("Nieuwe infosessie", stylesheets, scripts) {
+@app("Nieuwe infosessie", stylesheets, scripts) {
     <h1>Nieuwe infosessie</h1>
     @helper.form(routes.InfoSessions.createNewSession, 'class -> "form-horizontal") {
         <fieldset>

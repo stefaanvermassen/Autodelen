@@ -4,6 +4,10 @@
 
 # Home page
 GET         /                       controllers.Application.index()
+GET         /informatie             controllers.Informatie.index()
+
+# Dashboard page
+GET         /dashboard              controllers.Dashboard.index()
 
 # Login screen
 GET         /login                  controllers.Login.login()
