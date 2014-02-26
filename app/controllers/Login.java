@@ -28,7 +28,11 @@ public class Login extends Controller {
         public String password;
 
         public String validate() {
-            if (checkLoginModel(this)) {
+            if(email == null || email.length() < 5)
+                return "Emailadres ontbreekt";
+            else if(password == null || password.length() == 0)
+                return "Wachtwoord ontbreekt";
+            else if (checkLoginModel(this)) {
                 return null;
             } else return "Foute gebruikersnaam of wachtwoord.";
         }
@@ -68,7 +72,16 @@ public class Login extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN, UserRole.SUPER_USER})
     public static Result login() {
-        if (session("email") == null) {
+        // Allow a force login when the user doesn't exist anymore
+        String email = session("email");
+        if(email != null){
+            if(DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
+                session().clear();
+                email = null;
+            }
+        }
+
+        if (email == null) {
             return ok(
                     login.render(Form.form(LoginModel.class))
             );
