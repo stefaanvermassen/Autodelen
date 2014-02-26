@@ -10,10 +10,6 @@ import models.UserRole;
 import java.sql.*;
 import java.util.EnumSet;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
-
-import scalaz.std.effect.sql.preparedStatement;
-
 /**
  * Created by Cedric on 2/16/14.
  */
