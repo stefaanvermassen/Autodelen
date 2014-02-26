@@ -4,7 +4,7 @@ Autodelen
 Webapplicatie die de administratie verzorgd voor een organisatie voor autodelen.
 
 Teamleden
-----
+-----
 
   - Bardadym Maryna
   - Belen Hannes (team lead)
