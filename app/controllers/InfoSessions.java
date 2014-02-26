@@ -1,9 +1,11 @@
 package controllers;
 
+import controllers.Security.RoleSecured;
 import database.*;
 import models.Address;
 import models.InfoSession;
 import models.User;
+import models.UserRole;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -54,8 +56,7 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    //TODO: admin attribute
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result newSession() {
         return ok(newsession.render(Form.form(InfoSessionCreationModel.class)));
     }
@@ -65,7 +66,7 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
@@ -106,7 +107,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result showUpcomingSessions() {
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();

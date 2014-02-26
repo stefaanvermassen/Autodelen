@@ -1,5 +1,6 @@
-package controllers;
+package controllers.Security;
 
+import controllers.routes;
 import database.DatabaseHelper;
 import models.User;
 import models.UserRole;
@@ -35,13 +36,16 @@ public class RoleSecured {
         public F.Promise<SimpleResult> call(Context ctx) {
             try {
                 UserRole[] SecuredRoles = configuration.value();
-                User user = DatabaseHelper.getUserProvider().getUser(ctx.session().get("email"));
+                User user = DatabaseHelper.getUserProvider().getUser(ctx.session().get("email"), true);
+                // If user is null, redirect to login page
                 if(user == null)
-                    return F.Promise.pure((SimpleResult) unauthorized(views.html.defaultpages.unauthorized.render()));
+                    return F.Promise.pure(redirect(routes.Login.login()));
+                // If user has got one of the specified roles, delegate to the requested page
                 for(UserRole securedRole : SecuredRoles) {
                     if(user.gotRole(securedRole))
                         return delegate.call(ctx);
                 }
+                // User is not authorized
                 return F.Promise.pure((SimpleResult) unauthorized(views.html.defaultpages.unauthorized.render()));
             }
             catch(Throwable t) {

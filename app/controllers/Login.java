@@ -1,15 +1,13 @@
 package controllers;
 
+import controllers.Security.RoleSecured;
 import database.*;
 import models.Address;
 import models.User;
 import models.UserRole;
-import play.*;
 import play.data.*;
 
 import views.html.login.*;
-
-import static play.data.Form.*;
 
 import play.mvc.*;
 import org.mindrot.jbcrypt.BCrypt;
