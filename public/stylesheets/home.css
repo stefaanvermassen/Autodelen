@@ -1,17 +1,43 @@
 /* Custom CSS */
+.anchor {
+    padding-top: 51px;
+    margin-top: -51px;
+    display: inline-block;
+}
+
 .logo {
     /*resize*/
     width: 300px;
     height: 300px;
 
     /*scale instead of crop*/
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position:center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#sidebar {
+    padding-top: 20px;
 }
 
 body {
     padding-top: 71px;
+}
+
+.numbercircle {
+    border-radius: 50%;
+
+    width: 180px;
+    height: 180px;
+    
+    /*background: #fff;*/
+    border: 10px solid #666;
+    color: #666;
+    text-align: center;
+    
+    font: 160px Arial, sans-serif;
+    display:block;
+    margin:auto;
 }
 
 /* SIDEBAR */

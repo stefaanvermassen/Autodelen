@@ -1,8 +1,5 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
 
-@import database.DatabaseHelper;
-@defining(DatabaseHelper.getUserProvider().getUser(session.get("email"))) { user =>
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -36,7 +33,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                   </button>
-                  <a class="navbar-brand" href="#"><b>Dégage!</b></a>
+                  <a class="navbar-brand" href="@routes.Application.index"><b>Dégage!</b></a>
                 </div>
                 <div class="navbar-collapse collapse">
                   <ul class="nav navbar-nav navbar-right">
@@ -74,4 +71,3 @@
         <!-- Page-Level Demo Scripts - Main - Use for reference -->
     </body>
 </html>
-}
