@@ -1,10 +1,8 @@
 package controllers;
 
-import controllers.Security.RoleSecured;
 import database.*;
 import models.Address;
 import models.User;
-import models.UserRole;
 import play.data.*;
 
 import views.html.login.*;
