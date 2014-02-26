@@ -21,12 +21,4 @@ public class Secured extends Security.Authenticator {
     public Result onUnauthorized(Context ctx) {
         return redirect(routes.Login.login());
     }
-
-    // Access rights
-    public static boolean isAuthorized(UserRole role) {
-        User user = (User) DatabaseHelper.getUserProvider().getUser(Context.current().session().get("email"));
-        if(user == null)
-            return false;
-        return user.gotRole(role);
-    }
 }
