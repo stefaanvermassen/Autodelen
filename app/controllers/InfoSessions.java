@@ -111,7 +111,7 @@ public class InfoSessions extends Controller {
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
-            return ok(list.render(sessions));
+            return ok(infosessions.render(sessions));
         } catch(DataAccessException ex){
             throw ex;
         }
