@@ -70,7 +70,6 @@ public class Login extends Controller {
      *
      * @return The login index page
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN, UserRole.SUPER_USER})
     public static Result login() {
         // Allow a force login when the user doesn't exist anymore
         String email = session("email");
