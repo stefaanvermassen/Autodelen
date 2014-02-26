@@ -52,8 +52,9 @@ public class JDBCUserDAO implements UserDAO {
             PreparedStatement ps = getUserByEmailStatement();
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return populateUser(rs, true, true);
+                if(rs.next())
+                    return populateUser(rs, true, true);
+                else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
             }
