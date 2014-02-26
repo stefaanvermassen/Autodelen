@@ -5,8 +5,11 @@ import database.DataAccessException;
 import database.DataAccessProvider;
 import database.UserDAO;
 import models.Address;
+import models.UserRole;
 import play.cache.Cache;
 import models.User;
+
+import java.util.EnumSet;
 
 /**
  * Created by Cedric on 2/20/14.
@@ -41,6 +44,11 @@ public class UserProvider implements UserDAO {
         } catch (DataAccessException ex) {
             return null; //TODO: log
         }
+    }
+
+    @Override
+    public User createUser(String email, String password, String firstName, String lastName, String phone, Address address, EnumSet<UserRole> roles) throws DataAccessException {
+        return null;
     }
 
     public void invalidateUser(String email) {

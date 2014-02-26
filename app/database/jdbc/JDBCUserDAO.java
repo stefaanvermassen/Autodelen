@@ -68,7 +68,7 @@ public class JDBCUserDAO implements UserDAO {
         return createUserStatement;
     }
     
-    private PreparedStatement updateUserStatement() throws SQLException {
+    private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
     		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_phone=?, user_address_domicile_id=? ");
     	}
@@ -88,6 +88,7 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
+                // TODO: if Address is null second argument of populateUser should be false
                 User user = populateUser(rs, true, true);
                 PreparedStatement rolesStmt = getUserRoles();
                 rolesStmt.setInt(1, user.getId());
@@ -168,7 +169,7 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public void updateUser(User user) throws DataAccessException {
-    	try (PreparedStatement ps = getCreateUserStatement() ; PreparedStatement insert = insertUserRolesStatement() ; PreparedStatement delete = deleteUserRolesStatement()) {
+    	try (PreparedStatement ps = getUpdateUserStatement() ; PreparedStatement insert = insertUserRolesStatement() ; PreparedStatement delete = deleteUserRolesStatement()) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getFirstName());
