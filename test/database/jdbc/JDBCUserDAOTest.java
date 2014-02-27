@@ -29,18 +29,11 @@ public class JDBCUserDAOTest {
         //dao = context.getUserDAO();
     }
 
+    /*
+     * Tests AddressDAO.createAddress() and UserDAO.createAddress()
+     */
     @Test
-    public void testPopulateUser() throws Exception {
-
-    }
-
-    @Test
-    public void testGetUser() throws Exception {
-
-    }
-
-    @Test
-    public void fillDatabase() throws Exception {
+    public void testUserDAO() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_users.txt"));
         sc.useDelimiter("\t");
         // Skip header
@@ -75,11 +68,5 @@ public class JDBCUserDAOTest {
         Assert.assertEquals(lastName, user.getLastName());
         Assert.assertEquals(phone, user.getPhone());
         Assert.assertEquals(address, user.getAddress());*/
-    }
-
-
-    @Test
-    public void testUpdateUser() throws Exception {
-
     }
 }
