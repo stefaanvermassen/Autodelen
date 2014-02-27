@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.Security.RoleSecured;
 import database.*;
 import models.Address;
 import models.User;
@@ -173,7 +174,7 @@ public class Login extends Controller {
      *
      * @return Redirect to index page
      */
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated()
     public static Result logout() {
         DatabaseHelper.getUserProvider().invalidateUser(session("email"));
 
