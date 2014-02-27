@@ -78,6 +78,10 @@ public class User {
 
     public void addRole(UserRole role) { roles.add(role); }
 
+    public void dropRole(UserRole role) {
+        roles.remove(role);
+    }
+
     public String getPhone() {
         return phone;
     }

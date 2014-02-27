@@ -3,6 +3,9 @@ package controllers;
 /**
  * Created by Cedric on 2/16/14.
  */
+import database.DatabaseHelper;
+import models.User;
+import models.UserRole;
 import play.*;
 import play.mvc.*;
 import play.mvc.Http.*;
