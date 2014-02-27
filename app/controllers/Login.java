@@ -74,7 +74,7 @@ public class Login extends Controller {
             );
         } else {
             return redirect(
-                    routes.Application.index()
+                    routes.Dashboard.index()
             );
         }
     }
@@ -93,7 +93,7 @@ public class Login extends Controller {
             session().clear();
             session("email", loginForm.get().email);
             return redirect(
-                    routes.Application.index() // return to index page, authentication success
+                    routes.Dashboard.index() // go to dashboard page, authentication success
             );
         }
     }
@@ -110,7 +110,7 @@ public class Login extends Controller {
             );
         } else {
             return redirect(
-                    routes.Application.index()
+                    routes.Login.login()
             );
         }
     }

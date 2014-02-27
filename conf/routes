@@ -9,6 +9,14 @@ GET         /informatie             controllers.Informatie.index()
 # Dashboard page
 GET         /dashboard              controllers.Dashboard.index()
 
+# User pages
+GET         /drives                 controllers.Drives.index()
+GET         /reserve                controllers.Reserve.index()
+GET         /reserve/details        controllers.Reserve.details()
+GET         /receipts               controllers.Receipts.index()
+GET         /settings               controllers.Settings.index()
+GET         /profile                controllers.Profile.index()
+
 # Login screen
 GET         /login                  controllers.Login.login()
 POST        /login                  controllers.Login.authenticate()

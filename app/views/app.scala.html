@@ -14,14 +14,14 @@
 
         <!-- Core CSS - Include with every page -->
         <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-
-        @stylesheets @* To include stylesheets from external templates *@
-        <!-- SB Admin CSS - Include with every page -->
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/font-awesome.min.css")">
+        @stylesheets @* To include stylesheets from external templates *@
+        
+        <!-- SB Admin CSS - Include with every page -->
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/sb-admin.css")">
 
         <!-- Page-Level Plugin CSS - Main -->
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
     </head>
     <body>
         <div id="wrapper">
@@ -268,37 +268,31 @@
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
-                            <a href="@routes.Login.login"><i class="fa fa-toggle-right fa-fw"></i> Login</a>
+                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-plus-square fa-fw"></i> Register</a>
+                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
+                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
+                            <a href="@routes.Dashboard.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                            <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Application.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Application.index"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
+                            <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="@routes.Application.index">Reservaties</a>
+                                    <a href="@routes.Dashboard.index">Reservaties</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->
@@ -338,8 +332,8 @@
         <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
 
         <!-- SB Admin Scripts - Include with every page -->
-        <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
         @scripts
+        <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
         
         <!-- Page-Level Plugin Scripts - Main -->
 
