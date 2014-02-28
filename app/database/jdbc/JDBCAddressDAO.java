@@ -58,7 +58,10 @@ public class JDBCAddressDAO implements AddressDAO {
     }
 
     public static Address populateAddress(ResultSet rs) throws SQLException {
-        return new Address(rs.getInt("address_id"), rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
+        if(rs.getObject("address_id") == null)
+            return null;
+        else
+            return new Address(rs.getInt("address_id"), rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
     }
 
     @Override

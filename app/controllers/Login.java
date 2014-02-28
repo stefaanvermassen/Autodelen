@@ -2,7 +2,6 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import models.Address;
 import models.User;
 import play.data.*;
 
@@ -43,14 +42,6 @@ public class Login extends Controller {
         public String password_repeat;
         public String firstName;
         public String lastName;
-        public String phone;
-
-        // Address fields
-        public String address_city;
-        public String address_zip;
-        public String address_street;
-        public String address_number;
-        public String address_bus;
 
         public String validate() {
             //TODO: check valid email format, valid name etc etc
@@ -136,7 +127,7 @@ public class Login extends Controller {
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
-        //TODO: captcha
+        //TODO: email verification
 
         Form<RegisterModel> registerForm = Form.form(RegisterModel.class).bindFromRequest();
         if (registerForm.hasErrors()) {
@@ -145,10 +136,9 @@ public class Login extends Controller {
             session().clear();
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                AddressDAO adao = context.getAddressDAO();
                 try {
-                    Address address = adao.createAddress(registerForm.get().address_zip, registerForm.get().address_city, registerForm.get().address_street, registerForm.get().address_number, registerForm.get().address_bus);
-                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName, registerForm.get().phone,address);
+                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
+                            registerForm.get().firstName, registerForm.get().lastName);
                     context.commit();
 
                     session("email", user.getEmail());

@@ -28,14 +28,14 @@ public class JDBCUserDAO implements UserDAO {
         if (getUserByEmailStatement == null) {
             getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
                     "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
-                    "FROM users INNER JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
+                    "FROM users LEFT JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
         }
         return getUserByEmailStatement;
     }
 
     private PreparedStatement getCreateUserStatement() throws SQLException {
         if (createUserStatement == null) {
-            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname, user_phone, user_address_domicile_id) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
     }
@@ -65,22 +65,17 @@ public class JDBCUserDAO implements UserDAO {
     }
 
     @Override
-    public User createUser(String email, String password, String firstName, String lastName, String phone, Address address) throws DataAccessException {
+    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
         try (PreparedStatement ps = getCreateUserStatement()) {
             ps.setString(1, email);
             ps.setString(2, password);
             ps.setString(3, firstName);
             ps.setString(4, lastName);
-            ps.setString(5, phone);
-
-            if (address != null) {
-                ps.setInt(6, address.getId());
-            } else ps.setNull(6, Types.INTEGER);
 
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new User(keys.getInt(1), email, firstName, lastName, password, address);
+                return new User(keys.getInt(1), email, firstName, lastName, password, null); //TODO: extra constructor
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
             }
