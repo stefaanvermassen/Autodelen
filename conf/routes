@@ -3,39 +3,40 @@
 # ~~~~
 
 # Home page
-GET         /                       controllers.Application.index()
-GET         /informatie             controllers.Informatie.index()
+GET         /                            controllers.Application.index()
+GET         /informatie                  controllers.Informatie.index()
 
 # Dashboard page
-GET         /dashboard              controllers.Dashboard.index()
+GET         /dashboard                   controllers.Dashboard.index()
 
 # User pages
-GET         /drives                 controllers.Drives.index()
-GET         /reserve                controllers.Reserve.index()
-GET         /reserve/details        controllers.Reserve.details()
-GET         /receipts               controllers.Receipts.index()
-GET         /settings               controllers.Settings.index()
-GET         /profile                controllers.Profile.index()
+GET         /drives                      controllers.Drives.index()
+GET         /reserve                     controllers.Reserve.index()
+GET         /reserve/details             controllers.Reserve.details()
+GET         /receipts                    controllers.Receipts.index()
+GET         /settings                    controllers.Settings.index()
+GET         /profile                     controllers.Profile.index()
 
 # Login screen
-GET         /login                  controllers.Login.login()
-POST        /login                  controllers.Login.authenticate()
-GET         /logout                 controllers.Login.logout()
-GET         /register               controllers.Login.register()
-POST        /register               controllers.Login.register_process()
+GET         /login                       controllers.Login.login()
+POST        /login                       controllers.Login.authenticate()
+GET         /logout                      controllers.Login.logout()
+GET         /register                    controllers.Login.register()
+POST        /register                    controllers.Login.register_process()
 
 # Calendar
-GET         /calendar               controllers.Calendar.index()
+GET         /calendar                    controllers.Calendar.index()
 
 # Infosessions
-GET         /infosession/new        controllers.InfoSessions.newSession()
-POST        /infosession/new        controllers.InfoSessions.createNewSession()
-GET         /infosession            controllers.InfoSessions.showUpcomingSessions()
-GET         /infosession/enroll        controllers.InfoSessions.enrollSession(id: Int)
-GET         /infosession/unenroll      controllers.InfoSessions.unenrollSession()
+GET         /infosession/new             controllers.InfoSessions.newSession()
+POST        /infosession/new             controllers.InfoSessions.createNewSession()
+GET         /infosession                 controllers.InfoSessions.showUpcomingSessions()
+GET         /infosession/enroll          controllers.InfoSessions.enrollSession(id: Int)
+GET         /infosession/unenroll        controllers.InfoSessions.unenrollSession()
+GET         /infosession/view            controllers.InfoSessions.detail(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file           controllers.Assets.at(path="/public", file)
+GET         /assets/*file                controllers.Assets.at(path="/public", file)
 
 # Support for webjar packages such as bootstrap
-GET         /webjars/*file          controllers.WebJarAssets.at(file)
+GET         /webjars/*file               controllers.WebJarAssets.at(file)

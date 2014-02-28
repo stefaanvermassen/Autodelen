@@ -32,6 +32,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getInfosessionForUser;
     private PreparedStatement registerUserForSession;
     private PreparedStatement unregisterUserForSession;
+    private PreparedStatement getAttendeesForSession;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
@@ -45,6 +46,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             "JOIN addresses ON infosession_address_id = address_id WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
         }
         return getInfosessionForUser;
+    }
+
+    public PreparedStatement getGetAttendeesForSession() throws SQLException {
+        if(getAttendeesForSession == null){
+         //   getAttendeesForSession = connection.prepareStatement("SELECT user_id, user_firstname, user_lastname " +
+          //                  "FROM infosessionenrollees INNER JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;)
+        }
+        return getAttendeesForSession;
     }
 
     private PreparedStatement getRegisterUserForSession() throws SQLException {
@@ -111,13 +120,20 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public InfoSession getInfoSession(int id) throws DataAccessException {
+    public InfoSession getInfoSession(int id, boolean withAttendees) throws DataAccessException {
         try {
             PreparedStatement ps = getGetInfoSessionById();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return populateInfoSession(rs);
+                if(rs.next()){
+                    InfoSession is = populateInfoSession(rs);
+                    if(withAttendees)
+                    {
+
+                    }
+                    return is;
+                } else return null;
+
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading infosession resultset", ex);
             }

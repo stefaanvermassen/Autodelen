@@ -67,9 +67,7 @@
                                                     <button disabled="disabled" type="button" class="btn btn-warning">Uitschrijven</button>
                                                 }
 
-                                                @if(isAdmin) {
-                                                    <a type="button" class="btn btn-primary" href="#edit">Bewerken</a>
-                                                }
+                                                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">Detail</a>
                                             </div>
                                         </td>
                                     </tr>

@@ -84,7 +84,22 @@ public class InfoSessions extends Controller {
         } else {
             return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
         }
+    }
 
+    @RoleSecured.RoleAuthenticated({})
+    public static Result detail(int sessionId){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            InfoSession session = dao.getInfoSession(sessionId);
+            if(session == null){
+                return badRequest("Sessie bestaat niet."); //TODO: flash
+            } else {
+                return ok(detail.render(session));
+            }
+        } catch(DataAccessException ex){
+            throw ex;
+            //TODO: log
+        }
     }
 
     @RoleSecured.RoleAuthenticated({})
