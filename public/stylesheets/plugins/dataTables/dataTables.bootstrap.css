@@ -1,7 +1,7 @@
 div.dataTables_length label {
+    font-weight: normal;
     float: left;
     text-align: left;
-    font-weight: normal;
 }
 
 div.dataTables_length select {
@@ -9,8 +9,8 @@ div.dataTables_length select {
 }
 
 div.dataTables_filter label {
-    float: right;
     font-weight: normal;
+    float: right;
 }
 
 div.dataTables_filter input {
@@ -39,6 +39,7 @@ table.dataTable th {
     box-sizing: content-box;
 }
 
+
 table.dataTable {
     clear: both;
     margin-top: 6px !important;
@@ -54,24 +55,16 @@ table.dataTable thead .sorting_desc_disabled {
     cursor: pointer;
 }
 
-table.dataTable thead .sorting {
-    background: url('../images/sort_both.png') no-repeat center right;
-}
+table.dataTable thead .sorting { background: url('../images/sort_both.png') no-repeat center right; }
+table.dataTable thead .sorting_asc { background: url('../images/sort_asc.png') no-repeat center right; }
+table.dataTable thead .sorting_desc { background: url('../images/sort_desc.png') no-repeat center right; }
 
-table.dataTable thead .sorting_asc {
-    background: url('../images/sort_asc.png') no-repeat center right;
-}
+table.dataTable thead .sorting_asc_disabled { background: url('../images/sort_asc_disabled.png') no-repeat center right; }
+table.dataTable thead .sorting_desc_disabled { background: url('../images/sort_desc_disabled.png') no-repeat center right; }
 
-table.dataTable thead .sorting_desc {
-    background: url('../images/sort_desc.png') no-repeat center right;
-}
-
-table.dataTable thead .sorting_asc_disabled {
-    background: url('../images/sort_asc_disabled.png') no-repeat center right;
-}
-
-table.dataTable thead .sorting_desc_disabled {
-    background: url('../images/sort_desc_disabled.png') no-repeat center right;
+table.dataTable thead > tr > th {
+    padding-left: 18px;
+    padding-right: 18px;
 }
 
 table.dataTable th:active {
@@ -79,7 +72,6 @@ table.dataTable th:active {
 }
 
 /* Scrolling */
-
 div.dataTables_scrollHead table {
     margin-bottom: 0 !important;
     border-bottom-left-radius: 0;
@@ -93,9 +85,9 @@ div.dataTables_scrollHead table thead tr:last-child td:first-child {
 }
 
 div.dataTables_scrollBody table {
+    border-top: none;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
-    border-top: none;
 }
 
 div.dataTables_scrollBody tbody tr:first-child th,
@@ -108,14 +100,16 @@ div.dataTables_scrollFoot table {
     border-top: none;
 }
 
+
+
+
 /*
  * TableTools styles
  */
-
 .table tbody tr.active td,
 .table tbody tr.active th {
-    color: white;
     background-color: #08C;
+    color: white;
 }
 
 .table tbody tr.active:hover td,
@@ -137,8 +131,8 @@ table.DTTT_selectable tbody tr {
 }
 
 div.DTTT .btn {
-    font-size: 12px;
     color: #333 !important;
+    font-size: 12px;
 }
 
 div.DTTT .btn:hover {
@@ -146,7 +140,7 @@ div.DTTT .btn:hover {
 }
 
 ul.DTTT_dropdown.dropdown-menu {
-    z-index: 2003;
+  z-index: 2003;
 }
 
 ul.DTTT_dropdown.dropdown-menu a {
@@ -158,16 +152,15 @@ ul.DTTT_dropdown.dropdown-menu li {
 }
 
 ul.DTTT_dropdown.dropdown-menu li:hover a {
-    color: white !important;
     background-color: #0088cc;
+    color: white !important;
 }
 
 div.DTTT_collection_background {
-    z-index: 2002;
+    z-index: 2002;  
 }
 
 /* TableTools information display */
-
 div.DTTT_print_info.modal {
     height: 150px;
     margin-top: -75px;
@@ -175,10 +168,10 @@ div.DTTT_print_info.modal {
 }
 
 div.DTTT_print_info h6 {
-    margin: 1em;
-    font-size: 28px;
     font-weight: normal;
+    font-size: 28px;
     line-height: 28px;
+    margin: 1em;
 }
 
 div.DTTT_print_info p {
@@ -186,26 +179,28 @@ div.DTTT_print_info p {
     line-height: 20px;
 }
 
+
+
 /*
  * FixedColumns styles
  */
-
 div.DTFC_LeftHeadWrapper table,
 div.DTFC_LeftFootWrapper table,
 div.DTFC_RightHeadWrapper table,
 div.DTFC_RightFootWrapper table,
 table.DTFC_Cloned tr.even {
     background-color: white;
+    margin-bottom: 0;
 }
-
-div.DTFC_RightHeadWrapper table,
+ 
+div.DTFC_RightHeadWrapper table ,
 div.DTFC_LeftHeadWrapper table {
     margin-bottom: 0 !important;
     border-top-right-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }
-
+ 
 div.DTFC_RightHeadWrapper table thead tr:last-child th:first-child,
 div.DTFC_RightHeadWrapper table thead tr:last-child td:first-child,
 div.DTFC_LeftHeadWrapper table thead tr:last-child th:first-child,
@@ -213,20 +208,20 @@ div.DTFC_LeftHeadWrapper table thead tr:last-child td:first-child {
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }
-
+ 
 div.DTFC_RightBodyWrapper table,
 div.DTFC_LeftBodyWrapper table {
-    margin-bottom: 0 !important;
     border-top: none;
+    margin-bottom: 0 !important;
 }
-
+ 
 div.DTFC_RightBodyWrapper tbody tr:first-child th,
 div.DTFC_RightBodyWrapper tbody tr:first-child td,
 div.DTFC_LeftBodyWrapper tbody tr:first-child th,
 div.DTFC_LeftBodyWrapper tbody tr:first-child td {
     border-top: none;
 }
-
+ 
 div.DTFC_RightFootWrapper table,
 div.DTFC_LeftFootWrapper table {
     border-top: none;

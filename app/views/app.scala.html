@@ -18,8 +18,8 @@
 
         @stylesheets @* To include stylesheets from external templates *@
         <!-- SB Admin CSS - Include with every page -->
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/font-awesome.min.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/sb-admin.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
 
         <!-- Page-Level Plugin CSS - Main -->
     </head>
@@ -265,19 +265,19 @@
                             <!-- /input-group -->
                         </li>
                         <li class="active">
-                            <a href="@routes.Application.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                            <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
                             <a href="@routes.Login.login"><i class="fa fa-toggle-right fa-fw"></i> Login</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-plus-square fa-fw"></i> Register</a>
+                            <a href="@routes.Login.register><i class="fa fa-plus-square fa-fw"></i> Register</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
+                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
+                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
                         </li>
                         <li>
                             <a href="@routes.Application.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
@@ -286,13 +286,13 @@
                             <a href="@routes.Application.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                            <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
+                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
+                            <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>

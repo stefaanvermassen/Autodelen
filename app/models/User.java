@@ -32,6 +32,9 @@ public class User {
         this.address = address;
 
         roles.add(UserRole.USER);
+        roles.add(UserRole.ADMIN); // TODO: remove when DAO works
+        roles.add(UserRole.SUPER_USER);
+        this.status = UserStatus.REGISTERED;
     }
 
     public void setId(int id){

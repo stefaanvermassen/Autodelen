@@ -40,7 +40,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
         if(getInfosessionForUser == null){
             getInfosessionForUser = connection.prepareStatement("SELECT " + INFOSESSION_FIELDS + " FROM infosessionenrollees " +
-            "JOIN infosessions ON infosession_id " +
+            "JOIN infosessions USING (infosession_id) " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
         }

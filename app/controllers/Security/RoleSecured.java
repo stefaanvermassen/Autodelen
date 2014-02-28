@@ -41,9 +41,13 @@ public class RoleSecured {
                 if(user == null)
                     return F.Promise.pure(redirect(routes.Login.login()));
                 // If user has got one of the specified roles, delegate to the requested page
-                for(UserRole securedRole : SecuredRoles) {
-                    if(user.gotRole(securedRole))
-                        return delegate.call(ctx);
+                if(SecuredRoles.length == 0)
+                    return delegate.call(ctx);
+                else {
+                    for(UserRole securedRole : SecuredRoles) {
+                        if(user.hasRole(securedRole))
+                            return delegate.call(ctx);
+                    }
                 }
                 // User is not authorized
                 return F.Promise.pure((SimpleResult) unauthorized(views.html.defaultpages.unauthorized.render()));

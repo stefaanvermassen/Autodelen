@@ -53,9 +53,9 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    //@RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result newSession() {
-        return ok(newsession.render(Form.form(InfoSessionCreationModel.class)));
+        return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class)));
     }
 
     @RoleSecured.RoleAuthenticated({})
@@ -127,11 +127,11 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    //@RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(newsession.render(createForm));
+            return badRequest(newInfosession.render(createForm));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -156,7 +156,7 @@ public class InfoSessions extends Controller {
                         );
                     } else {
                         createForm.error("Failed to create session in database. Contact administrator.");
-                        return badRequest(newsession.render(createForm));
+                        return badRequest(newInfosession.render(createForm));
                     }
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -168,12 +168,15 @@ public class InfoSessions extends Controller {
         }
     }
 
-    //@RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result showUpcomingSessions() {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
+            InfoSession enrolled = dao.getAttendingInfoSession(user);
+
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
-            return ok(list.render(null, sessions)); //TODO: get enrolled
+            return ok(infosessions.render(sessions, enrolled)); //TODO: get enrolled
         } catch (DataAccessException ex) {
             throw ex;
         }

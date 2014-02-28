@@ -1,0 +1,139 @@
+@(form: Form[InfoSessions.InfoSessionCreationModel])
+@scripts = {
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+
+@* Source: https://github.com/smalot/bootstrap-datetimepicker, released under Apache v2 license *@
+    <script>
+        $(document).ready(function() {
+            $("input[name='addresstype']:radio").change(function(e)
+            {
+                console.log('Address type changed!');
+                if(e.target.value === 'other'){
+                    $('#otherAddress').show();
+                } else {
+                    $('#otherAddress').hide();
+                }
+            });
+
+            $('#datepicker').datetimepicker({
+                weekStart: 1,
+                language: 'nl',
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                startDate: new Date()
+            });
+        });
+    </script>
+}
+
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+}
+
+@app("Nieuwe infosessie", stylesheets, scripts) {
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Infosessies</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Infosessie toevoegen
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="container">
+                    @helper.form(routes.InfoSessions.createNewSession, 'class -> "form-horizontal") {
+                        <fieldset>
+                            <div class="form-group">
+                                <label for="datepicker">Tijdstip:</label>
+                                <div id="datepicker" class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
+                                    <input class="form-control" size="16" type="text" value="@form("time").value" readonly>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                </div>
+                                <input type="text" class="hidden" id="time" name="time" value="@form("time").value" /><br/>
+                            </div>
+                            <div class="form-group">
+                                <div id="addressTypeRadios">
+                                    <div class="radio">
+                                        <label>
+                                        <input type="radio" name="addresstype" id="hostAdressRadio" value="host" checked>
+                                        Host adres
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                        <input type="radio" name="addresstype" id="otherAdressRadio" value="other">
+                                        Ander adres
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <div id="otherAddress" style="display: none">
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_street"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_street" name="address_street" type="text" placeholder="Straat" class="form-control input-md" value="@form("address_street").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_number"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_number" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_bus"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_bus" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_zip"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_zip" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_city"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_city" name="address_city" type="text" placeholder="Plaats" class="form-control input-md" value="@form("address_city").value">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-1 control-label" for="create"></label>
+                                <div class="col-md-12">
+                                    <button type="submit" id="create" name="create" class="btn btn-block btn-success">Toevoegen</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    }
+                    </div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /col-lg-12 -->
+    </div>
+    <!-- /row -->
+}
