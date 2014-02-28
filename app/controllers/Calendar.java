@@ -1,9 +1,8 @@
 package controllers;
 
-import models.User;
+import controllers.Security.RoleSecured;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Security;
 import views.html.calendar.*;
 
 /**
@@ -11,7 +10,7 @@ import views.html.calendar.*;
  */
 public class Calendar extends Controller {
 
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated()
     public static Result index() {
         return ok(calendar.render());
     }

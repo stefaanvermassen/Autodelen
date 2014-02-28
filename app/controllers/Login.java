@@ -1,14 +1,12 @@
 package controllers;
 
+import controllers.Security.RoleSecured;
 import database.*;
 import models.Address;
 import models.User;
-import play.*;
 import play.data.*;
 
 import views.html.login.*;
-
-import static play.data.Form.*;
 
 import play.mvc.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -29,7 +27,11 @@ public class Login extends Controller {
         public String password;
 
         public String validate() {
-            if (checkLoginModel(this)) {
+            if(email == null || email.length() < 5)
+                return "Emailadres ontbreekt";
+            else if(password == null || password.length() == 0)
+                return "Wachtwoord ontbreekt";
+            else if (checkLoginModel(this)) {
                 return null;
             } else return "Foute gebruikersnaam of wachtwoord.";
         }
@@ -68,7 +70,16 @@ public class Login extends Controller {
      * @return The login index page
      */
     public static Result login() {
-        if (session("email") == null) {
+        // Allow a force login when the user doesn't exist anymore
+        String email = session("email");
+        if(email != null){
+            if(DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
+                session().clear();
+                email = null;
+            }
+        }
+
+        if (email == null) {
             return ok(
                     login.render(Form.form(LoginModel.class))
             );
@@ -163,7 +174,7 @@ public class Login extends Controller {
      *
      * @return Redirect to index page
      */
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated()
     public static Result logout() {
         DatabaseHelper.getUserProvider().invalidateUser(session("email"));
 
