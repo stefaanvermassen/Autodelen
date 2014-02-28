@@ -46,11 +46,6 @@ public class UserProvider implements UserDAO {
         }
     }
 
-    @Override
-    public User createUser(String email, String password, String firstName, String lastName, String phone, Address address, EnumSet<UserRole> roles) throws DataAccessException {
-        return null;
-    }
-
     public void invalidateUser(String email) {
         Cache.remove(String.format(USER_BY_EMAIL, email));
     }
@@ -89,4 +84,10 @@ public class UserProvider implements UserDAO {
     public void updateUser(User user) throws DataAccessException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+	@Override
+	public void deleteUser(User user) throws DataAccessException {
+		// TODO Auto-generated method stub
+		
+	}
 }
