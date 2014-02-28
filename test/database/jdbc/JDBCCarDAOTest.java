@@ -1,10 +1,13 @@
 package database.jdbc;
 
 import database.CarDAO;
+import database.DataAccessContext;
+import database.DatabaseHelper;
 import models.Address;
 import models.Car;
 import models.CarFuel;
 import models.User;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,20 +23,17 @@ public class JDBCCarDAOTest {
 
     @Before
     public void setUp() throws Exception {
-        // Gives Error on DB.getConnection();
-        //DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
-        //dao = context.getCarDAO();
+        DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        carDAO = context.getCarDAO();
     }
 
     @Test
     public void testCarDAO() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\t");
-        // Skip header
-        sc.nextLine();
 
-        int i = 0;
         while(sc.hasNext()) {
+        	sc.nextLine(); // skip header first time
             String brand = sc.next();
             String type = sc.next();
             int seats = sc.nextInt();
@@ -55,13 +55,23 @@ public class JDBCCarDAOTest {
             String comments = sc.next();
 
             Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
-
-            //Assert.assertEquals(brand, car.getBrand())
-            //...
-            sc.nextLine();
-            i++;
-
+            int id = car.getId();
+            Car returnCar = carDAO.getCar(id);
+            Assert.assertEquals(car.getBrand(), returnCar.getBrand());
+            Assert.assertEquals(car.getComments(), returnCar.getComments());
+            Assert.assertEquals(car.getLastEdit(), returnCar.getLastEdit());
+            Assert.assertEquals(car.getType(), returnCar.getType());
+            Assert.assertEquals(car.getDoors(), returnCar.getDoors());
+            Assert.assertEquals(car.getEstimatedValue(), returnCar.getEstimatedValue());
+            Assert.assertEquals(car.getFuel(), returnCar.getFuel());
+            Assert.assertEquals(car.getFuelEconomy(), returnCar.getFuelEconomy());
+            Assert.assertEquals(car.getLocation().getId(), returnCar.getLocation().getId());
+            Assert.assertEquals(car.getOwner().getFirstName(), returnCar.getOwner().getFirstName());
+            Assert.assertEquals(car.getOwnerAnnualKm(), returnCar.getOwnerAnnualKm());
+            Assert.assertEquals(car.getSeats(), returnCar.getSeats());
+            Assert.assertEquals(car.getYear(), returnCar.getYear());
+            
+            carDAO.deleteCar(returnCar);
         }
-        Assert.assertEquals(i, 100);
     }
 }

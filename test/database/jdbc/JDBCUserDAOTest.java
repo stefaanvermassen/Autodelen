@@ -24,9 +24,9 @@ public class JDBCUserDAOTest {
 
     @Before
     public void setUp() throws Exception {
-        // Gives Error on DB.getConnection();
-        //DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
-        //dao = context.getUserDAO();
+        DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        user_dao = context.getUserDAO();
+        address_dao = context.getAddressDAO();
     }
 
     /*
@@ -35,12 +35,10 @@ public class JDBCUserDAOTest {
     @Test
     public void testUserDAO() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_users.txt"));
-        sc.useDelimiter("\t");
-        // Skip header
-        sc.nextLine();
+        sc.useDelimiter("\\t|\\n");
 
-        int i = 0;
         while(sc.hasNext()) {
+        	sc.nextLine(); //skip header first time
             String email = sc.next();
             String pass = sc.next();
             String firstName = sc.next();
@@ -48,25 +46,27 @@ public class JDBCUserDAOTest {
             String phone = sc.next();
 
             String street = sc.next();
-            int nr = sc.nextInt();
+            String nr = sc.nextInt() + "";
             String zip = sc.next();
             String city = sc.next();
+           
+            Address address = address_dao.createAddress(zip,city,street,nr,"");
+            User user = user_dao.createUser(email,pass,firstName,lastName,phone,address);
 
-            //Address address = address_dao.createAddress(...);
-            //User user = user_dao.createUser(..);
-
-            //Assert.assertEquals(email, user.email)
-            //...
-            sc.nextLine();
-            i++;
-
+            User returnUser = user_dao.getUser(email);
+            Address returnAddress = user.getAddress();
+            Assert.assertEquals(address.getBus(),returnAddress.getBus());
+            Assert.assertEquals(address.getZip(),returnAddress.getZip());
+            Assert.assertEquals(address.getStreet(),returnAddress.getStreet());
+            Assert.assertEquals(address.getCity(),returnAddress.getCity());
+            Assert.assertEquals(returnUser.getEmail(),user.getEmail());
+            Assert.assertEquals(returnUser.getPassword(),user.getPassword());
+            Assert.assertEquals(returnUser.getFirstName(),user.getFirstName());
+            Assert.assertEquals(returnUser.getLastName(),user.getLastName());
+            
+            user_dao.deleteUser(returnUser);
+            address_dao.deleteAddress(returnAddress);
         }
-        Assert.assertEquals(i, 100);
-        /*User user = dao.createUser(email, pass, firstName, lastName, phone, address);
-        Assert.assertEquals(email, user.getEmail());
-        Assert.assertEquals(firstName, user.getFirstName());
-        Assert.assertEquals(lastName, user.getLastName());
-        Assert.assertEquals(phone, user.getPhone());
-        Assert.assertEquals(address, user.getAddress());*/
+        sc.close();
     }
 }
