@@ -36,7 +36,7 @@ public class JDBCCarDAO implements CarDAO{
         this.connection = connection;
     }
 
-    public static Car populateCar(ResultSet rs) throws SQLException {
+    public static Car populateCar(ResultSet rs, boolean withAddress, boolean withUser) throws SQLException {
         Car car = new Car();
         car.setId(rs.getInt("car_id"));
         car.setBrand(rs.getString("car_brand"));
@@ -50,12 +50,23 @@ public class JDBCCarDAO implements CarDAO{
         car.setOwnerAnnualKm(rs.getInt("car_owner_annual_km"));
         car.setSeats(rs.getInt("car_seats"));
         car.setYear(rs.getInt("car_year"));
-        Address location = JDBCAddressDAO.populateAddress(rs);
+        Address location;
+        if(withAddress) {
+            location = JDBCAddressDAO.populateAddress(rs);
+        } else {
+            location = null;
+        }
         car.setLocation(location);
 
-        // Why not populateUser?
-        UserProvider up = new UserProvider(new JDBCDataAccessProvider());
-        car.setOwner(up.getUser(rs.getString("user_id")));
+        User user;
+        if(withAddress) {
+            UserProvider up = new UserProvider(new JDBCDataAccessProvider());
+            user = up.getUser(rs.getString("user_id"));
+        } else {
+            user = null;
+        }
+        car.setOwner(user);
+
         car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
         return car;
     }
@@ -174,7 +185,7 @@ public class JDBCCarDAO implements CarDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
 
-                return populateCar(rs);
+                return populateCar(rs, true, true);
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading car resultset", ex);
             }
