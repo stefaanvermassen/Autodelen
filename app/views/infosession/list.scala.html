@@ -1,5 +1,6 @@
-@(sessions: List[InfoSession])
+@(enrolled: InfoSession = null, sessions: List[InfoSession])
 
+@import database.DatabaseHelper;
 @main("Infosessies"){
 
     <h1>Infosessies</h1>
@@ -24,11 +25,18 @@
                     <td>@session.getTime.toString("yyyy-MM-dd HH:mm:ss")</td>
                     <td>@session.getHost</td>
                     <td>@session.getAddress</td>
+
                     <td>
                             <div class="btn-group btn-group-xs">
-                            <button type="button" class="btn btn-success">Inschrijven</button>
-                            <button type="button" class="btn btn-warning">Uitschrijven</button>
-                            <button type="button" class="btn btn-primary">Bewerken</button>
+                                @if(enrolled == null) {
+                                    <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(session.getId)">Inschrijven</a>
+                                } else {
+                                    <button type="button" class="btn btn-success" disabled="disabled">Inschrijven</button>
+                                }
+                            <a class="btn btn-warning" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
+                                @if(DatabaseHelper.getUserProvider.getUser(session.get("email")).hasRole(UserRole.ADMIN)) {
+                                    <a class="btn btn-primary">Bewerken</a>
+                                }
                         </div>
                     </td>
                 </tr>

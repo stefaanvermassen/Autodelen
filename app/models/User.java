@@ -74,7 +74,7 @@ public class User {
         this.password = password;
     }
 
-    public boolean gotRole(UserRole role) { return roles.contains(role); }
+    public boolean hasRole(UserRole role) { return roles.contains(role); }
 
     public void addRole(UserRole role) { roles.add(role); }
 

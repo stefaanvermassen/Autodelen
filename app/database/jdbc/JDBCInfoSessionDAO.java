@@ -18,18 +18,47 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private Connection connection;
 
-    private static String INFOSESSION_SELECTOR = "SELECT infosession_id, infosession_timestamp, " +
+    private static String INFOSESSION_FIELDS = "infosession_id, infosession_timestamp, " +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email FROM infosessions " +
+            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email";
+
+    private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + " FROM infosessions " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id";
 
     private PreparedStatement createInfoSessionStatement;
     private PreparedStatement getInfoSessionsAfterStatement;
     private PreparedStatement getInfoSessionById;
+    private PreparedStatement getInfosessionForUser;
+    private PreparedStatement registerUserForSession;
+    private PreparedStatement unregisterUserForSession;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
+        if(getInfosessionForUser == null){
+            getInfosessionForUser = connection.prepareStatement("SELECT " + INFOSESSION_FIELDS + " FROM infosessionenrollees " +
+            "JOIN infosessions ON infosession_id " +
+            "JOIN users ON infosession_host_user_id = user_id " +
+            "JOIN addresses ON infosession_address_id = address_id WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
+        }
+        return getInfosessionForUser;
+    }
+
+    private PreparedStatement getRegisterUserForSession() throws SQLException {
+        if(registerUserForSession == null){
+            registerUserForSession = connection.prepareStatement("INSERT INTO infosessionenrollees(infosession_id, infosession_enrollee_id) VALUES (?,?)");
+        }
+        return registerUserForSession;
+    }
+
+    private PreparedStatement getUnregisterUserForSession() throws SQLException {
+        if(unregisterUserForSession == null){
+            unregisterUserForSession = connection.prepareStatement("DELETE FROM infosessionenrollees WHERE infosession_id = ? AND infosession_enrollee_id = ?");
+        }
+        return unregisterUserForSession;
     }
 
     private PreparedStatement getCreateInfoSessionStatement() throws SQLException {
@@ -128,6 +157,47 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     @Override
     public void registerUser(InfoSession session, User user) throws DataAccessException {
-        throw new RuntimeException();
+       try {
+           PreparedStatement ps = getRegisterUserForSession();
+           ps.setInt(1, session.getId());
+           ps.setInt(2, user.getId());
+           if(ps.executeUpdate() == 0)
+               throw new DataAccessException("Failed to register user to infosession. 0 rows affected.");
+
+       } catch(SQLException ex) {
+            throw new DataAccessException("Failed to prepare statement for user registration with infosession.", ex);
+       }
+    }
+
+    @Override
+    public void unregisterUser(InfoSession session, User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUnregisterUserForSession();
+            ps.setInt(1, session.getId());
+            ps.setInt(2, user.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Failed to unregister user from infosession.");
+        } catch(SQLException ex){
+            throw new DataAccessException("Invalid unregister query for infosession.", ex);
+        }
+    }
+
+    @Override
+    public InfoSession getAttendingInfoSession(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetInfoSessionForUserStatement();
+            ps.setInt(1, user.getId());
+            ps.setTimestamp(2, new Timestamp(DateTime.now().getMillis())); //TODO: pass date as argument instead of 'now' ??
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if(!rs.next())
+                    return null;
+                else return populateInfoSession(rs);
+            } catch(SQLException ex){
+                throw new DataAccessException("Invalid query for attending infosession.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to fetch infosession for user", ex);
+        }
     }
 }

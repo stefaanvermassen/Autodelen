@@ -2,10 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import models.Address;
-import models.InfoSession;
-import models.User;
-import models.UserRole;
+import models.*;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -56,17 +53,81 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    //@RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result newSession() {
         return ok(newsession.render(Form.form(InfoSessionCreationModel.class)));
     }
+
+    @RoleSecured.RoleAuthenticated({})
+    public static Result unenrollSession() {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        if (user.getStatus() == UserStatus.REGISTERED) {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                InfoSessionDAO dao = context.getInfoSessionDAO();
+
+                InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
+                if(alreadyAttending == null){
+                    return badRequest("U bent niet ingeschreven in een toekomstige infosessie.");
+                } else {
+                    try {
+                        dao.unregisterUser(alreadyAttending, user);
+                        context.commit();
+                        return ok("U bent succesvol uitgeschreven uit deze infosessie."); //TODO: flash
+                    } catch(DataAccessException ex){
+                        context.rollback();
+                        throw ex;
+                    }
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        } else {
+            return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
+        }
+
+    }
+
+    @RoleSecured.RoleAuthenticated({})
+    public static Result enrollSession(int sessionId) {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        if (user.getStatus() == UserStatus.REGISTERED) {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                InfoSessionDAO dao = context.getInfoSessionDAO();
+
+                InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
+                if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
+                    return badRequest("U bent al ingeschreven voor een infosessie op " + alreadyAttending.getTime()); //TODO: show flash message and link to session
+                } else {
+                    InfoSession session = dao.getInfoSession(sessionId);
+                    if (session == null) {
+                        return badRequest("Deze sessie bestaat niet."); //TODO: flash
+                    } else {
+                        try {
+                            dao.registerUser(session, user);
+                            context.commit();
+                            return ok("U bent succesvol ingeschreven op de sessie van " + session.getTime());
+                        } catch (DataAccessException ex) {
+                            context.rollback();
+                            throw ex;
+                        }
+                    }
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        } else {
+            return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
+        }
+
+    }
+
 
     /**
      * Method: POST
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    //@RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
@@ -97,7 +158,7 @@ public class InfoSessions extends Controller {
                         createForm.error("Failed to create session in database. Contact administrator.");
                         return badRequest(newsession.render(createForm));
                     }
-                } catch(DataAccessException ex){
+                } catch (DataAccessException ex) {
                     context.rollback();
                     throw ex;
                 }
@@ -107,13 +168,13 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    //@RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result showUpcomingSessions() {
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
-            return ok(list.render(sessions));
-        } catch(DataAccessException ex){
+            return ok(list.render(null, sessions)); //TODO: get enrolled
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
