@@ -20,36 +20,18 @@ public class JDBCUserDAO implements UserDAO {
     private Connection connection;
     private PreparedStatement getUserByEmailStatement;
     private PreparedStatement createUserStatement;
-    private PreparedStatement getUserRoles;
     private PreparedStatement updateUserStatement;
-    private PreparedStatement insertUserRolesStatement;
-    private PreparedStatement deleteUserRolesStatement;
+    private PreparedStatement deleteUserStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
     }
     
-    private PreparedStatement deleteUserRolesStatement() throws SQLException{
-    	if(deleteUserRolesStatement == null){
-    		deleteUserRolesStatement = connection.prepareStatement("DELETE FROM UserRoles WHERE userrole_userid=? AND userrole_role=?");    		
+    private PreparedStatement getDeleteUserStatement() throws SQLException {
+    	if(deleteUserStatement == null){
+    		deleteUserStatement = connection.prepareStatement("DELETE FROM Users WHERE user_id = ?");
     	}
-    	return deleteUserRolesStatement;
-    }
-    
-    private PreparedStatement insertUserRolesStatement() throws SQLException{
-    	if(insertUserRolesStatement == null){
-    		insertUserRolesStatement = connection.prepareStatement("IF NOT EXISTS (SELECT * FROM UserRoles WHERE userrole_userid"
-    				+ "=? AND userrole_role=?) INSERT INTO UserRoles(userrole_userid, userrole_role) VALUES (?,?) ");    		
-    	}
-    	return insertUserRolesStatement;
-    }
-
-    private PreparedStatement getUserRoles() throws SQLException {
-    	if(getUserRoles == null){
-    		getUserRoles = connection.prepareStatement("SELECT userrole_role FROM UserRoles INNER JOIN Users ON "
-    				+ "userrole_userid = user_id WHERE user_id = ?");
-    	}
-    	return getUserRoles;
+    	return deleteUserStatement;
     }
     
     private PreparedStatement getUserByEmailStatement() throws SQLException {
@@ -89,19 +71,7 @@ public class JDBCUserDAO implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 // TODO: if Address is null second argument of populateUser should be false
-                User user = populateUser(rs, true, true);
-                PreparedStatement rolesStmt = getUserRoles();
-                rolesStmt.setInt(1, user.getId());
-                System.out.println(user.getFirstName());
-                try (ResultSet roleSet = rolesStmt.executeQuery()) {
-                	while(roleSet.next()){
-                		user.addRole(UserRole.valueOf(rs.getString("userrole_role")));
-                	}
-                return user;	
-                } catch (SQLException ex){
-                	throw new DataAccessException("Error reading UserRoles", ex);
-                }
-                
+                return populateUser(rs, true, true);               
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
             }
@@ -113,7 +83,8 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public User createUser(String email, String password, String firstName, String lastName, String phone, Address address) throws DataAccessException {
-        try (PreparedStatement ps = getCreateUserStatement()) {
+        try {
+        	PreparedStatement ps = getCreateUserStatement();
             ps.setString(1, email);
             ps.setString(2, password);
             ps.setString(3, firstName);
@@ -136,44 +107,12 @@ public class JDBCUserDAO implements UserDAO {
             throw new DataAccessException("Failed to commit new user transaction.", ex);
         }
     }
-    
-    @Override
-    public User createUser(String email, String password, String firstName, String lastName, String phone, Address address, EnumSet<UserRole> roles) throws DataAccessException {
-        try (PreparedStatement ps = getCreateUserStatement() ; PreparedStatement insert = insertUserRolesStatement()) {
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ps.setString(3, firstName);
-            ps.setString(4, lastName);
-            ps.setString(5, phone);
-
-            if (address != null) {
-                ps.setInt(6, address.getId());
-            } else ps.setNull(6, Types.INTEGER);
-
-            ps.executeUpdate();
-            User user = new User(0, email, firstName, lastName, password, address);
-            for(UserRole role : roles){
-    			insert.setString(2, role.toString());
-    			insert.executeUpdate();
-    			user.addRole(role);
-        	}
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
-                user.setId(keys.getInt(1));
-                connection.commit();
-                return user;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for new user.", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to commit new user transaction.", ex);
-        }
-    }
 
     @Override
     public void updateUser(User user) throws DataAccessException {
-    	try (PreparedStatement ps = getUpdateUserStatement() ; PreparedStatement insert = insertUserRolesStatement() ; PreparedStatement delete = deleteUserRolesStatement()) {
-            ps.setString(1, user.getEmail());
+    	try {
+    		PreparedStatement ps = getUpdateUserStatement(); 
+    		ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getFirstName());
             ps.setString(4, user.getLastName());
@@ -184,20 +123,22 @@ public class JDBCUserDAO implements UserDAO {
             } else ps.setNull(6, Types.INTEGER);
 
             ps.executeUpdate();
-            
-            insert.setInt(1, user.getId());
-        	delete.setInt(1, user.getId());
-        	for(UserRole role : UserRole.values()){
-        		if(user.gotRole(role)){
-        			insert.setString(2, role.toString());
-        			insert.executeUpdate();
-        		} else {
-        			delete.setString(2, role.toString());
-        		}
-        	}
         	connection.commit();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user", ex);
         }
     }
+
+	@Override
+	public void deleteUser(User user) throws DataAccessException {
+		try {
+			PreparedStatement ps = getDeleteUserStatement();
+			ps.setInt(1, user.getId());
+			ps.executeUpdate();
+			connection.commit();
+		} catch (SQLException ex){
+			throw new DataAccessException("Could not delete user",ex);
+		}
+		
+	}
 }
