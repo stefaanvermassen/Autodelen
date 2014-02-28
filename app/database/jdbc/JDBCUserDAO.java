@@ -91,6 +91,7 @@ public class JDBCUserDAO implements UserDAO {
                 User user = populateUser(rs, true, true);
                 PreparedStatement rolesStmt = getUserRoles();
                 rolesStmt.setInt(1, user.getId());
+                System.out.println(user.getFirstName());
                 try (ResultSet roleSet = rolesStmt.executeQuery()) {
                 	while(roleSet.next()){
                 		user.addRole(UserRole.valueOf(rs.getString("userrole_role")));
@@ -125,6 +126,7 @@ public class JDBCUserDAO implements UserDAO {
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
+                connection.commit();
                 return new User(keys.getInt(1), email, firstName, lastName, password, address);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
@@ -157,6 +159,7 @@ public class JDBCUserDAO implements UserDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 user.setId(keys.getInt(1));
+                connection.commit();
                 return user;
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
@@ -168,7 +171,7 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public void updateUser(User user) throws DataAccessException {
-    	try (PreparedStatement ps = getCreateUserStatement() ; PreparedStatement insert = insertUserRolesStatement() ; PreparedStatement delete = deleteUserRolesStatement()) {
+    	try (PreparedStatement ps = updateUserStatement() ; PreparedStatement insert = insertUserRolesStatement() ; PreparedStatement delete = deleteUserRolesStatement()) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getFirstName());
@@ -191,6 +194,7 @@ public class JDBCUserDAO implements UserDAO {
         			delete.setString(2, role.toString());
         		}
         	}
+        	connection.commit();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user", ex);
         }
