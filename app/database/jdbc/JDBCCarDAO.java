@@ -7,13 +7,16 @@ package database.jdbc;
 import database.CarDAO;
 import database.DataAccessException;
 import database.providers.UserProvider;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
+import java.sql.Date;
+
 import models.Address;
 import models.Car;
 import models.CarFuel;
@@ -31,6 +34,7 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement createCarStatement;
     private PreparedStatement updateCarStatement;
     private PreparedStatement getCarStatement;
+    private PreparedStatement deleteCarStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -71,6 +75,13 @@ public class JDBCCarDAO implements CarDAO{
         return car;
     }
 
+    private PreparedStatement getDeleteCarStatement() throws SQLException {
+    	if(deleteCarStatement == null){
+    		deleteCarStatement = connection.prepareStatement("DELETE FROM Cars WHERE car_id = ?");
+    	}
+    	return deleteCarStatement;
+    }
+    
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
             createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -103,6 +114,9 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setInt(4, seats);
                 ps.setInt(5, doors);
                 ps.setInt(6, year);
+                Calendar cal = Calendar.getInstance();
+                cal.set(year, 0,0);
+                ps.setDate(6, new Date(cal.getTime().getTime()));
                 ps.setBoolean(7, gps);
                 ps.setBoolean(8, hook);
                 ps.setString(9, fuel.toString());
@@ -111,11 +125,10 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setInt(12, ownerAnnualKm);
                 ps.setInt(13, owner.getId());
                 ps.setString(14, comments);
-                
-                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                String currentDatetime = dateFormat.format(new Date());
-                ps.setString(15, currentDatetime);
-                
+  
+                java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
+                String currentDatetime = sqlDate.toString();
+                ps.setDate(15,sqlDate);                
 
                 ps.executeUpdate();
                 connection.commit();
@@ -149,7 +162,9 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setInt(3, car.getLocation().getId());
                 ps.setInt(4, car.getSeats());
                 ps.setInt(5, car.getDoors());
-                ps.setInt(6, car.getYear());
+                Calendar cal = Calendar.getInstance();
+                cal.set(car.getYear(), 0,0);
+                ps.setDate(6, new Date(cal.getTime().getTime()));
                 ps.setBoolean(7, car.isGps());
                 ps.setBoolean(8, car.isHook());
                 ps.setString(9, car.getFuel().toString());
@@ -158,9 +173,7 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setInt(12,car.getOwnerAnnualKm());
                 ps.setInt(13,car.getOwner().getId());
                 ps.setString(14,car.getComments());
-                
-                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                ps.setString(15, dateFormat.format(new Date()));
+                ps.setDate(15,new Date(new java.util.Date().getTime()));
                 
 
                 ps.executeUpdate();
@@ -194,5 +207,18 @@ public class JDBCCarDAO implements CarDAO{
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
     }
+
+	@Override
+	public void deleteCar(Car car) throws DataAccessException {
+		try {
+			PreparedStatement ps = getDeleteCarStatement();
+			ps.setInt(1, car.getId());
+			ps.executeUpdate();
+			connection.commit();
+		} catch (SQLException ex){
+			throw new DataAccessException("Could not delete car",ex);
+		}
+		
+	}
     
 }
