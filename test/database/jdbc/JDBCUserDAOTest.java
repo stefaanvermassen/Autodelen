@@ -52,7 +52,6 @@ public class JDBCUserDAOTest {
            
             Address address = address_dao.createAddress(zip,city,street,nr,"");
             User user = user_dao.createUser(email,pass,firstName,lastName,phone,address);
-
             User returnUser = user_dao.getUser(email);
             Address returnAddress = user.getAddress();
             Assert.assertEquals(address.getBus(),returnAddress.getBus());
