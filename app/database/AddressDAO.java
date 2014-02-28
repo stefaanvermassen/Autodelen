@@ -9,4 +9,5 @@ public interface AddressDAO {
     public Address getAddress(int id) throws DataAccessException;
     public Address createAddress(String zip, String city, String street, String number, String bus) throws DataAccessException;
     public int existsAddress(Address address) throws DataAccessException;
+    public void deleteAddress(Address address) throws DataAccessException;
 }

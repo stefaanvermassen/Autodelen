@@ -16,8 +16,16 @@ public class JDBCAddressDAO implements AddressDAO {
     private PreparedStatement getAddressStatement;
     private PreparedStatement createAddressStatement;
     private PreparedStatement existsAddressStatement;
+    private PreparedStatement deleteAddressStatement;
 
     private static final String[] AUTO_GENERATED_KEYS = {"address_id"};
+    
+    private PreparedStatement getDeleteAddressStatement() throws SQLException {
+    	if(deleteAddressStatement == null){
+    		deleteAddressStatement = connection.prepareStatement("DELETE FROM Addresses WHERE address_id = ?");
+    	}
+    	return deleteAddressStatement;
+    }
 
     private PreparedStatement getGetAddressStatement() throws SQLException {
         if (getAddressStatement == null) {
@@ -82,6 +90,7 @@ public class JDBCAddressDAO implements AddressDAO {
 
                     try (ResultSet keys = ps.getGeneratedKeys()) {
                         keys.next(); //if this fails we want an exception anyway
+                        connection.commit();
                         return new Address(keys.getInt(1), zip, city, street, number, bus);
                     } catch (SQLException ex) {
                         throw new DataAccessException("Failed to get primary key for new address.", ex);
@@ -120,4 +129,17 @@ public class JDBCAddressDAO implements AddressDAO {
             throw new DataAccessException("Could not fetch address.", ex);
         }
     }
+
+	@Override
+	public void deleteAddress(Address address) throws DataAccessException {
+		try {
+			PreparedStatement ps = getDeleteAddressStatement();
+			ps.setInt(1, address.getId());
+			ps.executeUpdate();
+			connection.commit();
+		} catch (SQLException ex){
+			throw new DataAccessException("Could not delete address",ex);
+		}
+		
+	}
 }
