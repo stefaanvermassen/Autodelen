@@ -13,6 +13,8 @@ public interface DataAccessContext extends AutoCloseable {
     public CarDAO getCarDAO();
     
     public ReservationDAO getReservationDAO();
+    
+    public UserRoleDAO getUserRoleDAO();
 
     public void begin();
 
