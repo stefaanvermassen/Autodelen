@@ -23,6 +23,10 @@ public class User {
         this(0, email, null, null, null, null);
     }
 
+    public User() {
+        this(0, null, null, null, null, null);
+    }
+
     public User(int id, String email, String firstName, String lastName, String password, Address address){
         this.id = id;
         this.email = email;

@@ -19,14 +19,15 @@ import java.util.Scanner;
  */
 public class JDBCUserDAOTest {
 
-    private UserDAO user_dao;
-    private AddressDAO address_dao;
+    private UserDAO userDAO;
+    private AddressDAO addressDAO;
 
     @Before
     public void setUp() throws Exception {
         // Gives Error on DB.getConnection();
         //DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
-        //dao = context.getUserDAO();
+        //userDAO = context.getUserDAO();
+        //carDAO = context.getCarDAO();
     }
 
     /*
@@ -35,7 +36,7 @@ public class JDBCUserDAOTest {
     @Test
     public void testUserDAO() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_users.txt"));
-        sc.useDelimiter("\t");
+        sc.useDelimiter("\t|\r\n");
         // Skip header
         sc.nextLine();
 
@@ -57,7 +58,6 @@ public class JDBCUserDAOTest {
 
             //Assert.assertEquals(email, user.email)
             //...
-            sc.nextLine();
             i++;
 
         }

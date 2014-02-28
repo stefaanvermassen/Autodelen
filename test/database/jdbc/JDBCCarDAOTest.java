@@ -22,13 +22,13 @@ public class JDBCCarDAOTest {
     public void setUp() throws Exception {
         // Gives Error on DB.getConnection();
         //DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
-        //dao = context.getCarDAO();
+        //carDAO = context.getCarDAO();
     }
 
     @Test
     public void testCarDAO() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
-        sc.useDelimiter("\t");
+        sc.useDelimiter("\t|\r\n");
         // Skip header
         sc.nextLine();
 
@@ -58,7 +58,6 @@ public class JDBCCarDAOTest {
 
             //Assert.assertEquals(brand, car.getBrand())
             //...
-            sc.nextLine();
             i++;
 
         }
