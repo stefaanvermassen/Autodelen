@@ -19,6 +19,10 @@ public class User {
     private IdentityCard identityCard;
     private EnumSet<UserRole> roles = EnumSet.noneOf(UserRole.class);
 
+    public User(int id, String email, String firstName, String lastName){
+        this(id, email, firstName, lastName, null, null);
+    }
+
     public User(String email) {
         this(0, email, null, null, null, null);
     }
@@ -32,6 +36,9 @@ public class User {
         this.address = address;
 
         roles.add(UserRole.USER);
+        roles.add(UserRole.ADMIN); // TODO: remove when DAO works
+        roles.add(UserRole.SUPER_USER);
+        this.status = UserStatus.REGISTERED;
     }
 
     public void setId(int id){
@@ -74,7 +81,7 @@ public class User {
         this.password = password;
     }
 
-    public boolean gotRole(UserRole role) { return roles.contains(role); }
+    public boolean hasRole(UserRole role) { return roles.contains(role); }
 
     public void addRole(UserRole role) { roles.add(role); }
 

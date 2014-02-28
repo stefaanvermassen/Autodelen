@@ -27,11 +27,14 @@ public class InfoSession {
         this.time = time;
         this.address = address;
         this.host = host;
-        this.enrolled = enrolled;
+        if(enrolled == null)
+            this.enrolled = NO_ENROLLEES;
+        else
+            this.enrolled = enrolled;
     }
 
     public InfoSession(int id, DateTime time, Address address, User host) {
-        this(id, time, address, host, null);
+        this(id, time, address, host, NO_ENROLLEES);
     }
 
     public int getId() {
@@ -79,6 +82,10 @@ public class InfoSession {
             this.enrolled = new ArrayList<Enrollee>();
 
         this.enrolled.add(enrollee);
+    }
+
+    public boolean hasEnrolled(){
+        return !this.enrolled.isEmpty();
     }
 
     public void deleteEnrollee(Enrollee enrollee) {
