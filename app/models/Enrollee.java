@@ -8,20 +8,13 @@ package models;
  *
  * @author Laurent
  */
-class Enrollee {
-    
-    private int id;
+public class Enrollee {
     private User user;
     private EnrollementStatus status;
 
-    public Enrollee(int id, User user, EnrollementStatus status) {
-        this.id = id;
+    public Enrollee(User user, EnrollementStatus status) {
         this.user = user;
         this.status = status;
-    }
-    
-    public int getId() {
-        return id;
     }
 
     public User getUser() {

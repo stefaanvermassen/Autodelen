@@ -23,5 +23,6 @@ public interface InfoSessionDAO {
     public void updateInfoSession(InfoSession session) throws DataAccessException;
     public void registerUser(InfoSession session, User user) throws DataAccessException;
     public void unregisterUser(InfoSession session, User user) throws DataAccessException;
+    public void unregisterUser(int infoSessionId, int userId) throws DataAccessException;
     public InfoSession getAttendingInfoSession(User user) throws DataAccessException;
 }

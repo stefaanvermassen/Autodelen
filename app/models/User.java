@@ -19,6 +19,10 @@ public class User {
     private IdentityCard identityCard;
     private EnumSet<UserRole> roles = EnumSet.noneOf(UserRole.class);
 
+    public User(int id, String email, String firstName, String lastName){
+        this(id, email, firstName, lastName, null, null);
+    }
+
     public User(String email) {
         this(0, email, null, null, null, null);
     }

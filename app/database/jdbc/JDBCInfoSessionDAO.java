@@ -2,9 +2,7 @@ package database.jdbc;
 
 import database.DataAccessException;
 import database.InfoSessionDAO;
-import models.Address;
-import models.InfoSession;
-import models.User;
+import models.*;
 import org.joda.time.DateTime;
 
 import java.sql.*;
@@ -50,8 +48,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     public PreparedStatement getGetAttendeesForSession() throws SQLException {
         if(getAttendeesForSession == null){
-         //   getAttendeesForSession = connection.prepareStatement("SELECT user_id, user_firstname, user_lastname " +
-          //                  "FROM infosessionenrollees INNER JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;)
+            getAttendeesForSession = connection.prepareStatement("SELECT user_id, user_firstname, user_email, user_lastname, enrollment_status " +
+                    "FROM infosessionenrollees INNER JOIN users ON user_id = infosession_enrollee_id WHERE infosession_id = ?");
         }
         return getAttendeesForSession;
     }
@@ -124,19 +122,29 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         try {
             PreparedStatement ps = getGetInfoSessionById();
             ps.setInt(1, id);
+            InfoSession is;
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()){
-                    InfoSession is = populateInfoSession(rs);
-                    if(withAttendees)
-                    {
-
-                    }
-                    return is;
+                    is = populateInfoSession(rs);
                 } else return null;
-
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading infosession resultset", ex);
             }
+
+            if(withAttendees)
+            {
+                PreparedStatement ps2 = getGetAttendeesForSession();
+                ps2.setInt(1, id);
+                try(ResultSet rs = ps2.executeQuery()){
+                    while(rs.next()){
+                        is.addEnrollee(new Enrollee(new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname")),
+                                Enum.valueOf(EnrollementStatus.class, rs.getString("enrollment_status"))));
+                    }
+                } catch(SQLException ex){
+                    throw new DataAccessException("Failed to get attendees for infosession", ex);
+                }
+            }
+            return is;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch infosession by id.", ex);
         }
@@ -187,10 +195,15 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     @Override
     public void unregisterUser(InfoSession session, User user) throws DataAccessException {
+        unregisterUser(session.getId(), user.getId());
+    }
+
+    @Override
+    public void unregisterUser(int infoSessionId, int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getUnregisterUserForSession();
-            ps.setInt(1, session.getId());
-            ps.setInt(2, user.getId());
+            ps.setInt(1,infoSessionId);
+            ps.setInt(2, userId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Failed to unregister user from infosession.");
         } catch(SQLException ex){
