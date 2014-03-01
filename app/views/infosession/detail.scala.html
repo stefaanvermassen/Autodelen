@@ -4,44 +4,22 @@
 @app("Infosessie") {
     @defining(DatabaseHelper.getUserProvider.getUser(session.get("email")).hasRole(UserRole.ADMIN)) { isAdmin =>
         <h1>Infosessie</h1>
+
+        @if(!flash.isEmpty()) {
+            @for((msgKey, msgValue) <- flash) {
+                <div class="alert alert-@msgKey" data-dismiss="alert">
+                    <a class="close">×</a>
+                    @msgValue
+                </div>
+            }
+        }
+
         @if(isAdmin) {
             <a class="btn btn-primary btn-sm" href="#">Wijzigen</a>
         }
-    <p>
-        <strong>Datum:</strong>
-        @infoSession.getTime.toString("yyyy-MM-dd HH:mm:ss")
-    </p>
-    <p>
-        <strong>Host:</strong>
-        @infoSession.getHost.getFirstName @infoSession.getHost.getLastName
-    </p>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Adres</h3>
-        </div>
-        <div class="panel-body">
-        @defining(infoSession.getAddress) { address =>
-            <p>
-                <strong>Straat:</strong>
-                @address.getStreet
-                </p>
-            <p>
-                <strong>Nummer:</strong>
-                @address.getNumber
-            </p>
-        @if(address.getBus != null && !address.getBus.isEmpty) {
-            <strong>Bus:</strong>
-            @address.getBus
-        }
-            <p>
-                <strong>Stad:</strong>
-                @address.getZip, @address.getCity
-            </p>
-        }
-        </div>
-        @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-    </div>
+        @detailPartial(infoSession)
+
         @* TODO: can other users see the attendees, or only admins?? *@
         @if(infoSession.hasEnrolled) {
             <div class="panel panel-default">
@@ -68,7 +46,7 @@
                                     <td>@enrollee.getUser</td>
                                     @if(isAdmin) {
                                         <td>
-                                            <a class="btn btn-warning" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getEmail)">
+                                            <a class="btn btn-warning" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">
                                                 Verwijderen</a>
                                         </td>
                                     }
