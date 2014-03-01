@@ -43,16 +43,16 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private PreparedStatement getCreateReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
-            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservations_user_id, reservations_car_id, reservations_status"
-                    + "reservations_from, reservations_to) VALUES (?,?,?,?,?)");
+            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservation_user_id, reservation_car_id, reservation_status"
+                    + "reservation_from, reservation_to) VALUES (?,?,?,?,?)");
         }
         return createReservationStatement;
     }
 
     private PreparedStatement getUpdateReservationStatement() throws SQLException {
         if (updateReservationStatement == null) {
-            updateReservationStatement = connection.prepareStatement("UPDATE CarReservations SET reservations_user_id=? , reservations_car_id=? , reservations_status =? ,"
-                    + "reservations_from=? , reservations_to=? )");
+            updateReservationStatement = connection.prepareStatement("UPDATE CarReservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
+                    + "reservation_from=? , reservation_to=? )");
         }
         return updateReservationStatement;
     }

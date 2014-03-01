@@ -57,9 +57,9 @@ public class JDBCReservationDAOTest {
             User user = new User();
             user.setId(user_id);
 
-            //Reservation reservation = reservationDAO.createReservation(from, to, car, user);
+            Reservation reservation = reservationDAO.createReservation(from, to, car, user);
 
-            //Assert.assertEquals(from, reservation.getFrom());
+            Assert.assertEquals(from, reservation.getFrom());
             //...
             i++;
 

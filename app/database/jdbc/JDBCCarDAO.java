@@ -84,7 +84,7 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarStatement;
     }
@@ -114,9 +114,10 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setInt(4, seats);
                 ps.setInt(5, doors);
                 ps.setInt(6, year);
-                Calendar cal = Calendar.getInstance();
-                cal.set(year, 0,0);
-                ps.setDate(6, new Date(cal.getTime().getTime()));
+                //Calendar cal = Calendar.getInstance();
+                //cal.set(year, 0,0);
+                //ps.setDate(6, new Date(cal.getTime().getTime()));
+
                 ps.setBoolean(7, gps);
                 ps.setBoolean(8, hook);
                 ps.setString(9, fuel.toString());
@@ -131,24 +132,21 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setDate(15,sqlDate);                
 
                 ps.executeUpdate();
-                connection.commit();
-                connection.setAutoCommit(true);
-                
                 try (ResultSet keys = ps.getGeneratedKeys()) {
                     keys.next();
-
+                    connection.commit();
+                    connection.setAutoCommit(true);
                     return new Car(keys.getInt(1), type, brand, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
                 } catch (SQLException ex) {
                     throw new DataAccessException("Failed to get primary key for new user.", ex);
                 }
-
             } catch (SQLException ex) {
                 connection.rollback();
                 connection.setAutoCommit(true);
-                throw new DataAccessException("Failed to commit new user transaction.", ex);
+                throw new DataAccessException("Failed to commit new car transaction.", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create user.", ex);
+            throw new DataAccessException("Failed to create car.", ex);
         }
     }
 
@@ -162,9 +160,10 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setInt(3, car.getLocation().getId());
                 ps.setInt(4, car.getSeats());
                 ps.setInt(5, car.getDoors());
-                Calendar cal = Calendar.getInstance();
-                cal.set(car.getYear(), 0,0);
-                ps.setDate(6, new Date(cal.getTime().getTime()));
+                //Calendar cal = Calendar.getInstance();
+                //cal.set(car.getYear(), 0,0);
+                //ps.setDate(6, new Date(cal.getTime().getTime()));
+                ps.setInt(6, car.getYear());
                 ps.setBoolean(7, car.isGps());
                 ps.setBoolean(8, car.isHook());
                 ps.setString(9, car.getFuel().toString());
@@ -183,10 +182,10 @@ public class JDBCCarDAO implements CarDAO{
             } catch (SQLException ex) {
                 connection.rollback();
                 connection.setAutoCommit(true);
-                throw new DataAccessException("Failed to commit new user transaction.", ex);
+                throw new DataAccessException("Failed to commit new car transaction.", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create user.", ex);
+            throw new DataAccessException("Failed to create car.", ex);
         }
     }
 
