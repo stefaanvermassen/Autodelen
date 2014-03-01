@@ -61,42 +61,42 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({})
     public static Result unenrollSession() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
-        if (user.getStatus() == UserStatus.REGISTERED) {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                InfoSessionDAO dao = context.getInfoSessionDAO();
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
 
-                InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
-                if(alreadyAttending == null){
-                    return badRequest("U bent niet ingeschreven in een toekomstige infosessie.");
-                } else {
-                    try {
-                        dao.unregisterUser(alreadyAttending, user);
-                        context.commit();
-                        return ok("U bent succesvol uitgeschreven uit deze infosessie."); //TODO: flash
-                    } catch(DataAccessException ex){
-                        context.rollback();
-                        throw ex;
-                    }
+            InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
+            if (alreadyAttending == null) {
+                flash("danger", "U bent niet ingeschreven voor een toekomstige infosessie.");
+                return showUpcomingSessions();
+            } else {
+                try {
+                    dao.unregisterUser(alreadyAttending, user);
+                    context.commit();
+
+                    flash("success", "U bent succesvol uitgeschreven uit deze infosessie.");
+                    return showUpcomingSessions();
+                } catch (DataAccessException ex) {
+                    context.rollback();
+                    throw ex;
                 }
-            } catch (DataAccessException ex) {
-                throw ex;
             }
-        } else {
-            return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 
     @RoleSecured.RoleAuthenticated({})
-    public static Result detail(int sessionId){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result detail(int sessionId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession session = dao.getInfoSession(sessionId, true);
-            if(session == null){
-                return badRequest("Sessie bestaat niet."); //TODO: flash
+            if (session == null) {
+                flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
+                return showUpcomingSessions();
             } else {
                 return ok(detail.render(session));
             }
-        } catch(DataAccessException ex){
+        } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
         }
@@ -106,28 +106,33 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @param sessionId Id of the session the user has to be removed from
      * @param userEmail Email of the user to be removed
      * @return Status of the operation page
      */
     @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
-    public static Result removeUserFromSession(int sessionId, String userEmail){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result removeUserFromSession(int sessionId, String userEmail) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession is = dao.getInfoSession(sessionId, false);
-            if(is == null){
-                return badRequest("Infosessie bestaat niet.");
+            if (is == null) {
+                flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
+                return showUpcomingSessions();
             }
 
             User user = DatabaseHelper.getUserProvider().getUser(userEmail);
-            if(user == null){
-                return badRequest("User bestaat niet met adres=" + userEmail);
+            if (user == null) {
+                flash("danger", "Gebruiker met ID " + userEmail + " bestaat niet.");
+                return showUpcomingSessions();
             }
 
             dao.unregisterUser(is, user);
             context.commit();
-            return ok("De gebruiker werd succesvol uitgeschreven uit de infosessie.");
-        } catch(DataAccessException ex){
+
+            flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
+            return detail(sessionId);
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
@@ -141,16 +146,19 @@ public class InfoSessions extends Controller {
 
                 InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
                 if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
-                    return badRequest("U bent al ingeschreven voor een infosessie op " + alreadyAttending.getTime()); //TODO: show flash message and link to session
+                    flash("danger", "U bent reeds al ingeschreven voor een infosessie.");
+                    return showUpcomingSessions();
                 } else {
                     InfoSession session = dao.getInfoSession(sessionId, false);
                     if (session == null) {
-                        return badRequest("Deze sessie bestaat niet."); //TODO: flash
+                        flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
+                        return showUpcomingSessions();
                     } else {
                         try {
                             dao.registerUser(session, user);
                             context.commit();
-                            return ok("U bent succesvol ingeschreven op de sessie van " + session.getTime());
+                            flash("success", "U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".");
+                            return showUpcomingSessions();
                         } catch (DataAccessException ex) {
                             context.rollback();
                             throw ex;
@@ -161,7 +169,8 @@ public class InfoSessions extends Controller {
                 throw ex;
             }
         } else {
-            return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
+            flash("danger", "U bent reeds een geverifieerde gebruiker.");
+            return showUpcomingSessions();
         }
     }
 

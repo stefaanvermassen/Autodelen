@@ -4,6 +4,16 @@
 @app("Infosessie") {
     @defining(DatabaseHelper.getUserProvider.getUser(session.get("email")).hasRole(UserRole.ADMIN)) { isAdmin =>
         <h1>Infosessie</h1>
+
+        @if(!flash.isEmpty()) {
+            @for((msgKey, msgValue) <- flash) {
+                <div class="alert alert-@msgKey" data-dismiss="alert">
+                    <a class="close">×</a>
+                    @msgValue
+                </div>
+            }
+        }
+
         @if(isAdmin) {
             <a class="btn btn-primary btn-sm" href="#">Wijzigen</a>
         }
