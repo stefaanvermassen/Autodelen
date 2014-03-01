@@ -16,8 +16,13 @@ public class JDBCUserDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 
+    private static final String USER_QUERY = "SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
+            "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
+            "FROM users LEFT JOIN addresses on address_id = user_address_domicile_id";
+
     private Connection connection;
     private PreparedStatement getUserByEmailStatement;
+    private PreparedStatement getUserByIdStatement;
     private PreparedStatement createUserStatement;
 
     public JDBCUserDAO(Connection connection) {
@@ -26,11 +31,16 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
-                    "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
-                    "FROM users LEFT JOIN addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
+            getUserByEmailStatement = connection.prepareStatement(USER_QUERY + " WHERE user_email = ?");
         }
         return getUserByEmailStatement;
+    }
+
+    private PreparedStatement getGetuserByIdStatement() throws SQLException {
+        if(getUserByIdStatement == null){
+            getUserByIdStatement = connection.prepareStatement(USER_QUERY + " WHERE user_id = ?");
+        }
+        return getUserByIdStatement;
     }
 
     private PreparedStatement getCreateUserStatement() throws SQLException {
@@ -60,6 +70,24 @@ public class JDBCUserDAO implements UserDAO {
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
+        }
+
+    }
+
+    @Override
+    public User getUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetuserByIdStatement();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return populateUser(rs, true, true);
+                else return null;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading user resultset", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by id.", ex);
         }
 
     }

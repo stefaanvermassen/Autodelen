@@ -9,8 +9,8 @@ import org.joda.time.format.DateTimeFormatter;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Security;
 import views.html.infosession.*;
+import views.html.infosession.newInfosession;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class InfoSessions extends Controller {
         return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class)));
     }
 
-    @RoleSecured.RoleAuthenticated({})
+    @RoleSecured.RoleAuthenticated()
     public static Result unenrollSession() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -85,7 +85,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({})
+    @RoleSecured.RoleAuthenticated()
     public static Result detail(int sessionId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -102,17 +102,15 @@ public class InfoSessions extends Controller {
         }
     }
 
-    //TODO: allow UserProvider to get user by ID
-
     /**
      * Method: GET
      *
      * @param sessionId Id of the session the user has to be removed from
-     * @param userEmail Email of the user to be removed
+     * @param userId Userid of the user to be removed
      * @return Status of the operation page
      */
     @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
-    public static Result removeUserFromSession(int sessionId, String userEmail) {
+    public static Result removeUserFromSession(int sessionId, int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession is = dao.getInfoSession(sessionId, false);
@@ -121,9 +119,11 @@ public class InfoSessions extends Controller {
                 return showUpcomingSessions();
             }
 
-            User user = DatabaseHelper.getUserProvider().getUser(userEmail);
+            UserDAO udao = context.getUserDAO();
+
+            User user = udao.getUser(userId);
             if (user == null) {
-                flash("danger", "Gebruiker met ID " + userEmail + " bestaat niet.");
+                flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
                 return showUpcomingSessions();
             }
 
@@ -137,7 +137,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({})
+    @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         if (user.getStatus() == UserStatus.REGISTERED) {
@@ -196,6 +196,9 @@ public class InfoSessions extends Controller {
                     if ("other".equals(createForm.get().addresstype)) {
                         AddressDAO adao = context.getAddressDAO();
                         address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
+                    } else if(user.getAddress() == null) {
+                        createForm.error("De host heeft nog geen adres gespecifieerd op zijn profiel.");
+                        return badRequest(newInfosession.render(createForm));
                     } else {
                         address = user.getAddress();
                     }

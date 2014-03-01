@@ -27,6 +27,11 @@ public class UserProvider implements UserDAO {
     }
 
     @Override
+    public User getUser(int userId) throws DataAccessException {
+        throw new RuntimeException("Users aren't cached by ID (yet?)");
+    }
+
+    @Override
     public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
         String key = String.format(USER_BY_EMAIL, email);
         try (DataAccessContext context = provider.getDataAccessContext()) {
