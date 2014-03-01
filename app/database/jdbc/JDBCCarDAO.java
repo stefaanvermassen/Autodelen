@@ -84,7 +84,7 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments, car_last_edit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarStatement;
     }
@@ -105,8 +105,8 @@ public class JDBCCarDAO implements CarDAO{
     
     @Override
     public Car createCar(String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
-        try {
-            connection.setAutoCommit(false);
+
+            //connection.setAutoCommit(false);
             try (PreparedStatement ps = createCarStatement()) {
                 ps.setString(1, type);
                 ps.setString(2, brand);
@@ -129,25 +129,22 @@ public class JDBCCarDAO implements CarDAO{
   
                 java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
                 String currentDatetime = sqlDate.toString();
-                ps.setDate(15,sqlDate);                
+                //ps.setDate(15,sqlDate);
 
                 ps.executeUpdate();
                 try (ResultSet keys = ps.getGeneratedKeys()) {
                     keys.next();
                     connection.commit();
-                    connection.setAutoCommit(true);
+                    //connection.setAutoCommit(true);
                     return new Car(keys.getInt(1), type, brand, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
                 } catch (SQLException ex) {
                     throw new DataAccessException("Failed to get primary key for new user.", ex);
                 }
             } catch (SQLException ex) {
-                connection.rollback();
-                connection.setAutoCommit(true);
+                //connection.rollback();
+                //connection.setAutoCommit(true);
                 throw new DataAccessException("Failed to commit new car transaction.", ex);
             }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create car.", ex);
-        }
     }
 
     @Override

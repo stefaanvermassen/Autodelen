@@ -100,7 +100,7 @@ CREATE TABLE `Cars` (
 	`car_owner_annual_km` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(64),
-	`car_last_edit` DATETIME,
+	`car_last_edit` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_id`),
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES Users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES Addresses(`address_id`) ON DELETE CASCADE
