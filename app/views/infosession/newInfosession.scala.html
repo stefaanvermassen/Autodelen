@@ -52,6 +52,11 @@
                 <div class="panel-body">
                     <div class="container">
                     @helper.form(routes.InfoSessions.createNewSession, 'class -> "form-horizontal") {
+                        @if(form.hasGlobalErrors) {
+                            <div class="alert alert-danger alert-dismissable">
+                                <strong>Error!</strong> @form.globalError.message
+                            </div>
+                        }
                         <fieldset>
                             <div class="form-group">
                                 <label for="datepicker">Tijdstip:</label>
