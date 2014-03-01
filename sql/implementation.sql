@@ -225,3 +225,33 @@ CREATE TABLE `Messages` (
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
+
+CREATE TABLE `Templates` (
+	`template_id` INT NOT NULL AUTO_INCREMENT,
+	`template_title` VARCHAR(255) NOT NULL,
+	`template_body` TEXT NOT NULL,
+	`template_last_edit` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`template_id`),
+	UNIQUE INDEX `template_title` (`template_title`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `TemplateTags` ( # Welke tags kunnen we gebruiken in de templates
+	`template_tag_id` INT NOT NULL AUTO_INCREMENT,
+	`template_tag_body` VARCHAR(255) NOT NULL,
+	PRIMARY KEY (`template_tag_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `TemplateTagAssociations` ( # Welke tags horen bij welke templates
+	`template_tag_association_id` INT NOT NULL AUTO_INCREMENT,
+	`template_tag_id` INT NOT NULL,
+	`template_id` INT NOT NULL,
+	PRIMARY KEY (`template_tag_association_id`),
+	FOREIGN KEY (`template_id`) REFERENCES Templates(`template_id`),
+	FOREIGN KEY (`template_tag_id`) REFERENCES TemplateTags(`template_tag_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
