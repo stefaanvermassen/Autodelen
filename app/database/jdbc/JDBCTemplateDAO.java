@@ -19,6 +19,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
     private Connection connection;
     private PreparedStatement getTemplateByTitleStatement;
     private PreparedStatement getTagsByTemplateIdStatement;
+    private PreparedStatement getAllTemplatesStatement;
 
     public JDBCTemplateDAO(Connection connection) {
         this.connection = connection;
@@ -26,10 +27,18 @@ public class JDBCTemplateDAO implements TemplateDAO {
 
     private PreparedStatement getTemplateByTitleStatement() throws SQLException {
         if (getTemplateByTitleStatement == null) {
-            getTemplateByTitleStatement = connection.prepareStatement("SELECT template_id, template_title, template_body" +
+            getTemplateByTitleStatement = connection.prepareStatement("SELECT template_id, template_title, template_body " +
                     "FROM Templates WHERE template_title = ?;");
         }
         return getTemplateByTitleStatement;
+    }
+
+    private PreparedStatement getAllTemplatesStatement() throws SQLException {
+        if (getAllTemplatesStatement == null) {
+            getAllTemplatesStatement = connection.prepareStatement("SELECT template_id, template_title, template_body " +
+                    "FROM Templates;");
+        }
+        return getAllTemplatesStatement;
     }
 
     public EmailTemplate populateEmailTemplate(ResultSet rs) throws SQLException {
@@ -38,7 +47,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
 
     private PreparedStatement getTagsByTemplateIdStatement() throws SQLException {
         if (getTagsByTemplateIdStatement == null) {
-            getTagsByTemplateIdStatement = connection.prepareStatement("SELECT template_tag_body" +
+            getTagsByTemplateIdStatement = connection.prepareStatement("SELECT template_tag_body " +
                     "FROM templatetagassociations JOIN templatetags ON templatetagassociations.template_tag_id = templatetags.template_tag_id"
                     + " WHERE template_id = ?;");
         }
@@ -89,6 +98,25 @@ public class JDBCTemplateDAO implements TemplateDAO {
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch emailtemplate by title.", ex);
+        }
+    }
+
+    @Override
+    public List<EmailTemplate> getAllTemplates() throws DataAccessException {
+        List<EmailTemplate> templates = new ArrayList<>();
+        try{
+            PreparedStatement ps = getAllTemplatesStatement();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    templates.add(populateEmailTemplate(rs));
+                }
+                return templates;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading template resultset", ex);
+            }
+
+        }catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch templates.", ex);
         }
     }
 

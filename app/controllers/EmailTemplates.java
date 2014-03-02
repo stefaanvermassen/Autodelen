@@ -1,19 +1,33 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import database.DataAccessContext;
+import database.DataAccessException;
+import database.DatabaseHelper;
+import database.TemplateDAO;
+import models.EmailTemplate;
 import models.UserRole;
-import play.mvc.*;
-import views.html.emailtemplates.*;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.emailtemplates.emailtemplates;
 
-import static play.mvc.Results.ok;
+import java.util.List;
+
 
 /**
  * Created by Stefaan Vermassen on 01/03/14.
  */
-public class EmailTemplates {
+public class EmailTemplates extends Controller{
 
     @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result showExistingTemplates() {
-        return ok(emailtemplates.render());
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDao();
+            List<EmailTemplate> templates = dao.getAllTemplates();
+            return ok(emailtemplates.render(templates));
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+
     }
 }
