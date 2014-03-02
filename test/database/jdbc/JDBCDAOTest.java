@@ -4,7 +4,12 @@ import database.*;
 import models.Address;
 import models.Car;
 import models.CarFuel;
+import models.Reservation;
 import models.User;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +33,7 @@ public class JDBCDAOTest {
     private List<User> users = new ArrayList<>();
     private List<Address> addresses = new ArrayList<>();
     private List<Car> cars = new ArrayList<>();
+    private List<Reservation> reservations = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -65,10 +71,9 @@ public class JDBCDAOTest {
     public void testReservationDAO() throws Exception {
         createUsersAndAddresses();
         createCars();
-        //TODO
-        //createReservations();
-        //getReservationTest();
-        //deleteReservations();
+        createReservations();
+        getReservationTest();
+        deleteReservations();
         deleteCars();
         deleteUsersAndAddresses();
     }
@@ -169,6 +174,7 @@ public class JDBCDAOTest {
             Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
             cars.add(car);
         }
+        sc.close();
     }
     /*
     * First createCars() has to be called
@@ -200,6 +206,43 @@ public class JDBCDAOTest {
         while(i.hasNext()) {
             Car car = i.next();
             carDAO.deleteCar(car);
+            i.remove();
+        }
+    }
+    
+    private void createReservations() throws Exception {
+    	Scanner sc = new Scanner(new File("test/database/random_reservations.txt"));
+    	Iterator<Car> carIt = cars.iterator();
+    	Iterator<User> userIt = users.iterator();
+    	sc.nextLine();
+    	DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+    	while(carIt.hasNext() && userIt.hasNext() && sc.hasNext()){
+    		DateTime from = formatter.parseDateTime(sc.next());
+    		DateTime to = formatter.parseDateTime(sc.next());
+    		int carid = sc.nextInt(); //not used
+    		int userid = sc.nextInt(); //not used
+    		Reservation reservation = reservationDAO.createReservation(from, to, carIt.next(), userIt.next());
+    		reservations.add(reservation);
+    	}
+    	sc.close();
+    }
+    
+    private void getReservationTest() {
+        for(Reservation reservation : reservations) {
+            Reservation returnReservation = reservationDAO.getReservation(reservation.getId());
+
+            Assert.assertEquals(reservation.getCar().getId(),returnReservation.getCar().getId());
+            Assert.assertEquals(reservation.getUser().getId(),returnReservation.getUser().getId());
+            Assert.assertEquals(reservation.getTo(),returnReservation.getTo());
+            Assert.assertEquals(reservation.getFrom(),returnReservation.getFrom());
+        }
+    }
+    
+    private void deleteReservations(){
+    	Iterator<Reservation> i = reservations.iterator();
+        while(i.hasNext()) {
+            Reservation reservation = i.next();
+            reservationDAO.deleteReservation(reservation);
             i.remove();
         }
     }
