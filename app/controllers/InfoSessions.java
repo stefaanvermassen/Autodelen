@@ -371,7 +371,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated()
     public static Result showUpcomingSessions() {
         return ok(upcomingSessionsList());
     }
