@@ -46,7 +46,6 @@
                                     <td>@enrollee.getUser</td>
                                     @if(isAdmin) {
                                         <td>
-
                                             <div class="btn-group btn-group-xs">
                                                 <a class="btn btn-warning btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">Verwijderen</a>
 
@@ -68,7 +67,6 @@
                                                 } else {
                                                     <a disabled="disabled" class="btn btn-danger active" href="#">Afwezig</a>
                                                 }
-
                                                 </div>
                                         </td>
                                     }
