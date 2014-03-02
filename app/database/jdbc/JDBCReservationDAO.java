@@ -15,6 +15,7 @@ import models.Car;
 import models.Reservation;
 import models.ReservationStatus;
 import models.User;
+
 import org.joda.time.DateTime;
 
 /**
@@ -29,6 +30,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement createReservationStatement;
     private PreparedStatement updateReservationStatement;
     private PreparedStatement getReservationStatement;
+    private PreparedStatement deleteReservationStatement;
 
     public JDBCReservationDAO(Connection connection) {
         this.connection = connection;
@@ -41,6 +43,13 @@ public class JDBCReservationDAO implements ReservationDAO{
         return reservation;
     }
 
+    private PreparedStatement getDeleteReservationStatement() throws SQLException {
+    	if(deleteReservationStatement == null){
+    		deleteReservationStatement = connection.prepareStatement("DELETE FROM CarReservations WHERE reservation_id=?");
+    	}
+    	return deleteReservationStatement;
+    }
+    
     private PreparedStatement getCreateReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
             createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservation_user_id, reservation_car_id, reservation_status"
@@ -120,6 +129,18 @@ public class JDBCReservationDAO implements ReservationDAO{
         } catch (SQLException e){
             throw new DataAccessException("Unable to update reservation", e);
         }
+    }
+    
+    @Override
+    public void deleteReservation(Reservation reservation){
+    	try {
+			PreparedStatement ps = getDeleteReservationStatement();
+			ps.setInt(1, reservation.getId());
+			ps.executeUpdate();
+			connection.commit();
+		} catch (SQLException ex){
+			throw new DataAccessException("Could not delete reservation",ex);
+		}
     }
     
 }
