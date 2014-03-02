@@ -15,7 +15,7 @@
         }
 
         @if(isAdmin) {
-            <a class="btn btn-primary btn-sm" href="#">Wijzigen</a>
+            <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.editSession(infoSession.getId)">Wijzigen</a>
         }
 
         @detailPartial(infoSession)
