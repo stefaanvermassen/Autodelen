@@ -37,6 +37,7 @@ GET         /infosession/view                  controllers.InfoSessions.detail(i
 GET         /infosession/removeAttendee        controllers.InfoSessions.removeUserFromSession(sessionId: Int, userId: Int)
 GET         /infosession/edit                  controllers.InfoSessions.editSession(sessionId: Int)
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
+GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                      controllers.Assets.at(path="/public", file)

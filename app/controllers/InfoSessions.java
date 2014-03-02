@@ -242,6 +242,35 @@ public class InfoSessions extends Controller {
         }
     }
 
+    @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
+    public static Result setUserSessionStatus(int sessionId, int userId, String status){
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            InfoSession is = dao.getInfoSession(sessionId, false);
+            if (is == null) {
+                flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
+                return badRequest(upcomingSessionsList());
+            }
+
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId);
+            if (user == null) {
+                flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
+                return badRequest(upcomingSessionsList());
+            }
+
+            EnrollementStatus enrollStatus = Enum.valueOf(EnrollementStatus.class, status);
+
+            dao.setUserEnrollmentStatus(is, user, enrollStatus);
+            context.commit();
+            flash("success", "De gebruikerstatus werd succesvol aangepast.");
+            return detail(sessionId);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
