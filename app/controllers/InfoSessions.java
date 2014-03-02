@@ -6,11 +6,11 @@ import models.*;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.infosession.detail;
-import views.html.infosession.infosessions;
+import views.html.infosession.*;
 import views.html.infosession.newInfosession;
 
 import java.util.List;
@@ -56,84 +56,193 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result newSession() {
-        return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class)));
+        return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class), 0));
     }
 
-    @RoleSecured.RoleAuthenticated({})
-    public static Result unenrollSession() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
-        if (user.getStatus() == UserStatus.REGISTERED) {
+    /**
+     * Method: GET
+     *
+     * @param sessionId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    public static Result editSession(int sessionId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            InfoSession is = dao.getInfoSession(sessionId, false);
+            if (is == null) {
+                flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
+                return badRequest(upcomingSessionsList());
+            } else {
+                InfoSessionCreationModel model = new InfoSessionCreationModel();
+                model.time = is.getTime().toString(DATEFORMATTER);
+                //boolean isHostAddress = is.getHost().getAddress() != null && is.getHost().getAddress().getId() == is.getAddress().getId();
+                boolean isHostAddress = true;
+                model.addresstype = isHostAddress ? "host" : "other";
+                if (!isHostAddress) {
+                    model.address_city = is.getAddress().getCity();
+                    model.address_zip = is.getAddress().getZip();
+                    model.address_street = is.getAddress().getStreet();
+                    model.address_number = is.getAddress().getNumber();
+                    model.address_bus = is.getAddress().getBus();
+                }
+
+                Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
+                return ok(newInfosession.render(editForm, sessionId));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     *
+     * @param sessionId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    public static Result editSessionPost(int sessionId) {
+        Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
+        if (editForm.hasErrors()) {
+            return badRequest(newInfosession.render(editForm, sessionId));
+        } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
+                InfoSession session = dao.getInfoSession(sessionId, false);
+                if (session == null) {
+                    flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
+                    return badRequest(upcomingSessionsList());
+                }
 
-                InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
-                if(alreadyAttending == null){
-                    return badRequest("U bent niet ingeschreven in een toekomstige infosessie.");
-                } else {
-                    try {
-                        dao.unregisterUser(alreadyAttending, user);
-                        context.commit();
-                        return ok("U bent succesvol uitgeschreven uit deze infosessie."); //TODO: flash
-                    } catch(DataAccessException ex){
-                        context.rollback();
-                        throw ex;
+                try {
+                  //TODO:  boolean addressWasAtHost = session.getHost().getAddress() != null && session.getHost().getAddress().getId() == session.getAddress().getId();
+                    boolean addressWasAtHost = true;
+                    if (!"host".equals(editForm.get().addresstype) && !addressWasAtHost) {
+                        // We have to create a new address
+                        AddressDAO adao = context.getAddressDAO();
+                        Address address = adao.createAddress(editForm.get().address_zip, editForm.get().address_city, editForm.get().address_street, editForm.get().address_number, editForm.get().address_bus);
+                        session.setAddress(address);
+                        dao.updateInfoSessionAddress(session);
+                    } else if("host".equals(editForm.get().addresstype) && !addressWasAtHost) {
+                        // We change from a host-type address to a seperate address
+                        AddressDAO adao = context.getAddressDAO();
+                        Address oldAddress = session.getAddress();
+                        session.setAddress(session.getHost().getAddress());
+                        dao.updateInfoSessionAddress(session);
+                        adao.deleteAddress(oldAddress); //TODO: can we really delete this address?
+                    } else if(!addressWasAtHost){ // editable address, 4th option (edit host address isn't allowed)
+                        // update address
+                        Address address = session.getAddress();
+                        address.setCity(editForm.get().address_city);
+                        address.setBus(editForm.get().address_bus);
+                        address.setNumber(editForm.get().address_number);
+                        address.setStreet(editForm.get().address_street);
+                        address.setZip(editForm.get().address_zip);
+
+                        AddressDAO adao = context.getAddressDAO();
+                        adao.updateAddress(address);
                     }
+
+                    // Now we update the time
+                    DateTime time = editForm.get().getDateTime();
+                    if(!session.getTime().equals(time)) {
+                        session.setTime(time);
+                        dao.updateInfosessionTime(session);
+                    }
+                    context.commit();
+                    flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                    return detail(sessionId);
+                } catch (DataAccessException ex) {
+                    context.rollback();
+                    throw ex;
                 }
             } catch (DataAccessException ex) {
                 throw ex;
             }
-        } else {
-            return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
         }
     }
 
-    @RoleSecured.RoleAuthenticated({})
-    public static Result detail(int sessionId){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    @RoleSecured.RoleAuthenticated()
+    public static Result unenrollSession() {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+
+            InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
+            if (alreadyAttending == null) {
+                flash("danger", "U bent niet ingeschreven voor een toekomstige infosessie.");
+                return badRequest(upcomingSessionsList());
+            } else {
+                try {
+                    dao.unregisterUser(alreadyAttending, user);
+                    context.commit();
+
+                    flash("success", "U bent succesvol uitgeschreven uit deze infosessie.");
+                    return showUpcomingSessions();
+                } catch (DataAccessException ex) {
+                    context.rollback();
+                    throw ex;
+                }
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result detail(int sessionId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession session = dao.getInfoSession(sessionId, true);
-            if(session == null){
-                return badRequest("Sessie bestaat niet."); //TODO: flash
+            if (session == null) {
+                flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
+                return badRequest(upcomingSessionsList());
             } else {
                 return ok(detail.render(session));
             }
-        } catch(DataAccessException ex){
+        } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
         }
     }
 
-    //TODO: allow UserProvider to get user by ID
-
     /**
      * Method: GET
+     *
      * @param sessionId Id of the session the user has to be removed from
-     * @param userEmail Email of the user to be removed
+     * @param userId    Userid of the user to be removed
      * @return Status of the operation page
      */
     @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
-    public static Result removeUserFromSession(int sessionId, String userEmail){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result removeUserFromSession(int sessionId, int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession is = dao.getInfoSession(sessionId, false);
-            if(is == null){
-                return badRequest("Infosessie bestaat niet.");
+            if (is == null) {
+                flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
+                return badRequest(upcomingSessionsList());
             }
 
-            User user = DatabaseHelper.getUserProvider().getUser(userEmail);
-            if(user == null){
-                return badRequest("User bestaat niet met adres=" + userEmail);
+            UserDAO udao = context.getUserDAO();
+
+            User user = udao.getUser(userId);
+            if (user == null) {
+                flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
+                return badRequest(upcomingSessionsList());
             }
 
             dao.unregisterUser(is, user);
             context.commit();
-            return ok("De gebruiker werd succesvol uitgeschreven uit de infosessie.");
-        } catch(DataAccessException ex){
+
+            flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
+            return detail(sessionId);
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
 
-    @RoleSecured.RoleAuthenticated({})
+    @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         if (user.getStatus() == UserStatus.REGISTERED) {
@@ -142,16 +251,19 @@ public class InfoSessions extends Controller {
 
                 InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
                 if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
-                    return badRequest("U bent al ingeschreven voor een infosessie op " + alreadyAttending.getTime()); //TODO: show flash message and link to session
+                    flash("danger", "U bent reeds al ingeschreven voor een infosessie.");
+                    return badRequest(upcomingSessionsList());
                 } else {
                     InfoSession session = dao.getInfoSession(sessionId, false);
                     if (session == null) {
-                        return badRequest("Deze sessie bestaat niet."); //TODO: flash
+                        flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
+                        return badRequest(upcomingSessionsList());
                     } else {
                         try {
                             dao.registerUser(session, user);
                             context.commit();
-                            return ok("U bent succesvol ingeschreven op de sessie van " + session.getTime());
+                            flash("success", "U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".");
+                            return ok(upcomingSessionsList());
                         } catch (DataAccessException ex) {
                             context.rollback();
                             throw ex;
@@ -162,7 +274,8 @@ public class InfoSessions extends Controller {
                 throw ex;
             }
         } else {
-            return badRequest("U bent al een geverifieerde gebruiker.");     //TODO: flash already normal user
+            flash("danger", "U bent reeds een geverifieerde gebruiker.");
+            return badRequest(upcomingSessionsList());
         }
     }
 
@@ -176,7 +289,7 @@ public class InfoSessions extends Controller {
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(newInfosession.render(createForm));
+            return badRequest(newInfosession.render(createForm, 0));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -188,6 +301,9 @@ public class InfoSessions extends Controller {
                     if ("other".equals(createForm.get().addresstype)) {
                         AddressDAO adao = context.getAddressDAO();
                         address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
+                    } else if (user.getAddress() == null) {
+                        createForm.error("De host heeft nog geen adres gespecifieerd op zijn profiel.");
+                        return badRequest(newInfosession.render(createForm, 0));
                     } else {
                         address = user.getAddress();
                     }
@@ -201,7 +317,7 @@ public class InfoSessions extends Controller {
                         );
                     } else {
                         createForm.error("Failed to create session in database. Contact administrator.");
-                        return badRequest(newInfosession.render(createForm));
+                        return badRequest(newInfosession.render(createForm, 0));
                     }
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -213,17 +329,21 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
-    public static Result showUpcomingSessions() {
+    private static Html upcomingSessionsList() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
 
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
-            return ok(infosessions.render(sessions, enrolled)); //TODO: get enrolled
+            return infosessions.render(sessions, enrolled);
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    public static Result showUpcomingSessions() {
+        return ok(upcomingSessionsList());
     }
 }

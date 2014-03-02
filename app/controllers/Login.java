@@ -150,8 +150,6 @@ public class Login extends Controller {
                     throw ex;
                 }
             } catch (DataAccessException ex) {
-                //TODO: send fail message
-
                 throw ex;
             }
         }

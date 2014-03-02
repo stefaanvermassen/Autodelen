@@ -43,7 +43,7 @@
                     <li><a href="#">Links</a></li>
                     <li><a href="#">Pers</a></li>
                       @if(session.get("email") == null) {
-                        <li><a href="@routes.Login.login">Inloggen</a></li>
+                        <li><a href="@routes.Login.login">Aanmelden</a></li>
                       } else {
                           <li><a href="@routes.Login.logout">Afmelden</a></li>
                       }

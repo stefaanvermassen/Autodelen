@@ -34,7 +34,9 @@ GET         /infosession                       controllers.InfoSessions.showUpco
 GET         /infosession/enroll                controllers.InfoSessions.enrollSession(id: Int)
 GET         /infosession/unenroll              controllers.InfoSessions.unenrollSession()
 GET         /infosession/view                  controllers.InfoSessions.detail(id: Int)
-GET         /infosession/removeAttendee        controllers.InfoSessions.removeUserFromSession(sessionId: Int, userEmail: String)
+GET         /infosession/removeAttendee        controllers.InfoSessions.removeUserFromSession(sessionId: Int, userId: Int)
+GET         /infosession/edit                  controllers.InfoSessions.editSession(sessionId: Int)
+POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 
 # Emailtemplates
 GET         /emailtemplate                     controllers.EmailTemplates.showExistingTemplates()

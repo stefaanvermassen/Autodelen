@@ -31,9 +31,25 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement registerUserForSession;
     private PreparedStatement unregisterUserForSession;
     private PreparedStatement getAttendeesForSession;
+    private PreparedStatement setAddressForSession;
+    private PreparedStatement setTimeForSession;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getSetAddressForSession() throws SQLException {
+        if(setAddressForSession == null){
+            setAddressForSession = connection.prepareStatement("UPDATE infosessions SET infosession_address_id = ? WHERE infosession_id = ?");
+        }
+        return setAddressForSession;
+    }
+
+    private PreparedStatement getSetTimeForSession() throws SQLException {
+        if(setTimeForSession == null){
+            setTimeForSession = connection.prepareStatement("UPDATE infosessions SET infosession_timestamp = ? WHERE infosession_id = ?");
+        }
+        return setTimeForSession;
     }
 
     private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
@@ -150,6 +166,12 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
     }
 
+    /**
+     * Updates the time field only
+     * @param id
+     * @return
+     * @throws DataAccessException
+     */
     @Override
     public boolean deleteInfoSession(int id) throws DataAccessException {
         throw new RuntimeException();
@@ -175,8 +197,36 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public void updateInfoSession(InfoSession session) throws DataAccessException {
-        throw new RuntimeException();
+    public void updateInfosessionTime(InfoSession session) throws DataAccessException {
+        if(session.getId() == 0)
+            throw new DataAccessException("Cannot update time field on unsaved session.");
+
+        try {
+            PreparedStatement ps = getSetTimeForSession();
+            ps.setTimestamp(1, new Timestamp(session.getTime().getMillis()));
+            ps.setInt(2, session.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating time on infosession.");
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to update infosession timestamp.", ex);
+        }
+    }
+
+    @Override
+    public void updateInfoSessionAddress(InfoSession session) throws DataAccessException {
+        Address address = session.getAddress();
+        if(address == null || session.getId() == 0 || address.getId() == 0)
+            throw new DataAccessException("Failed to update session. Address or session doesn't exist in database.");
+
+        try {
+            PreparedStatement ps = getSetAddressForSession();
+            ps.setInt(1, address.getId());
+            ps.setInt(2, session.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Address update for InfoSession did not affect any row.");
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to update address for infosession.", ex);
+        }
     }
 
     @Override
