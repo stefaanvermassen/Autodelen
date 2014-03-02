@@ -38,7 +38,8 @@ GET         /infosession/removeAttendee        controllers.InfoSessions.removeUs
 
 # Emailtemplates
 GET         /emailtemplate                     controllers.EmailTemplates.showExistingTemplates()
-GET         /emailtemplate/edit                controllers.EmailTemplates.edit(id: Int)
+GET         /emailtemplate/edit                controllers.EmailTemplates.showTemplate(id: Int)
+POST        /emailtemplate/edit                controllers.EmailTemplates.editTemplate()
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                      controllers.Assets.at(path="/public", file)

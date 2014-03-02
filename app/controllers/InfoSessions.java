@@ -9,8 +9,9 @@ import org.joda.time.format.DateTimeFormatter;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Security;
-import views.html.infosession.*;
+import views.html.infosession.detail;
+import views.html.infosession.infosessions;
+import views.html.infosession.newInfosession;
 
 import java.util.List;
 

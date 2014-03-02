@@ -20,6 +20,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
     private PreparedStatement getTemplateByIdStatement;
     private PreparedStatement getTagsByTemplateIdStatement;
     private PreparedStatement getAllTemplatesStatement;
+    private PreparedStatement updateTemplateStatement;
 
     public JDBCTemplateDAO(Connection connection) {
         this.connection = connection;
@@ -39,6 +40,13 @@ public class JDBCTemplateDAO implements TemplateDAO {
                     "FROM Templates;");
         }
         return getAllTemplatesStatement;
+    }
+
+    private PreparedStatement getUpdateTemplateStatement() throws SQLException {
+        if (updateTemplateStatement == null) {
+            updateTemplateStatement = connection.prepareStatement("UPDATE Templates SET template_body = ? WHERE template_id = ?;");
+        }
+        return updateTemplateStatement;
     }
 
     public EmailTemplate populateEmailTemplate(ResultSet rs) throws SQLException {
@@ -97,7 +105,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
                 throw new DataAccessException("Error reading emailtemplate resultset", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch emailtemplate by title.", ex);
+            throw new DataAccessException("Could not fetch emailtemplate by id.", ex);
         }
     }
 
@@ -121,7 +129,15 @@ public class JDBCTemplateDAO implements TemplateDAO {
     }
 
     @Override
-    public void updateTemplate(EmailTemplate template) throws DataAccessException {
+    public void updateTemplate(int templateID, String templateBody) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUpdateTemplateStatement();
+            ps.setString(1, templateBody);
+            ps.setInt(2,templateID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 }
