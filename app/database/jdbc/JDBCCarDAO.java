@@ -90,10 +90,10 @@ public class JDBCCarDAO implements CarDAO{
     }
     
     private PreparedStatement updateCarStatement() throws SQLException {
-        if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? , car_last_edit=? ");
+        if (updateCarStatement == null) {
+            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? , car_last_edit=? ");
         }
-        return createCarStatement;
+        return updateCarStatement;
     }
     
     private PreparedStatement getCarStatement() throws SQLException {
@@ -107,7 +107,8 @@ public class JDBCCarDAO implements CarDAO{
     public Car createCar(String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
 
             //connection.setAutoCommit(false);
-            try (PreparedStatement ps = createCarStatement()) {
+            try {
+            	PreparedStatement ps = createCarStatement();
                 ps.setString(1, type);
                 ps.setString(2, brand);
                 ps.setInt(3, location.getId());
@@ -151,7 +152,8 @@ public class JDBCCarDAO implements CarDAO{
     public void updateCar(Car car) throws DataAccessException {
         try {
             connection.setAutoCommit(false);
-            try (PreparedStatement ps = updateCarStatement()) {
+            try {
+            	PreparedStatement ps = updateCarStatement();
                 ps.setString(1, car.getType());
                 ps.setString(2, car.getBrand());
                 ps.setInt(3, car.getLocation().getId());
