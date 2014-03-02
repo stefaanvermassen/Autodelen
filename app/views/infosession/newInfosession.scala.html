@@ -1,4 +1,5 @@
-@(form: Form[InfoSessions.InfoSessionCreationModel])
+@(form: Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0)
+@* TODO: This file should be renamed since it's also used for editing *@
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
@@ -34,8 +35,7 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
-
-@app("Nieuwe infosessie", stylesheets, scripts) {
+@app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
     <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Infosessies</h1>
@@ -46,12 +46,17 @@
         <div class="col-lg-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Infosessie toevoegen
+                    <i class="fa fa-bar-chart-o fa-fw"></i> @(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie")
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div class="container">
-                    @helper.form(routes.InfoSessions.createNewSession, 'class -> "form-horizontal") {
+                    @helper.form(if (editId == 0) routes.InfoSessions.createNewSession else routes.InfoSessions.editSessionPost(editId), 'class -> "form-horizontal") {
+                        @if(form.hasGlobalErrors) {
+                            <div class="alert alert-danger alert-dismissable">
+                                <strong>Error!</strong> @form.globalError.message
+                            </div>
+                        }
                         <fieldset>
                             <div class="form-group">
                                 <label for="datepicker">Tijdstip:</label>
@@ -66,14 +71,14 @@
                                 <div id="addressTypeRadios">
                                     <div class="radio">
                                         <label>
-                                        <input type="radio" name="addresstype" id="hostAdressRadio" value="host" checked>
-                                        Host adres
+                                            <input type="radio" name="addresstype" id="hostAdressRadio" value="host" checked>
+                                            Host adres
                                         </label>
                                     </div>
                                     <div class="radio">
                                         <label>
-                                        <input type="radio" name="addresstype" id="otherAdressRadio" value="other">
-                                        Ander adres
+                                            <input type="radio" name="addresstype" id="otherAdressRadio" value="other">
+                                            Ander adres
                                         </label>
                                     </div>
                                 </div>
@@ -81,7 +86,7 @@
 
 
                             <div class="form-group">
-                                <div id="otherAddress" style="display: none">
+                                <div id="otherAddress" style="display:none;">
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="address_street"></label>
                                         <div class="col-md-12">
@@ -92,21 +97,21 @@
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="address_number"></label>
                                         <div class="col-md-12">
-                                            <input id="address_number" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
+                                            <input id="address_number" maxlength="9" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="address_bus"></label>
                                         <div class="col-md-12">
-                                            <input id="address_bus" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
+                                            <input id="address_bus" maxlength="3" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="address_zip"></label>
                                         <div class="col-md-12">
-                                            <input id="address_zip" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
+                                            <input id="address_zip" maxlength="11" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
                                         </div>
                                     </div>
 
@@ -122,7 +127,7 @@
                             <div class="form-group">
                                 <label class="col-md-1 control-label" for="create"></label>
                                 <div class="col-md-12">
-                                    <button type="submit" id="create" name="create" class="btn btn-block btn-success">Toevoegen</button>
+                                    <button type="submit" id="create" name="create" class="btn btn-block btn-success">@{ if(editId == 0) "Toevoegen" else "Bewerken" }</button>
                                 </div>
                             </div>
                         </fieldset>

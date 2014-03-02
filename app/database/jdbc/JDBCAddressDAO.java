@@ -18,6 +18,8 @@ public class JDBCAddressDAO implements AddressDAO {
     private Connection connection;
     private PreparedStatement getAddressStatement;
     private PreparedStatement createAddressStatement;
+    private PreparedStatement deleteAddressStatement;
+    private PreparedStatement updateAddressStatement;
 
     private static final String[] AUTO_GENERATED_KEYS = {"address_id"};
 
@@ -26,6 +28,19 @@ public class JDBCAddressDAO implements AddressDAO {
             getAddressStatement = connection.prepareStatement("SELECT address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
         }
         return getAddressStatement;
+    }
+
+    private PreparedStatement getUpdateAddressStatement() throws SQLException {
+        if(updateAddressStatement == null){
+            updateAddressStatement = connection.prepareStatement("UPDATE addresses SET address_city = ?, address_zipcode = ?, address_street = ?, address_street_number = ?, address_street_bus = ? WHERE address_id = ?");
+        }
+        return updateAddressStatement;
+    }
+    private PreparedStatement getDeleteAddressStatement() throws SQLException {
+        if(deleteAddressStatement == null){
+            deleteAddressStatement = connection.prepareStatement("DELETE FROM addresses WHERE address_id = ?");
+        }
+        return deleteAddressStatement;
     }
 
     private PreparedStatement getCreateAddressStatement() throws SQLException {
@@ -85,5 +100,38 @@ public class JDBCAddressDAO implements AddressDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create address.", ex);
         }
+    }
+
+    @Override
+    public void deleteAddress(Address address) throws DataAccessException {
+        if(address.getId() == 0)
+            throw new DataAccessException("Cannot delete address that doesn't have an ID");
+
+        try {
+            PreparedStatement ps = getDeleteAddressStatement();
+            ps.setInt(1, address.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when deleting address with ID=" + address.getId());
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to execute address deletion query.", ex);
+        }
+    }
+
+    @Override
+    public void updateAddress(Address address) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUpdateAddressStatement();
+            ps.setString(1, address.getCity());
+            ps.setString(2, address.getZip());
+            ps.setString(3, address.getStreet());
+            ps.setString(4, address.getNumber());
+            ps.setString(5, address.getBus());
+            ps.setInt(6, address.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Address update affected 0 rows.");
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to update address.", ex);
+        }
+
     }
 }
