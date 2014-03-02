@@ -116,7 +116,8 @@ public class InfoSessions extends Controller {
                 }
 
                 try {
-                    boolean addressWasAtHost = session.getHost().getAddress() != null && session.getHost().getAddress().getId() == session.getAddress().getId();
+                  //TODO:  boolean addressWasAtHost = session.getHost().getAddress() != null && session.getHost().getAddress().getId() == session.getAddress().getId();
+                    boolean addressWasAtHost = true;
                     if (!"host".equals(editForm.get().addresstype) && !addressWasAtHost) {
                         // We have to create a new address
                         AddressDAO adao = context.getAddressDAO();
