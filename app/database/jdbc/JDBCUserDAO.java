@@ -17,8 +17,13 @@ public class JDBCUserDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 
+    private static final String USER_QUERY = "SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
+            "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
+            "FROM users LEFT JOIN addresses on address_id = user_address_domicile_id";
+
     private Connection connection;
     private PreparedStatement getUserByEmailStatement;
+    private PreparedStatement getUserByIdStatement;
     private PreparedStatement createUserStatement;
     private PreparedStatement updateUserStatement;
     private PreparedStatement deleteUserStatement;
@@ -36,16 +41,21 @@ public class JDBCUserDAO implements UserDAO {
     
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement("SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
-                    "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
-                    "FROM Users INNER JOIN Addresses on address_id = user_address_domicile_id WHERE user_email = ?;");
+            getUserByEmailStatement = connection.prepareStatement(USER_QUERY + " WHERE user_email = ?");
         }
         return getUserByEmailStatement;
     }
 
+    private PreparedStatement getGetuserByIdStatement() throws SQLException {
+        if(getUserByIdStatement == null){
+            getUserByIdStatement = connection.prepareStatement(USER_QUERY + " WHERE user_id = ?");
+        }
+        return getUserByIdStatement;
+    }
+
     private PreparedStatement getCreateUserStatement() throws SQLException {
         if (createUserStatement == null) {
-            createUserStatement = connection.prepareStatement("INSERT INTO Users(user_email, user_password, user_firstname, user_lastname, user_phone, user_address_domicile_id) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
     }
@@ -69,10 +79,9 @@ public class JDBCUserDAO implements UserDAO {
             PreparedStatement ps = getUserByEmailStatement();
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                // TODO: if Address is null second argument of populateUser should be false
-
-                return populateUser(rs, true, true);               
+                if(rs.next())
+                    return populateUser(rs, true, true);
+                else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
             }
@@ -81,26 +90,37 @@ public class JDBCUserDAO implements UserDAO {
         }
 
     }
+    public User getUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetuserByIdStatement();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return populateUser(rs, true, true);
+                else return null;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading user resultset", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by id.", ex);
+        }
+
+    }
 
     @Override
-    public User createUser(String email, String password, String firstName, String lastName, String phone, Address address) throws DataAccessException {
+    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
         try {
-        	PreparedStatement ps = getCreateUserStatement();
+            PreparedStatement ps = getCreateUserStatement();
             ps.setString(1, email);
             ps.setString(2, password);
             ps.setString(3, firstName);
             ps.setString(4, lastName);
-            ps.setString(5, phone);
-
-            if (address != null) {
-                ps.setInt(6, address.getId());
-            } else ps.setNull(6, Types.INTEGER);
 
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 connection.commit();
-                return new User(keys.getInt(1), email, firstName, lastName, password, address);
+                return new User(keys.getInt(1), email, firstName, lastName, password, null); //TODO: extra constructor
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
             }

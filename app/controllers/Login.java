@@ -1,14 +1,11 @@
 package controllers;
 
+import controllers.Security.RoleSecured;
 import database.*;
-import models.Address;
 import models.User;
-import play.*;
 import play.data.*;
 
 import views.html.login.*;
-
-import static play.data.Form.*;
 
 import play.mvc.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -29,7 +26,11 @@ public class Login extends Controller {
         public String password;
 
         public String validate() {
-            if (checkLoginModel(this)) {
+            if(email == null || email.length() < 5)
+                return "Emailadres ontbreekt";
+            else if(password == null || password.length() == 0)
+                return "Wachtwoord ontbreekt";
+            else if (checkLoginModel(this)) {
                 return null;
             } else return "Foute gebruikersnaam of wachtwoord.";
         }
@@ -41,14 +42,6 @@ public class Login extends Controller {
         public String password_repeat;
         public String firstName;
         public String lastName;
-        public String phone;
-
-        // Address fields
-        public String address_city;
-        public String address_zip;
-        public String address_street;
-        public String address_number;
-        public String address_bus;
 
         public String validate() {
             //TODO: check valid email format, valid name etc etc
@@ -68,13 +61,22 @@ public class Login extends Controller {
      * @return The login index page
      */
     public static Result login() {
-        if (session("email") == null) {
+        // Allow a force login when the user doesn't exist anymore
+        String email = session("email");
+        if(email != null){
+            if(DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
+                session().clear();
+                email = null;
+            }
+        }
+
+        if (email == null) {
             return ok(
                     login.render(Form.form(LoginModel.class))
             );
         } else {
             return redirect(
-                    routes.Application.index()
+                    routes.Dashboard.index()
             );
         }
     }
@@ -93,7 +95,7 @@ public class Login extends Controller {
             session().clear();
             session("email", loginForm.get().email);
             return redirect(
-                    routes.Application.index() // return to index page, authentication success
+                    routes.Dashboard.index() // go to dashboard page, authentication success
             );
         }
     }
@@ -110,7 +112,7 @@ public class Login extends Controller {
             );
         } else {
             return redirect(
-                    routes.Application.index()
+                    routes.Login.login()
             );
         }
     }
@@ -125,7 +127,7 @@ public class Login extends Controller {
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
-        //TODO: captcha
+        //TODO: email verification
 
         Form<RegisterModel> registerForm = Form.form(RegisterModel.class).bindFromRequest();
         if (registerForm.hasErrors()) {
@@ -134,10 +136,9 @@ public class Login extends Controller {
             session().clear();
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                AddressDAO adao = context.getAddressDAO();
                 try {
-                    Address address = adao.createAddress(registerForm.get().address_zip, registerForm.get().address_city, registerForm.get().address_street, registerForm.get().address_number, registerForm.get().address_bus);
-                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password), registerForm.get().firstName, registerForm.get().lastName, registerForm.get().phone,address);
+                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
+                            registerForm.get().firstName, registerForm.get().lastName);
                     context.commit();
 
                     session("email", user.getEmail());
@@ -149,8 +150,6 @@ public class Login extends Controller {
                     throw ex;
                 }
             } catch (DataAccessException ex) {
-                //TODO: send fail message
-
                 throw ex;
             }
         }
@@ -163,7 +162,7 @@ public class Login extends Controller {
      *
      * @return Redirect to index page
      */
-    @Security.Authenticated(Secured.class)
+    @RoleSecured.RoleAuthenticated()
     public static Result logout() {
         DatabaseHelper.getUserProvider().invalidateUser(session("email"));
 

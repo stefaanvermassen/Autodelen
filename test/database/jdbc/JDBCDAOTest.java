@@ -115,7 +115,8 @@ public class JDBCDAOTest {
             String city = sc.next();
 
             Address address = addressDAO.createAddress(zip,city,street,nr,"");
-            User user = userDAO.createUser(email,pass,firstName,lastName,phone,address);
+            User user = userDAO.createUser(email,pass,firstName,lastName);
+            //,phone,address
 
             users.add(user);
             addresses.add(address);
@@ -128,15 +129,15 @@ public class JDBCDAOTest {
      */
     private void getUserTest() {
         for(User user : users) {
-            Address address = user.getAddress();
+            //Address address = user.getAddress();
 
             User returnUser = userDAO.getUser(user.getEmail());
-            Address returnAddress = user.getAddress();
+           //Address returnAddress = user.getAddress();
 
-            Assert.assertEquals(address.getBus(),returnAddress.getBus());
-            Assert.assertEquals(address.getZip(),returnAddress.getZip());
-            Assert.assertEquals(address.getStreet(),returnAddress.getStreet());
-            Assert.assertEquals(address.getCity(),returnAddress.getCity());
+            //Assert.assertEquals(address.getBus(),returnAddress.getBus());
+            //Assert.assertEquals(address.getZip(),returnAddress.getZip());
+            //Assert.assertEquals(address.getStreet(),returnAddress.getStreet());
+            //Assert.assertEquals(address.getCity(),returnAddress.getCity());
             Assert.assertEquals(returnUser.getEmail(),user.getEmail());
             Assert.assertEquals(returnUser.getPassword(),user.getPassword());
             Assert.assertEquals(returnUser.getFirstName(),user.getFirstName());
@@ -148,14 +149,18 @@ public class JDBCDAOTest {
      * First createUsersAndAddresses() has to be called
      */
     private void deleteUsersAndAddresses() {
-        Iterator<User> i = users.iterator();
-        while(i.hasNext()) {
-            User user = i.next();
-            Address address = user.getAddress();
+        Iterator<User> iUsers = users.iterator();
+        while(iUsers.hasNext()) {
+            User user = iUsers.next();
             userDAO.deleteUser(user);
+            iUsers.remove();
+        }
+
+        Iterator<Address> iAddresses = addresses.iterator();
+        while(iAddresses.hasNext()) {
+            Address address = iAddresses.next();
             addressDAO.deleteAddress(address);
-            i.remove();
-            addresses.remove(addresses.indexOf(address));
+            iAddresses.remove();
         }
     }
 
