@@ -61,7 +61,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getUpdateReservationStatement() throws SQLException {
         if (updateReservationStatement == null) {
             updateReservationStatement = connection.prepareStatement("UPDATE CarReservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
-                    + "reservation_from=? , reservation_to=? )");
+                    + "reservation_from=? , reservation_to=? WHERE reservation_id = ?");
         }
         return updateReservationStatement;
     }
@@ -107,8 +107,10 @@ public class JDBCReservationDAO implements ReservationDAO{
             ps.setString(3, reservation.getStatus().toString());
             ps.setTimestamp(4, new Timestamp(reservation.getFrom().getMillis()));
             ps.setTimestamp(5, new Timestamp(reservation.getTo().getMillis()));
+            ps.setInt(6, reservation.getId());
 
-            ps.executeUpdate();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Reservation update affected 0 rows.");
         } catch (SQLException e){
             throw new DataAccessException("Unable to update reservation", e);
         }

@@ -150,7 +150,7 @@ public class JDBCCarDAO implements CarDAO{
     @Override
     public void updateCar(Car car) throws DataAccessException {
         try {
-            connection.setAutoCommit(false);
+            //connection.setAutoCommit(false);
             try {
             	PreparedStatement ps = updateCarStatement();
                 ps.setString(1, car.getType());
@@ -175,11 +175,11 @@ public class JDBCCarDAO implements CarDAO{
 
                 ps.executeUpdate();
                 connection.commit();
-                connection.setAutoCommit(true);
+                //connection.setAutoCommit(true);
 
             } catch (SQLException ex) {
                 connection.rollback();
-                connection.setAutoCommit(true);
+                //connection.setAutoCommit(true);
                 throw new DataAccessException("Failed to commit new car transaction.", ex);
             }
         } catch (SQLException ex) {
