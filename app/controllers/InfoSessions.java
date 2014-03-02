@@ -76,7 +76,8 @@ public class InfoSessions extends Controller {
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
                 model.time = is.getTime().toString(DATEFORMATTER);
-                boolean isHostAddress = is.getHost().getAddress() != null && is.getHost().getAddress().getId() == is.getAddress().getId();
+                //boolean isHostAddress = is.getHost().getAddress() != null && is.getHost().getAddress().getId() == is.getAddress().getId();
+                boolean isHostAddress = true;
                 model.addresstype = isHostAddress ? "host" : "other";
                 if (!isHostAddress) {
                     model.address_city = is.getAddress().getCity();
@@ -85,6 +86,7 @@ public class InfoSessions extends Controller {
                     model.address_number = is.getAddress().getNumber();
                     model.address_bus = is.getAddress().getBus();
                 }
+
                 Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
                 return ok(newInfosession.render(editForm, sessionId));
             }
@@ -124,9 +126,10 @@ public class InfoSessions extends Controller {
                     } else if("host".equals(editForm.get().addresstype) && !addressWasAtHost) {
                         // We change from a host-type address to a seperate address
                         AddressDAO adao = context.getAddressDAO();
-                        adao.deleteAddress(session.getAddress()); //TODO: can we really delete this address?
+                        Address oldAddress = session.getAddress();
                         session.setAddress(session.getHost().getAddress());
                         dao.updateInfoSessionAddress(session);
+                        adao.deleteAddress(oldAddress); //TODO: can we really delete this address?
                     } else if(!addressWasAtHost){ // editable address, 4th option (edit host address isn't allowed)
                         // update address
                         Address address = session.getAddress();
