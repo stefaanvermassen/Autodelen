@@ -17,7 +17,7 @@ import java.util.List;
 public class JDBCTemplateDAO implements TemplateDAO {
 
     private Connection connection;
-    private PreparedStatement getTemplateByTitleStatement;
+    private PreparedStatement getTemplateByIdStatement;
     private PreparedStatement getTagsByTemplateIdStatement;
     private PreparedStatement getAllTemplatesStatement;
 
@@ -26,11 +26,11 @@ public class JDBCTemplateDAO implements TemplateDAO {
     }
 
     private PreparedStatement getTemplateByTitleStatement() throws SQLException {
-        if (getTemplateByTitleStatement == null) {
-            getTemplateByTitleStatement = connection.prepareStatement("SELECT template_id, template_title, template_body " +
-                    "FROM Templates WHERE template_title = ?;");
+        if (getTemplateByIdStatement == null) {
+            getTemplateByIdStatement = connection.prepareStatement("SELECT template_id, template_title, template_body " +
+                    "FROM Templates WHERE template_id = ?;");
         }
-        return getTemplateByTitleStatement;
+        return getTemplateByIdStatement;
     }
 
     private PreparedStatement getAllTemplatesStatement() throws SQLException {
@@ -83,10 +83,10 @@ public class JDBCTemplateDAO implements TemplateDAO {
 
 
     @Override
-    public EmailTemplate getTemplate(String title) throws DataAccessException {
+    public EmailTemplate getTemplate(int templateID) throws DataAccessException {
         try {
             PreparedStatement ps = getTemplateByTitleStatement();
-            ps.setString(1, title);
+            ps.setInt(1,templateID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return populateEmailTemplate(rs);
