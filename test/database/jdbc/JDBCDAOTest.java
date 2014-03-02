@@ -15,10 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by HannesM on 26/02/14.
@@ -47,8 +45,13 @@ public class JDBCDAOTest {
 
     @Test
     public void testUserDAO() throws Exception {
-        createUsersAndAddresses();
-        getUserTest();
+        try {
+            createUsersAndAddresses();
+            getUserTest();
+        } catch(Exception e) {
+            deleteUsersAndAddresses();
+            throw e;
+        }
         deleteUsersAndAddresses();
     }
 
@@ -57,9 +60,15 @@ public class JDBCDAOTest {
      */
     @Test
     public void testCarDAO() throws Exception {
-        createUsersAndAddresses();
-        createCars();
-        getCarTest();
+        try {
+            createUsersAndAddresses();
+            createCars();
+            getCarTest();
+        } catch(Exception e) {
+            deleteCars();
+            deleteUsersAndAddresses();
+            throw e;
+        }
         deleteCars();
         deleteUsersAndAddresses();
     }
@@ -69,10 +78,18 @@ public class JDBCDAOTest {
      */
     @Test
     public void testReservationDAO() throws Exception {
-        createUsersAndAddresses();
-        createCars();
-        createReservations();
-        getReservationTest();
+        try {
+            createUsersAndAddresses();
+            createCars();
+            createReservations();
+            getReservationTest();
+        } catch(Exception e) {
+            deleteReservations();
+            deleteCars();
+            deleteUsersAndAddresses();
+            throw e;
+        }
+
         deleteReservations();
         deleteCars();
         deleteUsersAndAddresses();
@@ -83,7 +100,7 @@ public class JDBCDAOTest {
      */
     private void createUsersAndAddresses() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_users.txt"));
-        sc.useDelimiter("\\t|\\n");
+        sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         while(sc.hasNext()) {
             String email = sc.next();
@@ -147,7 +164,7 @@ public class JDBCDAOTest {
      */
     private void createCars() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
-        sc.useDelimiter("\\t|\\n");
+        sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
 
         while(sc.hasNext()) {
@@ -184,7 +201,8 @@ public class JDBCDAOTest {
             Car returnCar = carDAO.getCar(car.getId());
             Assert.assertEquals(car.getBrand(), returnCar.getBrand());
             Assert.assertEquals(car.getComments(), returnCar.getComments());
-            Assert.assertEquals(car.getLastEdit(), returnCar.getLastEdit());
+            // Last Edit is automatically generated in database and a bit later in Java source code
+            //Assert.assertEquals(car.getLastEdit(), returnCar.getLastEdit());
             Assert.assertEquals(car.getType(), returnCar.getType());
             Assert.assertEquals(car.getDoors(), returnCar.getDoors());
             Assert.assertEquals(car.getEstimatedValue(), returnCar.getEstimatedValue());
@@ -209,19 +227,32 @@ public class JDBCDAOTest {
             i.remove();
         }
     }
-    
+
+    /*
+     * First createCars() has to be called
+     */
     private void createReservations() throws Exception {
     	Scanner sc = new Scanner(new File("test/database/random_reservations.txt"));
-    	Iterator<Car> carIt = cars.iterator();
-    	Iterator<User> userIt = users.iterator();
+        sc.useDelimiter("\\t|\\r\\n");
     	sc.nextLine();
-    	DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
-    	while(carIt.hasNext() && userIt.hasNext() && sc.hasNext()){
-    		DateTime from = formatter.parseDateTime(sc.next());
-    		DateTime to = formatter.parseDateTime(sc.next());
-    		int carid = sc.nextInt(); //not used
-    		int userid = sc.nextInt(); //not used
-    		Reservation reservation = reservationDAO.createReservation(from, to, carIt.next(), userIt.next());
+
+    	while(sc.hasNext()){
+            String fromString = sc.next();
+            Date fromDate = new SimpleDateFormat("M/d/y H:m").parse(fromString);
+            DateTime from = new DateTime(fromDate);
+
+            String toString = sc.next();
+            Date toDate = new SimpleDateFormat("M/d/y H:m").parse(toString);
+            DateTime to = new DateTime(toDate);
+
+    		int carid = sc.nextInt();
+            Car car = cars.get(carid-1);
+
+    		int userid = sc.nextInt();
+            User user = users.get(userid-1);
+
+    		Reservation reservation = reservationDAO.createReservation(from, to, car, user);
+
     		reservations.add(reservation);
     	}
     	sc.close();

@@ -44,7 +44,7 @@ public class JDBCCarDAO implements CarDAO{
         Car car = new Car();
         car.setId(rs.getInt("car_id"));
         car.setBrand(rs.getString("car_brand"));
-        car.setType(rs.getString("car_brand"));
+        car.setType(rs.getString("car_type"));
         car.setComments(rs.getString("car_comments"));
         car.setDoors(rs.getInt("car_doors"));
         car.setEstimatedValue(rs.getInt("car_estimated_value"));
@@ -63,9 +63,8 @@ public class JDBCCarDAO implements CarDAO{
         car.setLocation(location);
 
         User user;
-        if(withAddress) {
-            UserProvider up = new UserProvider(new JDBCDataAccessProvider());
-            user = up.getUser(rs.getString("user_id"));
+        if(withUser) {
+            user = JDBCUserDAO.populateUser(rs, false, false);
         } else {
             user = null;
         }
@@ -98,7 +97,7 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement getCarStatement() throws SQLException {
         if (getCarStatement == null) {
-            getCarStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.car_location=Cars.address_id INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE car_id=?");
+            getCarStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE car_id=?");
         }
         return getCarStatement;
     }
@@ -137,7 +136,7 @@ public class JDBCCarDAO implements CarDAO{
                     keys.next();
                     connection.commit();
                     //connection.setAutoCommit(true);
-                    return new Car(keys.getInt(1), type, brand, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
+                    return new Car(keys.getInt(1), brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
                 } catch (SQLException ex) {
                     throw new DataAccessException("Failed to get primary key for new user.", ex);
                 }

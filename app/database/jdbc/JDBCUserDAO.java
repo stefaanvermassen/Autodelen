@@ -71,6 +71,7 @@ public class JDBCUserDAO implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 // TODO: if Address is null second argument of populateUser should be false
+
                 return populateUser(rs, true, true);               
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);

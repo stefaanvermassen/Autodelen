@@ -20,6 +20,7 @@ public class Reservation {
     private DateTime to;
 
     public Reservation(int id, Car car, User user, DateTime from, DateTime to) {
+        this.id = id;
         this.car = car;
         this.user = user;
         this.from = from;

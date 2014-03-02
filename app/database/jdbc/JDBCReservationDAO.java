@@ -52,8 +52,8 @@ public class JDBCReservationDAO implements ReservationDAO{
     
     private PreparedStatement getCreateReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
-            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservation_user_id, reservation_car_id, reservation_status"
-                    + "reservation_from, reservation_to) VALUES (?,?,?,?,?)");
+            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservation_user_id, reservation_car_id, reservation_status,"
+                    + "reservation_from, reservation_to) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createReservationStatement;
     }
@@ -68,8 +68,7 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private PreparedStatement getGetReservationStatement() throws SQLException {
         if (getReservationStatement == null) {
-            // TODO: INNER JOINS with Cars, Users, Addresses (for Users), Addresses (for Cars)
-            getReservationStatement = connection.prepareStatement("SELECT * FROM CarReservations WHERE reservation_id=?");
+            getReservationStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id WHERE reservation_id=?");
         }
         return getReservationStatement;
     }
@@ -88,6 +87,7 @@ public class JDBCReservationDAO implements ReservationDAO{
             
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
+                connection.commit();
                 return new Reservation(keys.getInt(1), car, user, from, to);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new reservation.", ex);
