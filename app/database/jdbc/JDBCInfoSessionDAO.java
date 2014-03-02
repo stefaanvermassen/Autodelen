@@ -189,10 +189,10 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                 }
                 return sessions;
             } catch (SQLException ex) {
-                throw new DataAccessException("Error reading user resultset", ex);
+                throw new DataAccessException("Error reading infosession resultset", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch user by email.", ex);
+            throw new DataAccessException("Could not infosessions.", ex);
         }
     }
 
