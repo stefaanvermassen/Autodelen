@@ -1,5 +1,13 @@
 package database.jdbc;
 
+
+import database.AddressDAO;
+import database.CarDAO;
+import database.DataAccessContext;
+import database.InfoSessionDAO;
+import database.ReservationDAO;
+import database.UserDAO;
+import database.UserRoleDAO;
 import database.*;
 
 import java.sql.Connection;
@@ -14,8 +22,11 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private UserDAO userDAO;
     private InfoSessionDAO infoSessionDAO;
     private AddressDAO addressDAO;
+    private ReservationDAO reservationDAO;
+    private CarDAO carDAO;
+    private UserRoleDAO userRoleDAO;
     private TemplateDAO templateDAO;
-
+    
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
         try {
@@ -89,4 +100,28 @@ public class JDBCDataAccessContext implements DataAccessContext {
             //TODO ??
         }
     }
+
+	@Override
+	public CarDAO getCarDAO() {
+		if(carDAO == null){
+            carDAO = new JDBCCarDAO(connection);
+        }
+        return carDAO;
+	}
+
+	@Override
+	public ReservationDAO getReservationDAO() {
+		if(reservationDAO == null){
+            reservationDAO = new JDBCReservationDAO(connection);
+        }
+        return reservationDAO;
+	}
+
+	@Override
+	public UserRoleDAO getUserRoleDAO() {
+		if(userRoleDAO == null){
+			userRoleDAO = new JDBCUserRoleDAO(connection);
+        }
+        return userRoleDAO;
+	}
 }

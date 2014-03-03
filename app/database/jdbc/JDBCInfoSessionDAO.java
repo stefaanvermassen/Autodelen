@@ -94,7 +94,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getCreateInfoSessionStatement() throws SQLException {
         if (createInfoSessionStatement == null) {
-            createInfoSessionStatement = connection.prepareStatement("INSERT INTO infosessions(infosession_timestamp, infosession_address_id, infosession_host_user_id) VALUES (?,?,?)",
+            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_timestamp, infosession_address_id, infosession_host_user_id) VALUES (?,?,?)",
                     new String[]{"infosession_id"});
         }
         return createInfoSessionStatement;
@@ -137,7 +137,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                 throw new DataAccessException("Failed to get primary key for new infosession.", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch infosessions after date.", ex);
+            throw new DataAccessException("Could not create infosession.", ex);
         }
     }
 

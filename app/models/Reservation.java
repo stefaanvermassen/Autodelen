@@ -4,6 +4,8 @@
  */
 package models;
 
+import org.joda.time.DateTime;
+
 /**
  *
  * @author Laurent
@@ -14,10 +16,11 @@ public class Reservation {
     private ReservationStatus status;
     private Car car;
     private User user;
-    private String from;
-    private String to;
+    private DateTime from;
+    private DateTime to;
 
-    public Reservation(int id, Car car, User user, String from, String to) {
+    public Reservation(int id, Car car, User user, DateTime from, DateTime to) {
+        this.id = id;
         this.car = car;
         this.user = user;
         this.from = from;
@@ -53,19 +56,19 @@ public class Reservation {
         this.user = user;
     }
 
-    public String getFrom() {
+    public DateTime getFrom() {
         return from;
     }
 
-    public void setFrom(String from) {
+    public void setFrom(DateTime from) {
         this.from = from;
     }
 
-    public String getTo() {
+    public DateTime getTo() {
         return to;
     }
 
-    public void setTo(String to) {
+    public void setTo(DateTime to) {
         this.to = to;
     }
     

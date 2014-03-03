@@ -5,8 +5,11 @@ import database.DataAccessException;
 import database.DataAccessProvider;
 import database.UserDAO;
 import models.Address;
+import models.UserRole;
 import play.cache.Cache;
 import models.User;
+
+import java.util.EnumSet;
 
 /**
  * Created by Cedric on 2/20/14.
@@ -86,4 +89,10 @@ public class UserProvider implements UserDAO {
     public void updateUser(User user) throws DataAccessException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+	@Override
+	public void deleteUser(User user) throws DataAccessException {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -8,6 +8,7 @@ import models.User;
 import models.UserRole;
 
 import java.sql.*;
+import java.util.EnumSet;
 
 /**
  * Created by Cedric on 2/16/14.
@@ -24,11 +25,20 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getUserByEmailStatement;
     private PreparedStatement getUserByIdStatement;
     private PreparedStatement createUserStatement;
+    private PreparedStatement updateUserStatement;
+    private PreparedStatement deleteUserStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
     }
-
+    
+    private PreparedStatement getDeleteUserStatement() throws SQLException {
+    	if(deleteUserStatement == null){
+    		deleteUserStatement = connection.prepareStatement("DELETE FROM Users WHERE user_id = ?");
+    	}
+    	return deleteUserStatement;
+    }
+    
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
             getUserByEmailStatement = connection.prepareStatement(USER_QUERY + " WHERE user_email = ?");
@@ -48,6 +58,13 @@ public class JDBCUserDAO implements UserDAO {
             createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createUserStatement;
+    }
+    
+    private PreparedStatement getUpdateUserStatement() throws SQLException {
+    	if (updateUserStatement == null){
+    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=? WHERE user_id = ?");
+    	}
+    	return updateUserStatement;
     }
 
     public static User populateUser(ResultSet rs, boolean withPassword, boolean withAddress) throws SQLException {
@@ -73,8 +90,6 @@ public class JDBCUserDAO implements UserDAO {
         }
 
     }
-
-    @Override
     public User getUser(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getGetuserByIdStatement();
@@ -94,7 +109,8 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        try (PreparedStatement ps = getCreateUserStatement()) {
+        try {
+            PreparedStatement ps = getCreateUserStatement();
             ps.setString(1, email);
             ps.setString(2, password);
             ps.setString(3, firstName);
@@ -103,6 +119,7 @@ public class JDBCUserDAO implements UserDAO {
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
+                connection.commit();
                 return new User(keys.getInt(1), email, firstName, lastName, password, null); //TODO: extra constructor
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
@@ -114,6 +131,33 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public void updateUser(User user) throws DataAccessException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    	try {
+    		PreparedStatement ps = getUpdateUserStatement(); 
+    		ps.setString(1, user.getEmail());
+            ps.setString(2, user.getPassword());
+            ps.setString(3, user.getFirstName());
+            ps.setString(4, user.getLastName());
+
+            ps.setInt(5, user.getId());
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("User update affected 0 rows.");
+        	connection.commit();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user", ex);
+        }
     }
+
+	@Override
+	public void deleteUser(User user) throws DataAccessException {
+		try {
+			PreparedStatement ps = getDeleteUserStatement();
+			ps.setInt(1, user.getId());
+			ps.executeUpdate();
+			connection.commit();
+		} catch (SQLException ex){
+			throw new DataAccessException("Could not delete user",ex);
+		}
+		
+	}
 }
