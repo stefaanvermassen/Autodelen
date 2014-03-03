@@ -22,13 +22,9 @@ import java.util.Map;
  */
 public class EmailTemplates extends Controller {
 
-    public static class EmailTemplateEditModel {
-        public int id;
-        public String template_body;
 
-    }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated()
     public static Result showExistingTemplates() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDao();
@@ -40,7 +36,7 @@ public class EmailTemplates extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated()
     public static Result showTemplate(int templateId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDao();
@@ -56,7 +52,7 @@ public class EmailTemplates extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated()
     public static Result editTemplate() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDao();
