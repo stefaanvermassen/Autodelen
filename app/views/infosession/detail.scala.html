@@ -46,8 +46,28 @@
                                     <td>@enrollee.getUser</td>
                                     @if(isAdmin) {
                                         <td>
-                                            <a class="btn btn-warning" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">
-                                                Verwijderen</a>
+                                            <div class="btn-group btn-group-xs">
+                                                <a class="btn btn-warning btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">Verwijderen</a>
+
+                                                @* Allow status to be changed to Absent or present *@
+                                                @if(enrollee.getStatus != EnrollementStatus.ENROLLED) {
+                                                    <a class="btn btn-default" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ENROLLED.name())">Te bepalen</a>
+                                                } else {
+                                                    <a disabled="disabled" class="btn btn-default active" href="#">Te bepalen</a>
+                                                }
+
+                                                @if(enrollee.getStatus != EnrollementStatus.PRESENT) {
+                                                    <a class="btn btn-success" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.PRESENT.name())">Aanwezig</a>
+                                                } else {
+                                                    <a disabled="disabled" class="btn btn-success active" href="#">Aanwezig</a>
+                                                }
+
+                                                @if(enrollee.getStatus != EnrollementStatus.ABSENT) {
+                                                    <a class="btn btn-danger" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ABSENT.name())">Afwezig</a>
+                                                } else {
+                                                    <a disabled="disabled" class="btn btn-danger active" href="#">Afwezig</a>
+                                                }
+                                                </div>
                                         </td>
                                     }
                                 </tr>
@@ -58,7 +78,7 @@
                 </div>
             </div>
         } else {
-            <div class="alert alert-success">Er zijn nog geen inschrijvingen voor deze infosessie.</div>
+            <div class="alert alert-success"><span class="glyphicon glyphicon-info-sign"></span> Er zijn nog geen inschrijvingen voor deze infosessie.</div>
         }
 
     }

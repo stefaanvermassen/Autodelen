@@ -33,6 +33,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getAttendeesForSession;
     private PreparedStatement setAddressForSession;
     private PreparedStatement setTimeForSession;
+    private PreparedStatement setUserEnrollmentStatusForSession;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
@@ -43,6 +44,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             setAddressForSession = connection.prepareStatement("UPDATE infosessions SET infosession_address_id = ? WHERE infosession_id = ?");
         }
         return setAddressForSession;
+    }
+
+    private PreparedStatement getSetUserEnrollmentStatusForSession() throws SQLException {
+        if(setUserEnrollmentStatusForSession == null){
+            setUserEnrollmentStatusForSession = connection.prepareStatement("UPDATE infosessionenrollees SET enrollment_status = ? WHERE infosession_enrollee_id = ? AND infosession_id = ?");
+        }
+        return setUserEnrollmentStatusForSession;
     }
 
     private PreparedStatement getSetTimeForSession() throws SQLException {
@@ -189,10 +197,10 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                 }
                 return sessions;
             } catch (SQLException ex) {
-                throw new DataAccessException("Error reading user resultset", ex);
+                throw new DataAccessException("Error reading infosession resultset", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch user by email.", ex);
+            throw new DataAccessException("Could not infosessions.", ex);
         }
     }
 
@@ -241,6 +249,22 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
        } catch(SQLException ex) {
             throw new DataAccessException("Failed to prepare statement for user registration with infosession.", ex);
        }
+    }
+
+    @Override
+    public void setUserEnrollmentStatus(InfoSession session, User user, EnrollementStatus status) throws DataAccessException {
+        if(session.getId() == 0 || user.getId() == 0)
+            throw new DataAccessException("Cannot update enrollmentstatus for unsaved session or user.");
+        try {
+            PreparedStatement ps = getSetUserEnrollmentStatusForSession();
+            ps.setString(1, status.name());
+            ps.setInt(2, user.getId());
+            ps.setInt(3, session.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Failed to update enrollment status. Affected rows = 0");
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to update enrollment status.", ex);
+        }
     }
 
     @Override
