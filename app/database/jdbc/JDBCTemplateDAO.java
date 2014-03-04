@@ -67,11 +67,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
             PreparedStatement ps = getTagsByTemplateIdStatement();
             ps.setInt(1,templateId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateTagList(rs);
-                }else{
-                    return null;
-                }
+                return populateTagList(rs);
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading emailtags resultset", ex);
             }
