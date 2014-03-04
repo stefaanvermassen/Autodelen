@@ -14,7 +14,7 @@ import java.util.EnumSet;
 /**
  * Created by Cedric on 2/20/14.
  */
-public class UserProvider implements UserDAO {
+public class UserProvider {
 
     private static final String USER_BY_EMAIL = "user:email:%s";
 
@@ -24,31 +24,12 @@ public class UserProvider implements UserDAO {
         this.provider = provider;
     }
 
-    @Override
     public User getUser(String email) throws DataAccessException {
         return getUser(email, true);
     }
 
-    @Override
     public User getUser(int userId) throws DataAccessException {
         throw new RuntimeException("Users aren't cached by ID (yet?)");
-    }
-
-    @Override
-    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        String key = String.format(USER_BY_EMAIL, email);
-        try (DataAccessContext context = provider.getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.createUser(email, password, firstName, lastName);
-            if (user != null) { // cache and return
-                Cache.set(key, user);
-                return user;
-            } else {
-                return null;
-            }
-        } catch (DataAccessException ex) {
-            return null; //TODO: log
-        }
     }
 
     public void invalidateUser(String email) {
@@ -85,14 +66,26 @@ public class UserProvider implements UserDAO {
         }
     }
 
-    @Override
     public void updateUser(User user) throws DataAccessException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try (DataAccessContext context = provider.getDataAccessContext()) {
+            invalidateUser(user.getEmail());
+            UserDAO dao = context.getUserDAO();
+            dao.updateUser(user);
+            context.commit();
+        } catch(DataAccessException ex){
+            throw ex;
+        }
     }
 
-	@Override
 	public void deleteUser(User user) throws DataAccessException {
-		// TODO Auto-generated method stub
-		
+        try (DataAccessContext context = provider.getDataAccessContext()) {
+            invalidateUser(user.getEmail());
+            UserDAO dao = context.getUserDAO();
+            dao.deleteUser(user);
+            context.commit();
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+
 	}
 }

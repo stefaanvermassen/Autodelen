@@ -3,6 +3,7 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import models.User;
+import models.VerificationType;
 import play.data.*;
 
 import views.html.login.*;
@@ -26,9 +27,9 @@ public class Login extends Controller {
         public String password;
 
         public String validate() {
-            if(email == null || email.length() < 5)
+            if (email == null || email.length() < 5)
                 return "Emailadres ontbreekt";
-            else if(password == null || password.length() == 0)
+            else if (password == null || password.length() == 0)
                 return "Wachtwoord ontbreekt";
             else if (checkLoginModel(this)) {
                 return null;
@@ -47,7 +48,7 @@ public class Login extends Controller {
             //TODO: check valid email format, valid name etc etc
             if (password == null || password.length() < 8)
                 return "Wachtwoord moet minstens 8 tekens bevatten.";
-            else if(!password.equals(password_repeat))
+            else if (!password.equals(password_repeat))
                 return "Wachtwoord komt niet overeen.";
             else
                 return null;
@@ -63,8 +64,8 @@ public class Login extends Controller {
     public static Result login() {
         // Allow a force login when the user doesn't exist anymore
         String email = session("email");
-        if(email != null){
-            if(DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
+        if (email != null) {
+            if (DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
                 session().clear();
                 email = null;
             }
@@ -134,23 +135,34 @@ public class Login extends Controller {
             return badRequest(register.render(registerForm));
         } else {
             session().clear();
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                UserDAO dao = context.getUserDAO();
-                try {
-                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
-                            registerForm.get().firstName, registerForm.get().lastName);
-                    context.commit();
+            User otherUser = DatabaseHelper.getUserProvider().getUser(registerForm.get().email);
+            if (otherUser != null) {
+                registerForm.error("Er bestaat reeds een gebruiker met dit emailadres.");
+                return badRequest(register.render(registerForm));
+            } else {
+                try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                    UserDAO dao = context.getUserDAO();
+                    try {
+                        User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
+                                registerForm.get().firstName, registerForm.get().lastName);
 
-                    session("email", user.getEmail());
-                    return redirect(
-                            routes.Application.index() // return to index page, registration success
-                    );
-                } catch(DataAccessException ex){
-                    context.rollback();
+
+                        // Now we create a registration UUID
+                        String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION); //TODO: send this in an email
+
+                        context.commit();
+
+                        session("email", user.getEmail());
+                        return redirect(
+                                routes.Application.index() // return to index page, registration success
+                        );
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
+                    }
+                } catch (DataAccessException ex) {
                     throw ex;
                 }
-            } catch (DataAccessException ex) {
-                throw ex;
             }
         }
     }

@@ -6,6 +6,7 @@ import database.UserDAO;
 import models.Address;
 import models.User;
 import models.UserRole;
+import models.VerificationType;
 
 import java.sql.*;
 import java.util.EnumSet;
@@ -27,14 +28,38 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement createUserStatement;
     private PreparedStatement updateUserStatement;
     private PreparedStatement deleteUserStatement;
+    private PreparedStatement createVerificationStatement;
+    private PreparedStatement getVerificationStatement;
+    private PreparedStatement deleteVerificationStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
     }
+
+    private PreparedStatement getDeleteVerificationStatement() throws SQLException {
+        if(deleteVerificationStatement == null){
+            deleteVerificationStatement = connection.prepareStatement("DELETE FROM Verifications WHERE verification_user_id = ? AND verification_type = ?");
+        }
+        return deleteVerificationStatement;
+    }
+
+    private PreparedStatement getCreateVerificationStatement() throws SQLException {
+        if(createVerificationStatement == null){
+            createVerificationStatement = connection.prepareStatement("INSERT INTO Verifications(verification_ident, verification_user_id, verification_type) VALUES(UUID(),?, ?)");
+        }
+        return createVerificationStatement;
+    }
+
+    private PreparedStatement getGetVerificationStatement() throws SQLException {
+        if(getVerificationStatement == null){
+            getVerificationStatement = connection.prepareStatement("SELECT verification_ident FROM Verifications WHERE verification_user_id = ? AND verification_type = ?");
+        }
+        return getVerificationStatement;
+    }
     
     private PreparedStatement getDeleteUserStatement() throws SQLException {
     	if(deleteUserStatement == null){
-    		deleteUserStatement = connection.prepareStatement("DELETE FROM Users WHERE user_id = ?");
+    		deleteUserStatement = connection.prepareStatement("UPDATE Users SET user_status = 'DROPPED' WHERE user_id = ?");
     	}
     	return deleteUserStatement;
     }
@@ -126,6 +151,55 @@ public class JDBCUserDAO implements UserDAO {
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to commit new user transaction.", ex);
+        }
+    }
+
+    @Override
+    public String getVerificationString(User user, VerificationType type) throws DataAccessException {
+        try {
+
+            PreparedStatement ps = getGetVerificationStatement();
+            ps.setInt(1, user.getId());
+            ps.setString(2, type.name());
+            try(ResultSet rs = ps.executeQuery()){
+                if(!rs.next())
+                    return null;
+                else return rs.getString("verification_ident");
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read verification resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get verification string.", ex);
+        }
+    }
+
+    @Override
+    public String createVerificationString(User user, VerificationType type) throws DataAccessException {
+        try {
+            PreparedStatement ps = getCreateVerificationStatement();
+            ps.setInt(1, user.getId());
+            ps.setString(2, type.name());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Verification string creation failed. Zero rows affected");
+
+            return getVerificationString(user, type); //TODO: this might throw an exception about 2 open connections?
+
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to create verification string.", ex);
+        }
+    }
+
+    @Override
+    public void deleteVerificationString(User user, VerificationType type) throws DataAccessException {
+        try {
+            PreparedStatement ps = getDeleteVerificationStatement();
+            ps.setInt(1, user.getId());
+            ps.setString(2, type.name());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Verification delete operation affected 0 rows.");
+
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to delete verification.", ex);
         }
     }
 
