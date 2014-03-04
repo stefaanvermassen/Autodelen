@@ -3,6 +3,7 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import models.User;
+import models.UserStatus;
 import models.VerificationType;
 import play.data.*;
 
@@ -120,6 +121,40 @@ public class Login extends Controller {
 
     private static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt(12));
+    }
+
+    public static Result register_verification(int userId, String uuid) {
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId);
+            if (user == null) {
+                return badRequest("Deze user bestaat niet."); //TODO: flash
+            } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
+                return badRequest("Deze user hoeft helemaal niet meer gevalideerd te worden."); //TODO: flash
+            } else {
+                String ident = dao.getVerificationString(user, VerificationType.REGISTRATION);
+                if(ident == null){
+                    return badRequest("Oops something went wrong. Missing identifier in database?!!!!! Anyway, contact an administrator.");
+                } else if(ident.equals(uuid)){
+                    dao.deleteVerificationString(user, VerificationType.REGISTRATION);
+                    user.setStatus(UserStatus.REGISTERED);
+
+                    dao.updateUser(user);
+                    context.commit();
+                    DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
+
+                    flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
+                    LoginModel model = new LoginModel();
+                    model.email = user.getEmail();
+                    return ok(login.render(Form.form(LoginModel.class).fill(model)));
+                } else {
+                    return badRequest("De verificatiecode komt niet overeen met onze gegevens. TODO: nieuwe string voorstellen.");
+                }
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     /**
