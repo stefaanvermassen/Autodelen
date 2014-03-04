@@ -23,6 +23,7 @@ POST        /login                             controllers.Login.authenticate()
 GET         /logout                            controllers.Login.logout()
 GET         /register                          controllers.Login.register()
 POST        /register                          controllers.Login.register_process()
+GET         /register/verify                   controllers.Login.register_verification(userId: Int, code: String)
 
 # Calendar
 GET         /calendar                          controllers.Calendar.index()

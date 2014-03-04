@@ -3,6 +3,8 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import models.User;
+import models.UserStatus;
+import models.VerificationType;
 import play.data.*;
 
 import views.html.login.*;
@@ -16,23 +18,16 @@ import org.mindrot.jbcrypt.BCrypt;
  */
 public class Login extends Controller {
 
-    private static boolean checkLoginModel(LoginModel model) {
-        User user = DatabaseHelper.getUserProvider().getUser(model.email);
-        return user != null && BCrypt.checkpw(model.password, user.getPassword());
-    }
-
     public static class LoginModel {
         public String email;
         public String password;
 
         public String validate() {
-            if(email == null || email.length() < 5)
+            if (email == null || email.length() < 5)
                 return "Emailadres ontbreekt";
-            else if(password == null || password.length() == 0)
+            else if (password == null || password.length() == 0)
                 return "Wachtwoord ontbreekt";
-            else if (checkLoginModel(this)) {
-                return null;
-            } else return "Foute gebruikersnaam of wachtwoord.";
+            else return null;
         }
     }
 
@@ -47,7 +42,7 @@ public class Login extends Controller {
             //TODO: check valid email format, valid name etc etc
             if (password == null || password.length() < 8)
                 return "Wachtwoord moet minstens 8 tekens bevatten.";
-            else if(!password.equals(password_repeat))
+            else if (!password.equals(password_repeat))
                 return "Wachtwoord komt niet overeen.";
             else
                 return null;
@@ -63,8 +58,8 @@ public class Login extends Controller {
     public static Result login() {
         // Allow a force login when the user doesn't exist anymore
         String email = session("email");
-        if(email != null){
-            if(DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
+        if (email != null) {
+            if (DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
                 session().clear();
                 email = null;
             }
@@ -92,11 +87,28 @@ public class Login extends Controller {
         if (loginForm.hasErrors()) {
             return badRequest(login.render(loginForm));
         } else {
-            session().clear();
-            session("email", loginForm.get().email);
-            return redirect(
-                    routes.Dashboard.index() // go to dashboard page, authentication success
-            );
+            User user = DatabaseHelper.getUserProvider().getUser(loginForm.get().email);
+            boolean goodCredentials = user != null && BCrypt.checkpw(loginForm.get().password, user.getPassword());
+
+            if(goodCredentials) {
+                if(user.getStatus() == UserStatus.EMAIL_VALIDATING){
+                    loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
+                    //TODO: link aanvraag nieuwe bevestigingscode
+                    return badRequest(login.render(loginForm));
+                } else if(user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED){
+                    loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
+                    return badRequest(login.render(loginForm));
+                } else {
+                    session().clear();
+                    session("email", loginForm.get().email);
+                    return redirect(
+                            routes.Dashboard.index() // go to dashboard page, authentication success
+                    );
+                }
+            } else {
+                loginForm.error("Foute gebruikersnaam of wachtwoord.");
+                return badRequest(login.render(loginForm));
+            }
         }
     }
 
@@ -121,6 +133,41 @@ public class Login extends Controller {
         return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 
+    public static Result register_verification(int userId, String uuid) {
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId);
+            if (user == null) {
+                return badRequest("Deze user bestaat niet."); //TODO: flash
+            } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
+                flash("warning", "Deze gebruiker is reeds gevalideerd.");
+                return badRequest(login.render(Form.form(LoginModel.class))); //We don't include a preset email address here since we could leak ID -> email to public
+            } else {
+                String ident = dao.getVerificationString(user, VerificationType.REGISTRATION);
+                if(ident == null){
+                    return badRequest("Oops something went wrong. Missing identifier in database?!!!!! Anyway, contact an administrator.");
+                } else if(ident.equals(uuid)){
+                    dao.deleteVerificationString(user, VerificationType.REGISTRATION);
+                    user.setStatus(UserStatus.REGISTERED);
+
+                    dao.updateUser(user);
+                    context.commit();
+                    DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
+
+                    flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
+                    LoginModel model = new LoginModel();
+                    model.email = user.getEmail();
+                    return ok(login.render(Form.form(LoginModel.class).fill(model)));
+                } else {
+                    return badRequest("De verificatiecode komt niet overeen met onze gegevens. TODO: nieuwe string voorstellen.");
+                }
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
     /**
      * Method: POST
      *
@@ -134,23 +181,29 @@ public class Login extends Controller {
             return badRequest(register.render(registerForm));
         } else {
             session().clear();
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                UserDAO dao = context.getUserDAO();
-                try {
-                    User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
-                            registerForm.get().firstName, registerForm.get().lastName);
-                    context.commit();
+            User otherUser = DatabaseHelper.getUserProvider().getUser(registerForm.get().email);
+            if (otherUser != null) {
+                registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
+                return badRequest(register.render(registerForm));
+            } else {
+                try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                    UserDAO dao = context.getUserDAO();
+                    try {
+                        User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
+                                registerForm.get().firstName, registerForm.get().lastName);
 
-                    session("email", user.getEmail());
-                    return redirect(
-                            routes.Application.index() // return to index page, registration success
-                    );
-                } catch(DataAccessException ex){
-                    context.rollback();
+                        // Now we create a registration UUID
+                        String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION); //TODO: send this in an email
+                        context.commit();
+
+                        return ok(registrationok.render(user.getId(), verificationIdent));
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
+                    }
+                } catch (DataAccessException ex) {
                     throw ex;
                 }
-            } catch (DataAccessException ex) {
-                throw ex;
             }
         }
     }

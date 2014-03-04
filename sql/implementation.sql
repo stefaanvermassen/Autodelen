@@ -64,7 +64,7 @@ CREATE TABLE `Users` (
 	`user_address_residence_id` INT,
 	`user_driver_license_id` INT,
 	`user_identity_card_id` INT,
-	`user_status` ENUM('VALIDATING', 'REGISTERED', 'INFOSESSION_ENROLLMENT', 'INFOSESSION_PRESENT', 'INFOSESSION_ABSENT', 'DROPPED', 'POTENTIAL', 'FULL') NOT NULL DEFAULT 'REGISTERED', # Stadia die de gebruiker moet doorlopen
+	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_address_residence_id`) REFERENCES Addresses(`address_id`),
@@ -255,3 +255,11 @@ CREATE TABLE `TemplateTagAssociations` ( # Welke tags horen bij welke templates
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
+
+CREATE TABLE `Verifications` (
+	`verification_ident` CHAR(37) NOT NULL,
+	`verification_user_id` INT(11) NOT NULL,
+	`verification_type` ENUM('REGISTRATION','PWRESET') NOT NULL DEFAULT 'REGISTRATION',
+	PRIMARY KEY (`verification_user_id`, `verification_type`),
+	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `Users` (`user_id`)
+)

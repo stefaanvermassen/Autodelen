@@ -9,9 +9,10 @@ package models;
  * @author Laurent
  */
 public enum UserStatus {
+    EMAIL_VALIDATING,
     REGISTERED,
-    INFOSESSION_ENROLLMENT,
-    INFOSESSION_PRESENT,
-    INFOSESSION_ABSENT,
+    FULL_VALIDATING,
+    FULL,
+    BLOCKED,
     DROPPED
 }
