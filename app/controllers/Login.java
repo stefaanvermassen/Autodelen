@@ -184,13 +184,9 @@ public class Login extends Controller {
 
                         // Now we create a registration UUID
                         String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION); //TODO: send this in an email
-
                         context.commit();
 
-                        session("email", user.getEmail());
-                        return redirect(
-                                routes.Application.index() // return to index page, registration success
-                        );
+                        return ok(registrationok.render(user.getId(), verificationIdent));
                     } catch (DataAccessException ex) {
                         context.rollback();
                         throw ex;

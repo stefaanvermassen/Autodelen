@@ -3,10 +3,7 @@ package database.jdbc;
 import database.AddressDAO;
 import database.DataAccessException;
 import database.UserDAO;
-import models.Address;
-import models.User;
-import models.UserRole;
-import models.VerificationType;
+import models.*;
 
 import java.sql.*;
 import java.util.EnumSet;
@@ -18,7 +15,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 
-    private static final String USER_QUERY = "SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, " +
+    private static final String USER_QUERY = "SELECT user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status, " +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus " +
             "FROM users LEFT JOIN addresses on address_id = user_address_domicile_id";
 
@@ -93,9 +90,12 @@ public class JDBCUserDAO implements UserDAO {
     }
 
     public static User populateUser(ResultSet rs, boolean withPassword, boolean withAddress) throws SQLException {
-        return new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname"),
+        User user = new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname"),
                 withPassword ? rs.getString("user_password") : null,
-                withAddress ? JDBCAddressDAO.populateAddress(rs) : null); //TODO: handle null address
+                withAddress ? JDBCAddressDAO.populateAddress(rs) : null);
+
+        user.setStatus(Enum.valueOf(UserStatus.class,  rs.getString("user_status")));
+        return user;
     }
 
     @Override
