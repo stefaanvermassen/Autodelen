@@ -71,7 +71,7 @@
                         }
                     } else if (document.selection && document.selection.type != "Control") {
                         // IE < 9
-                        document.selection.createRange().pasteHTML(html);
+                        document.selection.createRange().pasteHTML(args);
                     }
                 } else {
                     document.execCommand(command, 0, args);
