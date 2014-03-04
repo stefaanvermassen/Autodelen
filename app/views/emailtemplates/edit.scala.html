@@ -1,12 +1,12 @@
 @(template: EmailTemplate)
     @stylesheets = {
-        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
-        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
-        <link href="http://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
-        <script src="http://mindmup.github.io/bootstrap-wysiwyg/external/jquery.hotkeys.js"></script>
-        <script src="http://mindmup.github.io/bootstrap-wysiwyg/external/google-code-prettify/prettify.js"></script>
-        <link href="http://mindmup.github.io/bootstrap-wysiwyg/index.css" rel="stylesheet">
-        <script src="http://mindmup.github.io/bootstrap-wysiwyg/bootstrap-wysiwyg.js"></script>
+        <link href="@routes.Assets.at("javascripts/plugins/editor/bootstrap-combined.no-icons.min.css")" rel="stylesheet">
+        <link href="@routes.Assets.at("javascripts/plugins/editor/bootstrap-responsive.min.css")" rel="stylesheet">
+        <link href="@routes.Assets.at("javascripts/plugins/editor/font-awesome.css")" rel="stylesheet">
+        <script src="@routes.Assets.at("javascripts/jquery.hotkeys.js")"></script>
+        <script src="@routes.Assets.at("javascripts/plugins/editor/prettify.js")"></script>
+        <link href="@routes.Assets.at("javascripts/plugins/editor/index.css")" rel="stylesheet">
+        <script src="@routes.Assets.at("javascripts/plugins/editor/bootstrap-wysiwyg.js")"></script>
     }
 
 
@@ -144,7 +144,7 @@
     $.ajax ( {
     url : '/emailtemplate/edit',
     type : 'POST',
-    data : { 'template_body' : $ ( '#editor' ).html ( ) },
+    data : { 'template_body' : $ ( '#editor' ).cleanHtml() },
     success: function(data, textStatus, request) {
     // data.redirect contains the string URL to redirect to
     window.location.href = data;
