@@ -6,7 +6,6 @@ import database.DataAccessException;
 import database.DatabaseHelper;
 import database.TemplateDAO;
 import models.EmailTemplate;
-import models.MailType;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.emailtemplates.edit;
@@ -57,7 +56,7 @@ public class EmailTemplates extends Controller {
             TemplateDAO dao = context.getTemplateDAO();
             final Map<String, String[]> values = request().body().asFormUrlEncoded();
             String templateBody = values.get("template_body")[0];
-            dao.updateTemplate(1, MailType.REGISTRATION.toString());
+            dao.updateTemplate(1, templateBody); //TODO: template ID
             context.commit();
             return ok(routes.EmailTemplates.showExistingTemplates().toString());
         } catch (DataAccessException ex) {

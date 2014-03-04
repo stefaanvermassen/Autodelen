@@ -4,7 +4,7 @@ package models;
  * Created by stefaan on 04/03/14.
  */
 public enum MailType {
-    REGISTRATION(1);
+    VERIFICATION(1);
     private final int key;
 
     private MailType(final int key) {
