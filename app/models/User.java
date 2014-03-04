@@ -17,7 +17,6 @@ public class User {
     private DriverLicense license;
     private UserStatus status;
     private IdentityCard identityCard;
-    private EnumSet<UserRole> roles = EnumSet.noneOf(UserRole.class);
 
     public User(int id, String email, String firstName, String lastName){
         this(id, email, firstName, lastName, null, null);
@@ -39,7 +38,6 @@ public class User {
         this.password = password;
         this.address = address;
 
-        roles.add(UserRole.USER);
         this.status = UserStatus.REGISTERED;
     }
 
@@ -81,14 +79,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public boolean hasRole(UserRole role) { return roles.contains(role); }
-
-    public void addRole(UserRole role) { roles.add(role); }
-
-    public void dropRole(UserRole role) {
-        roles.remove(role);
     }
 
     public String getPhone() {

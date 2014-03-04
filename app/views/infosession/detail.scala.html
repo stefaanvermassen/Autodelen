@@ -2,7 +2,7 @@
 @import database.DatabaseHelper;
 
 @app("Infosessie") {
-    @defining(DatabaseHelper.getUserProvider.getUser(session.get("email")).hasRole(UserRole.ADMIN)) { isAdmin =>
+    @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.ADMIN)) { isAdmin =>
         <h1>Infosessie</h1>
 
         @if(!flash.isEmpty()) {
