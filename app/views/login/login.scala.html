@@ -24,8 +24,7 @@
             <div class="container">
                 @if(!flash.isEmpty()) {
                     @for((msgKey, msgValue) <- flash) {
-                        <div class="alert alert-@msgKey" data-dismiss="alert">
-                            <a class="close">×</a>
+                        <div class="alert alert-@msgKey">
                             @msgValue
                         </div>
                     }

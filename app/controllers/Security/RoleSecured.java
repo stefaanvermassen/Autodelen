@@ -4,6 +4,7 @@ import controllers.routes;
 import database.DatabaseHelper;
 import models.User;
 import models.UserRole;
+import models.UserStatus;
 import play.libs.F;
 import play.mvc.*;
 import play.mvc.Http.*;
@@ -39,7 +40,7 @@ public class RoleSecured {
                 UserRole[] SecuredRoles = configuration.value();
                 User user = DatabaseHelper.getUserProvider().getUser(ctx.session().get("email"), true);
                 // If user is null, redirect to login page
-                if(user == null)
+                if(user == null || (user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING))
                     return F.Promise.pure(redirect(routes.Login.login()));
 
                 EnumSet<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance

@@ -1,6 +1,8 @@
 @(userId: Int, verification: String = "")
 @* TODO: When mails work this shouldn't show the verification URL anymore, but should be mailed to user *@
-<div class="alert alert-success">
-    <strong>Okay!</strong> Je gebruikersaccount werd succesvol aangemaakt. Je kan je account activeren aan de hand van de email die zodadelijk in je inbox zal belanden!
-</div>
-<a class="btn btn-success" href="@routes.Login.register_verification(userId, verification)">TODO: EMAIL IPV KNOP - Verifieer</a>
+@app("Registratie gelukt") {
+    <div class="alert alert-success">
+        <strong>Okay!</strong> Je gebruikersaccount werd succesvol aangemaakt. Je kan je account activeren aan de hand van de email die zodadelijk in je inbox zal belanden!
+    </div>
+    <a class="btn btn-success" href="@routes.Login.register_verification(userId, verification)">TODO: EMAIL IPV KNOP - Verifieer</a>
+}

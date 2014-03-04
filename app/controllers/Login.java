@@ -18,11 +18,6 @@ import org.mindrot.jbcrypt.BCrypt;
  */
 public class Login extends Controller {
 
-    private static boolean checkLoginModel(LoginModel model) {
-        User user = DatabaseHelper.getUserProvider().getUser(model.email);
-        return user != null && BCrypt.checkpw(model.password, user.getPassword());
-    }
-
     public static class LoginModel {
         public String email;
         public String password;
@@ -32,9 +27,7 @@ public class Login extends Controller {
                 return "Emailadres ontbreekt";
             else if (password == null || password.length() == 0)
                 return "Wachtwoord ontbreekt";
-            else if (checkLoginModel(this)) {
-                return null;
-            } else return "Foute gebruikersnaam of wachtwoord.";
+            else return null;
         }
     }
 
@@ -94,11 +87,28 @@ public class Login extends Controller {
         if (loginForm.hasErrors()) {
             return badRequest(login.render(loginForm));
         } else {
-            session().clear();
-            session("email", loginForm.get().email);
-            return redirect(
-                    routes.Dashboard.index() // go to dashboard page, authentication success
-            );
+            User user = DatabaseHelper.getUserProvider().getUser(loginForm.get().email);
+            boolean goodCredentials = user != null && BCrypt.checkpw(loginForm.get().password, user.getPassword());
+
+            if(goodCredentials) {
+                if(user.getStatus() == UserStatus.EMAIL_VALIDATING){
+                    loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
+                    //TODO: link aanvraag nieuwe bevestigingscode
+                    return badRequest(login.render(loginForm));
+                } else if(user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED){
+                    loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
+                    return badRequest(login.render(loginForm));
+                } else {
+                    session().clear();
+                    session("email", loginForm.get().email);
+                    return redirect(
+                            routes.Dashboard.index() // go to dashboard page, authentication success
+                    );
+                }
+            } else {
+                loginForm.error("Foute gebruikersnaam of wachtwoord.");
+                return badRequest(login.render(loginForm));
+            }
         }
     }
 
@@ -131,7 +141,8 @@ public class Login extends Controller {
             if (user == null) {
                 return badRequest("Deze user bestaat niet."); //TODO: flash
             } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
-                return badRequest("Deze user hoeft helemaal niet meer gevalideerd te worden."); //TODO: flash
+                flash("warning", "Deze gebruiker is reeds gevalideerd.");
+                return badRequest(login.render(Form.form(LoginModel.class))); //We don't include a preset email address here since we could leak ID -> email to public
             } else {
                 String ident = dao.getVerificationString(user, VerificationType.REGISTRATION);
                 if(ident == null){
@@ -172,7 +183,7 @@ public class Login extends Controller {
             session().clear();
             User otherUser = DatabaseHelper.getUserProvider().getUser(registerForm.get().email);
             if (otherUser != null) {
-                registerForm.error("Er bestaat reeds een gebruiker met dit emailadres.");
+                registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
                 return badRequest(register.render(registerForm));
             } else {
                 try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -180,7 +191,6 @@ public class Login extends Controller {
                     try {
                         User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
                                 registerForm.get().firstName, registerForm.get().lastName);
-
 
                         // Now we create a registration UUID
                         String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION); //TODO: send this in an email
