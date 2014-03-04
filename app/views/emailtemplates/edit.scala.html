@@ -46,6 +46,14 @@
                     </ul>
                 </div>
                 <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" title="Tag toevoegen"><i class=" icon-plus-sign"></i>&nbsp;<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    @for((templatetag, index) <- template.getUsableTags.zipWithIndex) {
+                        <li><a data-edit="insertHTML @templatetag">@templatetag</a></li>
+                    }
+                    </ul>
+                </div>
+                <div class="btn-group">
                     <a class="btn" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="icon-bold"></i></a>
                     <a class="btn" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="icon-italic"></i></a>
                     <a class="btn" data-edit="strikethrough" title="Strikethrough"><i class="icon-strikethrough"></i></a>
