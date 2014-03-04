@@ -164,7 +164,9 @@ public class Login extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result logout() {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         DatabaseHelper.getUserProvider().invalidateUser(session("email"));
+        DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
 
         session().clear();
         return redirect(

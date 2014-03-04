@@ -30,16 +30,14 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 
 	private PreparedStatement getInsertUserRolesStatement() throws SQLException{
     	if(insertUserRolesStatement == null){
-    		insertUserRolesStatement = connection.prepareStatement("IF NOT EXISTS (SELECT * FROM UserRoles WHERE userrole_userid"
-    				+ "=? AND userrole_role=?) INSERT INTO UserRoles(userrole_userid, userrole_role) VALUES (?,?) ");    		
+    		insertUserRolesStatement = connection.prepareStatement("INSERT INTO UserRoles(userrole_userid, userrole_role) VALUES (?,?)");
     	}
     	return insertUserRolesStatement;
     }
     
     private PreparedStatement getUserRolesStatement() throws SQLException {
     	if(getUserRolesStatement == null){
-    		getUserRolesStatement = connection.prepareStatement("SELECT userrole_role FROM UserRoles INNER JOIN Users ON "
-    				+ "userrole_userid = user_id WHERE user_id = ?");
+    		getUserRolesStatement = connection.prepareStatement("SELECT userrole_role FROM UserRoles WHERE userrole_userid = ?");
     	}
     	return getUserRolesStatement;
     }
@@ -49,7 +47,7 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 		try {
 			PreparedStatement ps = getUserRolesStatement();
 			ps.setInt(1, userId);
-			EnumSet<UserRole> roleSet = EnumSet.noneOf(UserRole.class);
+			EnumSet<UserRole> roleSet = EnumSet.of(UserRole.USER); // by default
 			try (ResultSet rs = ps.executeQuery()){
 				while(rs.next()){
 						roleSet.add(UserRole.valueOf(rs.getString("userrole_role")));
@@ -69,7 +67,7 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 		try {
 			PreparedStatement ps = getInsertUserRolesStatement();
 			ps.setInt(1, userId);
-			ps.setString(2, role.toString());
+			ps.setString(2, role.name());
 			ps.executeUpdate();
 		} 	catch (SQLException ex) {
 			throw new DataAccessException("Could not add userrole",ex);
@@ -81,7 +79,7 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 		try {
 			PreparedStatement ps = getRemoveUserRolesStatement();
 			ps.setInt(1, userId);
-			ps.setString(2, role.toString());
+			ps.setString(2, role.name());
 			ps.executeUpdate();
 		} 	catch (SQLException ex) {
 			throw new DataAccessException("Could not remove userrole",ex);

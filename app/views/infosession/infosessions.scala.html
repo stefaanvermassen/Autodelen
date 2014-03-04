@@ -16,7 +16,7 @@
     }
 
 @app("Infosessies", stylesheets, scripts) {
-    @defining(DatabaseHelper.getUserProvider.getUser(session.get("email")).hasRole(UserRole.ADMIN)) { isAdmin =>
+    @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.ADMIN)) { isAdmin =>
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Infosessies</h1>

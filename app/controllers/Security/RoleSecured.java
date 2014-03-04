@@ -9,6 +9,7 @@ import play.mvc.*;
 import play.mvc.Http.*;
 
 import java.lang.annotation.*;
+import java.util.EnumSet;
 
 /**
  * Created by Benjamin on 26/02/14.
@@ -40,12 +41,15 @@ public class RoleSecured {
                 // If user is null, redirect to login page
                 if(user == null)
                     return F.Promise.pure(redirect(routes.Login.login()));
+
+                EnumSet<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
+
                 // If user has got one of the specified roles, delegate to the requested page
                 if(SecuredRoles.length == 0)
                     return delegate.call(ctx);
                 else {
                     for(UserRole securedRole : SecuredRoles) {
-                        if(user.hasRole(securedRole))
+                        if(roles.contains(securedRole))
                             return delegate.call(ctx);
                     }
                 }
@@ -55,7 +59,6 @@ public class RoleSecured {
             catch(Throwable t) {
                 throw new RuntimeException(t);
             }
-
         }
 
     }
