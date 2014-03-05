@@ -73,6 +73,7 @@ public class JDBCDAOTest {
 
     /*
      * Also tests Users
+     * You have to manually delete users afterwards because deleteUsers() only changes user_status to DROPPED
      */
     @Test
     public void testCarDAO() throws Exception {
@@ -88,12 +89,38 @@ public class JDBCDAOTest {
             deleteAddresses();
             throw e;
         }
-
         deleteCars();
         deleteUsers();
         deleteAddresses();
     }
 
+    @Test
+    public void testCarDAOWithoutAddresses() throws Exception {
+        try {
+            createUsers();
+            createCarsWithoutAddresses();
+            getCarTest();
+            updateCarTest();
+        } catch(Exception e) {
+            deleteCars();
+            deleteUsers();
+            throw e;
+        }
+        deleteCars();
+        deleteUsers();
+
+    }
+
+    @Test
+    public void testCarDAOWithoutUser() throws Exception {
+        // Now let's try with User == null, but Cars.user_id cannot be null!
+        try {
+            createCarWithoutUser();
+            Assert.fail("Cars.user_id cannot be null, createCarWithoutUser() should throw DataAccesException");
+        } catch(DataAccessException e) {
+
+        }
+    }
     /*
      * Also tests Users and Cars
      */
@@ -252,6 +279,68 @@ public class JDBCDAOTest {
         }
     }
 
+    private void createCarsWithoutAddresses() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine(); // skip header first time
+
+        while(sc.hasNext()) {
+            String brand = sc.next();
+            String type = sc.next();
+            int seats = sc.nextInt();
+            int doors = sc.nextInt();
+            int year = sc.nextInt();
+            boolean gps = sc.nextBoolean();
+            boolean hook = sc.nextBoolean();
+            String fuel = sc.next();
+            CarFuel carFuel = CarFuel.valueOf(fuel);
+            int fuelEconomy = sc.nextInt();
+            int estimatedValue = sc.nextInt();
+            int ownerAnnualKm = sc.nextInt();
+            int owner_id = sc.nextInt();
+
+            // To keep it simple, we take a random user_id, therefore there have to be users in the database/list
+            User user = users.get(owner_id);
+
+            // Null as address
+            Address address = null;
+            String comments = sc.next();
+
+            Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            cars.add(car);
+        }
+        sc.close();
+    }
+
+    private void createCarWithoutUser() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine(); // skip header first time
+        String brand = sc.next();
+        String type = sc.next();
+        int seats = sc.nextInt();
+        int doors = sc.nextInt();
+        int year = sc.nextInt();
+        boolean gps = sc.nextBoolean();
+        boolean hook = sc.nextBoolean();
+        String fuel = sc.next();
+        CarFuel carFuel = CarFuel.valueOf(fuel);
+        int fuelEconomy = sc.nextInt();
+        int estimatedValue = sc.nextInt();
+        int ownerAnnualKm = sc.nextInt();
+        int owner_id = sc.nextInt();
+
+        // Null as user
+        User user = null;
+        // Null as address (should not matter)
+        Address address = null;
+        String comments = sc.next();
+
+        Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+        cars.add(car);
+        sc.close();
+    }
+
     /*
      * First createUsers() and createAddresses() has to be called
      */
@@ -301,8 +390,16 @@ public class JDBCDAOTest {
             Assert.assertEquals(car.getEstimatedValue(), returnCar.getEstimatedValue());
             Assert.assertEquals(car.getFuel(), returnCar.getFuel());
             Assert.assertEquals(car.getFuelEconomy(), returnCar.getFuelEconomy());
-            Assert.assertEquals(car.getLocation().getId(), returnCar.getLocation().getId());
-            Assert.assertEquals(car.getOwner().getFirstName(), returnCar.getOwner().getFirstName());
+            if(car.getLocation() == null) {
+                Assert.assertEquals(car.getLocation(), returnCar.getLocation());
+            } else {
+                Assert.assertEquals(car.getLocation().getId(), returnCar.getLocation().getId());
+            }
+            if(car.getOwner() == null) {
+                Assert.assertEquals(car.getOwner(), returnCar.getOwner());
+            } else {
+                Assert.assertEquals(car.getOwner().getFirstName(), returnCar.getOwner().getFirstName());
+            }
             Assert.assertEquals(car.getOwnerAnnualKm(), returnCar.getOwnerAnnualKm());
             Assert.assertEquals(car.getSeats(), returnCar.getSeats());
             Assert.assertEquals(car.getYear(), returnCar.getYear());
