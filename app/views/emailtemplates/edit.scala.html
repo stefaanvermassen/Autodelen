@@ -92,7 +92,7 @@
                 <input type="text" data-edit="inserttext" id="voiceBtn" x-webkit-speech="">
             </div>
 
-            <div id="editor">
+            <div id="editor" data-status="@template.getId">
             @Html(template.getBody)
             </div>
                     <button type="submit" id="create" name="create" class="btn btn-block btn-success">Toevoegen</button>
@@ -152,7 +152,7 @@
     $.ajax ( {
     url : '/emailtemplate/edit',
     type : 'POST',
-    data : { 'template_body' : $ ( '#editor' ).cleanHtml() },
+    data : { 'template_id':$ ( '#editor' ).data('status'), 'template_body' : $ ( '#editor' ).cleanHtml() },
     success: function(data, textStatus, request) {
     // data.redirect contains the string URL to redirect to
     window.location.href = data;
