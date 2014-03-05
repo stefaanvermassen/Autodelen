@@ -1,0 +1,5 @@
+@(userId: Int, uuid: String, email: String)
+@app("Wachtwoord reset") {
+    <div class="alert alert-success">Je resetaanvraag werd correct verwerkt. We hebben de aanvraag naar @email verzonden.</div>
+    <a class="btn btn-success btn-block" href="@routes.Login.resetPassword(userId, uuid)">TODO: EMAIL IPV KNOP - Reset bevestigen</a>
+}

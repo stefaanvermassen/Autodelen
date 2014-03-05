@@ -13,9 +13,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.login.login;
-import views.html.login.register;
-import views.html.login.registrationok;
+import views.html.login.*;
 
 
 /**
@@ -33,6 +31,25 @@ public class Login extends Controller {
             else if (password == null || password.length() == 0)
                 return "Wachtwoord ontbreekt";
             else return null;
+        }
+    }
+
+    public static class PasswordResetModel {
+        public String password;
+        public String password_repeat;
+
+        public String validate() {
+            if (password == null || !password.equals(password_repeat))
+                return "Wachtwoorden komen niet overeen";
+            else return null;
+        }
+    }
+
+    public static class PasswordResetRequestModel {
+        public String email;
+
+        public String validate() {
+            return null; //TODO regex check?
         }
     }
 
@@ -82,11 +99,129 @@ public class Login extends Controller {
     }
 
     /**
+     * Method: GET
+     *
+     * @return
+     */
+    public static Result resetPasswordRequest() {
+        return ok(pwresetrequest.render(Form.form(PasswordResetRequestModel.class)));
+    }
+
+    /**
+     * Method: POST
+     *
+     * @return
+     */
+    public static Result resetPasswordRequestProcess() {
+        Form<PasswordResetRequestModel> resetForm = Form.form(PasswordResetRequestModel.class).bindFromRequest();
+        if (resetForm.hasErrors()) {
+            return badRequest(pwresetrequest.render(resetForm));
+        } else {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                UserDAO dao = context.getUserDAO();
+                User user = dao.getUser(resetForm.get().email);
+                if (user == null) {
+                    resetForm.reject("Gebruiker met dit adres bestaat niet.");
+                    return badRequest(pwresetrequest.render(resetForm));
+                } else {
+                    try {
+                        //TODO: this check should be implicit?
+                        if (dao.getVerificationString(user, VerificationType.PWRESET) != null) {
+                            dao.deleteVerificationString(user, VerificationType.PWRESET);
+                        }
+
+                        String newUuid = dao.createVerificationString(user, VerificationType.PWRESET);
+                        context.commit();
+                        //TODO: send this by email
+                        return ok(pwresetrequestok.render(user.getId(), newUuid, user.getEmail()));
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
+                    }
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @param userId
+     * @param uuid
+     * @return
+     */
+    public static Result resetPassword(int userId, String uuid) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId);
+            if (user == null) {
+                return badRequest("Deze user bestaat niet."); //TODO: flash
+            } else {
+                String ident = dao.getVerificationString(user, VerificationType.PWRESET);
+                if (ident == null) {
+                    return badRequest("There was no password reset requested on this account.");
+                } else {
+                    // Render the password reset page
+                    return ok(pwreset.render(Form.form(PasswordResetModel.class), userId, uuid));
+                }
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     *
+     * @param userId
+     * @param uuid
+     * @return
+     */
+    public static Result resetPasswordProcess(int userId, String uuid) {
+        Form<PasswordResetModel> resetForm = Form.form(PasswordResetModel.class).bindFromRequest();
+        if (resetForm.hasErrors()) {
+            return badRequest(pwreset.render(resetForm, userId, uuid));
+        } else {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                UserDAO dao = context.getUserDAO();
+                User user = dao.getUser(userId);
+                if (user == null) {
+                    return badRequest("Deze user bestaat niet."); //TODO: flash
+                } else {
+                    String ident = dao.getVerificationString(user, VerificationType.PWRESET);
+                    if (ident == null) {
+                        return badRequest("There was no password reset requested on this account.");
+                    } else if (ident.equals(uuid)) {
+                        dao.deleteVerificationString(user, VerificationType.PWRESET);
+                        user.setPassword(hashPassword(resetForm.get().password));
+                        dao.updateUser(user);
+                        context.commit();
+
+                        DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
+                        flash("success", "Uw wachtwoord werd succesvol gewijzigd.");
+                        LoginModel model = new LoginModel();
+                        model.email = user.getEmail();
+
+                        return ok(login.render(Form.form(LoginModel.class).fill(model)));
+                    } else {
+                        return badRequest("De verificatiecode komt niet overeen met onze gegevens.");
+                    }
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        }
+    }
+
+    /**
      * Method: POST
      * Processes the form data
      *
      * @return Redirect to old page or login form
      */
+
     public static Result authenticate() {
         Form<LoginModel> loginForm = Form.form(LoginModel.class).bindFromRequest();
         if (loginForm.hasErrors()) {
@@ -95,12 +230,12 @@ public class Login extends Controller {
             User user = DatabaseHelper.getUserProvider().getUser(loginForm.get().email);
             boolean goodCredentials = user != null && BCrypt.checkpw(loginForm.get().password, user.getPassword());
 
-            if(goodCredentials) {
-                if(user.getStatus() == UserStatus.EMAIL_VALIDATING){
+            if (goodCredentials) {
+                if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
                     loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
                     //TODO: link aanvraag nieuwe bevestigingscode
                     return badRequest(login.render(loginForm));
-                } else if(user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED){
+                } else if (user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED) {
                     loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
                     return badRequest(login.render(loginForm));
                 } else {
@@ -111,7 +246,7 @@ public class Login extends Controller {
                     );
                 }
             } else {
-                loginForm.error("Foute gebruikersnaam of wachtwoord.");
+                loginForm.reject("Foute gebruikersnaam of wachtwoord.");
                 return badRequest(login.render(loginForm));
             }
         }
@@ -150,9 +285,9 @@ public class Login extends Controller {
                 return badRequest(login.render(Form.form(LoginModel.class))); //We don't include a preset email address here since we could leak ID -> email to public
             } else {
                 String ident = dao.getVerificationString(user, VerificationType.REGISTRATION);
-                if(ident == null){
+                if (ident == null) {
                     return badRequest("Oops something went wrong. Missing identifier in database?!!!!! Anyway, contact an administrator.");
-                } else if(ident.equals(uuid)){
+                } else if (ident.equals(uuid)) {
                     dao.deleteVerificationString(user, VerificationType.REGISTRATION);
                     user.setStatus(UserStatus.REGISTERED);
 
@@ -199,8 +334,9 @@ public class Login extends Controller {
 
                         // Now we create a registration UUID
                         String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
-                        Mail.sendVerificationMail(user, verificationIdent);
                         context.commit();
+                        Mail.sendVerificationMail(user, verificationIdent);
+
 
                         return ok(registrationok.render(user.getId(), verificationIdent));
                     } catch (DataAccessException ex) {
