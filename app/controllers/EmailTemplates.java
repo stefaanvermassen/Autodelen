@@ -56,7 +56,8 @@ public class EmailTemplates extends Controller {
             TemplateDAO dao = context.getTemplateDAO();
             final Map<String, String[]> values = request().body().asFormUrlEncoded();
             String templateBody = values.get("template_body")[0];
-            dao.updateTemplate(1, templateBody); //TODO: template ID
+            int templateId = Integer.parseInt(values.get("template_id")[0]);
+            dao.updateTemplate(templateId, templateBody);
             context.commit();
             return ok(routes.EmailTemplates.showExistingTemplates().toString());
         } catch (DataAccessException ex) {
