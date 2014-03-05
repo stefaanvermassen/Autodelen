@@ -1,11 +1,7 @@
 package database.jdbc;
 
 import database.*;
-import models.Address;
-import models.Car;
-import models.CarFuel;
-import models.Reservation;
-import models.User;
+import models.*;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -25,11 +21,13 @@ public class JDBCDAOTest {
     private UserDAO userDAO;
     private CarDAO carDAO;
     private ReservationDAO reservationDAO;
+    private InfoSessionDAO infoSessionDAO;
 
     private List<Address> addresses = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private List<Car> cars = new ArrayList<>();
     private List<Reservation> reservations = new ArrayList<>();
+    private List<InfoSession> infoSessions = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -39,6 +37,7 @@ public class JDBCDAOTest {
         userDAO = context.getUserDAO();
         carDAO = context.getCarDAO();
         reservationDAO = context.getReservationDAO();
+        infoSessionDAO = context.getInfoSessionDAO();
     }
 
     @Test
@@ -143,6 +142,26 @@ public class JDBCDAOTest {
 
         deleteReservations();
         deleteCars();
+        deleteUsers();
+        deleteAddresses();
+    }
+
+    @Test
+    public void testInfoSessionDAO() throws Exception {
+        try {
+            createAddresses();
+            createUsers();
+            createInfoSessions();
+            getInfoSessionTest();
+            updateInfoSessionTest();
+        } catch(Exception e) {
+            deleteInfoSessions();
+            deleteUsers();
+            deleteAddresses();
+            throw e;
+        }
+
+        deleteInfoSessions();
         deleteUsers();
         deleteAddresses();
     }
@@ -501,4 +520,65 @@ public class JDBCDAOTest {
         }
     }
 
+    /*
+    * First createUsers() and createAddresses() has to be called
+    */
+    private void createInfoSessions() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine();
+
+        while(sc.hasNext()){
+            String timeString = sc.next();
+            Date timeDate = new SimpleDateFormat("M-d-y H:m").parse(timeString);
+            DateTime time = new DateTime(timeDate);
+
+            int address_id = sc.nextInt();
+            Address address = addresses.get(address_id-1);
+
+            int user_id = sc.nextInt();
+            User user = users.get(user_id-1);
+
+            InfoSession infoSession = infoSessionDAO.createInfoSession(user, address, time);
+
+            infoSessions.add(infoSession);
+        }
+        sc.close();
+    }
+
+    private void getInfoSessionTest() {
+        for(InfoSession infoSession : infoSessions) {
+            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), false);
+
+            Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
+            Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
+            Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+        }
+    }
+
+    private void updateInfoSessionTest() {
+        for(InfoSession infoSession : infoSessions) {
+            infoSession.setAddress(addresses.get((infoSession.getAddress().getId() + 1) % 100));
+            //infoSession.setHost(users.get((infoSession.getHost().getId() + 1) % 100));
+            infoSession.setTime(infoSession.getTime().plusHours(1));
+
+            infoSessionDAO.updateInfoSessionAddress(infoSession);
+            infoSessionDAO.updateInfosessionTime(infoSession);
+
+            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), false);
+
+            Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
+            Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
+            Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+        }
+    }
+
+    private void deleteInfoSessions() throws Exception {
+        Iterator<InfoSession> i = infoSessions.iterator();
+        while(i.hasNext()) {
+            InfoSession infoSession = i.next();
+            infoSessionDAO.deleteInfoSession(infoSession.getId());
+            i.remove();
+        }
+    }
 }
