@@ -25,24 +25,25 @@ body {
 }
 
 .numbercircle {
-    border-radius: 50%;
+    font-size: 64px;
+}
 
-    width: 180px;
-    height: 180px;
-    
-    /*background: #fff;*/
-    border: 10px solid #666;
-    color: #666;
-    text-align: center;
-    
-    font: 160px Arial, sans-serif;
-    display:block;
-    margin:auto;
+.carlogo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* SIDEBAR */
 #sidebar > li > a {
     color: #7dba4d; 
+}
+
+.headerwrapcontent {
+    background: rgb(0, 0, 0); /* Fall-back for browsers that don't support rgba */
+    background: rgba(0, 0, 0, .5);
+    padding-bottom: 60px;
+    padding-top: 60px;
 }
 
 /*
@@ -166,13 +167,12 @@ i {
 	color: #3498db; 
 }
 
-
 /* HeaderWrap */
 #headerwrap {
-	/* background: url(../img/bg01.jpg) no-repeat center top; */
+	background: url(../images/SeattleI5Skyline.jpg) no-repeat center top; 
 	background-color: #7dba4d;
 	margin-top: -20px;
-	padding-top:200px;
+	padding-top: 150px;
 	background-attachment: relative;
 	background-position: center center;
 	min-height: 650px;
@@ -190,10 +190,11 @@ i {
 }
 
 #headerwrap h1 {
-	margin-top: 60px;
-	margin-bottom: 15px;
-	color: white;
-	font-size: 45px;
-	font-weight: 300;
-	letter-spacing: 1px;
+    margin-top: 0px;
+    margin-bottom: 15px;
+    color: white;
+    font-size: 45px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
 }

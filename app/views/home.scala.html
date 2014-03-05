@@ -33,20 +33,17 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                   </button>
-                  <a class="navbar-brand" href="@routes.Application.index"><b>Dégage!</b></a>
+                  <a class="navbar-brand" href="@routes.Application.index"><b><img src="@routes.Assets.at("images/logosmall.png")"> dégage!</b></a>
                 </div>
                 <div class="navbar-collapse collapse">
                   <ul class="nav navbar-nav navbar-right">
                     <li><a href="@routes.Application.index">Home</a></li>
                     <li><a href="@routes.Informatie.index">Informatie</a></li>
-                    <li><a href="#">Quiz</a></li>
-                    <li><a href="#">Links</a></li>
-                    <li><a href="#">Pers</a></li>
-                      @if(session.get("email") == null) {
+                    @if(session.get("email") == null) {
                         <li><a href="@routes.Login.login">Aanmelden</a></li>
-                      } else {
-                          <li><a href="@routes.Login.logout">Afmelden</a></li>
-                      }
+                        } else {
+                        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+                    }
                   </ul>
                 </div><!--/.nav-collapse -->
               </div>
