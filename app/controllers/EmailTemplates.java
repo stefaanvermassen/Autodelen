@@ -6,8 +6,6 @@ import database.DataAccessException;
 import database.DatabaseHelper;
 import database.TemplateDAO;
 import models.EmailTemplate;
-import models.UserRole;
-import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.emailtemplates.edit;
@@ -27,7 +25,7 @@ public class EmailTemplates extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result showExistingTemplates() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDao();
+            TemplateDAO dao = context.getTemplateDAO();
             List<EmailTemplate> templates = dao.getAllTemplates();
             return ok(emailtemplates.render(templates));
         } catch (DataAccessException ex) {
@@ -39,7 +37,7 @@ public class EmailTemplates extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result showTemplate(int templateId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDao();
+            TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(templateId);
             if (template == null) {
                 return badRequest("Template bestaat niet.");
@@ -55,10 +53,10 @@ public class EmailTemplates extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result editTemplate() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDao();
+            TemplateDAO dao = context.getTemplateDAO();
             final Map<String, String[]> values = request().body().asFormUrlEncoded();
             String templateBody = values.get("template_body")[0];
-            dao.updateTemplate(1, templateBody);
+            dao.updateTemplate(1, templateBody); //TODO: template ID
             context.commit();
             return ok(routes.EmailTemplates.showExistingTemplates().toString());
         } catch (DataAccessException ex) {

@@ -1,16 +1,21 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
-import database.*;
+import database.DataAccessContext;
+import database.DataAccessException;
+import database.DatabaseHelper;
+import database.UserDAO;
 import models.User;
 import models.UserStatus;
 import models.VerificationType;
-import play.data.*;
-
-import views.html.login.*;
-
-import play.mvc.*;
+import notifiers.Mail;
 import org.mindrot.jbcrypt.BCrypt;
+import play.data.Form;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.login.login;
+import views.html.login.register;
+import views.html.login.registrationok;
 
 
 /**
@@ -193,7 +198,8 @@ public class Login extends Controller {
                                 registerForm.get().firstName, registerForm.get().lastName);
 
                         // Now we create a registration UUID
-                        String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION); //TODO: send this in an email
+                        String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
+                        Mail.sendVerificationMail(user, verificationIdent);
                         context.commit();
 
                         return ok(registrationok.render(user.getId(), verificationIdent));

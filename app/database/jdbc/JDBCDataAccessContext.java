@@ -53,7 +53,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     }
 
     @Override
-    public TemplateDAO getTemplateDao() {
+    public TemplateDAO getTemplateDAO() {
         if(templateDAO == null){
             templateDAO = new JDBCTemplateDAO(connection);
         }

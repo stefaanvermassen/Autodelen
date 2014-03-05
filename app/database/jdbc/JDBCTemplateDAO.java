@@ -3,6 +3,7 @@ package database.jdbc;
 import database.DataAccessException;
 import database.TemplateDAO;
 import models.EmailTemplate;
+import models.MailType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -103,6 +104,11 @@ public class JDBCTemplateDAO implements TemplateDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch emailtemplate by id.", ex);
         }
+    }
+
+    @Override
+    public EmailTemplate getTemplate(MailType type) throws DataAccessException {
+        return getTemplate(type.getKey());
     }
 
     @Override
