@@ -36,12 +36,17 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 @app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Infosessies</h1>
-        </div>
-        <!-- /.col-lg-12 -->
-    </div>
+
+<div id="page-header-wrapper">
+    <h1 class="page-header">Infosessies</h1>
+    <ol class="breadcrumb">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Library</a></li>
+        <li class="active">Data</li>
+    </ol>
+</div>
+
+<div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-default">
@@ -50,7 +55,8 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
                     @helper.form(if (editId == 0) routes.InfoSessions.createNewSession else routes.InfoSessions.editSessionPost(editId), 'class -> "form-horizontal") {
                         @if(form.hasGlobalErrors) {
                             <div class="alert alert-danger alert-dismissable">
@@ -133,6 +139,7 @@
                         </fieldset>
                     }
                     </div>
+                    </div>
                 </div>
                 <!-- /.panel-body -->
             </div>
@@ -141,4 +148,6 @@
         <!-- /col-lg-12 -->
     </div>
     <!-- /row -->
+</div>
+<!-- /page-wrapper -->
 }

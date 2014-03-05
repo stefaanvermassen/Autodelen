@@ -17,12 +17,11 @@
 
         <!-- Core CSS - Include with every page -->
         <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
 
         @stylesheets @* To include stylesheets from external templates *@
-        <!-- SB Admin CSS - Include with every page -->
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.min.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
 
         <!-- Page-Level Plugin CSS - Main -->
     </head>
@@ -271,12 +270,6 @@
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
-                            <a href="@routes.Login.login"><i class="fa fa-toggle-right fa-fw"></i> Login</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Login.register"><i class="fa fa-plus-square fa-fw"></i> Register</a>
-                        </li>
-                        <li>
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li>
@@ -331,10 +324,8 @@
             </nav>
             <!-- /.navbar-static-side -->
 
-            <div id="page-wrapper">
-                @content
-            </div>
-            <!-- /#page-wrapper -->
+            @content
+            
         </div>
         <!-- /#wrapper -->
         @scripts
