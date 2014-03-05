@@ -9,6 +9,7 @@ import database.TemplateDAO;
 import models.EmailTemplate;
 import models.MailType;
 import models.User;
+import play.mvc.Http;
 import views.html.notifiers.welcome;
 
 
@@ -30,7 +31,8 @@ public class Mail extends Mailer {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
             mail = replaceUserTags(user, template.getBody());
-            mail = mail.replace("%verification_url%", routes.Login.register_verification(user.getId(), verificationUrl).toString());
+            String vUrl = "http://" + Http.Context.current().request().host()  + routes.Login.register_verification(user.getId(), verificationUrl).toString();
+            mail = mail.replace("%verification_url%", vUrl);
         }catch (DataAccessException ex) {
             mail = welcome.render(user).body();
         }
