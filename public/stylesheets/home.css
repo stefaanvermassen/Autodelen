@@ -43,6 +43,7 @@ body {
     background: rgb(0, 0, 0); /* Fall-back for browsers that don't support rgba */
     background: rgba(0, 0, 0, .5);
     padding-bottom: 60px;
+    padding-top: 60px;
 }
 
 /*
@@ -166,7 +167,6 @@ i {
 	color: #3498db; 
 }
 
-
 /* HeaderWrap */
 #headerwrap {
 	background: url(../images/SeattleI5Skyline.jpg) no-repeat center top; 
@@ -190,7 +190,7 @@ i {
 }
 
 #headerwrap h1 {
-    margin-top: 60px;
+    margin-top: 0px;
     margin-bottom: 15px;
     color: white;
     font-size: 45px;
