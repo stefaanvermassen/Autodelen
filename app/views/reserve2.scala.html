@@ -1,3 +1,4 @@
+@(car: Car)
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
@@ -55,30 +56,29 @@
                 <div class="panel-body">
                         <div class="container well">
                             <h4>Geselecteerde auto</h4>
-                            <p>
                             <div class="col-sm-2">
                                 <label>Eigenaar</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>John Doe</label>
+                                <label>@car.getOwner</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Merk</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>Mitsubishi</label>
+                                <label>@car.getBrand</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Capaciteit</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>10</label>
+                                <label>@car.getSeats</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Standplaats</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>New York</label>
+                                <label>@car.getLocation</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Locatie sleutels</label>
@@ -86,7 +86,6 @@
                             <div class="col-sm-10">
                                 <label>Niet New York</label>
                             </div>
-                            </p>
                         </div>
                         
 

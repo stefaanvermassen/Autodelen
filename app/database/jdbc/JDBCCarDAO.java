@@ -14,8 +14,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.sql.Date;
+import java.util.List;
 
 import models.Address;
 import models.Car;
@@ -35,6 +37,7 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement updateCarStatement;
     private PreparedStatement getCarStatement;
     private PreparedStatement deleteCarStatement;
+    private PreparedStatement getGetCarListStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -100,6 +103,13 @@ public class JDBCCarDAO implements CarDAO{
             getCarStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE car_id=?");
         }
         return getCarStatement;
+    }
+
+    private PreparedStatement getGetCarListStatement() throws SQLException {
+        if(getGetCarListStatement == null) {
+            getGetCarListStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id");
+        }
+        return getGetCarListStatement;
     }
     
     @Override
@@ -217,5 +227,23 @@ public class JDBCCarDAO implements CarDAO{
 		}
 		
 	}
+
+    @Override
+    public List<Car> getCarList() throws DataAccessException {
+        List<Car> cars = new ArrayList<>();
+        try {
+            PreparedStatement ps = getGetCarListStatement();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    cars.add(populateCar(rs, true, true));
+                }
+                return cars;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading cars resultset", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
     
 }
