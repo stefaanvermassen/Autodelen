@@ -42,6 +42,15 @@
                                             <strong>Error!</strong> @form.globalError.message
                                         </div>
                                     }
+
+                                    @* Link to request a new verification URL *@
+                                    @if("True".equals(form("reactivate").value)) {
+                                        <div class="alert alert-warning alert-dismissable">
+                                            <a href="@routes.Login.requestNewEmailVerificationProcess(form("email").value)">
+                                                Klik hier</a> om nieuwe activatie aan te vragen
+                                        </div>
+                                    }
+
                                     <fieldset>
                                         @* Source: http://bootsnipp.com/snippets/featured/login-form-flat *@
 
