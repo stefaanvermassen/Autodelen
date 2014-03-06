@@ -84,7 +84,7 @@ public class JDBCUserDAO implements UserDAO {
     
     private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
-    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=? WHERE user_id = ?");
+    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_phone=?, user_cellphone=? WHERE user_id = ?");
     	}
     	return updateUserStatement;
     }
@@ -212,7 +212,11 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(3, user.getFirstName());
             ps.setString(4, user.getLastName());
             ps.setString(5, user.getStatus().name());
-            ps.setInt(6, user.getId());
+            if(user.getPhone()==null) ps.setNull(6, Types.VARCHAR);
+            else ps.setString(6, user.getPhone());
+            if(user.getCellphone()==null) ps.setNull(7, Types.VARCHAR);
+            else ps.setString(7, user.getCellphone());
+            ps.setInt(8, user.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("User update affected 0 rows.");
