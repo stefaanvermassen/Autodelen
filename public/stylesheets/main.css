@@ -1,3 +1,54 @@
+/* --- Forms fix --- */
+
+.form-horizontal .form-group {
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+/* --- Breadcrumbs and general styling --- */
+
+.panel {
+	border-radius:0px;
+}
+
+.page-header {
+	padding: 20px 14px 20px;
+	margin: 0px;
+	border-bottom: 0px;
+}
+
+#page-header-wrapper {
+	margin: 0px;
+	margin-left: 250px;
+	border-left: 1px solid #e7e7e7;
+	background-color: #f6f6f6;
+}
+
+#page-wrapper {
+	background-color: #f6f6f6;
+	padding-top:20px;
+	min-height: 0px;
+}
+
+.panel-default > .panel-heading {
+	background-color: #fafafa;
+}
+
+.breadcrumb > li + li:before {
+    content: "> ";
+}
+
+.breadcrumb {
+	font-size: 12px;
+	background-color: #eaeaea;
+	margin-left:250px;
+	margin:0px;
+	border-top: 1px solid #d6d6d6;
+	border-bottom: 1px solid #d6d6d6;
+	border-radius:0px;
+}
+
+
 /* --- Avatar --- */
 .avatar {
 	padding-top: 15px;

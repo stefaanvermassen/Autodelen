@@ -2,6 +2,16 @@
 @import database.DatabaseHelper;
 
 @app("Infosessie") {
+
+<div id="page-header-wrapper">
+    <h1 class="page-header">Infosessie - details</h1>
+    <ol class="breadcrumb">
+        <li><a href="#">Home</a></li>
+        <li class="active">Infosessies</li>
+    </ol>
+</div>
+
+<div id="page-wrapper">
     @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.ADMIN)) { isAdmin =>
         <h1>Infosessie</h1>
 
@@ -82,4 +92,6 @@
         }
 
     }
+</div>
+<!-- /page-wrapper -->
 }

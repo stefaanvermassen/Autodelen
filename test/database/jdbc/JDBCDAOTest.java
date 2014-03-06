@@ -156,14 +156,13 @@ public class JDBCDAOTest {
             updateInfoSessionTest();
         } catch(Exception e) {
             deleteInfoSessions();
-            deleteUsers();
             deleteAddresses();
+            deleteUsers();
             throw e;
         }
-
         deleteInfoSessions();
-        deleteUsers();
         deleteAddresses();
+        deleteUsers();
     }
 
     /*
@@ -530,16 +529,36 @@ public class JDBCDAOTest {
 
         while(sc.hasNext()){
             String timeString = sc.next();
-            Date timeDate = new SimpleDateFormat("M-d-y H:m").parse(timeString);
+            Date timeDate = new SimpleDateFormat("M/d/y H:m").parse(timeString);
             DateTime time = new DateTime(timeDate);
 
-            int address_id = sc.nextInt();
-            Address address = addresses.get(address_id-1);
+            int addressid = sc.nextInt();
+            Address address = addresses.get(addressid-1);
 
-            int user_id = sc.nextInt();
-            User user = users.get(user_id-1);
+            int hostid = sc.nextInt();
+            User host = users.get(hostid-1);
 
-            InfoSession infoSession = infoSessionDAO.createInfoSession(user, address, time);
+            int u1id = sc.nextInt();
+            User u1 = users.get(u1id-1);
+
+            int u2id = sc.nextInt();
+            User u2 = users.get(u2id - 1);
+
+            int u3id = sc.nextInt();
+            User u3 = users.get(u3id - 1);
+
+            int u4id = sc.nextInt();
+            User u4 = users.get(u4id - 1);
+
+            int u5id = sc.nextInt();
+            User u5 = users.get(u5id - 1);
+
+            InfoSession infoSession = infoSessionDAO.createInfoSession(host, address, time);
+            infoSessionDAO.registerUser(infoSession, u1);
+            infoSessionDAO.registerUser(infoSession, u2);
+            infoSessionDAO.registerUser(infoSession, u3);
+            infoSessionDAO.registerUser(infoSession, u4);
+            infoSessionDAO.registerUser(infoSession, u5);
 
             infoSessions.add(infoSession);
         }
@@ -548,32 +567,33 @@ public class JDBCDAOTest {
 
     private void getInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
-            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), false);
-
-            Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
-            Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
+            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
             Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+            Assert.assertEquals(infoSession.getAddress(), returnInfoSession.getAddress());
+            Assert.assertEquals(infoSession.getHost(), returnInfoSession.getHost());
+            Assert.assertEquals(infoSession.getEnrolled(), returnInfoSession.getEnrolled());
         }
     }
 
     private void updateInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
-            infoSession.setAddress(addresses.get((infoSession.getAddress().getId() + 1) % 100));
-            //infoSession.setHost(users.get((infoSession.getHost().getId() + 1) % 100));
+
             infoSession.setTime(infoSession.getTime().plusHours(1));
+            infoSession.setAddress(addresses.get((infoSession.getAddress().getId() + 1) % 100));
+            Enrollee delete = infoSession.getEnrolled().get(0);
+            infoSession.deleteEnrollee(delete);
 
-            infoSessionDAO.updateInfoSessionAddress(infoSession);
             infoSessionDAO.updateInfosessionTime(infoSession);
+            infoSessionDAO.updateInfoSessionAddress(infoSession);
+            infoSessionDAO.unregisterUser(infoSession, delete.getUser());
+            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
 
-            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), false);
-
-            Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
-            Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
             Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+            Assert.assertEquals(infoSession.getAddress().getId(),returnInfoSession.getAddress().getId());
         }
     }
 
-    private void deleteInfoSessions() throws Exception {
+    private void deleteInfoSessions(){
         Iterator<InfoSession> i = infoSessions.iterator();
         while(i.hasNext()) {
             InfoSession infoSession = i.next();
