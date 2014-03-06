@@ -1,11 +1,7 @@
 package database.jdbc;
 
 import database.*;
-import models.Address;
-import models.Car;
-import models.CarFuel;
-import models.Reservation;
-import models.User;
+import models.*;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -25,11 +21,13 @@ public class JDBCDAOTest {
     private UserDAO userDAO;
     private CarDAO carDAO;
     private ReservationDAO reservationDAO;
+    private InfoSessionDAO infoSessionDAO;
 
     private List<Address> addresses = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private List<Car> cars = new ArrayList<>();
     private List<Reservation> reservations = new ArrayList<>();
+    private List<InfoSession> infoSessions = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -39,6 +37,7 @@ public class JDBCDAOTest {
         userDAO = context.getUserDAO();
         carDAO = context.getCarDAO();
         reservationDAO = context.getReservationDAO();
+        infoSessionDAO = context.getInfoSessionDAO();
     }
 
     @Test
@@ -118,6 +117,25 @@ public class JDBCDAOTest {
         deleteCars();
         deleteUsers();
         deleteAddresses();
+    }
+
+    @Test
+    public void testInfoSessionDAO() throws Exception {
+        try {
+            createUsers();
+            createAddresses();
+            createInfoSessions();
+            getInfoSessionTest();
+            updateInfoSessionTest();
+        } catch(Exception e) {
+            deleteInfoSessions();
+            deleteAddresses();
+            deleteUsers();
+            throw e;
+        }
+        deleteInfoSessions();
+        deleteAddresses();
+        deleteUsers();
     }
 
     /*
@@ -400,6 +418,88 @@ public class JDBCDAOTest {
         while(i.hasNext()) {
             Reservation reservation = i.next();
             reservationDAO.deleteReservation(reservation);
+            i.remove();
+        }
+    }
+
+    /*
+     * First createUsers() and createAddresses() has to be called
+     */
+    private void createInfoSessions() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine();
+
+        while(sc.hasNext()){
+            String timeString = sc.next();
+            Date timeDate = new SimpleDateFormat("M/d/y H:m").parse(timeString);
+            DateTime time = new DateTime(timeDate);
+
+            int addressid = sc.nextInt();
+            Address address = addresses.get(addressid-1);
+
+            int hostid = sc.nextInt();
+            User host = users.get(hostid-1);
+
+            int u1id = sc.nextInt();
+            User u1 = users.get(u1id-1);
+
+            int u2id = sc.nextInt();
+            User u2 = users.get(u2id - 1);
+
+            int u3id = sc.nextInt();
+            User u3 = users.get(u3id - 1);
+
+            int u4id = sc.nextInt();
+            User u4 = users.get(u4id - 1);
+
+            int u5id = sc.nextInt();
+            User u5 = users.get(u5id - 1);
+
+            InfoSession infoSession = infoSessionDAO.createInfoSession(host, address, time);
+            infoSessionDAO.registerUser(infoSession, u1);
+            infoSessionDAO.registerUser(infoSession, u2);
+            infoSessionDAO.registerUser(infoSession, u3);
+            infoSessionDAO.registerUser(infoSession, u4);
+            infoSessionDAO.registerUser(infoSession, u5);
+
+            infoSessions.add(infoSession);
+        }
+        sc.close();
+    }
+
+    private void getInfoSessionTest() {
+        for(InfoSession infoSession : infoSessions) {
+            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
+            Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+            Assert.assertEquals(infoSession.getAddress(), returnInfoSession.getAddress());
+            Assert.assertEquals(infoSession.getHost(), returnInfoSession.getHost());
+            Assert.assertEquals(infoSession.getEnrolled(), returnInfoSession.getEnrolled());
+        }
+    }
+
+    private void updateInfoSessionTest() {
+        for(InfoSession infoSession : infoSessions) {
+            infoSession.setTime(infoSession.getTime().plusHours(1));
+            infoSession.setAddress(addresses.get((infoSession.getAddress().getId() + 1) % 100));
+            Enrollee delete = infoSession.getEnrolled().get(0);
+            infoSession.deleteEnrollee(delete);
+
+            infoSessionDAO.updateInfosessionTime(infoSession);
+            infoSessionDAO.updateInfoSessionAddress(infoSession);
+            infoSessionDAO.unregisterUser(infoSession, delete.getUser());
+            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
+
+            Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+            Assert.assertEquals(infoSession.getAddress().getId(),returnInfoSession.getAddress().getId());
+        }
+    }
+
+    private void deleteInfoSessions(){
+        Iterator<InfoSession> i = infoSessions.iterator();
+        while(i.hasNext()) {
+            InfoSession infoSession = i.next();
+            infoSessionDAO.deleteInfoSession(infoSession.getId());
             i.remove();
         }
     }
