@@ -11,6 +11,7 @@ import models.VerificationType;
 import notifiers.Mail;
 import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.login.*;
@@ -61,8 +62,9 @@ public class Login extends Controller {
         public String lastName;
 
         public String validate() {
-            //TODO: check valid email format, valid name etc etc
-            if (password == null || password.length() < 8)
+            if(!new Constraints.EmailValidator().isValid(email))
+                return "Dit is geen geldig e-mailadres.";
+            else if (password == null || password.length() < 8)
                 return "Wachtwoord moet minstens 8 tekens bevatten.";
             else if (!password.equals(password_repeat))
                 return "Wachtwoord komt niet overeen.";
