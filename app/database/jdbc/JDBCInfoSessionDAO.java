@@ -18,12 +18,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_FIELDS = "infosession_id, infosession_timestamp, " +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email";
+            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status";
 
     private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + " FROM infosessions " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id";
 
+    private PreparedStatement deleteInfoSession;
     private PreparedStatement createInfoSessionStatement;
     private PreparedStatement getInfoSessionsAfterStatement;
     private PreparedStatement getInfoSessionById;
@@ -37,6 +38,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getDeleteInfoSessionStatement() throws SQLException {
+        if(deleteInfoSession == null){
+            deleteInfoSession = connection.prepareStatement("DELETE FROM InfoSessions WHERE infosession_id = ?");
+        }
+        return deleteInfoSession;
     }
 
     private PreparedStatement getSetAddressForSession() throws SQLException {
@@ -182,7 +190,17 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
      */
     @Override
     public boolean deleteInfoSession(int id) throws DataAccessException {
-        throw new RuntimeException();
+        try {
+            PreparedStatement ps = getDeleteInfoSessionStatement();
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException ex){
+            throw new DataAccessException("Could not delete infosession",ex);
+        }
+
+        // Why do we have to return a boolean?
+        return true;
     }
 
     @Override
