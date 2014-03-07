@@ -92,7 +92,7 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement updateCarStatement() throws SQLException {
         if (updateCarStatement == null) {
-            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=?");
+            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? WHERE car_id = ?");
         }
         return updateCarStatement;
     }
@@ -191,6 +191,8 @@ public class JDBCCarDAO implements CarDAO{
                 }
                 ps.setString(14,car.getComments());
                 //ps.setDate(15,new Date(new java.util.Date().getTime()));
+
+                ps.setInt(15, car.getId());
                 
 
                 ps.executeUpdate();

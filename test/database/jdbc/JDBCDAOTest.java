@@ -165,6 +165,25 @@ public class JDBCDAOTest {
         deleteAddresses();
     }
 
+    @Test
+    public void testInfoSessionDAOWithSameEnrollees() throws Exception {
+        try {
+            createAddresses();
+            createUsers();
+            createInfoSessionWithSameEnrollees();
+        } catch(Exception e) {
+            deleteInfoSessions();
+            permanentlyDeleteUsers();
+            deleteAddresses();
+            throw e;
+        }
+        deleteInfoSessions();
+        permanentlyDeleteUsers();
+        deleteAddresses();
+    }
+
+
+
     /*
      * Creates 100 random addresses in the database and in private List address
      */
@@ -210,14 +229,9 @@ public class JDBCDAOTest {
             address.setCity(address.getCity() + " AB");
             address.setNumber(address.getNumber() + " AB");
             addressDAO.updateAddress(address);
-            Address returnAddress = addressDAO.getAddress(address.getId());
-
-            Assert.assertEquals(address.getBus(),returnAddress.getBus());
-            Assert.assertEquals(address.getZip(),returnAddress.getZip());
-            Assert.assertEquals(address.getNumber(),returnAddress.getNumber());
-            Assert.assertEquals(address.getStreet(),returnAddress.getStreet());
-            Assert.assertEquals(address.getCity(),returnAddress.getCity());
         }
+
+        getAddressTest();
     }
     /*
      * First createAddresses() has to be called
@@ -283,13 +297,8 @@ public class JDBCDAOTest {
             user.setPassword(user.getPassword() + "Test");
 
             userDAO.updateUser(user);
-            User returnUser = userDAO.getUser(user.getId());
-
-            Assert.assertEquals(returnUser.getEmail(),user.getEmail());
-            Assert.assertEquals(returnUser.getPassword(),user.getPassword());
-            Assert.assertEquals(returnUser.getFirstName(),user.getFirstName());
-            Assert.assertEquals(returnUser.getLastName(),user.getLastName());
         }
+        getUserTest();
     }
 
     /*
@@ -460,11 +469,8 @@ public class JDBCDAOTest {
             car.setType(car.getType() + "test");
 
             carDAO.updateCar(car);
-            Car returnCar = carDAO.getCar(car.getId());
-
-            Assert.assertEquals(car.getBrand(), returnCar.getBrand());
-            Assert.assertEquals(car.getType(), returnCar.getType());
         }
+        getCarTest();
     }
     /*
     * First createCars() has to be called
@@ -534,13 +540,8 @@ public class JDBCDAOTest {
             reservation.setTo(reservation.getTo().plusHours(1));
 
             reservationDAO.updateReservation(reservation);
-            Reservation returnReservation = reservationDAO.getReservation(reservation.getId());
-
-            Assert.assertEquals(reservation.getCar().getId(),returnReservation.getCar().getId());
-            Assert.assertEquals(reservation.getUser().getId(),returnReservation.getUser().getId());
-            Assert.assertEquals(reservation.getTo(),returnReservation.getTo());
-            Assert.assertEquals(reservation.getFrom(),returnReservation.getFrom());
         }
+        getReservationTest();
     }
     
     private void deleteReservations(){
@@ -605,14 +606,77 @@ public class JDBCDAOTest {
         sc.close();
     }
 
+    private void createInfoSessionWithSameEnrollees() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine();
+
+        // One InfoSession is enough, we don't need 100 because it should fail on the first one
+
+        String timeString = sc.next();
+        Date timeDate = new SimpleDateFormat("M/d/y H:m").parse(timeString);
+        DateTime time = new DateTime(timeDate);
+
+        int addressid = sc.nextInt();
+        Address address = addresses.get(addressid-1);
+
+        int hostid = sc.nextInt();
+        User host = users.get(hostid-1);
+
+        int u1id = sc.nextInt();
+        User u1 = users.get(u1id-1);
+
+        int u2id = sc.nextInt();
+        User u2 = users.get(u2id - 1);
+
+        int u3id = sc.nextInt();
+        User u3 = users.get(u3id - 1);
+
+        int u4id = sc.nextInt();
+        User u4 = users.get(u4id - 1);
+
+        int u5id = sc.nextInt();
+        User u5 = users.get(u5id - 1);
+
+        InfoSession infoSession = infoSessionDAO.createInfoSession(host, address, time);
+        infoSessionDAO.registerUser(infoSession, u1);
+        infoSessionDAO.registerUser(infoSession, u2);
+        infoSessionDAO.registerUser(infoSession, u3);
+        infoSessionDAO.registerUser(infoSession, u4);
+        infoSessionDAO.registerUser(infoSession, u5);
+        try {
+            infoSessionDAO.registerUser(infoSession, u5);
+            Assert.fail("Should not be able to register same user twice on same InfoSession");
+        } catch(DataAccessException e) {
+            // This should happen
+        }
+
+        infoSessions.add(infoSession);
+
+        sc.close();
+    }
+
+
     private void getInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
             InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
             Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
             Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
             Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
-            // For now, let's just compare the amount of enrolled people
-            Assert.assertEquals(infoSession.getEnrolled().size(), returnInfoSession.getEnrolled().size());
+
+            List<Enrollee> enrollees = infoSession.getEnrolled();
+            List<Enrollee> returnEnrollees = returnInfoSession.getEnrolled();
+            Assert.assertEquals(enrollees.size(), returnEnrollees.size());
+
+            for(int i = 0; i < infoSession.getEnrolled().size(); i++) {
+                Enrollee enrollee = enrollees.get(i);
+                boolean sameEnrollee = false;
+                for(int j = 0; j < infoSession.getEnrolled().size(); j++) {
+                    Enrollee returnEnrollee = returnEnrollees.get(j);
+                    sameEnrollee = sameEnrollee ||(enrollee.getUser().getId() == returnEnrollee.getUser().getId() && enrollee.getStatus() == returnEnrollee.getStatus());
+                }
+                Assert.assertTrue(sameEnrollee);
+            }
         }
     }
 
@@ -627,11 +691,8 @@ public class JDBCDAOTest {
             infoSessionDAO.updateInfosessionTime(infoSession);
             infoSessionDAO.updateInfoSessionAddress(infoSession);
             infoSessionDAO.unregisterUser(infoSession, delete.getUser());
-            InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
-
-            Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
-            Assert.assertEquals(infoSession.getAddress().getId(),returnInfoSession.getAddress().getId());
         }
+        getInfoSessionTest();
     }
 
     private void deleteInfoSessions(){
