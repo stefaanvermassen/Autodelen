@@ -60,19 +60,19 @@ public class JDBCDAOTest {
             createUsers();
             getUserTest();
             updateUserTest();
+            deleteUserTest();
         } catch(Exception e) {
-            deleteUsers();
+            permanentlyDeleteUsers();
             deleteAddresses();
             throw e;
         }
 
-        deleteUsers();
+        permanentlyDeleteUsers();
         deleteAddresses();
     }
 
     /*
      * Also tests Users
-     * You have to manually delete users afterwards because deleteUsers() only changes user_status to DROPPED
      */
     @Test
     public void testCarDAO() throws Exception {
@@ -84,12 +84,12 @@ public class JDBCDAOTest {
             updateCarTest();
         } catch(Exception e) {
             deleteCars();
-            deleteUsers();
+            permanentlyDeleteUsers();
             deleteAddresses();
             throw e;
         }
         deleteCars();
-        deleteUsers();
+        permanentlyDeleteUsers();
         deleteAddresses();
     }
 
@@ -102,11 +102,11 @@ public class JDBCDAOTest {
             updateCarTest();
         } catch(Exception e) {
             deleteCars();
-            deleteUsers();
+            permanentlyDeleteUsers();
             throw e;
         }
         deleteCars();
-        deleteUsers();
+        permanentlyDeleteUsers();
 
     }
 
@@ -135,14 +135,14 @@ public class JDBCDAOTest {
         } catch(Exception e) {
             deleteReservations();
             deleteCars();
-            deleteUsers();
+            permanentlyDeleteUsers();
             deleteAddresses();
             throw e;
         }
 
         deleteReservations();
         deleteCars();
-        deleteUsers();
+        permanentlyDeleteUsers();
         deleteAddresses();
     }
 
@@ -156,13 +156,13 @@ public class JDBCDAOTest {
             updateInfoSessionTest();
         } catch(Exception e) {
             deleteInfoSessions();
+            permanentlyDeleteUsers();
             deleteAddresses();
-            deleteUsers();
             throw e;
         }
         deleteInfoSessions();
+        permanentlyDeleteUsers();
         deleteAddresses();
-        deleteUsers();
     }
 
     /*
@@ -227,6 +227,13 @@ public class JDBCDAOTest {
         while(iAddresses.hasNext()) {
             Address address = iAddresses.next();
             addressDAO.deleteAddress(address);
+            try {
+                Address returnAddress = addressDAO.getAddress(address.getId());
+                if(returnAddress != null)
+                    Assert.fail("Address not permanently deleted");
+            } catch(DataAccessException e) {
+                // This should happen.
+            }
             iAddresses.remove();
         }
     }
@@ -288,11 +295,30 @@ public class JDBCDAOTest {
     /*
      * First createUsers() has to be called
      */
-    private void deleteUsers() {
+    private void deleteUserTest() {
+        for(User user : users) {
+            userDAO.deleteUser(user);
+            User returnUser = userDAO.getUser(user.getId());
+            Assert.assertEquals(returnUser.getStatus(), UserStatus.DROPPED);
+        }
+    }
+
+    /*
+     * First createUsers() has to be called
+     */
+    private void permanentlyDeleteUsers() {
         Iterator<User> iUsers = users.iterator();
         while(iUsers.hasNext()) {
             User user = iUsers.next();
-            userDAO.deleteUser(user);
+            userDAO.permanentlyDeleteUser(user);
+            try {
+                User returnUser = userDAO.getUser(user.getId());
+                if(returnUser != null) {
+                    Assert.fail("User not permanently deleted");
+                }
+            } catch(DataAccessException e) {
+
+            }
             iUsers.remove();
         }
     }
@@ -448,6 +474,13 @@ public class JDBCDAOTest {
         while(i.hasNext()) {
             Car car = i.next();
             carDAO.deleteCar(car);
+            try {
+                Car returnCar = carDAO.getCar(car.getId());
+                if(returnCar != null)
+                    Assert.fail("Car not permanently deleted");
+            } catch(DataAccessException e) {
+                // This should happen.
+            }
             i.remove();
         }
     }
@@ -515,6 +548,13 @@ public class JDBCDAOTest {
         while(i.hasNext()) {
             Reservation reservation = i.next();
             reservationDAO.deleteReservation(reservation);
+            try {
+                Reservation returnReservation = reservationDAO.getReservation(reservation.getId());
+                if(returnReservation != null)
+                    Assert.fail("Reservation not permanently deleted");
+            } catch(DataAccessException e) {
+                // This should happen.
+            }
             i.remove();
         }
     }
@@ -569,9 +609,10 @@ public class JDBCDAOTest {
         for(InfoSession infoSession : infoSessions) {
             InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
             Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
-            Assert.assertEquals(infoSession.getAddress(), returnInfoSession.getAddress());
-            Assert.assertEquals(infoSession.getHost(), returnInfoSession.getHost());
-            Assert.assertEquals(infoSession.getEnrolled(), returnInfoSession.getEnrolled());
+            Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
+            Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
+            // For now, let's just compare the amount of enrolled people
+            Assert.assertEquals(infoSession.getEnrolled().size(), returnInfoSession.getEnrolled().size());
         }
     }
 
@@ -598,6 +639,20 @@ public class JDBCDAOTest {
         while(i.hasNext()) {
             InfoSession infoSession = i.next();
             infoSessionDAO.deleteInfoSession(infoSession.getId());
+            try {
+                InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), false);
+                if(returnInfoSession != null)
+                    Assert.fail("InfoSession not permanently deleted");
+                List<Enrollee> enrollees = infoSession.getEnrolled();
+                try {
+                    infoSessionDAO.unregisterUser(infoSession.getId(), enrollees.get(0).getUser().getId());
+                    Assert.fail("InfoSession Enrollee not deleted");
+                } catch(DataAccessException e) {
+                    // This should happen
+                }
+            } catch(DataAccessException e) {
+                // This should happen.
+            }
             i.remove();
         }
     }

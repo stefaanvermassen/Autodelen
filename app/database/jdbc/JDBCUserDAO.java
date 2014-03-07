@@ -25,6 +25,7 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement createUserStatement;
     private PreparedStatement updateUserStatement;
     private PreparedStatement deleteUserStatement;
+    private PreparedStatement permanentlyDeleteUserStatement;
     private PreparedStatement createVerificationStatement;
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
@@ -59,6 +60,13 @@ public class JDBCUserDAO implements UserDAO {
     		deleteUserStatement = connection.prepareStatement("UPDATE Users SET user_status = 'DROPPED' WHERE user_id = ?");
     	}
     	return deleteUserStatement;
+    }
+
+    private PreparedStatement getPermanentlyDeleteUserStatement() throws SQLException {
+        if(permanentlyDeleteUserStatement == null){
+            permanentlyDeleteUserStatement = connection.prepareStatement("DELETE FROM Users WHERE user_id = ?");
+        }
+        return permanentlyDeleteUserStatement;
     }
     
     private PreparedStatement getUserByEmailStatement() throws SQLException {
@@ -238,4 +246,16 @@ public class JDBCUserDAO implements UserDAO {
 		}
 		
 	}
+
+    @Override
+    public void permanentlyDeleteUser(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getPermanentlyDeleteUserStatement();
+            ps.setInt(1, user.getId());
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException ex){
+            throw new DataAccessException("Could not permanently delete user",ex);
+        }
+    }
 }
