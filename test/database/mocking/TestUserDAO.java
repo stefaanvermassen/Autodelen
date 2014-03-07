@@ -4,6 +4,7 @@ import database.DataAccessException;
 import database.UserDAO;
 import models.User;
 import models.VerificationType;
+import utility.Cloner;
 
 import java.util.*;
 
@@ -55,6 +56,7 @@ public class TestUserDAO implements UserDAO {
         for (User user : userList) {
             if (user.getEmail().equals(email))
                 return user;
+               // return (User) Cloner.clone(user);
         }
         return null;
     }
@@ -66,6 +68,8 @@ public class TestUserDAO implements UserDAO {
         for (User user : userList) {
             if (user.getId() == userId)
                 return user;
+               // return (User)Cloner.clone(user);
+
         }
         return null;
     }
