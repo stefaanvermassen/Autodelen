@@ -3,6 +3,7 @@ package database;
 import database.jdbc.JDBCDataAccessProvider;
 import database.providers.UserProvider;
 import database.providers.UserRoleProvider;
+import play.Logger;
 
 /**
  * Created by Cedric on 2/16/14.
@@ -21,20 +22,21 @@ public class DatabaseHelper {
         return userProvider;
     }
 
-    public static UserRoleProvider getUserRoleProvider(){
-        if(userRoleProvider == null){
+    public static UserRoleProvider getUserRoleProvider() {
+        if (userRoleProvider == null) {
             userRoleProvider = new UserRoleProvider(getDataAccessProvider(), getUserProvider());
         }
         return userRoleProvider;
     }
 
+    public static void setDataAccessProvider(DataAccessProvider provider) {
+        Logger.info("DatabaseProvider set to " + provider.getClass().getCanonicalName());
+        accessProvider = provider;
+    }
+
     public static DataAccessProvider getDataAccessProvider() {
         if (accessProvider == null) {
-            try {
-                accessProvider = new JDBCDataAccessProvider();
-            } catch (Exception ex) {
-                throw new DataAccessException("Failed to load MySQL driver", ex);
-            }
+            throw new NullPointerException("No databaseprovider has been specified.");
         }
         return accessProvider;
     }
