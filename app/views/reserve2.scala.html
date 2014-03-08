@@ -1,9 +1,24 @@
+@(form: play.data.Form[Reserve.ReservationModel], car: Car)
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
     <script>
+        function enableReserve() {
+            if($('#input_from').val() != "" && $('#input_until' ).val() != "") {
+                $('#reserve_button').removeClass('disabled');
+            }
+            else {
+                $('#reserve_button').addClass('disabled');
+            }
+        }
         $(document).ready(function() {
-            $('#datepickerFrom').datetimepicker({
+            var now = new Date();
+            var later = new Date();
+            later.setMinutes(later.getMinutes() + 5);
+            // Disable or enable reserve button
+            enableReserve()
+
+            $('#datetimepickerfrom').datetimepicker({
                 weekStart: 1,
                 language: 'nl',
                 todayBtn:  1,
@@ -12,12 +27,9 @@
                 startView: 2,
                 forceParse: 0,
                 showMeridian: 1,
-                startDate: new Date()
+                startDate: now // current date and time
             });
-        });
-        
-        $(document).ready(function() {
-            $('#datepickerUntill').datetimepicker({
+            $('#datetimepickeruntil').datetimepicker({
                 weekStart: 1,
                 language: 'nl',
                 todayBtn:  1,
@@ -26,9 +38,27 @@
                 startView: 2,
                 forceParse: 0,
                 showMeridian: 1,
-                startDate: new Date()
+                startDate: later // 5 minutes later than now
+            });
+            // When from is changed, make sure the user can't select a date before from
+            $('#datetimepickerfrom').datetimepicker().on('changeDate', function(evt) {
+                var correctedDate = new Date(evt.date);
+                correctedDate.setHours(correctedDate.getHours() - 1);
+                $('#datetimepickeruntil').datetimepicker('setStartDate', correctedDate);
+                correctedDate.setMinutes(correctedDate.getMinutes() + 5);
+            });
+            // When until is changed, make sure the user can't select a date after until
+            $('#datetimepickeruntil').datetimepicker().on('changeDate', function(evt) {
+                var correctedDate = new Date(evt.date);
+                correctedDate.setHours(correctedDate.getHours() - 1);
+                correctedDate.setMinutes(correctedDate.getMinutes() - 5);
+                $('#datetimepickerfrom').datetimepicker('setEndDate', correctedDate);
             });
         });
+        // Enable reserve button only when both the date fields are selected
+        $(document).on("change", function(evt) {
+            enableReserve();
+        })
     </script>
 }
 @stylesheets = {
@@ -55,65 +85,62 @@
                 <div class="panel-body">
                         <div class="container well">
                             <h4>Geselecteerde auto</h4>
-                            <p>
                             <div class="col-sm-2">
                                 <label>Eigenaar</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>John Doe</label>
+                                <label>@car.getOwner</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Merk</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>Mitsubishi</label>
+                                <label>@car.getBrand</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Capaciteit</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>10</label>
+                                <label>@car.getSeats</label>
                             </div>
                             <div class="col-sm-2">
                                 <label>Standplaats</label>
                             </div>
                             <div class="col-sm-10">
-                                <label>New York</label>
+                                <label>@car.getLocation</label>
                             </div>
-                            <div class="col-sm-2">
-                                <label>Locatie sleutels</label>
-                            </div>
-                            <div class="col-sm-10">
-                                <label>Niet New York</label>
-                            </div>
-                            </p>
                         </div>
-                        
 
-                    <div class="container form">
-                        <div class="form-group">
-                            <label for="datepickerFrom">Van</label>
-                            <div id="datepickerFrom" class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
-                                <input class="form-control" size="16" type="text" value="" readonly>
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    @helper.form(routes.Reserve.confirmReservation(car.getId), 'class -> "form-horizontal") {
+                        @if(form.hasGlobalErrors) {
+                            <div class="alert alert-danger alert-dismissable">
+                                <strong>Error!</strong> @form.globalError.message
                             </div>
-                            <input type="text" class="hidden" id="time" name="time" value="" />
-                        </div>
-                        <div class="form-group">
-                            <label for="datepickerFrom">Tot</label>
-                            <div id="datepickerFrom" class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
-                                <input class="form-control" size="16" type="text" value="" readonly>
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                            </div>
-                            <input type="text" class="hidden" id="time" name="time" value="" />
-                        </div>
-                        <div class="form-group">
-                            <a href="" class="btn btn-primary">Reserveren</a>
-                        </div>
-                    </div>
-
+                        }
+                        <fieldset>
+                                <div class="form-group">
+                                    <label for="from">Van</label>
+                                    <div id="datetimepickerfrom" class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" data-link-field="from">
+                                        <input id="input_from" class="form-control" size="16" type="text" value="@form("from").value" readonly>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                    </div>
+                                    <input type="text" class="hidden" id="from" name="from" value="@form("from").value" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="datetimepickeruntil">Tot</label>
+                                    <div id="datetimepickeruntil" class="input-group date form_datetime col-md-5" data-date-format="dd MM yyyy - HH:ii p" data-link-field="until">
+                                        <input id="input_until" class="form-control" size="16" type="text" value="@form("until").value" readonly>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                    </div>
+                                    <input type="text" class="hidden" id="until" name="until" value="@form("until").value" />
+                                </div>
+                                <div class="form-group">
+                                    <button  id="reserve_button" name="reserve" type="submit" class="btn btn-success">Reserveren</button>
+                                </div>
+                        </fieldset>
+                    }
                 </div>
                 <!-- /.panel-body -->
             </div>

@@ -9,7 +9,18 @@ package models;
  * @author Laurent
  */
 public enum ReservationStatus {
-    REQUEST,
-    ACCEPTED,
-    REFUSED    
+    REQUEST("Wachten op goedkeuring"),
+    ACCEPTED("Aanvraag goedgekeurd"),
+    REFUSED("Aanvraag geweigerd");
+
+    // Enum definition
+    private String description;
+
+    private ReservationStatus(final String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }
