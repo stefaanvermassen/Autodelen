@@ -91,14 +91,24 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @param sessionId
      * @return
      */
     @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
-    public static Result removeSession(int sessionId){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            return ok("");
-        } catch(DataAccessException ex){
+    public static Result removeSession(int sessionId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            try {
+                dao.deleteInfoSession(sessionId);
+                context.commit();
+                flash("success", "De infosessie werd succesvol verwijderd.");
+                return ok(upcomingSessionsList());
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
+            }
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
