@@ -59,7 +59,7 @@ public class UserRoleProvider {
                 throw ex;
             }
         } else {
-            return (EnumSet<UserRole>)obj;
+            return (EnumSet<UserRole>)obj; //Type erasure problem from Java, works at runtime
         }
     }
 

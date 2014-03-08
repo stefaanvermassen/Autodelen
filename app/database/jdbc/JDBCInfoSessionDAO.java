@@ -18,12 +18,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_FIELDS = "infosession_id, infosession_timestamp, " +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email";
+            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status";
 
     private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + " FROM infosessions " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id";
 
+    private PreparedStatement deleteInfoSession;
     private PreparedStatement createInfoSessionStatement;
     private PreparedStatement getInfoSessionsAfterStatement;
     private PreparedStatement getInfoSessionById;
@@ -37,6 +38,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getDeleteInfoSessionStatement() throws SQLException {
+        if(deleteInfoSession == null){
+            deleteInfoSession = connection.prepareStatement("DELETE FROM InfoSessions WHERE infosession_id = ?");
+        }
+        return deleteInfoSession;
     }
 
     private PreparedStatement getSetAddressForSession() throws SQLException {
@@ -80,7 +88,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getRegisterUserForSession() throws SQLException {
         if(registerUserForSession == null){
-            registerUserForSession = connection.prepareStatement("INSERT INTO infosessionenrollees(infosession_id, infosession_enrollee_id) VALUES (?,?)");
+            registerUserForSession = connection.prepareStatement("INSERT INTO InfoSessionEnrollees(infosession_id, infosession_enrollee_id) VALUES (?,?)");
         }
         return registerUserForSession;
     }
@@ -115,7 +123,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
-        return new InfoSession(rs.getInt("infosession_id"), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false));
+        return new InfoSession(rs.getInt("infosession_id"), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false, false));
     }
 
     @Override
@@ -129,7 +137,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, address.getId());
             ps.setInt(3, host.getId());
             ps.executeUpdate();
-
+            connection.commit();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 return new InfoSession(keys.getInt(1), time, address, host, InfoSession.NO_ENROLLEES);
@@ -182,7 +190,17 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
      */
     @Override
     public boolean deleteInfoSession(int id) throws DataAccessException {
-        throw new RuntimeException();
+        try {
+            PreparedStatement ps = getDeleteInfoSessionStatement();
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException ex){
+            throw new DataAccessException("Could not delete infosession",ex);
+        }
+
+        // Why do we have to return a boolean?
+        return true;
     }
 
     @Override
@@ -215,6 +233,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, session.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating time on infosession.");
+            connection.commit();
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to update infosession timestamp.", ex);
         }
@@ -232,6 +251,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, session.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update for InfoSession did not affect any row.");
+            connection.commit();
         } catch(SQLException ex){
             throw new DataAccessException("Failed to update address for infosession.", ex);
         }
@@ -245,7 +265,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
            ps.setInt(2, user.getId());
            if(ps.executeUpdate() == 0)
                throw new DataAccessException("Failed to register user to infosession. 0 rows affected.");
-
+           session.addEnrollee(new Enrollee(user, EnrollementStatus.ENROLLED));
+           connection.commit();
        } catch(SQLException ex) {
             throw new DataAccessException("Failed to prepare statement for user registration with infosession.", ex);
        }
@@ -262,6 +283,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(3, session.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Failed to update enrollment status. Affected rows = 0");
+            connection.commit();
         } catch(SQLException ex){
             throw new DataAccessException("Failed to update enrollment status.", ex);
         }
@@ -280,6 +302,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, userId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Failed to unregister user from infosession.");
+            connection.commit();
         } catch(SQLException ex){
             throw new DataAccessException("Invalid unregister query for infosession.", ex);
         }

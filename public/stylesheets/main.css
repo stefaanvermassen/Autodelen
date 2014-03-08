@@ -1,3 +1,8 @@
+/* --- Tables --- */
+.pagination>li:first-child>a, .pagination>li:last-child>a{
+	border-radius: 0px;
+}
+
 /* --- Forms fix --- */
 
 .form-horizontal .form-group {
@@ -6,6 +11,10 @@
 }
 
 /* --- Breadcrumbs and general styling --- */
+
+body {
+	background-color: #f6f6f6;
+}
 
 .panel {
 	border-radius:0px;
@@ -25,9 +34,9 @@
 }
 
 #page-wrapper {
-	background-color: #f6f6f6;
 	padding-top:20px;
 	min-height: 0px;
+	background-color: #f6f6f6;
 }
 
 .panel-default > .panel-heading {

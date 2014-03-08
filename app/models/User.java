@@ -13,6 +13,7 @@ public class User {
     private String lastName;
     private String password;
     private String phone;
+    private String cellphone;
     private Address address;
     private DriverLicense license;
     private UserStatus status;
@@ -45,7 +46,15 @@ public class User {
         this.id = id;
     }
 
-    public int getId() {
+    public String getCellphone() {
+		return cellphone;
+	}
+
+	public void setCellphone(String cellphone) {
+		this.cellphone = cellphone;
+	}
+
+	public int getId() {
         return id;
     }
 

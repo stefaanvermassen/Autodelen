@@ -52,6 +52,11 @@ GET         /infosession/removeAttendee        controllers.InfoSessions.removeUs
 GET         /infosession/edit                  controllers.InfoSessions.editSession(sessionId: Int)
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
+GET         /infosession/delete                controllers.InfoSessions.removeSession(sessionId: Int)
+
+# Settings
+# TODO: REMOVE THIS!!!
+GET         /settings/instantadmin             controllers.Settings.instantAdmin()
 
 # Emailtemplates
 GET         /emailtemplate                     controllers.EmailTemplates.showExistingTemplates()
