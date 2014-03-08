@@ -8,9 +8,11 @@ import database.*;
 public class TestDataAccessContext implements DataAccessContext {
 
     private TestUserDAO userDao;
+    private TestUserRoleDAO roleDao;
 
     public TestDataAccessContext(){
         userDao = new TestUserDAO();
+        roleDao = new TestUserRoleDAO(userDao);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class TestDataAccessContext implements DataAccessContext {
 
     @Override
     public UserRoleDAO getUserRoleDAO() {
-        return null;
+        return roleDao;
     }
 
     @Override

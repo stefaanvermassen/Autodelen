@@ -72,7 +72,8 @@ public class LoginControllerTest {
                         controllers.routes.ref.Login.authenticate(),
                         fakeRequest(POST, "/login").withFormUrlEncodedBody(data)
                 );
-                assertEquals("Valid login", OK, status(result));
+
+                assertEquals("Valid login", 303, status(result));
 
                 // Test if we can access dashboard now
                 Result result2 = callAction(
@@ -86,7 +87,7 @@ public class LoginControllerTest {
                         controllers.routes.ref.Login.logout(),
                         fakeRequest()
                 );
-                assertEquals("Requesting logout", OK, status(result3));
+                assertEquals("Requesting logout", 303, status(result3));
 
                 // Test if we cannot access dashboard now
                 Result result4 = callAction(
