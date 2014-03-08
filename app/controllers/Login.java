@@ -168,7 +168,7 @@ public class Login extends Controller {
 
                         String newUuid = dao.createVerificationString(user, VerificationType.PWRESET);
                         context.commit();
-                        //TODO: send this by email
+                        Mail.sendPasswordResetMail(user, newUuid);
                         return ok(pwresetrequestok.render(user.getId(), newUuid, user.getEmail()));
                     } catch (DataAccessException ex) {
                         context.rollback();
@@ -351,8 +351,6 @@ public class Login extends Controller {
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
-        //TODO: email verification
-
         Form<RegisterModel> registerForm = Form.form(RegisterModel.class).bindFromRequest();
         if (registerForm.hasErrors()) {
             return badRequest(register.render(registerForm));
