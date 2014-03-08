@@ -29,13 +29,12 @@ public class JDBCDataAccessProvider implements DataAccessProvider {
         try {
             Class.forName(JDBC_DRIVER);
             conn = DriverManager.getConnection(getDatabaseUrl(configuration), configuration.getUsername(), configuration.getPassword());
+            return new JDBCDataAccessContext(conn);
         } catch (ClassNotFoundException e) {
             throw new DataAccessException("Couldn't find jdbc driver", e);
         } catch (SQLException e) {
             throw new DataAccessException("Couldn't connect to database", e);
         }
-
-        return new JDBCDataAccessContext(conn);
     }
 
     private static String getDatabaseUrl(DatabaseConfiguration configuration){

@@ -24,7 +24,7 @@ public class DatabaseConfiguration {
         this.password = password;
     }
 
-    public static DatabaseConfiguration loadConfiguration(String path) throws IOException {
+    public static DatabaseConfiguration getConfiguration(String path) throws IOException {
         try(FileInputStream fi = new FileInputStream(path)){
             return getConfiguration(fi);
         } catch(IOException ex){
@@ -36,7 +36,7 @@ public class DatabaseConfiguration {
         Properties p = new Properties();
         p.load(stream);
 
-        return new DatabaseConfiguration(p.getProperty("server"), Integer.parseInt(p.getProperty("port", "3306")), p.getProperty("database"), p.getProperty("username"), p.getProperty("password", ""));
+        return new DatabaseConfiguration(p.getProperty("server"), Integer.parseInt(p.getProperty("port", "3306")), p.getProperty("database"), p.getProperty("user"), p.getProperty("password", ""));
     }
 
     public String getServer() {
