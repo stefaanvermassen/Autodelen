@@ -6,9 +6,9 @@ import database.DataAccessContext;
 import database.DataAccessException;
 import database.DatabaseHelper;
 import database.TemplateDAO;
-import models.EmailTemplate;
-import models.MailType;
-import models.User;
+import models.*;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
 import views.html.notifiers.welcome;
 
@@ -23,32 +23,145 @@ public class Mail extends Mailer {
 
     public static void sendVerificationMail(User user, String verificationUrl) {
         String mail = "";
-        setSubject("Welkom %s", user.getFirstName());
+        setSubject("Verifieer uw Dégage-account");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        // get html and process the args in the view
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
             mail = replaceUserTags(user, template.getBody());
-            String vUrl = "http://" + Http.Context.current().request().host()  + routes.Login.register_verification(user.getId(), verificationUrl).toString();
+            String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.register_verification(user.getId(), verificationUrl).toString();
             mail = mail.replace("%verification_url%", vUrl);
-        }catch (DataAccessException ex) {
-            mail = welcome.render(user).body();
+        } catch (DataAccessException ex) {
+            throw ex;
         }
 
-        if(!play.api.Play.isDev(play.api.Play.current())) {
+        if (!play.api.Play.isDev(play.api.Play.current())) {
             send(mail);
         }
     }
 
-    private static String replaceUserTags(User user, String template){
+    public static void sendWelcomeMail(User user) {
+        String mail = "";
+        setSubject("Welkom %s", user.getFirstName());
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.WELCOME);
+            mail = replaceUserTags(user, template.getBody());
+        } catch (DataAccessException ex) {
+            mail = welcome.render(user).body();
+        }
+
+        if (!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
+
+    }
+
+    public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
+        String mail = "";
+        setSubject("Bevestiging van uw inschrijving");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceInfoSessionTags(infoSession, mail);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        if (!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
+
+    }
+
+    public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
+        String mail = "";
+        setSubject("Reservatie aanvraag voor uw auto");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceCarReservationTags(carReservation, mail);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        if (!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
+
+    }
+
+    public static void sendReservationApprovedByOwnerMail(User user, Reservation carReservation) {
+        String mail = "";
+        setSubject("Reservatie goedgekeurd");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceCarReservationTags(carReservation, mail);
+            //TODO Right address??
+            mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        if (!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
+
+    }
+
+    public static void sendPasswordResetMail(User user, String verificationUrl) {
+        String mail = "";
+        setSubject("Uw wachtwoord opnieuw instellen");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.PASSWORD_RESET);
+            mail = replaceUserTags(user, template.getBody());
+            String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.resetPassword(user.getId(), verificationUrl).toString();
+            mail = mail.replace("%password_reset_url%", vUrl);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        if (!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
+    }
+
+    private static String replaceUserTags(User user, String template) {
         template = template.replace("%user_firstname%", user.getFirstName());
         template = template.replace("%user_lastname%", user.getLastName());
         //TODO: replace address only when provided
         return template;
     }
 
+    private static String replaceInfoSessionTags(InfoSession infoSession, String template) {
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
+        template = template.replace("%infosession_date%", fmt.print(infoSession.getTime()));
+        template = template.replace("%infosession_address%", infoSession.getAddress().toString());
+        return template;
+    }
 
+    private static String replaceCarReservationTags(Reservation carReservation, String template) {
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
+        template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
+        template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));
+        //TODO: reservation_url
+        return template;
+    }
 
 }
