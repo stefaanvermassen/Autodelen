@@ -55,8 +55,9 @@ public class TestUserDAO implements UserDAO {
         // URGENT
         for (User user : userList) {
             if (user.getEmail().equals(email))
-                return user;
-               // return (User) Cloner.clone(user);
+                return (User) Cloner.clone(user);
+               // return user;
+
         }
         return null;
     }
@@ -67,8 +68,9 @@ public class TestUserDAO implements UserDAO {
         // URGENT
         for (User user : userList) {
             if (user.getId() == userId)
-                return user;
-               // return (User)Cloner.clone(user);
+                return (User)Cloner.clone(user);
+               // return user;
+
 
         }
         return null;

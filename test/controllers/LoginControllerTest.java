@@ -8,6 +8,7 @@ import models.UserStatus;
 import org.junit.*;
 import org.mindrot.jbcrypt.BCrypt;
 import play.mvc.Result;
+import play.mvc.Http.Cookie;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,24 +76,26 @@ public class LoginControllerTest {
 
                 assertEquals("Valid login", 303, status(result));
 
+                Cookie loginCookie = cookie("PLAY_SESSION", result); //TODO: fix, this is the most ugly hack I've ever seen x)
+
                 // Test if we can access dashboard now
                 Result result2 = callAction(
                         controllers.routes.ref.Dashboard.index(),
-                        fakeRequest()
+                        fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("Requesting dashboard when logged in", OK, status(result2));
 
                 // Test if we can logout
                 Result result3 = callAction(
                         controllers.routes.ref.Login.logout(),
-                        fakeRequest()
+                        fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("Requesting logout", 303, status(result3));
 
                 // Test if we cannot access dashboard now
                 Result result4 = callAction(
                         controllers.routes.ref.Dashboard.index(),
-                        fakeRequest()
+                        fakeRequest().withCookies()
                 );
                 assertNotEquals("Requesting dashboard when nog loggedin", OK, status(result4));
             }

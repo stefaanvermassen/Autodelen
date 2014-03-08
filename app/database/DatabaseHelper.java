@@ -30,8 +30,13 @@ public class DatabaseHelper {
     }
 
     public static void setDataAccessProvider(DataAccessProvider provider) {
-        Logger.info("DatabaseProvider set to " + provider.getClass().getCanonicalName());
+        if(accessProvider != null) {
+            Logger.info("DatabaseProvider changed to " + provider.getClass().getCanonicalName());
+        }
+
         accessProvider = provider;
+        userRoleProvider = null;
+        userProvider = null;
     }
 
     public static DataAccessProvider getDataAccessProvider() {
