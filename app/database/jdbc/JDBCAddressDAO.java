@@ -152,6 +152,7 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setInt(1, address.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when deleting address with ID=" + address.getId());
+            connection.commit();
         } catch(SQLException ex){
             throw new DataAccessException("Failed to execute address deletion query.", ex);
         }
@@ -170,6 +171,7 @@ public class JDBCAddressDAO implements AddressDAO {
 			
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update affected 0 rows.");
+            connection.commit();
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to update address.", ex);
         }

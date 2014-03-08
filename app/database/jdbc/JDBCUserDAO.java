@@ -25,6 +25,7 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement createUserStatement;
     private PreparedStatement updateUserStatement;
     private PreparedStatement deleteUserStatement;
+    private PreparedStatement permanentlyDeleteUserStatement;
     private PreparedStatement createVerificationStatement;
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
@@ -60,6 +61,13 @@ public class JDBCUserDAO implements UserDAO {
     	}
     	return deleteUserStatement;
     }
+
+    private PreparedStatement getPermanentlyDeleteUserStatement() throws SQLException {
+        if(permanentlyDeleteUserStatement == null){
+            permanentlyDeleteUserStatement = connection.prepareStatement("DELETE FROM Users WHERE user_id = ?");
+        }
+        return permanentlyDeleteUserStatement;
+    }
     
     private PreparedStatement getUserByEmailStatement() throws SQLException {
         if (getUserByEmailStatement == null) {
@@ -84,7 +92,7 @@ public class JDBCUserDAO implements UserDAO {
     
     private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
-    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=? WHERE user_id = ?");
+    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_phone=?, user_cellphone=? WHERE user_id = ?");
     	}
     	return updateUserStatement;
     }
@@ -212,7 +220,11 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(3, user.getFirstName());
             ps.setString(4, user.getLastName());
             ps.setString(5, user.getStatus().name());
-            ps.setInt(6, user.getId());
+            if(user.getPhone()==null) ps.setNull(6, Types.VARCHAR);
+            else ps.setString(6, user.getPhone());
+            if(user.getCellphone()==null) ps.setNull(7, Types.VARCHAR);
+            else ps.setString(7, user.getCellphone());
+            ps.setInt(8, user.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("User update affected 0 rows.");
@@ -234,4 +246,16 @@ public class JDBCUserDAO implements UserDAO {
 		}
 		
 	}
+
+    @Override
+    public void permanentlyDeleteUser(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getPermanentlyDeleteUserStatement();
+            ps.setInt(1, user.getId());
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException ex){
+            throw new DataAccessException("Could not permanently delete user",ex);
+        }
+    }
 }

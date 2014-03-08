@@ -122,8 +122,9 @@ public class JDBCReservationDAO implements ReservationDAO{
             PreparedStatement ps = getGetReservationStatement();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return populateReservation(rs);
+                if(rs.next())
+                    return populateReservation(rs);
+                else return null;
             }catch (SQLException e){
                 throw new DataAccessException("Error reading reservation resultset", e);
 
