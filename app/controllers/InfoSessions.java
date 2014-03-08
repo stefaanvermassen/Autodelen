@@ -90,6 +90,20 @@ public class InfoSessions extends Controller {
     }
 
     /**
+     * Method: GET
+     * @param sessionId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
+    public static Result removeSession(int sessionId){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            return ok("");
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+    }
+
+    /**
      * Method: POST
      *
      * @param sessionId
