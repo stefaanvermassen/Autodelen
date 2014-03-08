@@ -203,9 +203,9 @@ public class JDBCCarDAO implements CarDAO{
             PreparedStatement ps = getCarStatement();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-
-                return populateCar(rs, true, true);
+                if(rs.next())
+                    return populateCar(rs, true, true);
+                return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading car resultset", ex);
             }

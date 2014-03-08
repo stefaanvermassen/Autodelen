@@ -72,6 +72,7 @@ public class Reserve extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result confirmReservation(int carId) {
+        // Get the car object to test whether the operation is legal
         Car car;
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -83,12 +84,14 @@ public class Reserve extends Controller {
         } catch(DataAccessException ex) {
             throw ex;
         }
+        // Request the form
         Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
         if(reservationForm.hasErrors()) {
             return badRequest(reserve2.render(reservationForm, car));
         }
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             try {
+                // Create the reservation
                 User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
 
@@ -98,8 +101,14 @@ public class Reserve extends Controller {
                 context.commit();
 
                 if (reservation != null) {
+                    // TODO: temporary test here if loaner is owner, later adjust
+                    if(car.getOwner().getId() == user.getId()) {
+                        reservation.setStatus(ReservationStatus.ACCEPTED);
+                        rdao.updateReservation(reservation);
+                        context.commit();
+                    }
                     return redirect(
-                            routes.Reserve.index() // return to infosession list
+                            routes.Drives.index() // redirect to drives list
                     );
                 } else {
                     reservationForm.error("De reservatie kon niet aangemaakt worden. Contacteer de administrator");

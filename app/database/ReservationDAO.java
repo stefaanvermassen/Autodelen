@@ -9,6 +9,8 @@ import models.Reservation;
 import models.User;
 import org.joda.time.DateTime;
 
+import java.util.List;
+
 /**
  *
  * @author Laurent
@@ -18,4 +20,5 @@ public interface ReservationDAO {
     public void updateReservation(Reservation reservation) throws DataAccessException;
     public Reservation getReservation(int id) throws DataAccessException;
     public void deleteReservation(Reservation reservation) throws DataAccessException;
+    public List<Reservation> getReservationList(int userId) throws DataAccessException;
 }
