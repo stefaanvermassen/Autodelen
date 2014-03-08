@@ -82,12 +82,12 @@ public class JDBCReservationDAO implements ReservationDAO{
             ps.setString(3,"REQUEST");
             ps.setTimestamp(4, new Timestamp(from.getMillis()));
             ps.setTimestamp(5, new Timestamp(to.getMillis()));
-            
-            ps.executeUpdate();
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating reservation.");
             
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                connection.commit();
                 return new Reservation(keys.getInt(1), car, user, from, to);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new reservation.", ex);
@@ -127,7 +127,6 @@ public class JDBCReservationDAO implements ReservationDAO{
                 else return null;
             }catch (SQLException e){
                 throw new DataAccessException("Error reading reservation resultset", e);
-
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to update reservation", e);
@@ -139,8 +138,8 @@ public class JDBCReservationDAO implements ReservationDAO{
     	try {
 			PreparedStatement ps = getDeleteReservationStatement();
 			ps.setInt(1, reservation.getId());
-			ps.executeUpdate();
-			connection.commit();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when deleting reservation.");
 		} catch (SQLException ex){
 			throw new DataAccessException("Could not delete reservation",ex);
 		}

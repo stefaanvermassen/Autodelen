@@ -136,8 +136,9 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setTimestamp(1, new Timestamp(time.getMillis())); //TODO: timezones?? convert to datetime see below
             ps.setInt(2, address.getId());
             ps.setInt(3, host.getId());
-            ps.executeUpdate();
-            connection.commit();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating infosession.");
+
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 return new InfoSession(keys.getInt(1), time, address, host, InfoSession.NO_ENROLLEES);
@@ -193,8 +194,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         try {
             PreparedStatement ps = getDeleteInfoSessionStatement();
             ps.setInt(1, id);
-            ps.executeUpdate();
-            connection.commit();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when deleting infosession.");
         } catch (SQLException ex){
             throw new DataAccessException("Could not delete infosession",ex);
         }
@@ -233,7 +234,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, session.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating time on infosession.");
-            connection.commit();
+
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to update infosession timestamp.", ex);
         }
@@ -251,7 +252,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, session.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update for InfoSession did not affect any row.");
-            connection.commit();
+
         } catch(SQLException ex){
             throw new DataAccessException("Failed to update address for infosession.", ex);
         }
@@ -266,7 +267,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
            if(ps.executeUpdate() == 0)
                throw new DataAccessException("Failed to register user to infosession. 0 rows affected.");
            session.addEnrollee(new Enrollee(user, EnrollementStatus.ENROLLED));
-           connection.commit();
+
        } catch(SQLException ex) {
             throw new DataAccessException("Failed to prepare statement for user registration with infosession.", ex);
        }
@@ -283,7 +284,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(3, session.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Failed to update enrollment status. Affected rows = 0");
-            connection.commit();
+
         } catch(SQLException ex){
             throw new DataAccessException("Failed to update enrollment status.", ex);
         }
@@ -302,7 +303,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, userId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Failed to unregister user from infosession.");
-            connection.commit();
+
         } catch(SQLException ex){
             throw new DataAccessException("Invalid unregister query for infosession.", ex);
         }

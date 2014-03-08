@@ -106,106 +106,93 @@ public class JDBCCarDAO implements CarDAO{
     
     @Override
     public Car createCar(String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
-
-            //connection.setAutoCommit(false);
-            try {
-            	PreparedStatement ps = createCarStatement();
-                ps.setString(1, type);
-                ps.setString(2, brand);
-                if(location != null) {
-                    ps.setInt(3, location.getId());
-                } else {
-                    ps.setNull(3, Types.INTEGER);
-                }
-                ps.setInt(4, seats);
-                ps.setInt(5, doors);
-                ps.setInt(6, year);
-                //Calendar cal = Calendar.getInstance();
-                //cal.set(year, 0,0);
-                //ps.setDate(6, new Date(cal.getTime().getTime()));
-
-                ps.setBoolean(7, gps);
-                ps.setBoolean(8, hook);
-                ps.setString(9, fuel.toString());
-                ps.setInt(10, fuelEconomy);
-                ps.setInt(11, estimatedValue);
-                ps.setInt(12, ownerAnnualKm);
-                // Owner cannot be null according to SQL script so this will throw an Exception
-                if(owner != null) {
-                    ps.setInt(13, owner.getId());
-                } else {
-                    ps.setNull(13, Types.INTEGER);
-                }
-                ps.setString(14, comments);
-  
-                java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
-                String currentDatetime = sqlDate.toString();
-                //ps.setDate(15,sqlDate);
-
-                ps.executeUpdate();
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    keys.next();
-                    connection.commit();
-                    //connection.setAutoCommit(true);
-                    return new Car(keys.getInt(1), brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
-                } catch (SQLException ex) {
-                    throw new DataAccessException("Failed to get primary key for new user.", ex);
-                }
-            } catch (SQLException ex) {
-                //connection.rollback();
-                //connection.setAutoCommit(true);
-                throw new DataAccessException("Failed to commit new car transaction.", ex);
+        try {
+            PreparedStatement ps = createCarStatement();
+            ps.setString(1, type);
+            ps.setString(2, brand);
+            if(location != null) {
+                ps.setInt(3, location.getId());
+            } else {
+                ps.setNull(3, Types.INTEGER);
             }
+            ps.setInt(4, seats);
+            ps.setInt(5, doors);
+            ps.setInt(6, year);
+            //Calendar cal = Calendar.getInstance();
+            //cal.set(year, 0,0);
+            //ps.setDate(6, new Date(cal.getTime().getTime()));
+
+            ps.setBoolean(7, gps);
+            ps.setBoolean(8, hook);
+            ps.setString(9, fuel.toString());
+            ps.setInt(10, fuelEconomy);
+            ps.setInt(11, estimatedValue);
+            ps.setInt(12, ownerAnnualKm);
+            // Owner cannot be null according to SQL script so this will throw an Exception
+            if(owner != null) {
+                ps.setInt(13, owner.getId());
+            } else {
+                ps.setNull(13, Types.INTEGER);
+            }
+            ps.setString(14, comments);
+
+            java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
+            String currentDatetime = sqlDate.toString();
+            //ps.setDate(15,sqlDate);
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating car.");
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next();
+                return new Car(keys.getInt(1), brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
+            } catch (SQLException ex) {
+                throw new DataAccessException("Failed to get primary key for new car.", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to create new car.", ex);
+        }
     }
 
     @Override
     public void updateCar(Car car) throws DataAccessException {
         try {
-            //connection.setAutoCommit(false);
-            try {
-            	PreparedStatement ps = updateCarStatement();
-                ps.setString(1, car.getType());
-                ps.setString(2, car.getBrand());
-                if(car.getLocation() != null) {
-                    ps.setInt(3, car.getLocation().getId());
-                } else {
-                    ps.setNull(3, Types.INTEGER);
-                }
-                ps.setInt(4, car.getSeats());
-                ps.setInt(5, car.getDoors());
-                //Calendar cal = Calendar.getInstance();
-                //cal.set(car.getYear(), 0,0);
-                //ps.setDate(6, new Date(cal.getTime().getTime()));
-                ps.setInt(6, car.getYear());
-                ps.setBoolean(7, car.isGps());
-                ps.setBoolean(8, car.isHook());
-                ps.setString(9, car.getFuel().toString());
-                ps.setInt(10, car.getFuelEconomy());
-                ps.setInt(11,car.getEstimatedValue());
-                ps.setInt(12,car.getOwnerAnnualKm());
-                // If Owner == null, this should throw an error on execution
-                if(car.getOwner() != null) {
-                    ps.setInt(13,car.getOwner().getId());
-                } else {
-                    ps.setNull(13, Types.INTEGER);
-                }
-                ps.setString(14,car.getComments());
-                //ps.setDate(15,new Date(new java.util.Date().getTime()));
-
-                ps.setInt(15, car.getId());
-                
-
-                ps.executeUpdate();
-                connection.commit();
-                //connection.setAutoCommit(true);
-
-            } catch (SQLException ex) {
-                connection.rollback();
-                //connection.setAutoCommit(true);
-                throw new DataAccessException("Failed to commit new car transaction.", ex);
+            PreparedStatement ps = updateCarStatement();
+            ps.setString(1, car.getType());
+            ps.setString(2, car.getBrand());
+            if(car.getLocation() != null) {
+                ps.setInt(3, car.getLocation().getId());
+            } else {
+                ps.setNull(3, Types.INTEGER);
             }
+            ps.setInt(4, car.getSeats());
+            ps.setInt(5, car.getDoors());
+            //Calendar cal = Calendar.getInstance();
+            //cal.set(car.getYear(), 0,0);
+            //ps.setDate(6, new Date(cal.getTime().getTime()));
+            ps.setInt(6, car.getYear());
+            ps.setBoolean(7, car.isGps());
+            ps.setBoolean(8, car.isHook());
+            ps.setString(9, car.getFuel().toString());
+            ps.setInt(10, car.getFuelEconomy());
+            ps.setInt(11,car.getEstimatedValue());
+            ps.setInt(12,car.getOwnerAnnualKm());
+            // If Owner == null, this should throw an error on execution
+            if(car.getOwner() != null) {
+                ps.setInt(13,car.getOwner().getId());
+            } else {
+                ps.setNull(13, Types.INTEGER);
+            }
+            ps.setString(14,car.getComments());
+            //ps.setDate(15,new Date(new java.util.Date().getTime()));
+
+            ps.setInt(15, car.getId());
+
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating car.");
+
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create car.", ex);
+            throw new DataAccessException("Failed to update car.", ex);
         }
     }
 
@@ -232,8 +219,8 @@ public class JDBCCarDAO implements CarDAO{
 		try {
 			PreparedStatement ps = getDeleteCarStatement();
 			ps.setInt(1, car.getId());
-			ps.executeUpdate();
-			connection.commit();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when deleting car.");
 		} catch (SQLException ex){
 			throw new DataAccessException("Could not delete car",ex);
 		}
