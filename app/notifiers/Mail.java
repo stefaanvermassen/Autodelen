@@ -23,7 +23,7 @@ public class Mail extends Mailer {
 
     public static void sendVerificationMail(User user, String verificationUrl) {
         String mail = "";
-        setSubject("Welcome %s", user.getFirstName());
+        setSubject("Welkom %s", user.getFirstName());
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
         // get html and process the args in the view
