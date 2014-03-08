@@ -1,6 +1,7 @@
 DROP DATABASE IF EXISTS autodelen;
 CREATE DATABASE autodelen;
 USE autodelen;
+SET NAMES utf8;
 
 CREATE TABLE `FileGroups` (
 	`file_group_id` INT NOT NULL AUTO_INCREMENT,
@@ -163,9 +164,9 @@ CREATE TABLE `InfoSessionEnrollees` ( # Wie is ingeschreven?
 	`infosession_id` INT NOT NULL,
 	`infosession_enrollee_id` INT NOT NULL,
 	`enrollment_status` ENUM('ENROLLED', 'PRESENT', 'ABSENT') NOT NULL DEFAULT 'ENROLLED',
-	PRIMARY KEY (`infosession_enrollee_id`),
+	PRIMARY KEY (`infosession_id`, `infosession_enrollee_id`),
 	FOREIGN KEY (`infosession_enrollee_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`infosession_id`) REFERENCES InfoSessions(`infosession_id`)
+	FOREIGN KEY (`infosession_id`) REFERENCES InfoSessions(`infosession_id`) ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
