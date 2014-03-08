@@ -34,6 +34,7 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement updateCarStatement;
     private PreparedStatement getCarStatement;
     private PreparedStatement deleteCarStatement;
+    private PreparedStatement getGetCarListStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
