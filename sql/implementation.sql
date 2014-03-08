@@ -1,6 +1,7 @@
 DROP DATABASE IF EXISTS autodelen;
 CREATE DATABASE autodelen;
 USE autodelen;
+SET NAMES utf8;
 
 CREATE TABLE `FileGroups` (
 	`file_group_id` INT NOT NULL AUTO_INCREMENT,
