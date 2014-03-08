@@ -89,12 +89,14 @@ public class JDBCUserDAO implements UserDAO {
     	return updateUserStatement;
     }
 
-    public static User populateUser(ResultSet rs, boolean withPassword, boolean withAddress) throws SQLException {
+    public static User populateUser(ResultSet rs, boolean withPassword, boolean withAddress, boolean withStatus) throws SQLException {
         User user = new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname"),
                 withPassword ? rs.getString("user_password") : null,
                 withAddress ? JDBCAddressDAO.populateAddress(rs) : null);
 
-        user.setStatus(Enum.valueOf(UserStatus.class,  rs.getString("user_status")));
+        if(withStatus)
+            user.setStatus(Enum.valueOf(UserStatus.class,  rs.getString("user_status")));
+
         return user;
     }
 
@@ -105,7 +107,7 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
-                    return populateUser(rs, true, true);
+                    return populateUser(rs, true, true, true);
                 else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
@@ -121,7 +123,7 @@ public class JDBCUserDAO implements UserDAO {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
-                    return populateUser(rs, true, true);
+                    return populateUser(rs, true, true, true);
                 else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading user resultset", ex);
