@@ -24,6 +24,7 @@ GET         /logout                            controllers.Login.logout()
 GET         /register                          controllers.Login.register()
 POST        /register                          controllers.Login.register_process()
 GET         /register/verify                   controllers.Login.register_verification(userId: Int, code: String)
+GET         /register/reactivate               controllers.Login.requestNewEmailVerificationProcess(email: String)
 GET         /pwreset                           controllers.Login.resetPassword(userId: Int, code: String)
 POST        /pwreset                           controllers.Login.resetPasswordProcess(userId: Int, code: String)
 GET         /pwresetrequest                    controllers.Login.resetPasswordRequest()
@@ -43,6 +44,10 @@ GET         /infosession/removeAttendee        controllers.InfoSessions.removeUs
 GET         /infosession/edit                  controllers.InfoSessions.editSession(sessionId: Int)
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
+
+# Settings
+# TODO: REMOVE THIS!!!
+GET         /settings/instantadmin             controllers.Settings.instantAdmin()
 
 # Emailtemplates
 GET         /emailtemplate                     controllers.EmailTemplates.showExistingTemplates()

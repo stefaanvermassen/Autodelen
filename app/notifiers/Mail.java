@@ -36,7 +36,10 @@ public class Mail extends Mailer {
         }catch (DataAccessException ex) {
             mail = welcome.render(user).body();
         }
-        send(mail);
+
+        if(!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
     }
 
     private static String replaceUserTags(User user, String template){
