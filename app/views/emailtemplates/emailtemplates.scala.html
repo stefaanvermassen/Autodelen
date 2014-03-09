@@ -4,27 +4,26 @@
     @scripts = {
         <script src="@routes.Assets.at("javascripts/plugins/dataTables/jquery.dataTables.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/plugins/dataTables/dataTables.bootstrap.js")" type="text/javascript"></script>
-
         <script>
         $(document).ready(function() {
-        $('#dataTables-emailtemplates').dataTable( {
-            "bFilter": false,
-            "bInfo": false,
-            "bLengthChange": false,
+            $('#dataTables-emailtemplates').dataTable( {
+                "bFilter": false,
+                "bInfo": false,
+                "bLengthChange": false,
 
-            "aoColumns": [
-              null,
-              null,
-              { "bSortable": false }
-            ],
-            "oLanguage": {
-              "oPaginate": {
-                "sNext": "Volgende",
-                "sPrevious": "Vorige",
-                "sSearch": "Zoek:"
-              }
-            }
-          } );
+                "aoColumns": [
+                  null,
+                  null,
+                  { "bSortable": false }
+                ],
+                "oLanguage": {
+                  "oPaginate": {
+                    "sNext": "Volgende",
+                    "sPrevious": "Vorige"
+                  },
+                  "sSearch": "Zoek: "
+                }
+            });
         });
         </script>
     }
