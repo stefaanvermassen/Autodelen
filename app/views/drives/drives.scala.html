@@ -1,18 +1,40 @@
+@(userId: Int, reservations: List[Reservation])
 @scripts = {
     <script src="@routes.Assets.at("javascripts/plugins/dataTables/jquery.dataTables.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/plugins/dataTables/dataTables.bootstrap.js")" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
-            $('#dataTables-drives').dataTable({
-            });
+        $('#dataTables-drives').dataTable( {
+            "bFilter": true,
+            "bInfo": false,
+            "bLengthChange": false,
+
+            "aoColumns": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              { "bSortable": false }
+            ],
+            "oLanguage": {
+              "oPaginate": {
+                "sNext": "Volgende",
+                "sPrevious": "Vorige"
+              },
+              "sSearch": "Zoek: "
+            }
+        });
         });
     </script>
 }
 @stylesheets = {
-    <script src="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")" type="text/javascript"></script>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
 }
-@app("Ritten") {
+@app("Ritten", stylesheets, scripts) {
 
 <div id="page-header-wrapper">
     <h1 class="page-header">Ritten</h1>
@@ -36,26 +58,59 @@
                             <thead>
                                 <tr role="row">
                                     <th class="sorting" tabindex="0" rowspan="1" colspan="1">#</th>
+                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Automerk</th>
+                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Type</th>
                                     <th class="sorting" tabindex="0" rowspan="1" colspan="1">Van</th>
                                     <th class="sorting" tabindex="0" rowspan="1" colspan="1">Tot</th>
                                     <th class="sorting" tabindex="0" rowspan="1" colspan="1">Ontlener</th>
+                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
                                     <th class="sorting" tabindex="0" rowspan="1" colspan="1">Acties</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>yyyy-MM-dd HH:mm:ss</td>
-                                    <td>yyyy-MM-dd HH:mm:ss</td>
-                                    <td>John Doe</td>
-                                    <td>
-                                        <div class="btn-group btn-group-xs">
-                                            <button type="button" class="btn btn-success">Goedkeuren</button>
-                                            <button type="button" class="btn btn-primary">Details</button>
-                                            <button type="button" class="btn btn-danger">Afkeuren</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @for((reservation, index) <- reservations.zipWithIndex) {
+                                    <tr>
+                                        <td>@{index+1}</td>
+                                        <td>@reservation.getCar.getBrand</td>
+                                        <td>@reservation.getCar.getType</td>
+                                        <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
+                                        <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
+                                        @if(reservation.getUser.getId == userId) {
+                                            <td>Jij</td>
+                                        } else {
+                                            <td>@reservation.getUser</td>
+                                        }
+                                        <td>
+                                            @reservation.getStatus match {
+                                                case ReservationStatus.ACCEPTED => {
+                                                    <span class="fa fa-check-circle"></span>
+                                                }
+                                                case ReservationStatus.REFUSED => {
+                                                    <span class="fa fa-minus-circle"></span>
+                                                }
+                                                case ReservationStatus.REQUEST => {
+                                                    <span class="fa fa-question-circle"></span>
+                                                }
+                                            }
+                                            @reservation.getStatus.getDescription
+                                        </td>
+                                        <!-- TODO: temporary give action annulate for both accepted as refused -->
+                                        @if(reservation.getUser.getId == userId || reservation.getStatus != ReservationStatus.REQUEST) {
+                                            <td>
+                                                <div class="btn-group btn-group-xs">
+                                                    <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">verwijder</a>
+                                                </div>
+                                            </td>
+                                        } else {
+                                            <td>
+                                                <div class="btn-group btn-group-xs">
+                                                    <a class="btn btn-success" href="@routes.Drives.aproveReservation(reservation.getId)">goedkeuren</a>
+                                                    <a class="btn btn-warning" href="@routes.Drives.refuseReservation(reservation.getId)">afkeuren</a>
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>

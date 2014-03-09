@@ -123,7 +123,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
-        return new InfoSession(rs.getInt("infosession_id"), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false));
+        return new InfoSession(rs.getInt("infosession_id"), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false, false));
     }
 
     @Override

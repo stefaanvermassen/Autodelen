@@ -4,6 +4,7 @@ INSERT INTO TemplateTags(template_tag_body) VALUE ("user_firstname");
 INSERT INTO TemplateTags(template_tag_body) VALUE ("user_lastname");
 
 INSERT INTO TemplateTags(template_tag_body) VALUE ("verification_url");
+INSERT INTO TemplateTags(template_tag_body) VALUE ("password_reset_url");
 
 INSERT INTO TemplateTags(template_tag_body) VALUE ("infosession_date");
 INSERT INTO TemplateTags(template_tag_body) VALUE ("infosession_address");
@@ -33,6 +34,8 @@ INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "user_firstname";
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "user_lastname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "verification_url";
 
 #--Welkom
 INSERT INTO Templates(template_title, template_body) VALUES (
@@ -120,3 +123,22 @@ INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_car_address";
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_url";
+
+#--Wachtwoord reset
+
+INSERT INTO Templates(template_title, template_body) VALUES (
+"Wachtwoord reset", 
+"Beste %user_firstname% %user_lastname%,<br>
+
+Klik op onderstaande link om een nieuw wachtwoord te kiezen.<br>
+%password_reset_url%
+<br>
+Met vriendelijke groeten,<br>
+Dégage");
+
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_firstname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_lastname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "password_reset_url";
