@@ -63,7 +63,6 @@ public class JDBCDAOTest {
             updateUserTest();
             deleteUserTest();
             permanentlyDeleteUsersTest();
-            deleteAddressesTest();
         } finally {
             context.rollback();
         }
