@@ -38,7 +38,9 @@ public class InfoSessions extends Controller {
         }
 
         public String validate() {
-            if (DateTime.now().isAfter(getDateTime())) {
+            if (time == null || time.isEmpty()) {
+                return "Gelieve het tijdsveld in te vullen";
+            } else if (DateTime.now().isAfter(getDateTime())) {
                 return "Je kan enkel een infosessie plannen na de huidige datum.";
             }
             return null;
@@ -55,7 +57,19 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result newSession() {
-        return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class), 0));
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+
+        if (user.getAddress() != null) {
+            InfoSessionCreationModel model = new InfoSessionCreationModel();
+            model.address_city = user.getAddress().getCity();
+            model.address_zip = user.getAddress().getZip();
+            model.address_street = user.getAddress().getStreet();
+            model.address_number = user.getAddress().getNumber();
+            model.address_bus = user.getAddress().getBus();
+
+            Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
+            return ok(newInfosession.render(editForm, 0));
+        } else return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class), 0));
     }
 
     /**
@@ -100,10 +114,15 @@ public class InfoSessions extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             try {
-                dao.deleteInfoSession(sessionId);
-                context.commit();
-                flash("success", "De infosessie werd succesvol verwijderd.");
-                return ok(upcomingSessionsList());
+                if (dao.getInfoSession(sessionId, false) == null) {
+                    flash("danger", "Deze infosessie bestaat niet.");
+                    return badRequest(upcomingSessionsList());
+                } else {
+                    dao.deleteInfoSession(sessionId);
+                    context.commit();
+                    flash("success", "De infosessie werd succesvol verwijderd.");
+                    return ok(upcomingSessionsList());
+                }
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;

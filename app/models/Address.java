@@ -70,7 +70,9 @@ public class Address {
     }
 
     @Override
-    public String toString(){
-        return String.format("%s %s, %s %s", street, number, zip, city);
+    public String toString() {
+        if ((street != null && !street.isEmpty()) || (number != null && !number.isEmpty()) || (zip != null && !zip.isEmpty()) || (city != null && !city.isEmpty())) {
+            return String.format("%s %s, %s %s", street, number, zip, city);
+        } else return "/";
     }
 }
