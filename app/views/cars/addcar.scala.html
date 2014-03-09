@@ -77,6 +77,36 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_street" name="address_street" type="text" placeholder="Straat" class="form-control input-md" value="@form("address_street").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_number" maxlength="9" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_bus" maxlength="3" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_zip" maxlength="11" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_city" name="address_city" type="text" placeholder="Plaats" class="form-control input-md" value="@form("address_city").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label class="col-md-1 control-label" for="add"></label>
                                         <div class="col-md-12">
                                             <button type="submit" id="add" name="add" class="btn btn-block btn-success">Voeg auto toe</button>
