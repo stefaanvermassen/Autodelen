@@ -1,32 +1,30 @@
 @(infoSession: InfoSession)
-    @import database.DatabaseHelper;
-
-    @scripts = {
-        <script>
-            $(document).ready(function() {
-                $( "#deleteButton" ).click(function() {
-                    if(confirm("Ben je zeker dat je deze sessie wil verwijderen?")){
-                        window.location = '@routes.InfoSessions.removeSession(infoSession.getId)';
-                    }
-                });
+@import database.DatabaseHelper;
+@scripts = {
+    <script>
+        $(document).ready(function() {
+            $( "#deleteButton" ).click(function() {
+                if(confirm("Ben je zeker dat je deze sessie wil verwijderen?")){
+                    window.location = '@routes.InfoSessions.removeSession(infoSession.getId)';
+                }
             });
-        </script>
-    }
+        });
+    </script>
+}
+@app("Datails Infosessie", Html(""), scripts) {
+<div id="page-header-wrapper">
+    <h1 class="page-header">Infosessies</h1>
+    <ol class="breadcrumb">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Infosessies</a></li>
+        <li class="active">Details infosessie</li>
+    </ol>
+</div>
 
-    @app("Infosessie", Html(""), scripts) {
-
-        <div id="page-header-wrapper">
-            <h1 class="page-header">Infosessie - details</h1>
-            <ol class="breadcrumb">
-                <li><a href="#">Home</a></li>
-                <li class="active">Infosessies</li>
-            </ol>
-        </div>
-
-        <div id="page-wrapper">
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
         @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.ADMIN)) { isAdmin =>
-            <h1>Infosessie</h1>
-
             @if(!flash.isEmpty()) {
                 @for((msgKey, msgValue) <- flash) {
                     <div class="alert alert-@msgKey" data-dismiss="alert">
@@ -35,13 +33,29 @@
                     </div>
                 }
             }
-
             @if(isAdmin) {
-                <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.editSession(infoSession.getId)">Wijzigen</a>
-                <button type="button" id="deleteButton" class="btn btn-warning btn-sm">Verwijderen</button>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <a class="btn btn-default btn-sm" href="@routes.InfoSessions.editSession(infoSession.getId)">Infosessie wijzigen</a>
+                        <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Infosessie verwijderen</button>
+                    </div>
+                </div>
             }
 
-            @detailPartial(infoSession)
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen infosessie
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    @detailPartial(infoSession)
+                </div>
+            </div>
+
             @* TODO: can other users see the attendees, or only admins?? *@
             @if(infoSession.hasEnrolled) {
                 <div class="panel panel-default">
@@ -57,6 +71,7 @@
                                         <th class="sorting" tabindex="0" rowspan="1" colspan="1">#</th>
                                         <th class="sorting" tabindex="0" rowspan="1" colspan="1">Naam</th>
                                         @if(isAdmin) { @* Extra operations for admin such as delete *@
+                                            <th>Aanwezigheid</th>
                                             <th>Actie</th>
                                         }
                                     </tr>
@@ -69,35 +84,35 @@
                                         @if(isAdmin) {
                                             <td>
                                                 <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-warning btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">
-                                                        Verwijderen</a>
-
                                                     @* Allow status to be changed to Absent or present *@
                                                     @if(enrollee.getStatus != EnrollementStatus.ENROLLED) {
                                                         <a class="btn btn-default" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ENROLLED.name())">
-                                                            Te bepalen</a>
+                                                            te bepalen</a>
                                                     } else {
                                                         <a disabled="disabled" class="btn btn-default active" href="#">
-                                                            Te bepalen</a>
+                                                            te bepalen</a>
                                                     }
 
                                                     @if(enrollee.getStatus != EnrollementStatus.PRESENT) {
                                                         <a class="btn btn-success" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.PRESENT.name())">
-                                                            Aanwezig</a>
+                                                            aanwezig</a>
                                                     } else {
                                                         <a disabled="disabled" class="btn btn-success active" href="#">
-                                                            Aanwezig</a>
+                                                            aanwezig</a>
                                                     }
 
                                                     @if(enrollee.getStatus != EnrollementStatus.ABSENT) {
-                                                        <a class="btn btn-danger" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ABSENT.name())">
-                                                            Afwezig</a>
+                                                        <a class="btn btn-warning" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ABSENT.name())">
+                                                            afwezig</a>
                                                     } else {
-                                                        <a disabled="disabled" class="btn btn-danger active" href="#">
-                                                            Afwezig</a>
+                                                        <a disabled="disabled" class="btn btn-warning active" href="#">
+                                                            afwezig</a>
                                                     }
                                                 </div>
                                             </td>
+                                            <td>
+                                                <a class="btn btn-danger btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">aanwezige verwijderen</a>
+                                            </td>       
                                         }
                                     </tr>
                                 }
@@ -107,11 +122,12 @@
                     </div>
                 </div>
             } else {
-                <div class="alert alert-success"><span class="glyphicon glyphicon-info-sign"></span>
-                    Er zijn nog geen inschrijvingen voor deze infosessie.</div>
+                <div class="alert alert-success"><span class="fa fa-info-circle"></span> Er zijn nog geen inschrijvingen voor deze infosessie.</div>
             }
 
         }
         </div>
-        <!-- /page-wrapper -->
-    }
+    </div>
+</div>
+<!-- /page-wrapper -->
+}

@@ -16,6 +16,14 @@ body {
 	background-color: #f6f6f6;
 }
 
+.well {
+	border-radius: 0px;
+}
+
+.alert {
+	border-radius: 0px;
+}
+
 .panel {
 	border-radius:0px;
 }
