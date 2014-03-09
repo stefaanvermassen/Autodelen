@@ -4,7 +4,7 @@
 
 # Home page
 GET         /                                  controllers.Application.index()
-GET         /informatie                        controllers.Informatie.index()
+GET         /information                       controllers.Information.index()
 
 # Dashboard page
 GET         /dashboard                         controllers.Dashboard.index()

@@ -4,12 +4,12 @@ import database.DatabaseHelper;
 import models.User;
 import play.mvc.*;
 
-import views.html.*;
+import views.html.homepage.*;
 
-public class Informatie extends Controller {
+public class Information extends Controller {
 
     public static Result index() {
-        return ok(informatie.render());
+        return ok(information.render());
     }
 
 }
