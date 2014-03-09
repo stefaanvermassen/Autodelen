@@ -43,7 +43,7 @@ public class Cars extends Controller {
     }
 
     public static Result showCars() {
-        return ok(carlist.render());
+        return ok(cars.render());
     }
 
     @RoleSecured.RoleAuthenticated()

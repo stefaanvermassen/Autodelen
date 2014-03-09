@@ -11,7 +11,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.infosession.*;
-import views.html.infosession.newInfosession;
 
 import java.util.List;
 
@@ -68,8 +67,8 @@ public class InfoSessions extends Controller {
             model.address_bus = user.getAddress().getBus();
 
             Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-            return ok(newInfosession.render(editForm, 0));
-        } else return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class), 0));
+            return ok(addinfosession.render(editForm, 0));
+        } else return ok(addinfosession.render(Form.form(InfoSessionCreationModel.class), 0));
     }
 
     /**
@@ -96,7 +95,7 @@ public class InfoSessions extends Controller {
                 model.address_bus = is.getAddress().getBus();
 
                 Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-                return ok(newInfosession.render(editForm, sessionId));
+                return ok(addinfosession.render(editForm, sessionId));
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -142,7 +141,7 @@ public class InfoSessions extends Controller {
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
-            return badRequest(newInfosession.render(editForm, sessionId));
+            return badRequest(addinfosession.render(editForm, sessionId));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -337,7 +336,7 @@ public class InfoSessions extends Controller {
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(newInfosession.render(createForm, 0));
+            return badRequest(addinfosession.render(createForm, 0));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -357,7 +356,7 @@ public class InfoSessions extends Controller {
                         );
                     } else {
                         createForm.error("Failed to create session in database. Contact administrator.");
-                        return badRequest(newInfosession.render(createForm, 0));
+                        return badRequest(addinfosession.render(createForm, 0));
                     }
                 } catch (DataAccessException ex) {
                     context.rollback();
