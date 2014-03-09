@@ -151,10 +151,10 @@ public class JDBCUserDAO implements UserDAO {
             ps.setString(3, firstName);
             ps.setString(4, lastName);
 
-            ps.executeUpdate();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating user.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                connection.commit();
                 return new User(keys.getInt(1), email, firstName, lastName, password, null); //TODO: extra constructor
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new user.", ex);
@@ -230,7 +230,7 @@ public class JDBCUserDAO implements UserDAO {
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("User update affected 0 rows.");
-        	connection.commit();
+
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user", ex);
         }
@@ -241,8 +241,8 @@ public class JDBCUserDAO implements UserDAO {
 		try {
 			PreparedStatement ps = getDeleteUserStatement();
 			ps.setInt(1, user.getId());
-			ps.executeUpdate();
-			connection.commit();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when deleting (=updating to DROPPED) user.");
 		} catch (SQLException ex){
 			throw new DataAccessException("Could not delete user",ex);
 		}
@@ -254,8 +254,8 @@ public class JDBCUserDAO implements UserDAO {
         try {
             PreparedStatement ps = getPermanentlyDeleteUserStatement();
             ps.setInt(1, user.getId());
-            ps.executeUpdate();
-            connection.commit();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when permanently deleting user.");
         } catch (SQLException ex){
             throw new DataAccessException("Could not permanently delete user",ex);
         }

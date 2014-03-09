@@ -50,8 +50,7 @@ CREATE TABLE `Addresses` (
   INDEX `address_place_zip` (`address_city`)
 )
   COLLATE='latin1_swedish_ci'
-  ENGINE=InnoDB
-  AUTO_INCREMENT=2;
+  ENGINE=InnoDB;
 
 CREATE TABLE `Users` (
 	`user_id` INT NOT NULL AUTO_INCREMENT,

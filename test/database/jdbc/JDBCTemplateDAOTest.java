@@ -18,21 +18,26 @@ import database.DatabaseHelper;
 import database.TemplateDAO;
 
 public class JDBCTemplateDAOTest {
-	
+
+    private DataAccessContext context;
 	private TemplateDAO templateDAO;
 	private List<EmailTemplate> templates;
 
 	@Before
     public void setUp() throws Exception {
-        DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
         templateDAO = context.getTemplateDAO();
         templates = templateDAO.getAllTemplates();
     }
 	
 	@Test
 	public void testTemplateDAO() throws Exception {
-		getTemplateTest();
-		updateTemplateTest();
+        try {
+		    getTemplateTest();
+		    updateTemplateTest();
+        } finally {
+            context.rollback();
+        }
 	}
 	
 	public void updateTemplateTest() throws Exception{
