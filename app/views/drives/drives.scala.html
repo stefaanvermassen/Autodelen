@@ -5,13 +5,34 @@
 
     <script>
         $(document).ready(function() {
-            $('#dataTables-drives').dataTable({
-            });
+        $('#dataTables-drives').dataTable( {
+            "bFilter": true,
+            "bInfo": false,
+            "bLengthChange": false,
+
+            "aoColumns": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              { "bSortable": false }
+            ],
+            "oLanguage": {
+              "oPaginate": {
+                "sNext": "Volgende",
+                "sPrevious": "Vorige"
+              },
+              "sSearch": "Zoek: "
+            }
+        });
         });
     </script>
 }
 @stylesheets = {
-    <script src="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")" type="text/javascript"></script>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
 }
 @app("Ritten", stylesheets, scripts) {
 
@@ -49,7 +70,7 @@
                             <tbody>
                                 @for((reservation, index) <- reservations.zipWithIndex) {
                                     <tr>
-                                        <td>@index</td>
+                                        <td>@{index+1}</td>
                                         <td>@reservation.getCar.getBrand</td>
                                         <td>@reservation.getCar.getType</td>
                                         <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
@@ -62,13 +83,13 @@
                                         <td>
                                             @reservation.getStatus match {
                                                 case ReservationStatus.ACCEPTED => {
-                                                    <span class="glyphicon glyphicon-ok-sign"></span>
+                                                    <span class="fa fa-check-circle"></span>
                                                 }
                                                 case ReservationStatus.REFUSED => {
-                                                    <span class="glyphicon glyphicon-minus-sign"></span>
+                                                    <span class="fa fa-minus-circle"></span>
                                                 }
                                                 case ReservationStatus.REQUEST => {
-                                                    <span class="glyphicon glyphicon-question-sign"></span>
+                                                    <span class="fa fa-question-circle"></span>
                                                 }
                                             }
                                             @reservation.getStatus.getDescription
