@@ -98,14 +98,14 @@
                                         @if(reservation.getUser.getId == userId || reservation.getStatus != ReservationStatus.REQUEST) {
                                             <td>
                                                 <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-warning" href="@routes.Drives.cancelReservation(reservation.getId)">Annuleer</a>
+                                                    <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">verwijder</a>
                                                 </div>
                                             </td>
                                         } else {
                                             <td>
                                                 <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-success" href="@routes.Drives.aproveReservation(reservation.getId)">Goedkeuren</a>
-                                                    <a class="btn btn-danger" href="@routes.Drives.refuseReservation(reservation.getId)">Afkeuren</a>
+                                                    <a class="btn btn-success" href="@routes.Drives.aproveReservation(reservation.getId)">goedkeuren</a>
+                                                    <a class="btn btn-warning" href="@routes.Drives.refuseReservation(reservation.getId)">afkeuren</a>
                                                 </div>
                                             </td>
                                         }
