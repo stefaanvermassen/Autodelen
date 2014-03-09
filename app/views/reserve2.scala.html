@@ -64,53 +64,57 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
-@app("Reserveren - details", stylesheets, scripts) {
-
+@app("Reservatiedetails", stylesheets, scripts) {
 <div id="page-header-wrapper">
-    <h1 class="page-header">Reserveren - details</h1>
+    <h1 class="page-header">Reservatiedetails</h1>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
-        <li class="active">Reserveren</li>
+        <li><a href="#">Reserveren</a></li>
+        <li class="active">Reservatiedetails</li>
     </ol>
 </div>
 
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
+
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Reserveren - details
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Geselecteerde auto
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                        <div class="container well">
-                            <h4>Geselecteerde auto</h4>
-                            <div class="col-sm-2">
-                                <label>Eigenaar</label>
-                            </div>
-                            <div class="col-sm-10">
-                                <label>@car.getOwner</label>
-                            </div>
-                            <div class="col-sm-2">
-                                <label>Merk</label>
-                            </div>
-                            <div class="col-sm-10">
-                                <label>@car.getBrand</label>
-                            </div>
-                            <div class="col-sm-2">
-                                <label>Capaciteit</label>
-                            </div>
-                            <div class="col-sm-10">
-                                <label>@car.getSeats</label>
-                            </div>
-                            <div class="col-sm-2">
-                                <label>Standplaats</label>
-                            </div>
-                            <div class="col-sm-10">
-                                <label>@car.getLocation</label>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="well">
+                                <p>
+                                    <strong>Eigenaar:</strong> @car.getOwner<br>
+                                    <strong>Merk:</strong> @car.getBrand<br>
+                                    <strong>Capaciteit:</strong> @car.getSeats<br>
+                                    <strong>Standplaats:</strong> @car.getLocation
+                                </p>
+                                <p>
+                                    @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
+                                </p>
                             </div>
                         </div>
+                        <div class="col-lg-8">
+                        <div class="well">
+                                Map placeholder
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
 
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Reservatiedetails
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
                     @helper.form(routes.Reserve.confirmReservation(car.getId), 'class -> "form-horizontal") {
                         @if(form.hasGlobalErrors) {
                             <div class="alert alert-danger alert-dismissable">
