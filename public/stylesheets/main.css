@@ -1,7 +1,6 @@
 /* --- Tables --- */
 .pagination>li:first-child>a, .pagination>li:last-child>a{
 	border-radius: 0px;
-
 }
 
 .pagination>li>a, .pagination>li>span {
@@ -87,11 +86,6 @@ body {
 }
 
 .avatar > img {
-	/*rounded*/
-	border-radius: 150px;
-	-webkit-border-radius: 150px;
-	-moz-border-radius: 150px;
-
 	/*center*/
     display: block;
     margin-right: auto;
@@ -100,11 +94,6 @@ body {
 	/*resize*/
 	width: 150px;
 	height: 150px;
-
-	/*scale instead of crop*/
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position:center;
 }
 
 /* --- Flatstrap --- */
