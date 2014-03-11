@@ -17,26 +17,32 @@ import java.util.*;
  */
 public class JDBCDAOTest {
 
+    private DataAccessContext context;
+
     private AddressDAO addressDAO;
     private UserDAO userDAO;
     private CarDAO carDAO;
     private ReservationDAO reservationDAO;
+    private CarRideDAO carRideDAO;
     private InfoSessionDAO infoSessionDAO;
 
     private List<Address> addresses = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private List<Car> cars = new ArrayList<>();
     private List<Reservation> reservations = new ArrayList<>();
+    private List<CarRide> carRides = new ArrayList<>();
     private List<InfoSession> infoSessions = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
-        DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
+        context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
 
         addressDAO = context.getAddressDAO();
         userDAO = context.getUserDAO();
         carDAO = context.getCarDAO();
         reservationDAO = context.getReservationDAO();
+        carRideDAO = context.getCarRideDAO();
         infoSessionDAO = context.getInfoSessionDAO();
     }
 
@@ -46,11 +52,10 @@ public class JDBCDAOTest {
             createAddresses();
             getAddressTest();
             updateAddressTest();
-        } catch(Exception e) {
-            deleteAddresses();
-            throw e;
+            deleteAddressesTest();
+        } finally {
+            context.rollback();
         }
-        deleteAddresses();
     }
 
     @Test
@@ -61,18 +66,14 @@ public class JDBCDAOTest {
             getUserTest();
             updateUserTest();
             deleteUserTest();
-        } catch(Exception e) {
-            permanentlyDeleteUsers();
-            deleteAddresses();
-            throw e;
+            permanentlyDeleteUsersTest();
+        } finally {
+            context.rollback();
         }
-
-        permanentlyDeleteUsers();
-        deleteAddresses();
     }
 
     /*
-     * Also tests Users
+     * Also tests Users and Addresses
      */
     @Test
     public void testCarDAO() throws Exception {
@@ -82,15 +83,10 @@ public class JDBCDAOTest {
             createCars();
             getCarTest();
             updateCarTest();
-        } catch(Exception e) {
-            deleteCars();
-            permanentlyDeleteUsers();
-            deleteAddresses();
-            throw e;
+            deleteCarsTest();
+        } finally {
+            context.rollback();
         }
-        deleteCars();
-        permanentlyDeleteUsers();
-        deleteAddresses();
     }
 
     @Test
@@ -100,13 +96,10 @@ public class JDBCDAOTest {
             createCarsWithoutAddresses();
             getCarTest();
             updateCarTest();
-        } catch(Exception e) {
-            deleteCars();
-            permanentlyDeleteUsers();
-            throw e;
+            deleteCarsTest();
+        } finally {
+            context.rollback();
         }
-        deleteCars();
-        permanentlyDeleteUsers();
 
     }
 
@@ -118,6 +111,8 @@ public class JDBCDAOTest {
             Assert.fail("Cars.user_id cannot be null, createCarWithoutUser() should throw DataAccesException");
         } catch(DataAccessException e) {
 
+        } finally {
+            context.rollback();
         }
     }
     /*
@@ -132,18 +127,25 @@ public class JDBCDAOTest {
             createReservations();
             getReservationTest();
             updateReservationTest();
-        } catch(Exception e) {
-            deleteReservations();
-            deleteCars();
-            permanentlyDeleteUsers();
-            deleteAddresses();
-            throw e;
+            deleteReservationsTest();
+        } finally {
+            context.rollback();
         }
+    }
 
-        deleteReservations();
-        deleteCars();
-        permanentlyDeleteUsers();
-        deleteAddresses();
+    @Test
+    public void testCarRideDAO() throws Exception {
+        try {
+            createAddresses();
+            createUsers();
+            createCars();
+            createReservations();
+            createCarRides();
+            getCarRideTest();
+            updateCarRideTest();
+        } finally {
+            context.rollback();
+        }
     }
 
     @Test
@@ -154,15 +156,10 @@ public class JDBCDAOTest {
             createInfoSessions();
             getInfoSessionTest();
             updateInfoSessionTest();
-        } catch(Exception e) {
-            deleteInfoSessions();
-            permanentlyDeleteUsers();
-            deleteAddresses();
-            throw e;
+            deleteInfoSessionsTest();
+        } finally {
+            context.rollback();
         }
-        deleteInfoSessions();
-        permanentlyDeleteUsers();
-        deleteAddresses();
     }
 
     @Test
@@ -171,15 +168,10 @@ public class JDBCDAOTest {
             createAddresses();
             createUsers();
             createInfoSessionWithSameEnrollees();
-        } catch(Exception e) {
-            deleteInfoSessions();
-            permanentlyDeleteUsers();
-            deleteAddresses();
-            throw e;
         }
-        deleteInfoSessions();
-        permanentlyDeleteUsers();
-        deleteAddresses();
+        finally {
+            context.rollback();
+        }
     }
 
 
@@ -236,7 +228,7 @@ public class JDBCDAOTest {
     /*
      * First createAddresses() has to be called
      */
-    private void deleteAddresses() throws Exception {
+    private void deleteAddressesTest() throws Exception {
         Iterator<Address> iAddresses = addresses.iterator();
         while(iAddresses.hasNext()) {
             Address address = iAddresses.next();
@@ -315,7 +307,7 @@ public class JDBCDAOTest {
     /*
      * First createUsers() has to be called
      */
-    private void permanentlyDeleteUsers() {
+    private void permanentlyDeleteUsersTest() {
         Iterator<User> iUsers = users.iterator();
         while(iUsers.hasNext()) {
             User user = iUsers.next();
@@ -475,7 +467,7 @@ public class JDBCDAOTest {
     /*
     * First createCars() has to be called
     */
-    private void deleteCars() {
+    private void deleteCarsTest() {
         Iterator<Car> i = cars.iterator();
         while(i.hasNext()) {
             Car car = i.next();
@@ -544,7 +536,7 @@ public class JDBCDAOTest {
         getReservationTest();
     }
     
-    private void deleteReservations(){
+    private void deleteReservationsTest(){
     	Iterator<Reservation> i = reservations.iterator();
         while(i.hasNext()) {
             Reservation reservation = i.next();
@@ -558,6 +550,47 @@ public class JDBCDAOTest {
             }
             i.remove();
         }
+    }
+
+    private void createCarRides() throws Exception {
+        for(Reservation reservation : reservations) {
+            CarRide carRide = carRideDAO.createCarRide(reservation);
+
+            carRides.add(carRide);
+        }
+    }
+
+    private void getCarRideTest() {
+        for(CarRide carRide : carRides) {
+            CarRide returncarRide = carRideDAO.getCarRide(carRide.getReservation().getId());
+
+            // TODO: assertEquals of the actual reservations, and not only ID's?
+            Assert.assertEquals(carRide.getReservation().getId(),returncarRide.getReservation().getId());
+            Assert.assertEquals(carRide.isStatus(),returncarRide.isStatus());
+            Assert.assertEquals(carRide.getStartMileage(),returncarRide.getStartMileage());
+            Assert.assertEquals(carRide.getEndMileage(),returncarRide.getEndMileage());
+        }
+    }
+
+    private void updateCarRideTest() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_carrides.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine();
+
+        for(CarRide carRide : carRides) {
+            int statusInt = sc.nextInt();
+            boolean status = statusInt == 1;
+            carRide.setStatus(status);
+
+            int start = sc.nextInt();
+            carRide.setStartMileage(start);
+
+            int end = sc.nextInt();
+            carRide.setEndMileage(end);
+
+            carRideDAO.updateCarRide(carRide);
+        }
+        getCarRideTest();
     }
 
     /*
@@ -695,7 +728,7 @@ public class JDBCDAOTest {
         getInfoSessionTest();
     }
 
-    private void deleteInfoSessions(){
+    private void deleteInfoSessionsTest(){
         Iterator<InfoSession> i = infoSessions.iterator();
         while(i.hasNext()) {
             InfoSession infoSession = i.next();
@@ -704,6 +737,8 @@ public class JDBCDAOTest {
                 InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), false);
                 if(returnInfoSession != null)
                     Assert.fail("InfoSession not permanently deleted");
+
+                // Now let's see if the enrollees are still in the database...
                 List<Enrollee> enrollees = infoSession.getEnrolled();
                 try {
                     infoSessionDAO.unregisterUser(infoSession.getId(), enrollees.get(0).getUser().getId());

@@ -1,6 +1,7 @@
 DROP DATABASE IF EXISTS autodelen;
 CREATE DATABASE autodelen;
 USE autodelen;
+SET NAMES utf8;
 
 CREATE TABLE `FileGroups` (
 	`file_group_id` INT NOT NULL AUTO_INCREMENT,
@@ -49,8 +50,7 @@ CREATE TABLE `Addresses` (
   INDEX `address_place_zip` (`address_city`)
 )
   COLLATE='latin1_swedish_ci'
-  ENGINE=InnoDB
-  AUTO_INCREMENT=2;
+  ENGINE=InnoDB;
 
 CREATE TABLE `Users` (
 	`user_id` INT NOT NULL AUTO_INCREMENT,
@@ -197,17 +197,12 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `CarRides` (
-	`car_ride_id` INT NOT NULL AUTO_INCREMENT,
-	`car_ride_car_id` INT NOT NULL,
-	`car_ride_user_id` INT NOT NULL,
-	`car_ride_from` TIMESTAMP NOT NULL,
-	`car_ride_to` TIMESTAMP NOT NULL,
-	`car_ride_status` BIT(1) NOT NULL DEFAULT 0,
+	`car_ride_car_reservation_id` INT NOT NULL, # also primary key
+	`car_ride_status` BIT(1) NOT NULL DEFAULT 0, # goedgekeurde kilometerstand?
 	`car_ride_start_mileage` DECIMAL(10,1),
 	`car_ride_end_mileage` DECIMAL(10,1),
-	PRIMARY KEY (`car_ride_id`),
-	FOREIGN KEY (`car_ride_car_id`) REFERENCES Cars(`car_id`),
-	FOREIGN KEY (`car_ride_user_id`) REFERENCES Users(`user_id`)
+	PRIMARY KEY (`car_ride_car_reservation_id`),
+	FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

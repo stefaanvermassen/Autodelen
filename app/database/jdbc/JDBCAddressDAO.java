@@ -90,23 +90,23 @@ public class JDBCAddressDAO implements AddressDAO {
     @Override
     public Address createAddress(String zip, String city, String street, String number, String bus) throws DataAccessException {
         try {
-                PreparedStatement ps = getCreateAddressStatement();
-                ps.setString(1, city);
-                ps.setString(2, zip);
-                ps.setString(3, street);
-                ps.setString(4, number);
-                ps.setString(5, bus);
+            PreparedStatement ps = getCreateAddressStatement();
+            ps.setString(1, city);
+            ps.setString(2, zip);
+            ps.setString(3, street);
+            ps.setString(4, number);
+            ps.setString(5, bus);
 
-                ps.executeUpdate();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating address.");
 
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    keys.next(); //if this fails we want an exception anyway
-                    connection.commit();
-                    return new Address(keys.getInt(1), zip, city, street, number, bus);
-                } catch (SQLException ex) {
-                    throw new DataAccessException("Failed to get primary key for new address.", ex);
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+
+                return new Address(keys.getInt(1), zip, city, street, number, bus);
+            } catch (SQLException ex) {
+                throw new DataAccessException("Failed to get primary key for new address.", ex);
             }
-
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create address.", ex);
         }
@@ -152,7 +152,7 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setInt(1, address.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when deleting address with ID=" + address.getId());
-            connection.commit();
+
         } catch(SQLException ex){
             throw new DataAccessException("Failed to execute address deletion query.", ex);
         }
@@ -171,7 +171,7 @@ public class JDBCAddressDAO implements AddressDAO {
 			
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update affected 0 rows.");
-            connection.commit();
+
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to update address.", ex);
         }

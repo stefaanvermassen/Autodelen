@@ -24,7 +24,6 @@ public class InfoSessions extends Controller {
 
     public static class InfoSessionCreationModel {
         public String time; //TODO: use date format here
-        public String addresstype;
 
         // Address fields
         public String address_city;
@@ -39,7 +38,9 @@ public class InfoSessions extends Controller {
         }
 
         public String validate() {
-            if (DateTime.now().isAfter(getDateTime())) {
+            if (time == null || time.isEmpty()) {
+                return "Gelieve het tijdsveld in te vullen";
+            } else if (DateTime.now().isAfter(getDateTime())) {
                 return "Je kan enkel een infosessie plannen na de huidige datum.";
             }
             return null;
@@ -56,7 +57,19 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
     public static Result newSession() {
-        return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class), 0));
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+
+        if (user.getAddress() != null) {
+            InfoSessionCreationModel model = new InfoSessionCreationModel();
+            model.address_city = user.getAddress().getCity();
+            model.address_zip = user.getAddress().getZip();
+            model.address_street = user.getAddress().getStreet();
+            model.address_number = user.getAddress().getNumber();
+            model.address_bus = user.getAddress().getBus();
+
+            Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
+            return ok(newInfosession.render(editForm, 0));
+        } else return ok(newInfosession.render(Form.form(InfoSessionCreationModel.class), 0));
     }
 
     /**
@@ -76,19 +89,43 @@ public class InfoSessions extends Controller {
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
                 model.time = is.getTime().toString(DATEFORMATTER);
-                //boolean isHostAddress = is.getHost().getAddress() != null && is.getHost().getAddress().getId() == is.getAddress().getId();
-                boolean isHostAddress = true;
-                model.addresstype = isHostAddress ? "host" : "other";
-                if (!isHostAddress) {
-                    model.address_city = is.getAddress().getCity();
-                    model.address_zip = is.getAddress().getZip();
-                    model.address_street = is.getAddress().getStreet();
-                    model.address_number = is.getAddress().getNumber();
-                    model.address_bus = is.getAddress().getBus();
-                }
+                model.address_city = is.getAddress().getCity();
+                model.address_zip = is.getAddress().getZip();
+                model.address_street = is.getAddress().getStreet();
+                model.address_number = is.getAddress().getNumber();
+                model.address_bus = is.getAddress().getBus();
 
                 Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
                 return ok(newInfosession.render(editForm, sessionId));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @param sessionId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
+    public static Result removeSession(int sessionId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            try {
+                if (dao.getInfoSession(sessionId, false) == null) {
+                    flash("danger", "Deze infosessie bestaat niet.");
+                    return badRequest(upcomingSessionsList());
+                } else {
+                    dao.deleteInfoSession(sessionId);
+                    context.commit();
+                    flash("success", "De infosessie werd succesvol verwijderd.");
+                    return ok(upcomingSessionsList());
+                }
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -116,37 +153,19 @@ public class InfoSessions extends Controller {
                 }
 
                 try {
-                  //TODO:  boolean addressWasAtHost = session.getHost().getAddress() != null && session.getHost().getAddress().getId() == session.getAddress().getId();
-                    boolean addressWasAtHost = true;
-                    if (!"host".equals(editForm.get().addresstype) && !addressWasAtHost) {
-                        // We have to create a new address
-                        AddressDAO adao = context.getAddressDAO();
-                        Address address = adao.createAddress(editForm.get().address_zip, editForm.get().address_city, editForm.get().address_street, editForm.get().address_number, editForm.get().address_bus);
-                        session.setAddress(address);
-                        dao.updateInfoSessionAddress(session);
-                    } else if("host".equals(editForm.get().addresstype) && !addressWasAtHost) {
-                        // We change from a host-type address to a seperate address
-                        AddressDAO adao = context.getAddressDAO();
-                        Address oldAddress = session.getAddress();
-                        session.setAddress(session.getHost().getAddress());
-                        dao.updateInfoSessionAddress(session);
-                        adao.deleteAddress(oldAddress); //TODO: can we really delete this address?
-                    } else if(!addressWasAtHost){ // editable address, 4th option (edit host address isn't allowed)
-                        // update address
-                        Address address = session.getAddress();
-                        address.setCity(editForm.get().address_city);
-                        address.setBus(editForm.get().address_bus);
-                        address.setNumber(editForm.get().address_number);
-                        address.setStreet(editForm.get().address_street);
-                        address.setZip(editForm.get().address_zip);
+                    Address address = session.getAddress();
+                    address.setCity(editForm.get().address_city);
+                    address.setBus(editForm.get().address_bus);
+                    address.setNumber(editForm.get().address_number);
+                    address.setStreet(editForm.get().address_street);
+                    address.setZip(editForm.get().address_zip);
 
-                        AddressDAO adao = context.getAddressDAO();
-                        adao.updateAddress(address);
-                    }
+                    AddressDAO adao = context.getAddressDAO();
+                    adao.updateAddress(address);
 
                     // Now we update the time
                     DateTime time = editForm.get().getDateTime();
-                    if(!session.getTime().equals(time)) {
+                    if (!session.getTime().equals(time)) {
                         session.setTime(time);
                         dao.updateInfosessionTime(session);
                     }
@@ -243,7 +262,7 @@ public class InfoSessions extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
-    public static Result setUserSessionStatus(int sessionId, int userId, String status){
+    public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
 
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -326,16 +345,8 @@ public class InfoSessions extends Controller {
                 try {
                     User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
-                    Address address;
-                    if ("other".equals(createForm.get().addresstype)) {
-                        AddressDAO adao = context.getAddressDAO();
-                        address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
-                    } else if (user.getAddress() == null) {
-                        createForm.error("De host heeft nog geen adres gespecifieerd op zijn profiel.");
-                        return badRequest(newInfosession.render(createForm, 0));
-                    } else {
-                        address = user.getAddress();
-                    }
+                    AddressDAO adao = context.getAddressDAO();
+                    Address address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     InfoSession session = dao.createInfoSession(user, address, createForm.get().getDateTime()); //TODO: allow other hosts
                     context.commit();

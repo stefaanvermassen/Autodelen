@@ -11,6 +11,7 @@ import models.VerificationType;
 import notifiers.Mail;
 import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.login.*;
@@ -45,11 +46,11 @@ public class Login extends Controller {
         }
     }
 
-    public static class PasswordResetRequestModel {
+    public static class EmailFormModel {
         public String email;
 
         public String validate() {
-            return null; //TODO regex check?
+            return new Constraints.EmailValidator().isValid(email) ? null : "Ongeldig emailadres";
         }
     }
 
@@ -61,8 +62,9 @@ public class Login extends Controller {
         public String lastName;
 
         public String validate() {
-            //TODO: check valid email format, valid name etc etc
-            if (password == null || password.length() < 8)
+            if (!new Constraints.EmailValidator().isValid(email))
+                return "Dit is geen geldig e-mailadres.";
+            else if (password == null || password.length() < 8)
                 return "Wachtwoord moet minstens 8 tekens bevatten.";
             else if (!password.equals(password_repeat))
                 return "Wachtwoord komt niet overeen.";
@@ -103,8 +105,42 @@ public class Login extends Controller {
      *
      * @return
      */
+    public static Result requestNewEmailVerificationProcess(String email) {
+        //TODO: prevent people from spamming this URL as this might DDOS the mailserver (CRSF token and POST instead of GET)
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(email);
+            if (user == null) {
+                return badRequest("Deze gebruiker bestaat niet."); //TODO: flash
+            } else {
+                if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
+                    try {
+                        dao.deleteVerificationString(user, VerificationType.REGISTRATION);
+                        String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
+                        context.commit();
+                        Mail.sendVerificationMail(user, verificationIdent);
+                        return ok(registrationok.render(user.getId(), verificationIdent, true));
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
+                    }
+                } else {
+                    return badRequest("Deze gebruiker is reeds geactiveerd.");
+                }
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @return
+     */
     public static Result resetPasswordRequest() {
-        return ok(pwresetrequest.render(Form.form(PasswordResetRequestModel.class)));
+        return ok(singlemailform.render(Form.form(EmailFormModel.class)));
     }
 
     /**
@@ -113,16 +149,16 @@ public class Login extends Controller {
      * @return
      */
     public static Result resetPasswordRequestProcess() {
-        Form<PasswordResetRequestModel> resetForm = Form.form(PasswordResetRequestModel.class).bindFromRequest();
+        Form<EmailFormModel> resetForm = Form.form(EmailFormModel.class).bindFromRequest();
         if (resetForm.hasErrors()) {
-            return badRequest(pwresetrequest.render(resetForm));
+            return badRequest(singlemailform.render(resetForm));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
                 User user = dao.getUser(resetForm.get().email);
                 if (user == null) {
                     resetForm.reject("Gebruiker met dit adres bestaat niet.");
-                    return badRequest(pwresetrequest.render(resetForm));
+                    return badRequest(singlemailform.render(resetForm));
                 } else {
                     try {
                         //TODO: this check should be implicit?
@@ -132,7 +168,7 @@ public class Login extends Controller {
 
                         String newUuid = dao.createVerificationString(user, VerificationType.PWRESET);
                         context.commit();
-                        //TODO: send this by email
+                        Mail.sendPasswordResetMail(user, newUuid);
                         return ok(pwresetrequestok.render(user.getId(), newUuid, user.getEmail()));
                     } catch (DataAccessException ex) {
                         context.rollback();
@@ -233,6 +269,7 @@ public class Login extends Controller {
             if (goodCredentials) {
                 if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
                     loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
+                    loginForm.data().put("reactivate", "True");
                     //TODO: link aanvraag nieuwe bevestigingscode
                     return badRequest(login.render(loginForm));
                 } else if (user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED) {
@@ -314,8 +351,6 @@ public class Login extends Controller {
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
-        //TODO: email verification
-
         Form<RegisterModel> registerForm = Form.form(RegisterModel.class).bindFromRequest();
         if (registerForm.hasErrors()) {
             return badRequest(register.render(registerForm));
@@ -337,8 +372,7 @@ public class Login extends Controller {
                         context.commit();
                         Mail.sendVerificationMail(user, verificationIdent);
 
-
-                        return ok(registrationok.render(user.getId(), verificationIdent));
+                        return ok(registrationok.render(user.getId(), verificationIdent, true));
                     } catch (DataAccessException ex) {
                         context.rollback();
                         throw ex;

@@ -26,6 +26,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private CarDAO carDAO;
     private UserRoleDAO userRoleDAO;
     private TemplateDAO templateDAO;
+    private CarRideDAO carRideDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -124,4 +125,12 @@ public class JDBCDataAccessContext implements DataAccessContext {
         }
         return userRoleDAO;
 	}
+
+    @Override
+    public CarRideDAO getCarRideDAO() {
+        if(carRideDAO == null){
+            carRideDAO = new JDBCCarRideDAO(connection);
+        }
+        return carRideDAO;
+    }
 }

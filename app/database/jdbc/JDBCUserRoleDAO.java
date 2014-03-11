@@ -68,7 +68,8 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 			PreparedStatement ps = getInsertUserRolesStatement();
 			ps.setInt(1, userId);
 			ps.setString(2, role.name());
-			ps.executeUpdate();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when adding user role.");
 		} 	catch (SQLException ex) {
 			throw new DataAccessException("Could not add userrole",ex);
 		}	
@@ -80,7 +81,8 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 			PreparedStatement ps = getRemoveUserRolesStatement();
 			ps.setInt(1, userId);
 			ps.setString(2, role.name());
-			ps.executeUpdate();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when removing user role.");
 		} 	catch (SQLException ex) {
 			throw new DataAccessException("Could not remove userrole",ex);
 		}

@@ -1,3 +1,13 @@
+/* --- Tables --- */
+.pagination>li:first-child>a, .pagination>li:last-child>a{
+	border-radius: 0px;
+
+}
+
+.pagination>li>a, .pagination>li>span {
+	padding: 4px 8px;
+}
+
 /* --- Forms fix --- */
 
 .form-horizontal .form-group {
@@ -6,6 +16,27 @@
 }
 
 /* --- Breadcrumbs and general styling --- */
+
+html{
+	height: 100%;
+}
+
+body {
+	height: 100%;
+	background-color: #f6f6f6;
+}
+
+#wrapper {
+	height: 100%;
+}
+
+.well {
+	border-radius: 0px;
+}
+
+.alert {
+	border-radius: 0px;
+}
 
 .panel {
 	border-radius:0px;
@@ -25,9 +56,10 @@
 }
 
 #page-wrapper {
-	background-color: #f6f6f6;
+	height: 100%;
 	padding-top:20px;
 	min-height: 0px;
+	background-color: #f6f6f6;
 }
 
 .panel-default > .panel-heading {
@@ -84,4 +116,37 @@
     border: 1px solid #D6D6D6;
     border-radius: 0;
     box-shadow: none;
+}
+
+@media (max-width: 768px) {
+	.breadcrumb {
+		margin-left:0px;
+	}
+
+	#page-header-wrapper {
+		margin-left: 0px;
+	}
+}
+
+
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: @screen-sm-min) {
+	.breadcrumb {
+		margin-left:0px;
+	}
+
+	#page-header-wrapper {
+		margin-left: 0px;
+	}
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: @screen-md-min) {
+
+}
+
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width: @screen-lg-min) {
+
 }

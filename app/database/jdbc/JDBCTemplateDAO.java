@@ -136,7 +136,8 @@ public class JDBCTemplateDAO implements TemplateDAO {
             PreparedStatement ps = getUpdateTemplateStatement();
             ps.setString(1, templateBody);
             ps.setInt(2,templateID);
-            ps.executeUpdate();
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating template.");
         } catch (SQLException e) {
             e.printStackTrace();
         }

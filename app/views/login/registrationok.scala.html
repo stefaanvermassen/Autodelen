@@ -1,4 +1,4 @@
-@(userId: Int, verification: String = "")
+@(userId: Int, verification: String = "", newActivation: Boolean = true)
 @* TODO: When mails work this shouldn't show the verification URL anymore, but should be mailed to user *@
 <!DOCTYPE html>
 <html>
@@ -36,7 +36,8 @@
 				                        </div>
 				                    }
 				                }
-                                <p>Je gebruikersaccount werd succesvol aangemaakt. Je kan je account activeren aan de hand van de email die zodadelijk zal aankrijgen!</p>
+                                <p>@if(newActivation) { Je gebruikersaccount werd succesvol aangemaakt. } else { Er werd een nieuwe mail gestuurd. }
+                                    Je kan je account activeren aan de hand van de email die zodadelijk zal aankrijgen!</p>
 								<a class="btn btn-success btn-block" href="@routes.Login.register_verification(userId, verification)">TODO: EMAIL IPV KNOP - Verifieer</a>
                             </div>
                         </div>

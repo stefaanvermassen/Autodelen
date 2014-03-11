@@ -9,6 +9,8 @@ import models.CarFuel;
 import models.Address;
 import models.User;
 
+import java.util.List;
+
 /**
  *
  * @author Laurent
@@ -19,4 +21,5 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
     public void deleteCar(Car car) throws DataAccessException;
+    public List<Car> getCarList() throws DataAccessException;
 }
