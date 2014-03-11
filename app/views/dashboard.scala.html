@@ -10,21 +10,32 @@
 </div>
 
 <div id="page-wrapper">
-    @if(!flash.isEmpty()) {
-        @for((msgKey, msgValue) <- flash) {
-            <div class="alert alert-@msgKey">
-            @msgValue
+    <div class="row">
+        <div class="col-lg-12">
+		    @if(!flash.isEmpty()) {
+		        @for((msgKey, msgValue) <- flash) {
+		            <div class="alert alert-@msgKey">
+		            @msgValue
+		            </div>
+		        }
+		    }
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-wrench"></i> Temporary Toolbox
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <a href="@routes.Settings.instantAdmin" class="btn btn-default">Insta-admin</a>
+                    <a href="@routes.Login.login" class="btn btn-default">Login</a>
+                    <a href="@routes.Login.logout" class="btn btn-default">Logout</a>
+                </div>
+                <!-- /.panel-body -->
             </div>
-        }
-    }
-
-	<div class="row">
-		<div class="col-lg-12">
-			<p>
-				Dashboard, yeah!
-			</p>
-		</div>
-	</div>
+            <!-- /.panel -->
+        </div>
+        <!-- /col-lg-12 -->
+    </div>
+    <!-- /row -->
 </div>
 <!-- /page-wrapper -->
 }

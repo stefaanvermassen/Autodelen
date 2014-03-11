@@ -1,15 +1,22 @@
 @(form: Form[Cars.CarModel])
 @app("Auto toevoegen") {
+
+<div id="page-header-wrapper">
+    <h1 class="page-header">Auto toevoegen</h1>
+    <ol class="breadcrumb">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Eigenaar</a></li>
+        <li><a href="#">Auto's</a></li>
+        <li class="active">Auto toevoegen</li>
+    </ol>
+</div>
     <div id="page-wrapper">
         <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Auto's</h1>
-            </div>
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Voeg een auto toe
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Auto toevoegen
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -20,7 +27,6 @@
                                     </div>
                                 }
                                 <fieldset>
-
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="brand"></label>
                                         <div class="col-md-12">
@@ -67,6 +73,36 @@
                                         <label class="col-md-1 control-label" for="ownerAnnualKm"></label>
                                         <div class="col-md-12">
                                             <input id="ownerAnnualKm" name="ownerAnnualKm" type="number" placeholder="Gemiddeld aantal kilometers (per jaar)" class="form-control input-md" value="@form("ownerAnnualKm").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_street" name="address_street" type="text" placeholder="Straat" class="form-control input-md" value="@form("address_street").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_number" maxlength="9" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_bus" maxlength="3" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_zip" maxlength="11" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <input id="address_city" name="address_city" type="text" placeholder="Plaats" class="form-control input-md" value="@form("address_city").value">
                                         </div>
                                     </div>
 

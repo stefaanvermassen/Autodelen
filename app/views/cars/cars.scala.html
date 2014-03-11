@@ -1,30 +1,25 @@
-@app("Afrekeningen") {
-
+@app("Auto's") {
 <div id="page-header-wrapper">
-    <h1 class="page-header">Afrekeningen</h1>
+    <h1 class="page-header">Auto's</h1>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
-        <li><a href="#">Library</a></li>
-        <li class="active">Afrekeningen</li>
+        <li><a href="#">Eigenaar</a></li>
+        <li class="active">Auto's</li>
     </ol>
 </div>
 
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            @if(!flash.isEmpty()) {
-                @for((msgKey, msgValue) <- flash) {
-                    <div class="alert alert-@msgKey">
-                    @msgValue
-                    </div>
-                }
-            }
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-wrench"></i> Afrekeningen
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Auto's
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
+                    <a class="btn btn-primary btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
+                    <!-- TODO get cars out of database -->
+                    <p> Hier komt nog een lijst met de auto's uit de db</p>
                 </div>
                 <!-- /.panel-body -->
             </div>
