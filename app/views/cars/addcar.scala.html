@@ -1,5 +1,5 @@
-@(form: Form[Cars.CarModel])
-@app("Auto toevoegen") {
+@(form: Form[Cars.CarModel],  editId: Int = 0)
+@app(if (editId == 0) "Nieuwe auto" else "Bewerk auto") {
 
 <div id="page-header-wrapper">
     <h1 class="page-header">Auto toevoegen</h1>
@@ -16,17 +16,28 @@
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Auto toevoegen
+                            <i class="fa fa-bar-chart-o fa-fw"></i> @(if (editId == 0) "Nieuwe auto" else "Bewerk auto")
                         </div>
-                            <!-- /.panel-heading -->
+                        <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @helper.form(routes.Cars.addNewCar(), 'class -> "form-horizontal") {
+                                <!-- TODO: else: routes.edit -->
+                            @helper.form(if (editId == 0) routes.Cars.addNewCar() else routes.Cars.addNewCar(), 'class -> "form-horizontal") {
                                 @if(form.hasGlobalErrors) {
                                     <div class="alert alert-danger alert-dismissable">
                                         <strong>Error!</strong> @form.globalError.message
                                     </div>
                                 }
                                 <fieldset>
+
+                                    <!-- Userpicker, only for admin ? -->
+                                    <!-- Radio button for owner address or other
+                                    if other then show Address text-fields
+                                    (like newInfosession) -->
+                                    <!-- Checkbox for GPS -->
+                                    <!-- Checkbox for Hook -->
+                                    <!-- Dropdown menu for car fuel (see Enum in models.CarFuel) -->
+                                    <!-- Textarea for comments -->
+
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="brand"></label>
                                         <div class="col-md-12">
@@ -52,6 +63,13 @@
                                         <label class="col-md-1 control-label" for="doors"></label>
                                         <div class="col-md-12">
                                             <input id="doors" name="doors" type="number" placeholder="Aantal deuren" class="form-control input-md" value="@form("doors").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="year"></label>
+                                        <div class="col-md-12">
+                                            <input id="year" name="year" type="number" placeholder="Bouwjaar" class="form-control input-md" value="@form("year").value">
                                         </div>
                                     </div>
 
