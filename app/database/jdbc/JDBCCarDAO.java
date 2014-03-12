@@ -33,6 +33,7 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement createCarStatement;
     private PreparedStatement updateCarStatement;
     private PreparedStatement getCarStatement;
+    private PreparedStatement getCarsOfUserStatement;
     private PreparedStatement deleteCarStatement;
     private PreparedStatement getGetCarListStatement;
 
@@ -107,6 +108,13 @@ public class JDBCCarDAO implements CarDAO{
             getCarStatement = connection.prepareStatement("SELECT * FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE car_id=?");
         }
         return getCarStatement;
+    }
+
+    private PreparedStatement getGetCarsOfUserStatement() throws SQLException {
+        if (getCarsOfUserStatement == null) {
+            getCarsOfUserStatement = connection.prepareStatement("SELECT * FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE user_id=?");
+        }
+        return getCarsOfUserStatement;
     }
 
     private PreparedStatement getGetCarListStatement() throws SQLException {
@@ -242,19 +250,34 @@ public class JDBCCarDAO implements CarDAO{
 
     @Override
     public List<Car> getCarList() throws DataAccessException {
-        List<Car> cars = new ArrayList<>();
-        try {
-            PreparedStatement ps = getGetCarListStatement();
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    cars.add(populateCar(rs, true, true));
-                }
-                return cars;
+            try {
+                PreparedStatement ps = getGetCarListStatement();
+                return getCars(ps);
             } catch (SQLException ex) {
-                throw new DataAccessException("Error reading cars resultset", ex);
+                throw new DataAccessException("Could not retrieve a list of cars", ex);
             }
+    }
+
+    @Override
+    public List<Car> getCarsOfUser(int user_id) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetCarsOfUserStatement();
+            ps.setInt(1, user_id);
+            return getCars(ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
+            throw new DataAccessException("Could not retrieve a list of cars for user with id " + user_id, ex);
+        }
+    }
+
+    public List<Car> getCars(PreparedStatement ps) {
+        List<Car> cars = new ArrayList<>();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                cars.add(populateCar(rs, true, true));
+            }
+            return cars;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error reading cars resultset", ex);
         }
     }
     

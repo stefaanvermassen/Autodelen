@@ -12,8 +12,8 @@ GET         /userroles                         controllers.Userroles.index()
 
 # Drives
 GET         /drives                            controllers.Drives.index()
-GET         /drives/approved                   controllers.Drives.aproveReservation(reservationId: Int)
-GET         /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int)
+GET         /drives/approved                   controllers.Drives.approveReservation(reservationId: Int)
+POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int)
 GET         /drives/cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
 
 # Reservations
