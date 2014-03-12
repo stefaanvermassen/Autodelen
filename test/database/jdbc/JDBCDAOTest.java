@@ -23,22 +23,26 @@ public class JDBCDAOTest {
     private UserDAO userDAO;
     private CarDAO carDAO;
     private ReservationDAO reservationDAO;
+    private CarRideDAO carRideDAO;
     private InfoSessionDAO infoSessionDAO;
 
     private List<Address> addresses = new ArrayList<>();
     private List<User> users = new ArrayList<>();
     private List<Car> cars = new ArrayList<>();
     private List<Reservation> reservations = new ArrayList<>();
+    private List<CarRide> carRides = new ArrayList<>();
     private List<InfoSession> infoSessions = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
+        DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
         context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
 
         addressDAO = context.getAddressDAO();
         userDAO = context.getUserDAO();
         carDAO = context.getCarDAO();
         reservationDAO = context.getReservationDAO();
+        carRideDAO = context.getCarRideDAO();
         infoSessionDAO = context.getInfoSessionDAO();
     }
 
@@ -63,7 +67,6 @@ public class JDBCDAOTest {
             updateUserTest();
             deleteUserTest();
             permanentlyDeleteUsersTest();
-            deleteAddressesTest();
         } finally {
             context.rollback();
         }
@@ -125,6 +128,21 @@ public class JDBCDAOTest {
             getReservationTest();
             updateReservationTest();
             deleteReservationsTest();
+        } finally {
+            context.rollback();
+        }
+    }
+
+    @Test
+    public void testCarRideDAO() throws Exception {
+        try {
+            createAddresses();
+            createUsers();
+            createCars();
+            createReservations();
+            createCarRides();
+            getCarRideTest();
+            updateCarRideTest();
         } finally {
             context.rollback();
         }
@@ -310,8 +328,9 @@ public class JDBCDAOTest {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
-
+        int i = 1;
         while(sc.hasNext()) {
+            String name = "naam" + i++; // TODO: also read from Scanner
             String brand = sc.next();
             String type = sc.next();
             int seats = sc.nextInt();
@@ -333,7 +352,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -343,6 +362,7 @@ public class JDBCDAOTest {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
+        String name = "name"; // TODO: also read from Scanner
         String brand = sc.next();
         String type = sc.next();
         int seats = sc.nextInt();
@@ -363,7 +383,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
         cars.add(car);
         sc.close();
     }
@@ -375,8 +395,9 @@ public class JDBCDAOTest {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
-
+        int i = 1;
         while(sc.hasNext()) {
+            String name = "Naam" + i++; // TODO: also read from scanner
             String brand = sc.next();
             String type = sc.next();
             int seats = sc.nextInt();
@@ -397,7 +418,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -532,6 +553,47 @@ public class JDBCDAOTest {
             }
             i.remove();
         }
+    }
+
+    private void createCarRides() throws Exception {
+        for(Reservation reservation : reservations) {
+            CarRide carRide = carRideDAO.createCarRide(reservation);
+
+            carRides.add(carRide);
+        }
+    }
+
+    private void getCarRideTest() {
+        for(CarRide carRide : carRides) {
+            CarRide returncarRide = carRideDAO.getCarRide(carRide.getReservation().getId());
+
+            // TODO: assertEquals of the actual reservations, and not only ID's?
+            Assert.assertEquals(carRide.getReservation().getId(),returncarRide.getReservation().getId());
+            Assert.assertEquals(carRide.isStatus(),returncarRide.isStatus());
+            Assert.assertEquals(carRide.getStartMileage(),returncarRide.getStartMileage());
+            Assert.assertEquals(carRide.getEndMileage(),returncarRide.getEndMileage());
+        }
+    }
+
+    private void updateCarRideTest() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_carrides.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine();
+
+        for(CarRide carRide : carRides) {
+            int statusInt = sc.nextInt();
+            boolean status = statusInt == 1;
+            carRide.setStatus(status);
+
+            int start = sc.nextInt();
+            carRide.setStartMileage(start);
+
+            int end = sc.nextInt();
+            carRide.setEndMileage(end);
+
+            carRideDAO.updateCarRide(carRide);
+        }
+        getCarRideTest();
     }
 
     /*

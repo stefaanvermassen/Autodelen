@@ -58,7 +58,7 @@ public class RoleSecured {
                 return F.Promise.pure((SimpleResult) unauthorized(views.html.defaultpages.unauthorized.render()));
             }
             catch(Throwable t) {
-                throw new RuntimeException(t);
+               throw new RuntimeException(t);
             }
         }
 

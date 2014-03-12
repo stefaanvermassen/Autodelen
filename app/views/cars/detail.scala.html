@@ -1,0 +1,63 @@
+@(car : Car)
+@import database.DatabaseHelper;
+    @scripts = {
+        <script>
+        $(document).ready(function() {
+            $( "#deleteButton" ).click(function() {
+                if(confirm("Ben je zeker dat je deze auto wil verwijderen?")){
+                    window.location = '@routes.Cars.removeCar(car.getId)';
+                }
+            });
+        });
+    </script>
+    }
+@app("Details Auto", Html(""), scripts) {
+    <div id="page-header-wrapper">
+        <h1 class="page-header">Auto's</h1>
+        <ol class="breadcrumb">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Auto's</a></li>
+            <li class="active">Details auto</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+            @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.ADMIN)) { isAdmin =>
+                @if(!flash.isEmpty()) {
+                    @for((msgKey, msgValue) <- flash) {
+                        <div class="alert alert-@msgKey" data-dismiss="alert">
+                            <a class="close">×</a>
+                            @msgValue
+                        </div>
+                    }
+                }
+                @if(isAdmin) {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                        </div>
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
+                            <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
+                        </div>
+                    </div>
+                }
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen auto
+                </div>
+                    <!-- /.panel-heading -->
+                <div class="panel-body">
+                @detailPartial(car)
+            </div>
+            </div>
+            }
+            </div>
+        </div>
+    </div>
+    <!-- /page-wrapper -->
+}
