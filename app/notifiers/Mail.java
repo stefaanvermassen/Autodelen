@@ -122,6 +122,26 @@ public class Mail extends Mailer {
 
     }
 
+    public static void sendReservationRefusedByOwnerMail(User user, String reason) {
+        String mail = "";
+        setSubject("Reservatie geweigerd");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
+            mail = replaceUserTags(user, template.getBody());
+            mail = mail.replace("%reason%", reason);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        if (!play.api.Play.isDev(play.api.Play.current())) {
+            send(mail);
+        }
+
+    }
+
     public static void sendPasswordResetMail(User user, String verificationUrl) {
         String mail = "";
         setSubject("Uw wachtwoord opnieuw instellen");
