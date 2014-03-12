@@ -124,6 +124,25 @@ SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_url";
 
+#--Reservatie geweigerd
+INSERT INTO Templates(template_title, template_body) VALUES (
+  "Reservatie geweigerd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw reservatie werd geweigerd door de eigenaar om volgende reden:<br>
+  <br>
+  %reason%<br>
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage");
+
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_firstname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_lastname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reason";
+
 #--Wachtwoord reset
 
 INSERT INTO Templates(template_title, template_body) VALUES (
