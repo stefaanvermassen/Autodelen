@@ -4,7 +4,7 @@
         <script>
         $(document).ready(function() {
             $( "#deleteButton" ).click(function() {
-                if(confirm("Ben je zeker dat je deze sessie wil verwijderen?")){
+                if(confirm("Ben je zeker dat je deze auto wil verwijderen?")){
                     window.location = '@routes.Cars.removeCar(car.getId)';
                 }
             });

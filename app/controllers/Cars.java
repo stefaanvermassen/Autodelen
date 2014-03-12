@@ -19,6 +19,7 @@ import java.util.List;
 public class Cars extends Controller {
 
     public static class CarModel {
+        public String name;
         public String brand;
         public String type;
         public int seats;
@@ -80,7 +81,7 @@ public class Cars extends Controller {
 
                     // TODO: also accept other users (only admin can do this)
                     // TODO: get boolean out (hook and gps) of form, enum fuel
-                    Car car = dao.createCar(model.brand, model.type, address, model.seats, model.doors,
+                    Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, false, false, CarFuel.DIESEL, model.fuelEconomy, model.estimatedValue,
                             model.ownerAnnualKm, user, "");
                     context.commit();
@@ -116,6 +117,7 @@ public class Cars extends Controller {
                 return badRequest(carList());
             } else {
                 CarModel model = new CarModel();
+                model.name = car.getName();
                 model.brand = car.getBrand();
                 model.type = car.getType();
                 model.seats = car.getSeats();
@@ -161,31 +163,32 @@ public class Cars extends Controller {
                 }
 
                 try {
-                    CarModel carForm = editForm.get();
-                    car.setBrand(carForm.brand);
-                    car.setType(carForm.type);
-                    car.setDoors(carForm.doors);
-                    car.setSeats(carForm.seats);
-                    car.setYear(carForm.year);
-                    car.setFuelEconomy(carForm.fuelEconomy);
-                    car.setEstimatedValue(carForm.estimatedValue);
-                    car.setOwnerAnnualKm(carForm.ownerAnnualKm);
+                    CarModel carModel = editForm.get();
+                    car.setName(carModel.name);
+                    car.setBrand(carModel.brand);
+                    car.setType(carModel.type);
+                    car.setDoors(carModel.doors);
+                    car.setSeats(carModel.seats);
+                    car.setYear(carModel.year);
+                    car.setFuelEconomy(carModel.fuelEconomy);
+                    car.setEstimatedValue(carModel.estimatedValue);
+                    car.setOwnerAnnualKm(carModel.ownerAnnualKm);
 
                     AddressDAO adao = context.getAddressDAO();
                     Address address = car.getLocation();
                     if(address == null) {
-                        address = adao.createAddress(carForm.address_zip, carForm.address_city, carForm.address_street, carForm.address_number, carForm.address_bus);
+                        address = adao.createAddress(carModel.address_zip, carModel.address_city, carModel.address_street, carModel.address_number, carModel.address_bus);
                         car.setLocation(address);
                     } else {
-                        address.setCity(carForm.address_city);
-                        address.setBus(carForm.address_bus);
-                        address.setNumber(carForm.address_number);
-                        address.setStreet(carForm.address_street);
-                        address.setZip(carForm.address_zip);
+                        address.setCity(carModel.address_city);
+                        address.setBus(carModel.address_bus);
+                        address.setNumber(carModel.address_number);
+                        address.setStreet(carModel.address_street);
+                        address.setZip(carModel.address_zip);
                         adao.updateAddress(address);
                     }
 
-                    car.setComments(carForm.comments);
+                    car.setComments(carModel.comments);
                     dao.updateCar(car);
 
                     context.commit();

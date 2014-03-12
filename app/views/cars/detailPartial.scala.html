@@ -3,15 +3,10 @@
     <div class="col-lg-4">
         <div class="well">
             <p>
+                <strong>Naam: </strong> @car.getName<br>
                 <!-- TODO; Make owner clickable -->
                 <strong>Eigenaar:</strong> @car.getOwner.getFirstName @car.getOwner.getLastName<br>
-                @defining(car.getLocation) { address =>
-                    <strong>Adres:</strong> @address.getStreet @address.getNumber
-                    @if(address.getBus != null && !address.getBus.isEmpty) {
-                        b@address.getBus
-                    }
-                , @address.getZip @address.getCity<br>
-                }
+                <strong>Adres: </strong> @car.getLocation<br>
                 <strong>Merk: </strong> @car.getBrand<br>
                 <strong>Type: </strong> @car.getType<br>
                 <strong>Aantal zitplaatsen: </strong> @car.getSeats<br>

@@ -66,6 +66,7 @@
                             <thead>
                                 <tr role="row">
                                     <th>#</th>
+                                    <th>Naam</th>
                                     <th>Merk</th>
                                     <th>Eigenaar</th>
                                     <th>Acties</th>
@@ -75,6 +76,7 @@
                             @for((car, index) <- cars.zipWithIndex) {
                                 <tr class="info" >
                                     <td>@(index + 1)</td>
+                                    <td>@car.getName</td>
                                     <td>@car.getBrand</td>
                                     <td>@car.getOwner.getFirstName @car.getOwner.getLastName</td>
                                     <td>
