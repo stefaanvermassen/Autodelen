@@ -1,0 +1,34 @@
+@(car: Car)
+<div class="row">
+    <div class="col-lg-4">
+        <div class="well">
+            <p>
+                <!-- TODO; Make owner clickable -->
+                <strong>Eigenaar:</strong> @car.getOwner.getFirstName @car.getOwner.getLastName<br>
+                @defining(car.getLocation) { address =>
+                    <strong>Adres:</strong> @address.getStreet @address.getNumber
+                    @if(address.getBus != null && !address.getBus.isEmpty) {
+                        b@address.getBus
+                    }
+                , @address.getZip @address.getCity<br>
+                }
+                <strong>Merk: </strong> @car.getBrand<br>
+                <strong>Type: </strong> @car.getType<br>
+                <strong>Aantal zitplaatsen: </strong> @car.getSeats<br>
+                <strong>Aantal deuren: </strong> @car.getDoors<br>
+                <strong>Bouwjaar: </strong> @car.getYear<br>
+                <strong>Gemiddeld verbruik (per 100 km): </strong> @car.getFuelEconomy<br>
+                <strong>Geschatte huidige waarde: </strong> @car.getEstimatedValue<br>
+                <strong>Gemiddeld aantal kilometers (per jaar): </strong> @car.getOwnerAnnualKm
+
+                    <!-- TODO: gps, hook, fuel, fuelEconomy, EstimatedValue, OwnerAnnualKm, Comments, (Laatste aanpassing?) -->
+                @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
+            </p>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="well">
+            Map placeholder
+        </div>
+    </div>
+</div>

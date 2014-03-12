@@ -69,9 +69,10 @@ POST        /emailtemplate/edit                controllers.EmailTemplates.editTe
 GET         /cars                              controllers.Cars.showCars()
 GET         /cars/new                          controllers.Cars.newCar()
 POST        /cars/new                          controllers.Cars.addNewCar()
-#GET         /cars/view                         controllers.Cars.detail(id: Int)
+GET         /cars/view                         controllers.Cars.detail(id: Int)
 GET         /cars/edit                         controllers.Cars.editCar(carId: Int)
-#POST        /cars/edit                      controllers.Cars.editSessionPost(sessionId: Int)
+POST        /cars/edit                         controllers.Cars.editCarPost(carId: Int)
+GET         /cars/delete                       controllers.Cars.removeCar(carId: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                      controllers.Assets.at(path="/public", file)
