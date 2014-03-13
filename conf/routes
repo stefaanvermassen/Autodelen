@@ -4,15 +4,16 @@
 
 # Home page
 GET         /                                  controllers.Application.index()
-GET         /informatie                        controllers.Informatie.index()
+GET         /information                       controllers.Information.index()
 
 # Dashboard page
 GET         /dashboard                         controllers.Dashboard.index()
+GET         /userroles                         controllers.Userroles.index()
 
 # Drives
 GET         /drives                            controllers.Drives.index()
-GET         /drives/approved                   controllers.Drives.aproveReservation(reservationId: Int)
-GET         /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int)
+GET         /drives/approved                   controllers.Drives.approveReservation(reservationId: Int)
+POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int)
 GET         /drives/cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
 
 # Reservations
@@ -22,6 +23,7 @@ POST        /reserve/reservation               controllers.Reserve.confirmReserv
 
 # User pages
 GET         /receipts                          controllers.Receipts.index()
+GET         /messages                          controllers.Messages.index()
 GET         /settings                          controllers.Settings.index()
 GET         /profile                           controllers.Profile.index()
 
@@ -67,6 +69,10 @@ POST        /emailtemplate/edit                controllers.EmailTemplates.editTe
 GET         /cars                              controllers.Cars.showCars()
 GET         /cars/new                          controllers.Cars.newCar()
 POST        /cars/new                          controllers.Cars.addNewCar()
+GET         /cars/view                         controllers.Cars.detail(id: Int)
+GET         /cars/edit                         controllers.Cars.editCar(carId: Int)
+POST        /cars/edit                         controllers.Cars.editCarPost(carId: Int)
+GET         /cars/delete                       controllers.Cars.removeCar(carId: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                      controllers.Assets.at(path="/public", file)

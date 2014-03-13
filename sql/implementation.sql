@@ -86,6 +86,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `Cars` (
 	`car_id` INT NOT NULL AUTO_INCREMENT,
+	`car_name` VARCHAR(64) NOT NULL,
 	`car_type` VARCHAR(64) NOT NULL DEFAULT '0',
 	`car_brand` VARCHAR(64) NOT NULL DEFAULT '0',
 	`car_location` INT,

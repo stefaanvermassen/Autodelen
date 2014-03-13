@@ -9,8 +9,7 @@ import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
-import views.html.*;
-import views.html.reserve2;
+import views.html.reserve.*;
 
 import java.util.List;
 

@@ -252,7 +252,7 @@
 
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
-                    <div class="avatar"><img src="@routes.Assets.at("images/avatar.jpg")" alt="profile picture"></div>
+                    <div class="avatar"><img class="img-circle" src="@routes.Assets.at("images/avatar.jpg")" alt="profile picture"></div>
                     <ul class="nav" id="side-menu">
                         <li class="sidebar-search">
                             <div class="input-group custom-search-form">
@@ -275,10 +275,10 @@
                             <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         <li>
-                            <a href="@routes.Application.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                            <a href="@routes.Messages.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
                         </li>
                         <li>
                             <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -296,19 +296,16 @@
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="@routes.Application.index">Reservaties</a>
+                                    <a href="@routes.Cars.showCars()">Auto's</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-wrench fa-fw"></i> Beheerder<span class="fa arrow"></span></a>
+                            <a href="#"><i class="fa fa-wrench fa-fw"></i> Superuser<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="">Infosessies</a>
-                                </li>
-                                <li>
-                                    <a href="">Leden</a>
+                                    <a href="@routes.Userroles.index()">Gebruikersrollen</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

@@ -15,6 +15,8 @@ INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_user_firstname")
 INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_user_lastname");
 INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_url");
 INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_car_address");
+INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_reason");
+
 
 #-- Templates
 #INSERT INTO Templates(template_title, template_body) VALUES (?,?)
@@ -123,6 +125,25 @@ INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_car_address";
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_url";
+
+#--Reservatie geweigerd
+INSERT INTO Templates(template_title, template_body) VALUES (
+  "Reservatie geweigerd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw reservatie werd geweigerd door de eigenaar om volgende reden:<br>
+  <br>
+  %reservation_reason%<br>
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage");
+
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_firstname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_lastname";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_reason";
 
 #--Wachtwoord reset
 

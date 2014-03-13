@@ -1,25 +1,49 @@
-@(form: Form[Cars.CarModel])
-@app("Auto toevoegen") {
+@(form: Form[Cars.CarModel],  editId: Int = 0)
+@app(if (editId == 0) "Nieuwe auto" else "Bewerk auto") {
+
+<div id="page-header-wrapper">
+    <h1 class="page-header">Auto toevoegen</h1>
+    <ol class="breadcrumb">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Eigenaar</a></li>
+        <li><a href="#">Auto's</a></li>
+        <li class="active">Auto toevoegen</li>
+    </ol>
+</div>
     <div id="page-wrapper">
         <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Auto's</h1>
-            </div>
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Voeg een auto toe
+                            <i class="fa fa-bar-chart-o fa-fw"></i> @(if (editId == 0) "Nieuwe auto" else "Bewerk auto")
                         </div>
-                            <!-- /.panel-heading -->
+                        <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @helper.form(routes.Cars.addNewCar(), 'class -> "form-horizontal") {
+                                <!-- TODO: else: routes.edit -->
+                            @helper.form(if (editId == 0) routes.Cars.addNewCar() else routes.Cars.editCarPost(editId), 'class -> "form-horizontal") {
                                 @if(form.hasGlobalErrors) {
                                     <div class="alert alert-danger alert-dismissable">
                                         <strong>Error!</strong> @form.globalError.message
                                     </div>
                                 }
                                 <fieldset>
+
+                                    <!-- Userpicker, only for admin ? -->
+                                    <!-- Radio button for owner address or other
+                                    if other then show Address text-fields
+                                    (like newInfosession) -->
+                                    <!-- Checkbox for GPS -->
+                                    <!-- Checkbox for Hook -->
+                                    <!-- Dropdown menu for car fuel (see Enum in models.CarFuel) -->
+                                    <!-- Textarea for comments -->
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="name"></label>
+                                        <div class="col-md-12">
+                                            <input id="name" name="name" type="text" placeholder="Naam" class="form-control input-md" value="@form("name").value">
+                                        </div>
+                                    </div>
 
                                     <div class="form-group">
                                         <label class="col-md-1 control-label" for="brand"></label>
@@ -50,6 +74,13 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label class="col-md-1 control-label" for="year"></label>
+                                        <div class="col-md-12">
+                                            <input id="year" name="year" type="number" placeholder="Bouwjaar" class="form-control input-md" value="@form("year").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label class="col-md-1 control-label" for="fuelEconomy"></label>
                                         <div class="col-md-12">
                                             <input id="fuelEconomy" name="fuelEconomy" type="number" placeholder="Gemiddeld verbruik (per 100km)" class="form-control input-md" value="@form("fuelEconomy").value">
@@ -71,9 +102,44 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_street"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_street" name="address_street" type="text" placeholder="Straat" class="form-control input-md" value="@form("address_street").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_number"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_number" maxlength="9" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_bus"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_bus" maxlength="3" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_zip"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_zip" maxlength="11" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="address_city"></label>
+                                        <div class="col-md-12">
+                                            <input id="address_city" name="address_city" type="text" placeholder="Plaats" class="form-control input-md" value="@form("address_city").value">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label class="col-md-1 control-label" for="add"></label>
                                         <div class="col-md-12">
-                                            <button type="submit" id="add" name="add" class="btn btn-block btn-success">Voeg auto toe</button>
+                                            <button type="submit" id="add" name="add" class="btn btn-block btn-success">@{ if(editId == 0) "Auto aanmaken" else "Wijzigingen opslaan" }</button>
                                         </div>
                                     </div>
                                 </fieldset>

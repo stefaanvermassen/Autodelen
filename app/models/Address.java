@@ -72,7 +72,10 @@ public class Address {
     @Override
     public String toString() {
         if ((street != null && !street.isEmpty()) || (number != null && !number.isEmpty()) || (zip != null && !zip.isEmpty()) || (city != null && !city.isEmpty())) {
-            return String.format("%s %s, %s %s", street, number, zip, city);
+            String busString = "";
+            if(bus != null && !bus.isEmpty())
+                busString = " b" + bus;
+            return String.format("%s %s%s, %s %s", street, number, busString, zip, city);
         } else return "/";
     }
 }

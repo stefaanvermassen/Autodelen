@@ -328,8 +328,9 @@ public class JDBCDAOTest {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
-
+        int i = 1;
         while(sc.hasNext()) {
+            String name = "naam" + i++; // TODO: also read from Scanner
             String brand = sc.next();
             String type = sc.next();
             int seats = sc.nextInt();
@@ -351,7 +352,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -361,6 +362,7 @@ public class JDBCDAOTest {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
+        String name = "name"; // TODO: also read from Scanner
         String brand = sc.next();
         String type = sc.next();
         int seats = sc.nextInt();
@@ -381,7 +383,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
         cars.add(car);
         sc.close();
     }
@@ -393,8 +395,9 @@ public class JDBCDAOTest {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
-
+        int i = 1;
         while(sc.hasNext()) {
+            String name = "Naam" + i++; // TODO: also read from scanner
             String brand = sc.next();
             String type = sc.next();
             int seats = sc.nextInt();
@@ -415,7 +418,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
             cars.add(car);
         }
         sc.close();
