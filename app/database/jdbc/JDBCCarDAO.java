@@ -36,6 +36,7 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement getCarsOfUserStatement;
     private PreparedStatement deleteCarStatement;
     private PreparedStatement getGetCarListStatement;
+    private PreparedStatement getGetCarListPageStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -122,6 +123,13 @@ public class JDBCCarDAO implements CarDAO{
             getGetCarListStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id");
         }
         return getGetCarListStatement;
+    }
+
+    private PreparedStatement getGetCarListPageStatement() throws SQLException {
+        if(getGetCarListPageStatement == null) {
+            getGetCarListPageStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id limit ?, ?");
+        }
+        return getGetCarListPageStatement;
     }
     
     @Override
@@ -259,6 +267,19 @@ public class JDBCCarDAO implements CarDAO{
     }
 
     @Override
+    public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
+        try {
+            int first = (page-1)*pageSize;
+            PreparedStatement ps = getGetCarListPageStatement();
+            ps.setInt(1, first);
+            ps.setInt(2, pageSize);
+            return getCars(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
+
+    @Override
     public List<Car> getCarsOfUser(int user_id) throws DataAccessException {
         try {
             PreparedStatement ps = getGetCarsOfUserStatement();
@@ -280,5 +301,4 @@ public class JDBCCarDAO implements CarDAO{
             throw new DataAccessException("Error reading cars resultset", ex);
         }
     }
-    
 }

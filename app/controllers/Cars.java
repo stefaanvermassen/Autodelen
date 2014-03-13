@@ -251,7 +251,7 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
-            List<Car> listOfCars = dao.getCarList();
+            List<Car> listOfCars = dao.getCarList(1, 50);
             return cars.render(listOfCars);
         } catch (DataAccessException ex) {
             throw ex;
