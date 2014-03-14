@@ -1,0 +1,43 @@
+@(roles: Array[Tuple2[UserRole, Boolean]], user: User)
+
+@app("Bewerk roles") {
+    <div id="page-header-wrapper">
+        <h1 class="page-header">Gebruikersrollen</h1>
+        <ol class="breadcrumb">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Library</a></li>
+            <li><a href="@routes.UserRoles.index">Gebruikersrollen</a></li>
+            <li class="active">Bewerken</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <h2>Rollen voor @user.getEmail</h2>
+        @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
+            @* @if(form.hasGlobalErrors) {
+            <div class="alert alert-danger alert-dismissable">
+            <strong>Error!</strong> @form.globalError.message
+            </div>
+            } *@
+            <fieldset>
+                <div class="form-group">
+                @for((role, checked) <- roles) {
+                    <input type="checkbox" name="role" value="@role" checked="@checked"> @role <br>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="reset"></label>
+                    <div class="col-md-12">
+                        <button id="reset" name="reset" class="btn btn-block btn-success">Wijzig rollen</button>
+                    </div>
+                </div>
+            </fieldset>
+        }
+
+        <ul>
+
+        </ul>
+    </div>
+}
+

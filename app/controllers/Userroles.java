@@ -1,14 +1,76 @@
 package controllers;
 
-import database.DatabaseHelper;
+import controllers.Security.RoleSecured;
+import database.*;
 import models.User;
+import models.UserRole;
+import org.h2.engine.Database;
 import play.mvc.*;
-import views.html.*;
 
-public class Userroles extends Controller {
+import scala.Tuple2;
+import views.html.userroles.*;
 
+import java.util.Set;
+
+public class UserRoles extends Controller {
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result index() {
-        return ok(userroles.render());
+        return ok(overview.render());
+    }
+
+    /**
+     * Method: GET
+     * @param userId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result edit(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId);
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return badRequest(overview.render());
+            } else {
+                UserRoleDAO dao = context.getUserRoleDAO();
+                Set<UserRole> roles = dao.getUserRoles(userId);
+                UserRole[] allRoles = UserRole.values();
+                Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length];
+                for (int i = 0; i < allRoles.length; ++i) {
+                    filtered[i] = new Tuple2<>(allRoles[i], roles.contains(allRoles[i]));
+                }
+                return ok(editroles.render(filtered, user));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+
+    /**
+     * Method: POST
+     * @param userId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result editPost(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId);
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return badRequest(overview.render());
+            } else {
+                UserRoleDAO dao = context.getUserRoleDAO();
+                Set<UserRole> roles = dao.getUserRoles(userId);
+                return ok("Received request.");
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
 }
