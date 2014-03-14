@@ -1,4 +1,6 @@
-@scripts = {
+@(users: List[User])
+
+    @scripts = {
     <script src="@routes.Assets.at("../../../public/javascripts/plugins/dataTables/jquery.dataTables.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("../../../public/javascripts/plugins/dataTables/dataTables.bootstrap.js")" type="text/javascript"></script>
     <script>
@@ -74,6 +76,18 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @for(user <- users){
+                                    <tr>
+                                        <td>@user.getId</td>
+                                        <td>@user</td>
+                                        <td>TODO rollen icoontjes</td>
+                                        <td>
+                                            <div class="btn-group btn-group-xs">
+                                                <a href="@routes.UserRoles.edit(user.getId)" class="btn btn-primary">Bewerken</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
                                 <tr>
                                     <td>1</td>
                                     <td>John Dough</td>
@@ -84,16 +98,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>John Dough</td>
-                                    <td></td>
-                                    <td>
-                                        <div class="btn-group btn-group-xs">
-                                            <a href="@routes.UserRoles.edit(1)" class="btn btn-primary">bewerken</a>
-                                        </div>
-                                    </td>
-                                </tr>
+
                             </tbody>
                         </table>
                     </div>

@@ -10,16 +10,19 @@ import play.mvc.*;
 import scala.Tuple2;
 import views.html.userroles.*;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class UserRoles extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result index() {
-        return ok(overview.render());
+        //TODO: User picker / filter (paginated) -> Karsten??
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            return ok(overview.render(dao.getAllUsers()));
+        } catch (DataAccessException ex) {
+            throw ex;//TODO?
+        }
     }
 
     /**
@@ -35,7 +38,7 @@ public class UserRoles extends Controller {
             User user = udao.getUser(userId);
             if (user == null) {
                 flash("danger", "GebruikersID " + userId + " bestaat niet.");
-                return badRequest(overview.render());
+                return badRequest(overview.render(udao.getAllUsers()));
             } else {
                 UserRoleDAO dao = context.getUserRoleDAO();
                 Set<UserRole> roles = dao.getUserRoles(userId);
@@ -47,7 +50,7 @@ public class UserRoles extends Controller {
     }
 
     @SuppressWarnings("unchecked")
-    private static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles){
+    private static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles) {
         UserRole[] allRoles = UserRole.values();
         Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length - 1];
         int k = 0;
@@ -74,7 +77,7 @@ public class UserRoles extends Controller {
             User user = udao.getUser(userId);
             if (user == null) {
                 flash("danger", "GebruikersID " + userId + " bestaat niet.");
-                return badRequest(overview.render());
+                return badRequest(overview.render(udao.getAllUsers()));
             } else {
                 UserRoleDAO dao = context.getUserRoleDAO();
                 Set<UserRole> oldRoles = dao.getUserRoles(userId);
@@ -95,21 +98,27 @@ public class UserRoles extends Controller {
                 Set<UserRole> removedRoles = EnumSet.copyOf(oldRoles);
                 removedRoles.removeAll(newRoles);
 
-                try {
-                    for(UserRole removedRole : removedRoles){
-                        dao.removeUserRole(userId, removedRole);
-                    }
+                // Check if a superuser did delete his role by accident (SU roles can only be removed by other SU users)
+                if (user.getEmail().equals(session("email")) && removedRoles.contains(UserRole.SUPER_USER)) {
+                    flash("danger", "Als superuser kan u uw eigen superuser rechten niet verwijderen.");
+                    return badRequest(editroles.render(getUserRolesStatus(oldRoles), user));
+                } else {
+                    try {
+                        for (UserRole removedRole : removedRoles) {
+                            dao.removeUserRole(userId, removedRole);
+                        }
 
-                    for(UserRole addedRole : addedRoles){
-                        dao.addUserRole(userId, addedRole);
-                    }
-                    context.commit();
+                        for (UserRole addedRole : addedRoles) {
+                            dao.addUserRole(userId, addedRole);
+                        }
+                        context.commit();
 
-                    flash("success", "Er werden " + addedRoles.size() + " rol(len) toegevoegd en " + removedRoles.size() + " rol(len) verwijderd.");
-                    return ok(editroles.render(getUserRolesStatus(newRoles), user));
-                } catch(DataAccessException ex){
-                    context.rollback();
-                    throw ex;
+                        flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
+                        return ok(editroles.render(getUserRolesStatus(newRoles), user));
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
+                    }
                 }
             }
         } catch (DataAccessException ex) {
