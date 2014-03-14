@@ -21,6 +21,7 @@ public class UserRoles extends Controller {
 
     /**
      * Method: GET
+     *
      * @param userId
      * @return
      */
@@ -37,9 +38,12 @@ public class UserRoles extends Controller {
                 UserRoleDAO dao = context.getUserRoleDAO();
                 Set<UserRole> roles = dao.getUserRoles(userId);
                 UserRole[] allRoles = UserRole.values();
-                Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length];
+                Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length - 1];
+                int k = 0;
                 for (int i = 0; i < allRoles.length; ++i) {
-                    filtered[i] = new Tuple2<>(allRoles[i], roles.contains(allRoles[i]));
+                    if (allRoles[i] != UserRole.USER) { //TODO: review whole USER role, this thing is a hack and can be left out
+                        filtered[k++] = new Tuple2<>(allRoles[i], roles.contains(allRoles[i]));
+                    }
                 }
                 return ok(editroles.render(filtered, user));
             }
@@ -51,6 +55,7 @@ public class UserRoles extends Controller {
 
     /**
      * Method: POST
+     *
      * @param userId
      * @return
      */
