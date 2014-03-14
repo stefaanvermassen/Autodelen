@@ -6,7 +6,9 @@ import database.UserDAO;
 import models.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * Created by Cedric on 2/16/14.
@@ -29,9 +31,17 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement createVerificationStatement;
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
+    private PreparedStatement getAllUsersStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getGetAllUsersStatement() throws SQLException {
+        if(getAllUsersStatement == null){
+            getAllUsersStatement = connection.prepareStatement("SELECT user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM users");
+        }
+        return getAllUsersStatement;
     }
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
@@ -210,6 +220,24 @@ public class JDBCUserDAO implements UserDAO {
 
         } catch(SQLException ex){
             throw new DataAccessException("Failed to delete verification.", ex);
+        }
+    }
+
+    @Override
+    public List<User> getAllUsers() throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAllUsersStatement();
+            List<User> users = new ArrayList<>();
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    users.add(populateUser(rs, false, false, true));
+                }
+                return users;
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read user resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get user list.", ex);
         }
     }
 

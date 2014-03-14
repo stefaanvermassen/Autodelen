@@ -57,7 +57,7 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 				throw new DataAccessException("Error reading resultset",ex);
 			}			
 		} catch (SQLException ex) {
-			throw new DataAccessException("Could not get userroles",ex);
+			throw new DataAccessException("Could not get overview",ex);
 		}
 		
 	}
