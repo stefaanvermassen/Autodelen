@@ -7,14 +7,11 @@ import models.Reservation;
 import models.ReservationStatus;
 import models.User;
 import notifiers.Mail;
-import notifiers.Mailer;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
-import views.html.drives.*;
 import views.html.drives.drives;
 
-import java.sql.Ref;
 import java.util.List;
 
 public class Drives extends Controller {
@@ -36,17 +33,17 @@ public class Drives extends Controller {
     }
 
     public static Html showIndex() {
-        return showIndex(null);
+        return showIndex(null, -1);
     }
 
-    public static Html showIndex(Form<RefuseModel> form) {
+    public static Html showIndex(Form<RefuseModel> form, int errorIndex) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
-            List<Reservation> reservations = dao.getReservationList(user.getId());
+            List<Reservation> reservations = dao.getReservationListForUser(user.getId());
             if(form == null)
-                return drives.render(user.getId(), Form.form(RefuseModel.class),reservations);
-            return drives.render(user.getId(), form, reservations);
+                return drives.render(user.getId(), errorIndex, Form.form(RefuseModel.class),reservations);
+            return drives.render(user.getId(), errorIndex, form, reservations);
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -58,11 +55,11 @@ public class Drives extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result refuseReservation(int reservationId) {
+    public static Result refuseReservation(int reservationId, int errorIndex) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
         if(refuseForm.hasErrors())
-            return badRequest(showIndex(refuseForm));
+            return badRequest(showIndex(refuseForm, errorIndex));
         Result result = adjustStatus(reservationId, ReservationStatus.REFUSED);
         if(result != null)
             Mail.sendReservationRefusedByOwnerMail(user, refuseForm.get().reason);

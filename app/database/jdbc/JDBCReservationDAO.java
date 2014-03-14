@@ -31,7 +31,8 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement updateReservationStatement;
     private PreparedStatement getReservationStatement;
     private PreparedStatement deleteReservationStatement;
-    private PreparedStatement getReservationListStatement;
+    private PreparedStatement getReservationListByUseridStatement;
+    private PreparedStatement getReservationListByCaridStatement;
 
     public JDBCReservationDAO(Connection connection) {
         this.connection = connection;
@@ -74,13 +75,22 @@ public class JDBCReservationDAO implements ReservationDAO{
         return getReservationStatement;
     }
 
-    private PreparedStatement getGetReservationListStatement() throws SQLException {
-        if (getReservationListStatement == null) {
+    private PreparedStatement getGetReservationListByUseridStatement() throws SQLException {
+        if (getReservationListByUseridStatement == null) {
             // Only request the reservations for which the current user is the loaner or the owner
-            getReservationListStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
+            getReservationListByUseridStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
                     "WHERE car_owner_user_id=? OR reservation_user_id=?");
         }
-        return getReservationListStatement;
+        return getReservationListByUseridStatement;
+    }
+
+    private PreparedStatement getGetReservationListByCaridStatement() throws SQLException {
+        if (getReservationListByUseridStatement == null) {
+            // Only request the reservations for which the current user is the loaner or the owner
+            getReservationListByUseridStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
+                    "WHERE car_id=?");
+        }
+        return getReservationListByUseridStatement;
     }
 
     @Override
@@ -156,25 +166,40 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     @Override
-    public List<Reservation> getReservationList(int userId) throws DataAccessException {
+    public List<Reservation> getReservationListForUser(int userId) throws DataAccessException {
         try {
             List<Reservation> list = new ArrayList<>();
-            PreparedStatement ps = getGetReservationListStatement();
+            PreparedStatement ps = getGetReservationListByUseridStatement();
             ps.setInt(1, userId);
             ps.setInt(2, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(populateReservation(rs));
-                }
-                return list;
-            }catch (SQLException e){
-                throw new DataAccessException("Error while reading reservation resultset", e);
-
-            }
+            return getReservationList(ps);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
         }
     }
 
+    @Override
+    public List<Reservation> getReservationListForCar(int carId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetReservationListByCaridStatement();
+            ps.setInt(1, carId);
+            return getReservationList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of reservations", e);
+        }
+    }
+
+    private List<Reservation> getReservationList(PreparedStatement ps) throws DataAccessException {
+        List<Reservation> list = new ArrayList<>();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(populateReservation(rs));
+            }
+            return list;
+        }catch (SQLException e){
+            throw new DataAccessException("Error while reading reservation resultset", e);
+
+        }
+    }
 
 }

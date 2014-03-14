@@ -1,4 +1,4 @@
-@(userId: Int, form: play.data.Form[Drives.RefuseModel], reservations: List[Reservation])
+@(userId: Int, errorIndex: Int, form: play.data.Form[Drives.RefuseModel], reservations: List[Reservation])
 @scripts = {
     <script src="@routes.Assets.at("javascripts/plugins/dataTables/jquery.dataTables.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/plugins/dataTables/dataTables.bootstrap.js")" type="text/javascript"></script>
@@ -28,6 +28,9 @@
                   "sSearch": "Zoek: "
                 }
             });
+            @if(form.hasGlobalErrors) {
+                flipHidden(@errorIndex);
+            };
         });
 
         function flipHidden(index) {
@@ -127,7 +130,7 @@
                                                     <a class="btn btn-warning" onclick="flipHidden(@index)">afkeuren</a>
                                                 </div>
                                                 <div id="hidden2_@index" class="hidden">
-                                                    @helper.form(routes.Drives.refuseReservation(reservation.getId), 'class -> "form-horizontal") {
+                                                    @helper.form(routes.Drives.refuseReservation(reservation.getId, index), 'class -> "form-horizontal") {
                                                         <fieldset>
                                                             <div class="form-group">
                                                                 <label class="col-md-1 control-label" for="reason"></label>
