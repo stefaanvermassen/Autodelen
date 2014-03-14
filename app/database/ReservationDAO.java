@@ -20,5 +20,6 @@ public interface ReservationDAO {
     public void updateReservation(Reservation reservation) throws DataAccessException;
     public Reservation getReservation(int id) throws DataAccessException;
     public void deleteReservation(Reservation reservation) throws DataAccessException;
-    public List<Reservation> getReservationList(int userId) throws DataAccessException;
+    public List<Reservation> getReservationListForUser(int userId) throws DataAccessException;
+    public List<Reservation> getReservationListForCar(int carID) throws DataAccessException;
 }

@@ -4,7 +4,6 @@ import controllers.Security.RoleSecured;
 import database.*;
 import models.User;
 import models.UserRole;
-import org.h2.engine.Database;
 import play.mvc.*;
 
 import scala.Tuple2;
