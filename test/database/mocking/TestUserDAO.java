@@ -3,6 +3,7 @@ package database.mocking;
 import database.DataAccessException;
 import database.UserDAO;
 import models.User;
+import models.UserStatus;
 import models.VerificationType;
 import utility.Cloner;
 
@@ -88,6 +89,16 @@ public class TestUserDAO implements UserDAO {
 
     @Override
     public void deleteUser(User user) throws DataAccessException {
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getId() == user.getId()) {
+                userList.get(i).setStatus(UserStatus.DROPPED);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void permanentlyDeleteUser(User user) throws DataAccessException {
         for (int i = 0; i < userList.size(); i++) {
             if (userList.get(i).getId() == user.getId()) {
                 userList.remove(i);

@@ -149,7 +149,7 @@ public class JDBCReservationDAO implements ReservationDAO{
                 throw new DataAccessException("Error reading reservation resultset", e);
             }
         } catch (SQLException e){
-            throw new DataAccessException("Unable to update reservation", e);
+            throw new DataAccessException("Unable to get reservation", e);
         }
     }
     

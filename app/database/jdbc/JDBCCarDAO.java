@@ -46,6 +46,7 @@ public class JDBCCarDAO implements CarDAO{
         if(rs.getObject("car_id") != null) {
             Car car = new Car();
             car.setId(rs.getInt("car_id"));
+            car.setName(rs.getString("car_name"));
             car.setBrand(rs.getString("car_brand"));
             car.setType(rs.getString("car_type"));
             car.setComments(rs.getString("car_comments"));
@@ -90,14 +91,14 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_name, car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments) VALUES (?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarStatement;
     }
     
     private PreparedStatement updateCarStatement() throws SQLException {
         if (updateCarStatement == null) {
-            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? WHERE car_id = ?");
+            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_name=?, car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? WHERE car_id = ?");
         }
         return updateCarStatement;
     }
@@ -124,36 +125,37 @@ public class JDBCCarDAO implements CarDAO{
     }
     
     @Override
-    public Car createCar(String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
+    public Car createCar(String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement();
-            ps.setString(1, type);
-            ps.setString(2, brand);
+            ps.setString(1, name);
+            ps.setString(2, type);
+            ps.setString(3, brand);
             if(location != null) {
-                ps.setInt(3, location.getId());
+                ps.setInt(4, location.getId());
             } else {
-                ps.setNull(3, Types.INTEGER);
+                ps.setNull(4, Types.INTEGER);
             }
-            ps.setInt(4, seats);
-            ps.setInt(5, doors);
-            ps.setInt(6, year);
+            ps.setInt(5, seats);
+            ps.setInt(6, doors);
+            ps.setInt(7, year);
             //Calendar cal = Calendar.getInstance();
             //cal.set(year, 0,0);
             //ps.setDate(6, new Date(cal.getTime().getTime()));
 
-            ps.setBoolean(7, gps);
-            ps.setBoolean(8, hook);
-            ps.setString(9, fuel.toString());
-            ps.setInt(10, fuelEconomy);
-            ps.setInt(11, estimatedValue);
-            ps.setInt(12, ownerAnnualKm);
+            ps.setBoolean(8, gps);
+            ps.setBoolean(9, hook);
+            ps.setString(10, fuel.toString());
+            ps.setInt(11, fuelEconomy);
+            ps.setInt(12, estimatedValue);
+            ps.setInt(13, ownerAnnualKm);
             // Owner cannot be null according to SQL script so this will throw an Exception
             if(owner != null) {
-                ps.setInt(13, owner.getId());
+                ps.setInt(14, owner.getId());
             } else {
-                ps.setNull(13, Types.INTEGER);
+                ps.setNull(14, Types.INTEGER);
             }
-            ps.setString(14, comments);
+            ps.setString(15, comments);
 
             java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
             String currentDatetime = sqlDate.toString();
@@ -163,7 +165,7 @@ public class JDBCCarDAO implements CarDAO{
                 throw new DataAccessException("No rows were affected when creating car.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next();
-                return new Car(keys.getInt(1), brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
+                return new Car(keys.getInt(1), name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new car.", ex);
             }
@@ -176,36 +178,36 @@ public class JDBCCarDAO implements CarDAO{
     public void updateCar(Car car) throws DataAccessException {
         try {
             PreparedStatement ps = updateCarStatement();
-            ps.setString(1, car.getType());
-            ps.setString(2, car.getBrand());
+            ps.setString(1, car.getName());
+            ps.setString(2, car.getType());
+            ps.setString(3, car.getBrand());
             if(car.getLocation() != null) {
-                ps.setInt(3, car.getLocation().getId());
+                ps.setInt(4, car.getLocation().getId());
             } else {
-                ps.setNull(3, Types.INTEGER);
+                ps.setNull(4, Types.INTEGER);
             }
-            ps.setInt(4, car.getSeats());
-            ps.setInt(5, car.getDoors());
+            ps.setInt(5, car.getSeats());
+            ps.setInt(6, car.getDoors());
             //Calendar cal = Calendar.getInstance();
             //cal.set(car.getYear(), 0,0);
             //ps.setDate(6, new Date(cal.getTime().getTime()));
-            ps.setInt(6, car.getYear());
-            ps.setBoolean(7, car.isGps());
-            ps.setBoolean(8, car.isHook());
-            ps.setString(9, car.getFuel().toString());
-            ps.setInt(10, car.getFuelEconomy());
-            ps.setInt(11,car.getEstimatedValue());
-            ps.setInt(12,car.getOwnerAnnualKm());
+            ps.setInt(7, car.getYear());
+            ps.setBoolean(8, car.isGps());
+            ps.setBoolean(9, car.isHook());
+            ps.setString(10, car.getFuel().toString());
+            ps.setInt(11, car.getFuelEconomy());
+            ps.setInt(12,car.getEstimatedValue());
+            ps.setInt(13,car.getOwnerAnnualKm());
             // If Owner == null, this should throw an error on execution
             if(car.getOwner() != null) {
-                ps.setInt(13,car.getOwner().getId());
+                ps.setInt(14,car.getOwner().getId());
             } else {
-                ps.setNull(13, Types.INTEGER);
+                ps.setNull(14, Types.INTEGER);
             }
-            ps.setString(14,car.getComments());
+            ps.setString(15,car.getComments());
             //ps.setDate(15,new Date(new java.util.Date().getTime()));
 
-            ps.setInt(15, car.getId());
-
+            ps.setInt(16, car.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");

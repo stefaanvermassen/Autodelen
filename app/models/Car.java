@@ -11,6 +11,7 @@ package models;
 public class Car {
     
     private int id;
+    private String name;
     private String brand;
     private String type;
     private Address location;
@@ -28,11 +29,12 @@ public class Car {
     private String lastEdit;
 
     public Car() {
-        this(0,null,null,null,0,0,0,false,false,null,0,0,0,null,null,null);
+        this(0, null, null, null, null, 0, 0, 0, false, false, null, 0, 0, 0, null, null, null);
     }
 
-    public Car(int id, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments, String lastEdit) {
+    public Car(int id, String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments, String lastEdit) {
         this.id = id;
+        this.name = name;
         this.brand = brand;
         this.type = type;
         this.location = location;
@@ -57,6 +59,10 @@ public class Car {
     public void setId(int id){
         this.id=id;
     }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
 
     public String getBrand() {
         return brand;

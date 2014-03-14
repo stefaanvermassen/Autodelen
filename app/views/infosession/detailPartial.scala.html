@@ -6,18 +6,10 @@
                 <strong>Host:</strong> @infoSession.getHost.getFirstName @infoSession.getHost.getLastName<br>
                 <strong>Datum:</strong> @infoSession.getTime.toString("dd/MM/yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
+                <strong>Adres:</strong> @infoSession.getAddress
             </p>
-            <p>
-                @defining(infoSession.getAddress) { address =>
-                    <strong>Straat:</strong> @address.getStreet<br>
-                    <strong>Nummer:</strong> @address.getNumber<br>
-                @if(address.getBus != null && !address.getBus.isEmpty) {
-                    <strong>Bus:</strong> @address.getBus<br>
-                }
-                    <strong>Stad:</strong> @address.getZip @address.getCity<br>
-                }
-                @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-            </p>
+            @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
+
         </div>
     </div>
     <div class="col-lg-8">

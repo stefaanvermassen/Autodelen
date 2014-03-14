@@ -8,7 +8,11 @@ GET         /information                       controllers.Information.index()
 
 # Dashboard page
 GET         /dashboard                         controllers.Dashboard.index()
-GET         /userroles                         controllers.Userroles.index()
+
+# UserRoles
+GET         /userroles                         controllers.UserRoles.index()
+GET         /userroles/edit                    controllers.UserRoles.edit(userId: Int)
+POST        /userroles/edit                    controllers.UserRoles.editPost(userId: Int)
 
 # Drives
 GET         /drives                            controllers.Drives.index()
@@ -69,6 +73,10 @@ POST        /emailtemplate/edit                controllers.EmailTemplates.editTe
 GET         /cars                              controllers.Cars.showCars()
 GET         /cars/new                          controllers.Cars.newCar()
 POST        /cars/new                          controllers.Cars.addNewCar()
+GET         /cars/view                         controllers.Cars.detail(id: Int)
+GET         /cars/edit                         controllers.Cars.editCar(carId: Int)
+POST        /cars/edit                         controllers.Cars.editCarPost(carId: Int)
+GET         /cars/delete                       controllers.Cars.removeCar(carId: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                      controllers.Assets.at(path="/public", file)
