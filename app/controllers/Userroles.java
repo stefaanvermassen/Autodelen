@@ -10,6 +10,9 @@ import play.mvc.*;
 import scala.Tuple2;
 import views.html.userroles.*;
 
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 public class UserRoles extends Controller {
@@ -25,7 +28,6 @@ public class UserRoles extends Controller {
      * @param userId
      * @return
      */
-    @SuppressWarnings("unchecked")
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result edit(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -37,19 +39,24 @@ public class UserRoles extends Controller {
             } else {
                 UserRoleDAO dao = context.getUserRoleDAO();
                 Set<UserRole> roles = dao.getUserRoles(userId);
-                UserRole[] allRoles = UserRole.values();
-                Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length - 1];
-                int k = 0;
-                for (int i = 0; i < allRoles.length; ++i) {
-                    if (allRoles[i] != UserRole.USER) { //TODO: review whole USER role, this thing is a hack and can be left out
-                        filtered[k++] = new Tuple2<>(allRoles[i], roles.contains(allRoles[i]));
-                    }
-                }
-                return ok(editroles.render(filtered, user));
+                return ok(editroles.render(getUserRolesStatus(roles), user));
             }
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles){
+        UserRole[] allRoles = UserRole.values();
+        Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length - 1];
+        int k = 0;
+        for (UserRole allRole : allRoles) {
+            if (allRole != UserRole.USER) { //TODO: review whole USER role, this thing is a hack and can be left out
+                filtered[k++] = new Tuple2<>(allRole, assignedRoles.contains(allRole));
+            }
+        }
+        return filtered;
     }
 
 
@@ -70,8 +77,40 @@ public class UserRoles extends Controller {
                 return badRequest(overview.render());
             } else {
                 UserRoleDAO dao = context.getUserRoleDAO();
-                Set<UserRole> roles = dao.getUserRoles(userId);
-                return ok("Received request.");
+                Set<UserRole> oldRoles = dao.getUserRoles(userId);
+
+                Map<String, String[]> map = request().body().asFormUrlEncoded();
+                String[] checkedVal = map.get("role"); // get selected topics
+
+                Set<UserRole> newRoles = EnumSet.of(UserRole.USER);
+                if (checkedVal != null) {
+                    for (String strRole : checkedVal) {
+                        newRoles.add(Enum.valueOf(UserRole.class, strRole));
+                    }
+                }
+
+                Set<UserRole> addedRoles = EnumSet.copyOf(newRoles);
+                addedRoles.removeAll(oldRoles);
+
+                Set<UserRole> removedRoles = EnumSet.copyOf(oldRoles);
+                removedRoles.removeAll(newRoles);
+
+                try {
+                    for(UserRole removedRole : removedRoles){
+                        dao.removeUserRole(userId, removedRole);
+                    }
+
+                    for(UserRole addedRole : addedRoles){
+                        dao.addUserRole(userId, addedRole);
+                    }
+                    context.commit();
+
+                    flash("success", "Er werden " + addedRoles.size() + " rol(len) toegevoegd en " + removedRoles.size() + " rol(len) verwijderd.");
+                    return ok(editroles.render(getUserRolesStatus(newRoles), user));
+                } catch(DataAccessException ex){
+                    context.rollback();
+                    throw ex;
+                }
             }
         } catch (DataAccessException ex) {
             throw ex;

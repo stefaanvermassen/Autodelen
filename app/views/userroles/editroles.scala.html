@@ -13,12 +13,14 @@
 
     <div id="page-wrapper">
         <h2>Rollen voor @user.getEmail</h2>
+        @if(!flash.isEmpty()) {
+            @for((msgKey, msgValue) <- flash) {
+                <div class="alert alert-@msgKey">
+                @msgValue
+                </div>
+            }
+        }
         @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
-            @* @if(form.hasGlobalErrors) {
-            <div class="alert alert-danger alert-dismissable">
-            <strong>Error!</strong> @form.globalError.message
-            </div>
-            } *@
             <fieldset>
                 <div class="form-group">
                 @for((role, checked) <- roles) {
