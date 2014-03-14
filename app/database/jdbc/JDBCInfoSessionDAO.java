@@ -16,7 +16,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private Connection connection;
 
-    private static String INFOSESSION_FIELDS = "infosession_id, infosession_timestamp, " +
+    private static String INFOSESSION_FIELDS = "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
             "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
             "user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status";
 
@@ -102,7 +102,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getCreateInfoSessionStatement() throws SQLException {
         if (createInfoSessionStatement == null) {
-            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_timestamp, infosession_address_id, infosession_host_user_id) VALUES (?,?,?)",
+            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_type, infosession_timestamp, infosession_address_id, infosession_host_user_id, infosession_max_enrollees) VALUES (?,?,?,?,?)",
                     new String[]{"infosession_id"});
         }
         return createInfoSessionStatement;
@@ -123,25 +123,28 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
-        return new InfoSession(rs.getInt("infosession_id"), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false, false));
+        return new InfoSession(rs.getInt("infosession_id"), InfoSessionType.valueOf(rs.getString("infosession_type")), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false), rs.getInt("infosession_max_enrollees"));
     }
 
     @Override
-    public InfoSession createInfoSession(User host, Address address, DateTime time) throws DataAccessException {
+    public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int maxEnrollees) throws DataAccessException {
         if (host.getId() == 0 || address.getId() == 0)
             throw new DataAccessException("Tried to create infosession without database user / database address");
 
         try {
             PreparedStatement ps = getCreateInfoSessionStatement();
-            ps.setTimestamp(1, new Timestamp(time.getMillis())); //TODO: timezones?? convert to datetime see below
-            ps.setInt(2, address.getId());
-            ps.setInt(3, host.getId());
+            ps.setString(1, type.name());
+            ps.setTimestamp(2, new Timestamp(time.getMillis())); //TODO: timezones?? convert to datetime see below
+            ps.setInt(3, address.getId());
+            ps.setInt(4, host.getId());
+            ps.setInt(5, maxEnrollees);
+
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating infosession.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new InfoSession(keys.getInt(1), time, address, host, InfoSession.NO_ENROLLEES);
+                return new InfoSession(keys.getInt(1), type, time, address, host, InfoSession.NO_ENROLLEES, maxEnrollees);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new infosession.", ex);
             }

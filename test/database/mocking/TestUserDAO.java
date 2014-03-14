@@ -109,7 +109,7 @@ public class TestUserDAO implements UserDAO {
 
     @Override
     public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        User user = new User(userIdCounter++, email, firstName, lastName, password, null);
+        User user = new User(userIdCounter++, email, firstName, lastName, password);
         userList.add(user);
         return user;
     }

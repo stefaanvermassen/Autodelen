@@ -69,7 +69,7 @@ public class JDBCCarDAO implements CarDAO{
 
             User user;
             if(withUser) {
-                user = JDBCUserDAO.populateUser(rs, false, false, false);
+                user = JDBCUserDAO.populateUser(rs, false, false);
             } else {
                 user = null;
             }

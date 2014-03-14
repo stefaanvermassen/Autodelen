@@ -22,6 +22,17 @@ public class JDBCAddressDAO implements AddressDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"address_id"};
 
+    public static Address populateAddress(ResultSet rs) throws SQLException {
+        return populateAddress(rs, "addresses");
+    }
+
+    public static Address populateAddress(ResultSet rs, String tableName) throws SQLException {
+        if(rs.getObject(tableName + ".address_id") == null)
+            return null;
+        else
+            return new Address(rs.getInt(tableName + ".address_id"), rs.getString(tableName + ".address_zipcode"), rs.getString(tableName + ".address_city"), rs.getString(tableName + ".address_street"), rs.getString(tableName + ".address_street_number"), rs.getString(tableName + ".address_street_bus"));
+    }
+
     private PreparedStatement getGetAddressStatement() throws SQLException {
         if (getAddressStatement == null) {
             getAddressStatement = connection.prepareStatement("SELECT address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
@@ -78,13 +89,6 @@ public class JDBCAddressDAO implements AddressDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch address by id.", ex);
         }
-    }
-
-    public static Address populateAddress(ResultSet rs) throws SQLException {
-        if(rs.getObject("address_id") == null)
-            return null;
-        else
-            return new Address(rs.getInt("address_id"), rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
     }
 
     @Override

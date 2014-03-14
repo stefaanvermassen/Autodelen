@@ -288,7 +288,7 @@ public class JDBCDAOTest {
             user.setLastName(user.getLastName() + "Test");
             user.setPassword(user.getPassword() + "Test");
 
-            userDAO.updateUser(user);
+            userDAO.updateUser(user, false);
         }
         getUserTest();
     }
@@ -299,7 +299,7 @@ public class JDBCDAOTest {
     private void deleteUserTest() {
         for(User user : users) {
             userDAO.deleteUser(user);
-            User returnUser = userDAO.getUser(user.getId());
+            User returnUser = userDAO.getUser(user.getId(), true);
             Assert.assertEquals(returnUser.getStatus(), UserStatus.DROPPED);
         }
     }
@@ -313,7 +313,7 @@ public class JDBCDAOTest {
             User user = iUsers.next();
             userDAO.permanentlyDeleteUser(user);
             try {
-                User returnUser = userDAO.getUser(user.getId());
+                User returnUser = userDAO.getUser(user.getId(), false);
                 if(returnUser != null) {
                     Assert.fail("User not permanently deleted");
                 }
@@ -630,7 +630,7 @@ public class JDBCDAOTest {
             int u5id = sc.nextInt();
             User u5 = users.get(u5id - 1);
 
-            InfoSession infoSession = infoSessionDAO.createInfoSession(host, address, time);
+            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, host, address, time, 0);
             infoSessionDAO.registerUser(infoSession, u1);
             infoSessionDAO.registerUser(infoSession, u2);
             infoSessionDAO.registerUser(infoSession, u3);
@@ -674,7 +674,7 @@ public class JDBCDAOTest {
         int u5id = sc.nextInt();
         User u5 = users.get(u5id - 1);
 
-        InfoSession infoSession = infoSessionDAO.createInfoSession(host, address, time);
+        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, host, address, time, 0);
         infoSessionDAO.registerUser(infoSession, u1);
         infoSessionDAO.registerUser(infoSession, u2);
         infoSessionDAO.registerUser(infoSession, u3);

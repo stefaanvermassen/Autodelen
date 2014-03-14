@@ -191,7 +191,7 @@ public class Login extends Controller {
     public static Result resetPassword(int userId, String uuid) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(userId);
+            User user = dao.getUser(userId, false);
             if (user == null) {
                 return badRequest("Deze user bestaat niet."); //TODO: flash
             } else {
@@ -222,7 +222,7 @@ public class Login extends Controller {
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                User user = dao.getUser(userId);
+                User user = dao.getUser(userId, true);
                 if (user == null) {
                     return badRequest("Deze user bestaat niet."); //TODO: flash
                 } else {
@@ -232,7 +232,7 @@ public class Login extends Controller {
                     } else if (ident.equals(uuid)) {
                         dao.deleteVerificationString(user, VerificationType.PWRESET);
                         user.setPassword(hashPassword(resetForm.get().password));
-                        dao.updateUser(user);
+                        dao.updateUser(user, true);
                         context.commit();
 
                         DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
@@ -314,7 +314,7 @@ public class Login extends Controller {
 
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(userId);
+            User user = dao.getUser(userId, true);
             if (user == null) {
                 return badRequest("Deze user bestaat niet."); //TODO: flash
             } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
@@ -328,7 +328,7 @@ public class Login extends Controller {
                     dao.deleteVerificationString(user, VerificationType.REGISTRATION);
                     user.setStatus(UserStatus.REGISTERED);
 
-                    dao.updateUser(user);
+                    dao.updateUser(user, true);
                     context.commit();
                     DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
 

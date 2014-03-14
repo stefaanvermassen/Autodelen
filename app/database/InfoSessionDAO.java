@@ -4,10 +4,7 @@
  */
 package database;
 
-import models.Address;
-import models.EnrollementStatus;
-import models.InfoSession;
-import models.User;
+import models.*;
 import org.joda.time.DateTime;
 
 import java.util.List;
@@ -17,7 +14,7 @@ import java.util.List;
  * @author Laurent
  */
 public interface InfoSessionDAO {
-    public InfoSession createInfoSession(User host, Address address, DateTime time) throws DataAccessException;
+    public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int maxEnrollees) throws DataAccessException;
     public InfoSession getInfoSession(int id, boolean withAttendees) throws DataAccessException;
     public boolean deleteInfoSession(int id) throws DataAccessException;
     public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException;

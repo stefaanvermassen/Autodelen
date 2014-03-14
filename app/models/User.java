@@ -1,7 +1,5 @@
 package models;
 
-import java.util.*;
-
 /**
  * Created by Cedric on 2/16/14.
  */
@@ -14,30 +12,35 @@ public class User {
     private String password;
     private String phone;
     private String cellphone;
-    private Address address;
+    private Address addressDomicile;
+    private Address addressResidence;
     private DriverLicense license;
     private UserStatus status;
     private IdentityCard identityCard;
+    private String damageHistory;
+    private boolean payedDeposit;
+    private boolean agreeTerms;
+    private User contractManager;
+    // TODO: image
 
     public User(int id, String email, String firstName, String lastName){
-        this(id, email, firstName, lastName, null, null);
+        this(id, email, firstName, lastName, null);
     }
 
     public User(String email) {
-        this(0, email, null, null, null, null);
+        this(0, email, null, null, null);
     }
 
     public User() {
-        this(0, null, null, null, null, null);
+        this(0, null, null, null, null);
     }
 
-    public User(int id, String email, String firstName, String lastName, String password, Address address){
+    public User(int id, String email, String firstName, String lastName, String password){
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
-        this.address = address;
 
         this.status = UserStatus.REGISTERED;
     }
@@ -98,14 +101,21 @@ public class User {
         this.phone = phone;
     }
 
-    public Address getAddress() {
-        return address;
+    public Address getAddressDomicile() {
+        return addressDomicile;
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
+    public void setAddressDomicile(Address addressDomicile) {
+        this.addressDomicile = addressDomicile;
     }
 
+    public Address getAddressResidence() {
+        return addressResidence;
+    }
+
+    public void setAddressResidence(Address addressResidence) {
+        this.addressResidence = addressResidence;
+    }
     public DriverLicense getLicense() {
         return license;
     }
@@ -128,6 +138,38 @@ public class User {
 
     public void setIdentityCard(IdentityCard identityCard) {
         this.identityCard = identityCard;
+    }
+
+    public String getDamageHistory() {
+        return damageHistory;
+    }
+
+    public void setDamageHistory(String damageHistory) {
+        this.damageHistory = damageHistory;
+    }
+
+    public boolean isPayedDeposit() {
+        return payedDeposit;
+    }
+
+    public void setPayedDeposit(boolean payedDeposit) {
+        this.payedDeposit = payedDeposit;
+    }
+
+    public User getContractManager() {
+        return contractManager;
+    }
+
+    public void setContractManager(User contractManager) {
+        this.contractManager = contractManager;
+    }
+
+    public boolean isAgreeTerms() {
+        return agreeTerms;
+    }
+
+    public void setAgreeTerms(boolean agreeTerms) {
+        this.agreeTerms = agreeTerms;
     }
 
     @Override

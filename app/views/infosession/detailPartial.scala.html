@@ -4,9 +4,11 @@
         <div class="well">
             <p>
                 <strong>Host:</strong> @infoSession.getHost.getFirstName @infoSession.getHost.getLastName<br>
+                <strong>Type:</strong> @infoSession.getType.name()<br>
                 <strong>Datum:</strong> @infoSession.getTime.toString("dd/MM/yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
-                <strong>Adres:</strong> @infoSession.getAddress
+                <strong>Adres:</strong> @infoSession.getAddress<br>
+                <strong>Maximum aantal deelnemers:</strong> @infoSession.getMaxEnrollees
             </p>
             @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
 

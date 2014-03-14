@@ -27,7 +27,7 @@ public class TestUserRoleDAO implements UserRoleDAO {
     public EnumSet<UserRole> getUserRoles(int userId) throws DataAccessException {
         EnumSet<UserRole> r = roles.get(userId);
         if (r == null) {
-            if (userDao.getUser(userId) != null) {
+            if (userDao.getUser(userId, false) != null) {
                 return EnumSet.of(UserRole.USER);
             } else {
                 return EnumSet.noneOf(UserRole.class);

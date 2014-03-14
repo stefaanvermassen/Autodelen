@@ -70,7 +70,7 @@ public class UserProvider {
         try (DataAccessContext context = provider.getDataAccessContext()) {
             invalidateUser(user.getEmail());
             UserDAO dao = context.getUserDAO();
-            dao.updateUser(user);
+            dao.updateUser(user, true);
             context.commit();
         } catch(DataAccessException ex){
             throw ex;

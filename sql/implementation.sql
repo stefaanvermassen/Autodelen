@@ -65,11 +65,18 @@ CREATE TABLE `Users` (
 	`user_driver_license_id` INT,
 	`user_identity_card_id` INT,
 	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
+	`user_damage_history` TEXT,
+	`user_payed_deposit` BIT(1),
+	`user_agree_terms` BIT(1),
+	`user_contract_manager_id` INT,
+	`user_image_id` INT,
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_address_residence_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_driver_license_id`) REFERENCES DriverLicenses(`driver_license_id`),
 	FOREIGN KEY (`user_identity_card_id`) REFERENCES IdentityCards(`identity_card_id`),
+	FOREIGN KEY (`user_contract_manager_id`) REFERENCES Users(`user_id`),
+	FOREIGN KEY (`user_image_id`) REFERENCES Files(`file_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
 )
 COLLATE='latin1_swedish_ci'
@@ -101,10 +108,12 @@ CREATE TABLE `Cars` (
 	`car_owner_annual_km` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
+	`car_images_id` INT,
 	`car_last_edit` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_id`),
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES Users(`user_id`) ON DELETE CASCADE,
-	FOREIGN KEY (`car_location`) REFERENCES Addresses(`address_id`) ON DELETE CASCADE
+	FOREIGN KEY (`car_location`) REFERENCES Addresses(`address_id`) ON DELETE CASCADE,
+	FOREIGN KEY (`car_images_id`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -150,9 +159,11 @@ ENGINE=InnoDB;
 
 CREATE TABLE `InfoSessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
+	`infosession_type` ENUM('NORMAL', 'OWNER', 'OTHER') NOT NULL DEFAULT 'NORMAL',
 	`infosession_timestamp` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`infosession_address_id` INT NOT NULL,
 	`infosession_host_user_id` INT,
+	`infosession_max_enrollees` INT,
 	PRIMARY KEY (`infosession_id`),
 	FOREIGN KEY (`infosession_host_user_id`) REFERENCES Users(`user_id`),
 	FOREIGN KEY (`infosession_address_id`) REFERENCES Addresses(`address_id`)	
