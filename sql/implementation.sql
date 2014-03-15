@@ -272,15 +272,21 @@ CREATE TABLE `Verifications` (
 	PRIMARY KEY (`verification_user_id`, `verification_type`),
 	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `Users` (`user_id`)
 )
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
 
-CREATE TABLE `Notifications`{
+CREATE TABLE `Notifications` ( # from user to user != Notifications
 	`notification_id` INT NOT NULL AUTO_INCREMENT,
 	`notification_user_id` INT NOT NULL,
+	`notification_read` BIT(1) NOT NULL DEFAULT 0,
 	`notification_subject` VARCHAR(255),
-	`notification_read` BIT(1) NOT NULL DEFAULT '0',
 	`notification_body` TEXT,
 	`notification_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`notification_id`),
 	FOREIGN KEY (`notification_user_id`) REFERENCES Users(`user_id`)
-}
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+
 
