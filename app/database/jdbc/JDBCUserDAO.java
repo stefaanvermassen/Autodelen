@@ -40,7 +40,6 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement smallUpdateUserStatement;
     private PreparedStatement updateUserStatement;
     private PreparedStatement deleteUserStatement;
-    private PreparedStatement permanentlyDeleteUserStatement;
     private PreparedStatement createVerificationStatement;
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
@@ -52,7 +51,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getGetAllUsersStatement() throws SQLException {
         if(getAllUsersStatement == null){
-            getAllUsersStatement = connection.prepareStatement("SELECT user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM users");
+            getAllUsersStatement = connection.prepareStatement(USER_QUERY);
         }
         return getAllUsersStatement;
     }
@@ -83,13 +82,6 @@ public class JDBCUserDAO implements UserDAO {
     		deleteUserStatement = connection.prepareStatement("UPDATE Users SET user_status = 'DROPPED' WHERE user_id = ?");
     	}
     	return deleteUserStatement;
-    }
-
-    private PreparedStatement getPermanentlyDeleteUserStatement() throws SQLException {
-        if(permanentlyDeleteUserStatement == null){
-            permanentlyDeleteUserStatement = connection.prepareStatement("DELETE FROM Users WHERE user_id = ?");
-        }
-        return permanentlyDeleteUserStatement;
     }
     
     private PreparedStatement getUserByEmailStatement() throws SQLException {
