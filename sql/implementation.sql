@@ -238,7 +238,9 @@ ENGINE=InnoDB;
 CREATE TABLE `Templates` (
 	`template_id` INT NOT NULL AUTO_INCREMENT,
 	`template_title` VARCHAR(255) NOT NULL,
+	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
 	`template_body` TEXT NOT NULL,
+	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, # Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
 	`template_last_edit` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`template_id`),
 	UNIQUE INDEX `template_title` (`template_title`)
@@ -275,7 +277,7 @@ CREATE TABLE `Verifications` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Notifications` ( # from user to user != Notifications
+CREATE TABLE `Notifications` ( # from system to user
 	`notification_id` INT NOT NULL AUTO_INCREMENT,
 	`notification_user_id` INT NOT NULL,
 	`notification_read` BIT(1) NOT NULL DEFAULT 0,
