@@ -241,6 +241,7 @@ CREATE TABLE `Templates` (
 	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
 	`template_body` TEXT NOT NULL,
 	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, # Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
+	`template_send_mail_changeable` BIT(1) NOT NULL DEFAULT 1, # Mag aangepast worden? Bv wachtwoord reset/verificatie niet!
 	`template_last_edit` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`template_id`),
 	UNIQUE INDEX `template_title` (`template_title`)
