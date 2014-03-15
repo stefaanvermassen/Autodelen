@@ -8,7 +8,16 @@
                 <strong>Datum:</strong> @infoSession.getTime.toString("dd/MM/yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
-                <strong>Maximum aantal deelnemers:</strong> @infoSession.getMaxEnrollees
+                @if(infoSession.getMaxEnrollees == 0){
+                    <strong># deelnemers</strong> @infoSession.getEnrolleeCount (onbeperkt)
+                } else {
+                    <strong># deelnemers</strong>
+                    @if(infoSession.getEnrolleeCount < infoSession.getMaxEnrollees) {
+                        @infoSession.getEnrolleeCount / @infoSession.getMaxEnrollees
+                    } else {
+                        Volzet (Max. @infoSession.getMaxEnrollees)
+                    }
+                }
             </p>
             @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
 
