@@ -17,7 +17,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private Connection connection;
 
     private static String INFOSESSION_FIELDS = "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
-            "address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+            "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
             "user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status";
 
     private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + " FROM infosessions " +

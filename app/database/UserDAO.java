@@ -15,7 +15,6 @@ public interface UserDAO {
     public User getUser(int userId, boolean withRest) throws DataAccessException;
     public void updateUser(User user, boolean withRest) throws DataAccessException;
 	public void deleteUser(User user) throws DataAccessException;
-    public void permanentlyDeleteUser(User user) throws DataAccessException;
     public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException;
     public String getVerificationString(User user, VerificationType type) throws DataAccessException;
     public String createVerificationString(User user, VerificationType type) throws DataAccessException;

@@ -41,6 +41,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `Addresses` (
   `address_id` INT(10) NOT NULL AUTO_INCREMENT,
+  `address_country` VARCHAR(64) NOT NULL DEFAULT 'Belgium',
   `address_city` VARCHAR(64) NOT NULL,
   `address_zipcode` VARCHAR(12) NOT NULL,
   `address_street` VARCHAR(64) NOT NULL DEFAULT '0',
@@ -58,6 +59,7 @@ CREATE TABLE `Users` (
 	`user_password` CHAR(64) NOT NULL,
 	`user_firstname` VARCHAR(64) NOT NULL,
 	`user_lastname` VARCHAR(64) NOT NULL,
+	`user_gender` ENUM('MALE', 'FEMALE', 'UNKNOWN') NOT NULL DEFAULT 'UNKNOWN',
 	`user_cellphone` VARCHAR(16),
 	`user_phone` VARCHAR(16),
 	`user_address_domicile_id` INT,

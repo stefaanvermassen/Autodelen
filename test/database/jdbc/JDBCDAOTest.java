@@ -63,10 +63,9 @@ public class JDBCDAOTest {
         try {
             createAddresses();
             createUsers();
-            getUserTest();
+            getUserByIdTest(false);
             updateUserTest();
             deleteUserTest();
-            permanentlyDeleteUsersTest();
         } finally {
             context.rollback();
         }
@@ -174,8 +173,6 @@ public class JDBCDAOTest {
         }
     }
 
-
-
     /*
      * Creates 100 random addresses in the database and in private List address
      */
@@ -184,12 +181,14 @@ public class JDBCDAOTest {
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         while(sc.hasNext()) {
+            // Todo: read country from scanner
+            String country = "Belgium";
             String street = sc.next();
             String nr = sc.next();
             String zip = sc.next();
             String city = sc.next();
 
-            Address address = addressDAO.createAddress(zip, city, street, nr, "");
+            Address address = addressDAO.createAddress(country, zip, city, street, nr, "");
 
             addresses.add(address);
         }
@@ -257,6 +256,8 @@ public class JDBCDAOTest {
             String firstName = sc.next();
             String lastName = sc.next();
 
+            // Skip other fields, is for update
+            sc.nextLine();
             User user = userDAO.createUser(email,pass,firstName,lastName);
 
             users.add(user);
@@ -267,30 +268,62 @@ public class JDBCDAOTest {
     /*
      * First createUsers() has to be called
      */
-    private void getUserTest() {
+    private void getUserByEmailTest() {
         for(User user : users) {
             User returnUser = userDAO.getUser(user.getEmail());
 
-            Assert.assertEquals(returnUser.getEmail(),user.getEmail());
-            Assert.assertEquals(returnUser.getPassword(),user.getPassword());
-            Assert.assertEquals(returnUser.getFirstName(),user.getFirstName());
-            Assert.assertEquals(returnUser.getLastName(),user.getLastName());
+            Assert.assertEquals(returnUser, user);
+        }
+    }
+
+    private void getUserByIdTest(boolean withRest) {
+        for(User user : users) {
+            User returnUser = userDAO.getUser(user.getId(), withRest);
+
+            Assert.assertEquals(returnUser, user);
         }
     }
 
     /*
      * First createUsers() has to be called
      */
-    private void updateUserTest() {
+    private void updateUserTest() throws Exception {
+        Scanner sc = new Scanner(new File("test/database/random_users.txt"));
+        sc.useDelimiter("\\t|\\r\\n");
+        sc.nextLine(); //skip header first time
         for(User user : users) {
+            // Skip email, pass, firstname, lastname
+            sc.next();
+            sc.next();
+            sc.next();
+            sc.next();
             user.setEmail(user.getEmail() + ".com");
             user.setFirstName(user.getFirstName() + "Test");
             user.setLastName(user.getLastName() + "Test");
             user.setPassword(user.getPassword() + "Test");
-
-            userDAO.updateUser(user, false);
+            String cellphone = sc.next();
+            user.setCellphone(cellphone);
+            String phone = sc.next();
+            user.setPhone(phone);
+            UserGender gender = UserGender.valueOf(sc.next());
+            user.setGender(gender);
+            int addressDomicileId = sc.nextInt();
+            user.setAddressDomicile(addresses.get(addressDomicileId-1));
+            int addressResidenceId = sc.nextInt();
+            user.setAddressResidence(addresses.get(addressResidenceId - 1));
+            UserStatus status = UserStatus.valueOf(sc.next());
+            user.setStatus(status);
+            String damageHistory = sc.next();
+            user.setDamageHistory(damageHistory);
+            boolean payedDesposit = sc.nextInt() == 1;
+            user.setPayedDeposit(payedDesposit);
+            boolean agreeTerms = sc.nextInt() == 1;
+            user.setAgreeTerms(agreeTerms);
+            int contractManagerId = sc.nextInt();
+            user.setContractManager(users.get(contractManagerId-1));
+            userDAO.updateUser(user, true);
         }
-        getUserTest();
+        getUserByIdTest(true);
     }
 
     /*
@@ -301,26 +334,6 @@ public class JDBCDAOTest {
             userDAO.deleteUser(user);
             User returnUser = userDAO.getUser(user.getId(), true);
             Assert.assertEquals(returnUser.getStatus(), UserStatus.DROPPED);
-        }
-    }
-
-    /*
-     * First createUsers() has to be called
-     */
-    private void permanentlyDeleteUsersTest() {
-        Iterator<User> iUsers = users.iterator();
-        while(iUsers.hasNext()) {
-            User user = iUsers.next();
-            userDAO.permanentlyDeleteUser(user);
-            try {
-                User returnUser = userDAO.getUser(user.getId(), false);
-                if(returnUser != null) {
-                    Assert.fail("User not permanently deleted");
-                }
-            } catch(DataAccessException e) {
-
-            }
-            iUsers.remove();
         }
     }
 
@@ -429,28 +442,7 @@ public class JDBCDAOTest {
     private void getCarTest() {
         for(Car car : cars) {
             Car returnCar = carDAO.getCar(car.getId());
-            Assert.assertEquals(car.getBrand(), returnCar.getBrand());
-            Assert.assertEquals(car.getComments(), returnCar.getComments());
-            // Last Edit is automatically generated in database and a bit later in Java source code
-            //Assert.assertEquals(car.getLastEdit(), returnCar.getLastEdit());
-            Assert.assertEquals(car.getType(), returnCar.getType());
-            Assert.assertEquals(car.getDoors(), returnCar.getDoors());
-            Assert.assertEquals(car.getEstimatedValue(), returnCar.getEstimatedValue());
-            Assert.assertEquals(car.getFuel(), returnCar.getFuel());
-            Assert.assertEquals(car.getFuelEconomy(), returnCar.getFuelEconomy());
-            if(car.getLocation() == null) {
-                Assert.assertEquals(car.getLocation(), returnCar.getLocation());
-            } else {
-                Assert.assertEquals(car.getLocation().getId(), returnCar.getLocation().getId());
-            }
-            if(car.getOwner() == null) {
-                Assert.assertEquals(car.getOwner(), returnCar.getOwner());
-            } else {
-                Assert.assertEquals(car.getOwner().getFirstName(), returnCar.getOwner().getFirstName());
-            }
-            Assert.assertEquals(car.getOwnerAnnualKm(), returnCar.getOwnerAnnualKm());
-            Assert.assertEquals(car.getSeats(), returnCar.getSeats());
-            Assert.assertEquals(car.getYear(), returnCar.getYear());
+            Assert.assertEquals(car, returnCar);
         }
     }
 
@@ -524,6 +516,7 @@ public class JDBCDAOTest {
             Assert.assertEquals(reservation.getUser().getId(),returnReservation.getUser().getId());
             Assert.assertEquals(reservation.getTo(),returnReservation.getTo());
             Assert.assertEquals(reservation.getFrom(),returnReservation.getFrom());
+            Assert.assertEquals(reservation.getStatus(), returnReservation.getStatus());
         }
     }
 

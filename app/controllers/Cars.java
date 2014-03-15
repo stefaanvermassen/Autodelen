@@ -76,7 +76,8 @@ public class Cars extends Controller {
                     User user = DatabaseHelper.getUserProvider().getUser(session("email"));
                     CarModel model = carForm.get();
                     AddressDAO adao = context.getAddressDAO();
-                    Address address = adao.createAddress(model.address_zip, model.address_city, model.address_street,
+                    // TODO: add country
+                    Address address = adao.createAddress("Belgium", model.address_zip, model.address_city, model.address_street,
                             model.address_number, model.address_bus);
 
                     // TODO: also accept other users (only admin can do this)
@@ -177,7 +178,7 @@ public class Cars extends Controller {
                     AddressDAO adao = context.getAddressDAO();
                     Address address = car.getLocation();
                     if(address == null) {
-                        address = adao.createAddress(carModel.address_zip, carModel.address_city, carModel.address_street, carModel.address_number, carModel.address_bus);
+                        address = adao.createAddress("Belgium", carModel.address_zip, carModel.address_city, carModel.address_street, carModel.address_number, carModel.address_bus);
                         car.setLocation(address);
                     } else {
                         address.setCity(carModel.address_city);

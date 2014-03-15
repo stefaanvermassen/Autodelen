@@ -351,7 +351,7 @@ public class InfoSessions extends Controller {
                     User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
                     AddressDAO adao = context.getAddressDAO();
-                    Address address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
+                    Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     //TODO: read InfoSessionType from form
                     InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().getDateTime(), createForm.get().max_enrollees); //TODO: allow other hosts

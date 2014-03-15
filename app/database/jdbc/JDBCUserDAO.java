@@ -17,9 +17,9 @@ public class JDBCUserDAO implements UserDAO {
 
     private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM Users";
 
-    private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, " +
-            "domicileAddresses.address_id, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
-            "residenceAddresses.address_id, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
+    private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, users.user_gender, " +
+            "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
+            "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
             "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, " +
             "contractManagers.user_id, contractManagers.user_password, contractManagers.user_firstname, contractManagers.user_lastname, contractManagers.user_email";
 
@@ -117,7 +117,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
-    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, user_agree_terms=?, user_contract_manager_id=? WHERE user_id = ?");
+    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, user_agree_terms=?, user_contract_manager_id=? WHERE user_id = ?");
     	}
     	return updateUserStatement;
     }
@@ -135,6 +135,7 @@ public class JDBCUserDAO implements UserDAO {
             user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
             user.setCellphone(rs.getString(tableName + ".user_cellphone"));
             user.setPhone(rs.getString(tableName + ".user_phone"));
+            user.setGender(UserGender.valueOf(rs.getString(tableName + ".user_gender")));
             user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
             user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
             user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
@@ -229,21 +230,22 @@ public class JDBCUserDAO implements UserDAO {
                 ps.setInt(5, user.getId());
             } else {
                 ps.setString(5, user.getStatus().name());
-                if(user.getPhone()==null) ps.setNull(6, Types.VARCHAR);
-                else ps.setString(6, user.getPhone());
-                if(user.getCellphone()==null) ps.setNull(7, Types.VARCHAR);
-                else ps.setString(7, user.getCellphone());
-                if(user.getAddressDomicile() == null) ps.setNull(8, Types.INTEGER);
-                else ps.setInt(8, user.getAddressDomicile().getId());
-                if(user.getAddressResidence() == null) ps.setNull(9, Types.INTEGER);
-                else ps.setInt(9, user.getAddressResidence().getId());
-                if(user.getDamageHistory()==null) ps.setNull(10, Types.VARCHAR);
-                else ps.setString(10, user.getDamageHistory());
-                ps.setBoolean(11, user.isPayedDeposit());
-                ps.setBoolean(12, user.isAgreeTerms());
-                if(user.getContractManager()==null) ps.setNull(13, Types.INTEGER);
-                else ps.setInt(13, user.getContractManager().getId());
-                ps.setInt(10, user.getId());
+                ps.setString(6, user.getGender().name());
+                if(user.getPhone()==null) ps.setNull(7, Types.VARCHAR);
+                else ps.setString(7, user.getPhone());
+                if(user.getCellphone()==null) ps.setNull(8, Types.VARCHAR);
+                else ps.setString(8, user.getCellphone());
+                if(user.getAddressDomicile() == null) ps.setNull(9, Types.INTEGER);
+                else ps.setInt(9, user.getAddressDomicile().getId());
+                if(user.getAddressResidence() == null) ps.setNull(10, Types.INTEGER);
+                else ps.setInt(10, user.getAddressResidence().getId());
+                if(user.getDamageHistory()==null) ps.setNull(11, Types.VARCHAR);
+                else ps.setString(11, user.getDamageHistory());
+                ps.setBoolean(12, user.isPayedDeposit());
+                ps.setBoolean(13, user.isAgreeTerms());
+                if(user.getContractManager()==null) ps.setNull(14, Types.INTEGER);
+                else ps.setInt(14, user.getContractManager().getId());
+                ps.setInt(15, user.getId());
 
                 // TODO: driver license, identity card, image
             }
@@ -267,18 +269,6 @@ public class JDBCUserDAO implements UserDAO {
             throw new DataAccessException("Could not delete user",ex);
         }
 
-    }
-
-    @Override
-    public void permanentlyDeleteUser(User user) throws DataAccessException {
-        try {
-            PreparedStatement ps = getPermanentlyDeleteUserStatement();
-            ps.setInt(1, user.getId());
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when permanently deleting user.");
-        } catch (SQLException ex){
-            throw new DataAccessException("Could not permanently delete user",ex);
-        }
     }
 
     @Override
