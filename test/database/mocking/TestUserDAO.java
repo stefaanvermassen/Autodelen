@@ -132,4 +132,9 @@ public class TestUserDAO implements UserDAO {
             keyMap.remove(user.getId());
         }
     }
+
+    @Override
+    public List<User> getAllUsers() throws DataAccessException {
+        return null;
+    }
 }

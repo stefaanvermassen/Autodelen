@@ -8,12 +8,16 @@ GET         /information                       controllers.Information.index()
 
 # Dashboard page
 GET         /dashboard                         controllers.Dashboard.index()
-GET         /userroles                         controllers.Userroles.index()
+
+# UserRoles
+GET         /userroles                         controllers.UserRoles.index()
+GET         /userroles/edit                    controllers.UserRoles.edit(userId: Int)
+POST        /userroles/edit                    controllers.UserRoles.editPost(userId: Int)
 
 # Drives
 GET         /drives                            controllers.Drives.index()
 GET         /drives/approved                   controllers.Drives.approveReservation(reservationId: Int)
-POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int)
+POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int)
 GET         /drives/cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
 
 # Reservations

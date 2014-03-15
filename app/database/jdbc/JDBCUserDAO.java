@@ -6,6 +6,10 @@ import models.*;
 
 import java.sql.*;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+
 /**
  * Created by Cedric on 2/16/14.
  */
@@ -40,9 +44,17 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement createVerificationStatement;
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
+    private PreparedStatement getAllUsersStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getGetAllUsersStatement() throws SQLException {
+        if(getAllUsersStatement == null){
+            getAllUsersStatement = connection.prepareStatement("SELECT user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM users");
+        }
+        return getAllUsersStatement;
     }
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
@@ -139,8 +151,13 @@ public class JDBCUserDAO implements UserDAO {
             user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
             user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
             user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
-            user.setContractManager(JDBCUserDAO.populateUser(rs, false, false, "contractManagers"));
-            user.setStatus(Enum.valueOf(UserStatus.class, rs.getString(tableName + ".user_status")));
+            int contract_manager_id = rs.getInt(tableName + ".user_contract_manager_id");
+            if(rs.wasNull()) {
+                user.setContractManager(null);
+            } else {
+                user.setContractManager(JDBCUserDAO.populateUser(rs, false, false, "contractManagers"));
+            }
+            user.setStatus(UserStatus.valueOf(rs.getString(tableName + ".user_status")));
             // TODO: driver license, identity card, image
         }
 
@@ -245,6 +262,7 @@ public class JDBCUserDAO implements UserDAO {
                 ps.setBoolean(13, user.isAgreeTerms());
                 if(user.getContractManager()==null) ps.setNull(14, Types.INTEGER);
                 else ps.setInt(14, user.getContractManager().getId());
+
                 ps.setInt(15, user.getId());
 
                 // TODO: driver license, identity card, image
@@ -317,6 +335,24 @@ public class JDBCUserDAO implements UserDAO {
 
         } catch(SQLException ex){
             throw new DataAccessException("Failed to delete verification.", ex);
+        }
+    }
+
+    @Override
+    public List<User> getAllUsers() throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAllUsersStatement();
+            List<User> users = new ArrayList<>();
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    users.add(populateUser(rs, false, true));
+                }
+                return users;
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read user resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get user list.", ex);
         }
     }
 }

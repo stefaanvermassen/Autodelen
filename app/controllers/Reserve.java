@@ -10,7 +10,11 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import views.html.reserve.*;
+import views.html.reserve.reserve2;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class Reserve extends Controller {
@@ -31,19 +35,22 @@ public class Reserve extends Controller {
         }
 
         public String validate() {
-            // Should not happen, but just in case
+            DateTime now = DateTime.now();
+            DateTime from = getTimeFrom();
+            DateTime until = getTimeFrom();
             if("".equals(from) || "".equals(until)) {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
-            }
-            // Should also not happen
-            else if(getTimeFrom().isAfter(getTimeUntil())) {
+            } else if(from.isAfter(until)) {
                 return "De einddatum kan niet voor de begindatum liggen!";
+            } else if(from.isBefore(now)) {
+                return "Een reservatie die plaats vindt voor vandaag is ongeldig";
             }
             return null;
         }
 
     }
 
+    @RoleSecured.RoleAuthenticated()
     public static Result index() {
         return ok(showIndex());
     }
@@ -63,7 +70,20 @@ public class Reserve extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
-            return ok(reserve2.render(Form.form(ReservationModel.class), car));
+
+            ReservationDAO rdao = context.getReservationDAO();
+            List<Reservation> reservations = rdao.getReservationListForCar(carId);
+            // Clean up: delete all reservations that belong to the past
+            DateTime now = DateTime.now();
+            for(Reservation reservation : reservations) {
+                DateTime from = DATEFORMATTER.parseDateTime(reservation.getFrom().toString("yyyy-MM-dd HH:mm:ss"));
+                DateTime until = DATEFORMATTER.parseDateTime(reservation.getTo().toString("yyyy-MM-dd HH:mm:ss"));
+                if(!from.isAfter(now) && !until.isAfter(now)) {
+                    rdao.deleteReservation(reservation);
+                }
+            }
+
+            return ok(reserve2.render(Form.form(ReservationModel.class), car, reservations));
         } catch(DataAccessException ex) {
             throw ex;
         }
@@ -80,23 +100,27 @@ public class Reserve extends Controller {
                 flash("danger", "De reservatie van deze auto is onmogelijk: auto onbestaand!");
                 return badRequest(showIndex());
             }
-        } catch(DataAccessException ex) {
-            throw ex;
-        }
-        // Request the form
-        Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
-        if(reservationForm.hasErrors()) {
-            return badRequest(reserve2.render(reservationForm, car));
-        }
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            ReservationDAO rdao = context.getReservationDAO();
+            List<Reservation> reservations = rdao.getReservationListForCar(carId);
+            // Request the form
+            Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
+            if(reservationForm.hasErrors()) {
+                return badRequest(reserve2.render(reservationForm, car, reservations));
+            }
             try {
+                // Test whether the reservation is valid
+                DateTime from = reservationForm.get().getTimeFrom();
+                DateTime until = reservationForm.get().getTimeUntil();
+                for(Reservation reservation : reservations) {
+                    if(!from.isAfter(reservation.getTo()) && !until.isBefore(reservation.getFrom())) {
+                        reservationForm.reject("De reservatie overlapt met een reeds bestaande reservatie!");
+                        return badRequest(reserve2.render(reservationForm, car, reservations));
+                    }
+                }
+
                 // Create the reservation
                 User user = DatabaseHelper.getUserProvider().getUser(session("email"));
-
-
-                ReservationDAO rdao = context.getReservationDAO();
-                Reservation reservation = rdao.createReservation(reservationForm.get().getTimeFrom(),
-                        reservationForm.get().getTimeUntil(), car, user);
+                Reservation reservation = rdao.createReservation(from, until, car, user);
                 context.commit();
 
                 if (reservation != null) {
@@ -111,10 +135,9 @@ public class Reserve extends Controller {
                     );
                 } else {
                     reservationForm.error("De reservatie kon niet aangemaakt worden. Contacteer de administrator");
-                    return badRequest(reserve2.render(reservationForm, car));
+                    return badRequest(reserve2.render(reservationForm, car, reservations));
                 }
             } catch(DataAccessException ex) {
-                context.rollback();
                 throw ex;
             }
         } catch(DataAccessException ex) {

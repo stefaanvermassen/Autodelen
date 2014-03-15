@@ -1,6 +1,7 @@
 package database;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import models.Address;
 import models.User;
@@ -19,4 +20,5 @@ public interface UserDAO {
     public String getVerificationString(User user, VerificationType type) throws DataAccessException;
     public String createVerificationString(User user, VerificationType type) throws DataAccessException;
     public void deleteVerificationString(User user, VerificationType type) throws DataAccessException;
+    public List<User> getAllUsers() throws DataAccessException; //TODO: remove, make paginated (otherwise heavy load on each call!!)
 }

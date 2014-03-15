@@ -17,6 +17,7 @@ import java.util.EnumSet;
 public class UserProvider {
 
     private static final String USER_BY_EMAIL = "user:email:%s";
+    private static final String USER_BY_ID = "user:id:%d";
 
     private DataAccessProvider provider;
 
@@ -28,8 +29,36 @@ public class UserProvider {
         return getUser(email, true);
     }
 
+    public User getUser(int userId, boolean cached) {
+       /* String key = String.format(USER_BY_ID, userId);
+
+        Object obj = null;
+        if (cached) {
+            obj = Cache.get(key);
+        }
+
+        if (obj == null || !(obj instanceof User)) {
+            try (DataAccessContext context = provider.getDataAccessContext()) {
+                UserDAO dao = context.getUserDAO();
+                User user = dao.getUser(userId);
+
+                if (user != null) { // cache and return
+                    Cache.set(key, user);
+                    return user;
+                } else {
+                    return null;
+                }
+            } catch (DataAccessException ex) {
+                throw ex; //TODO: log
+            }
+        } else {
+            return (User) obj;
+        }*/
+        throw new RuntimeException("Not implemented yet. Unify with email (use same objects)");
+    }
+
     public User getUser(int userId) throws DataAccessException {
-        throw new RuntimeException("Users aren't cached by ID (yet?)");
+        return getUser(userId, true);
     }
 
     public void invalidateUser(String email) {
@@ -72,20 +101,20 @@ public class UserProvider {
             UserDAO dao = context.getUserDAO();
             dao.updateUser(user, true);
             context.commit();
-        } catch(DataAccessException ex){
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
 
-	public void deleteUser(User user) throws DataAccessException {
+    public void deleteUser(User user) throws DataAccessException {
         try (DataAccessContext context = provider.getDataAccessContext()) {
             invalidateUser(user.getEmail());
             UserDAO dao = context.getUserDAO();
             dao.deleteUser(user);
             context.commit();
-        } catch(DataAccessException ex){
+        } catch (DataAccessException ex) {
             throw ex;
         }
 
-	}
+    }
 }
