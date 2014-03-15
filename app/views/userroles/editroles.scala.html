@@ -1,50 +1,55 @@
 @(roles: Array[Tuple2[UserRole, Boolean]], user: User)
+@import scala.collection.mutable.Map;
 
-@app("Bewerk roles") {
-    <div id="page-header-wrapper">
-        <h1 class="page-header">Gebruikersrollen</h1>
-        <ol class="breadcrumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Library</a></li>
-            <li><a href="@routes.UserRoles.index">Gebruikersrollen</a></li>
-            <li class="active">Bewerken</li>
-        </ol>
-    </div>
+    @defining(Map(
+        UserRole.ADMIN -> "Kan gewone gebruikers modereren.",
+        UserRole.SUPER_USER -> "Kan globale variabelen aanpassen, rechten beheren, ...")) { roleDesc =>
+        @app("Bewerk roles") {
+            <div id="page-header-wrapper">
+                <h1 class="page-header">Gebruikersrollen</h1>
+                <ol class="breadcrumb">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Library</a></li>
+                    <li><a href="@routes.UserRoles.index">Gebruikersrollen</a></li>
+                    <li class="active">Bewerken</li>
+                </ol>
+            </div>
 
-    <div id="page-wrapper">
-        <h2>Rollen voor @user.getEmail</h2>
-        @if(!flash.isEmpty()) {
-            @for((msgKey, msgValue) <- flash) {
-                <div class="alert alert-@msgKey">
-                @msgValue
-                </div>
-            }
-        }
-        @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
-            <fieldset>
-                <div class="form-group">
-                @for((role, checked) <- roles) {
-                    @* TODO: Cleaner syntax to add 'checked' attribute *@
-                    @if(checked) {
-                        <input type="checkbox" name="role" value="@role" checked> @role <br>
-                    } else {
-                        <input type="checkbox" name="role" value="@role"> @role <br>
+            <div id="page-wrapper">
+                <h2>Rollen voor @user.getEmail</h2>
+                @if(!flash.isEmpty()) {
+                    @for((msgKey, msgValue) <- flash) {
+                        <div class="alert alert-@msgKey">
+                        @msgValue
+                        </div>
                     }
                 }
-                </div>
+                @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
+                    <fieldset>
+                        <div class="form-group">
+                        @for((role, checked) <- roles) {
+                            @* TODO: Cleaner syntax to add 'checked' attribute *@
+                            @if(checked) {
+                                <input type="checkbox" name="role" value="@role" checked> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
+                            } else {
+                                <input type="checkbox" name="role" value="@role"> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
+                                }
+                        }
+                        </div>
 
-                <div class="form-group">
-                    <label class="col-md-1 control-label" for="reset"></label>
-                    <div class="col-md-12">
-                        <button id="reset" name="reset" class="btn btn-block btn-success">Wijzig rollen</button>
-                    </div>
-                </div>
-            </fieldset>
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="reset"></label>
+                            <div class="col-md-12">
+                                <button id="reset" name="reset" class="btn btn-block btn-success">Wijzig rollen</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                }
+
+                <ul>
+
+                </ul>
+            </div>
         }
-
-        <ul>
-
-        </ul>
-    </div>
-}
+    }
 
