@@ -51,6 +51,11 @@ public class TestDataAccessContext implements DataAccessContext {
     }
 
     @Override
+    public CarRideDAO getCarRideDAO() {
+        return null;
+    }
+
+    @Override
     public void begin() {
 
     }

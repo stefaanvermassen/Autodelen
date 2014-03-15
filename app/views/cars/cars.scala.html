@@ -32,7 +32,7 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     }
 
-@app("Auto's") {
+@app("Auto's", stylesheets, scripts) {
 <div id="page-header-wrapper">
     <h1 class="page-header">Auto's</h1>
     <ol class="breadcrumb">
@@ -74,7 +74,7 @@
                             </thead>
                             <tbody>
                             @for((car, index) <- cars.zipWithIndex) {
-                                <tr class="info" >
+                                <tr>
                                     <td>@(index + 1)</td>
                                     <td>@car.getName</td>
                                     <td>@car.getBrand</td>

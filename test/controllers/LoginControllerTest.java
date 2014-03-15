@@ -49,8 +49,8 @@ public class LoginControllerTest {
         UserDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserDAO();
         User user = dao.createUser(email, hashPassword(password), firstName, lastName);
         user.setStatus(UserStatus.REGISTERED);
-        dao.updateUser(user);
-        return dao.getUser(user.getId());
+        dao.updateUser(user, true);
+        return dao.getUser(user.getId(), false);
     }
 
     // TODO: Can we really have a dependency on our models in controller testing??

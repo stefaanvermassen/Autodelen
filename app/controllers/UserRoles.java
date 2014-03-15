@@ -34,7 +34,7 @@ public class UserRoles extends Controller {
     public static Result edit(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
-            User user = udao.getUser(userId);
+            User user = udao.getUser(userId, true);
             if (user == null) {
                 flash("danger", "GebruikersID " + userId + " bestaat niet.");
                 return badRequest(overview.render(udao.getAllUsers()));
@@ -73,7 +73,7 @@ public class UserRoles extends Controller {
     public static Result editPost(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
-            User user = udao.getUser(userId);
+            User user = udao.getUser(userId, true);
             if (user == null) {
                 flash("danger", "GebruikersID " + userId + " bestaat niet.");
                 return badRequest(overview.render(udao.getAllUsers()));

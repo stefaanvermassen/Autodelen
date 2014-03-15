@@ -22,16 +22,27 @@ public class JDBCAddressDAO implements AddressDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"address_id"};
 
+    public static Address populateAddress(ResultSet rs) throws SQLException {
+        return populateAddress(rs, "addresses");
+    }
+
+    public static Address populateAddress(ResultSet rs, String tableName) throws SQLException {
+        if(rs.getObject(tableName + ".address_id") == null)
+            return null;
+        else
+            return new Address(rs.getInt(tableName + ".address_id"), rs.getString(tableName + ".address_country"), rs.getString(tableName + ".address_zipcode"), rs.getString(tableName + ".address_city"), rs.getString(tableName + ".address_street"), rs.getString(tableName + ".address_street_number"), rs.getString(tableName + ".address_street_bus"));
+    }
+
     private PreparedStatement getGetAddressStatement() throws SQLException {
         if (getAddressStatement == null) {
-            getAddressStatement = connection.prepareStatement("SELECT address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus FROM addresses WHERE address_id = ?");
+            getAddressStatement = connection.prepareStatement("SELECT address_id, address_city, address_zipcode, address_street, address_street_number, address_street_bus, address_country FROM addresses WHERE address_id = ?");
         }
         return getAddressStatement;
     }
 
     private PreparedStatement getUpdateAddressStatement() throws SQLException {
         if(updateAddressStatement == null){
-            updateAddressStatement = connection.prepareStatement("UPDATE addresses SET address_city = ?, address_zipcode = ?, address_street = ?, address_street_number = ?, address_street_bus = ? WHERE address_id = ?");
+            updateAddressStatement = connection.prepareStatement("UPDATE addresses SET address_city = ?, address_zipcode = ?, address_street = ?, address_street_number = ?, address_street_bus = ?, address_country=? WHERE address_id = ?");
         }
         return updateAddressStatement;
     }
@@ -44,14 +55,14 @@ public class JDBCAddressDAO implements AddressDAO {
 
     private PreparedStatement getCreateAddressStatement() throws SQLException {
         if (createAddressStatement == null) {
-            createAddressStatement = connection.prepareStatement("INSERT INTO addresses(address_city, address_zipcode, address_street, address_street_number, address_street_bus) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createAddressStatement = connection.prepareStatement("INSERT INTO addresses(address_city, address_zipcode, address_street, address_street_number, address_street_bus, address_country) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createAddressStatement;
     }
 
     private PreparedStatement getExistsAddressStatement() throws SQLException {
         if (existsAddressStatement == null) {
-            existsAddressStatement = connection.prepareStatement("SELECT address_id FROM addresses WHERE address_city=? AND address_zipcode=? AND address_street=? AND address_street_number=? AND address_street_bus=?");
+            existsAddressStatement = connection.prepareStatement("SELECT address_id FROM addresses WHERE address_city=? AND address_zipcode=? AND address_street=? AND address_street_number=? AND address_street_bus=? AND address_country=?");
         }
         return existsAddressStatement;
     }
@@ -80,15 +91,8 @@ public class JDBCAddressDAO implements AddressDAO {
         }
     }
 
-    public static Address populateAddress(ResultSet rs) throws SQLException {
-        if(rs.getObject("address_id") == null)
-            return null;
-        else
-            return new Address(rs.getInt("address_id"), rs.getString("address_zipcode"), rs.getString("address_city"), rs.getString("address_street"), rs.getString("address_street_number"), rs.getString("address_street_bus"));
-    }
-
     @Override
-    public Address createAddress(String zip, String city, String street, String number, String bus) throws DataAccessException {
+    public Address createAddress(String country, String zip, String city, String street, String number, String bus) throws DataAccessException {
         try {
             PreparedStatement ps = getCreateAddressStatement();
             ps.setString(1, city);
@@ -96,6 +100,7 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setString(3, street);
             ps.setString(4, number);
             ps.setString(5, bus);
+            ps.setString(6, country);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating address.");
@@ -103,7 +108,7 @@ public class JDBCAddressDAO implements AddressDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
 
-                return new Address(keys.getInt(1), zip, city, street, number, bus);
+                return new Address(keys.getInt(1), country, zip, city, street, number, bus);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new address.", ex);
             }
@@ -126,6 +131,7 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setString(3, address.getStreet());
             ps.setString(4, address.getNumber());
             ps.setString(5, address.getBus());
+            ps.setString(6, address.getCountry());
 			
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
@@ -167,7 +173,9 @@ public class JDBCAddressDAO implements AddressDAO {
             ps.setString(3, address.getStreet());
             ps.setString(4, address.getNumber());
             ps.setString(5, address.getBus());
-            ps.setInt(6, address.getId());
+            ps.setString(6, address.getCountry());
+
+            ps.setInt(7, address.getId());
 			
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update affected 0 rows.");

@@ -17,13 +17,16 @@ public class InfoSession {
     public static final List<Enrollee> NO_ENROLLEES = new ArrayList<Enrollee>(0);
 
     private int id;
+    private InfoSessionType type;
     private DateTime time;
     private Address address;
     private User host;
     private List<Enrollee> enrolled;
+    private int maxEnrollees;
 
-    public InfoSession(int id, DateTime time, Address address, User host, List<Enrollee> enrolled) {
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, List<Enrollee> enrolled, int maxEnrollees) {
         this.id = id;
+        this.type = type;
         this.time = time;
         this.address = address;
         this.host = host;
@@ -31,10 +34,11 @@ public class InfoSession {
             this.enrolled = NO_ENROLLEES;
         else
             this.enrolled = enrolled;
+        this.maxEnrollees = maxEnrollees;
     }
 
-    public InfoSession(int id, DateTime time, Address address, User host) {
-        this(id, time, address, host, NO_ENROLLEES);
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int maxEnrollees) {
+        this(id, type, time, address, host, NO_ENROLLEES, maxEnrollees);
     }
 
     public int getId() {
@@ -43,6 +47,14 @@ public class InfoSession {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public InfoSessionType getType() {
+        return type;
+    }
+
+    public void setType(InfoSessionType type) {
+        this.type = type;
     }
 
     public DateTime getTime() {
@@ -91,5 +103,14 @@ public class InfoSession {
     public void deleteEnrollee(Enrollee enrollee) {
         this.enrolled.remove(enrollee);
     }
+
+    public int getMaxEnrollees() {
+        return maxEnrollees;
+    }
+
+    public void setMaxEnrollees(int maxEnrollees) {
+        this.maxEnrollees = maxEnrollees;
+    }
+
 
 }

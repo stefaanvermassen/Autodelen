@@ -23,6 +23,8 @@ public class InfoSessions extends Controller {
 
     public static class InfoSessionCreationModel {
         public String time; //TODO: use date format here
+        public int max_enrollees;
+        public InfoSessionType type;
 
         // Address fields
         public String address_city;
@@ -58,13 +60,13 @@ public class InfoSessions extends Controller {
     public static Result newSession() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
-        if (user.getAddress() != null) {
+        if (user.getAddressDomicile() != null) {
             InfoSessionCreationModel model = new InfoSessionCreationModel();
-            model.address_city = user.getAddress().getCity();
-            model.address_zip = user.getAddress().getZip();
-            model.address_street = user.getAddress().getStreet();
-            model.address_number = user.getAddress().getNumber();
-            model.address_bus = user.getAddress().getBus();
+            model.address_city = user.getAddressDomicile().getCity();
+            model.address_zip = user.getAddressDomicile().getZip();
+            model.address_street = user.getAddressDomicile().getStreet();
+            model.address_number = user.getAddressDomicile().getNumber();
+            model.address_bus = user.getAddressDomicile().getBus();
 
             Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
             return ok(addinfosession.render(editForm, 0));
@@ -87,7 +89,9 @@ public class InfoSessions extends Controller {
                 return badRequest(upcomingSessionsList());
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
+                model.type = is.getType();
                 model.time = is.getTime().toString(DATEFORMATTER);
+                model.max_enrollees = is.getMaxEnrollees();
                 model.address_city = is.getAddress().getCity();
                 model.address_zip = is.getAddress().getZip();
                 model.address_street = is.getAddress().getStreet();
@@ -168,6 +172,8 @@ public class InfoSessions extends Controller {
                         session.setTime(time);
                         dao.updateInfosessionTime(session);
                     }
+
+                    //TODO: update maxEnrollees, type
                     context.commit();
                     flash("success", "Uw wijzigingen werden succesvol toegepast.");
                     return detail(sessionId);
@@ -244,7 +250,7 @@ public class InfoSessions extends Controller {
 
             UserDAO udao = context.getUserDAO();
 
-            User user = udao.getUser(userId);
+            User user = udao.getUser(userId, false);
             if (user == null) {
                 flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
                 return badRequest(upcomingSessionsList());
@@ -272,7 +278,7 @@ public class InfoSessions extends Controller {
             }
 
             UserDAO udao = context.getUserDAO();
-            User user = udao.getUser(userId);
+            User user = udao.getUser(userId, false);
             if (user == null) {
                 flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
                 return badRequest(upcomingSessionsList());
@@ -345,9 +351,10 @@ public class InfoSessions extends Controller {
                     User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
                     AddressDAO adao = context.getAddressDAO();
-                    Address address = adao.createAddress(createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
+                    Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
-                    InfoSession session = dao.createInfoSession(user, address, createForm.get().getDateTime()); //TODO: allow other hosts
+                    //TODO: read InfoSessionType from form
+                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().getDateTime(), createForm.get().max_enrollees); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {

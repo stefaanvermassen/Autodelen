@@ -64,7 +64,7 @@ public class TestUserDAO implements UserDAO {
     }
 
     @Override
-    public User getUser(int userId) throws DataAccessException {
+    public User getUser(int userId, boolean withRest) throws DataAccessException {
         //TODO: this should return a cloned object!!!!!!!!!!!
         // URGENT
         for (User user : userList) {
@@ -78,7 +78,7 @@ public class TestUserDAO implements UserDAO {
     }
 
     @Override
-    public void updateUser(User user) throws DataAccessException {
+    public void updateUser(User user, boolean withRest) throws DataAccessException {
         for (int i = 0; i < userList.size(); i++) {
             if (userList.get(i).getId() == user.getId()) {
                 userList.set(i, user);
@@ -98,18 +98,8 @@ public class TestUserDAO implements UserDAO {
     }
 
     @Override
-    public void permanentlyDeleteUser(User user) throws DataAccessException {
-        for (int i = 0; i < userList.size(); i++) {
-            if (userList.get(i).getId() == user.getId()) {
-                userList.remove(i);
-                return;
-            }
-        }
-    }
-
-    @Override
     public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        User user = new User(userIdCounter++, email, firstName, lastName, password, null);
+        User user = new User(userIdCounter++, email, firstName, lastName, password);
         userList.add(user);
         return user;
     }
@@ -141,5 +131,10 @@ public class TestUserDAO implements UserDAO {
         } else {
             keyMap.remove(user.getId());
         }
+    }
+
+    @Override
+    public List<User> getAllUsers() throws DataAccessException {
+        return null;
     }
 }

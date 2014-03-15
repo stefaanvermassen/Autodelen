@@ -183,9 +183,52 @@ public class Car {
     public void setLastEdit(String lastEdit) {
         this.lastEdit = lastEdit;
     }
-    
-    
-    
-    
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Car car = (Car) o;
+
+        if (doors != car.doors) return false;
+        if (estimatedValue != car.estimatedValue) return false;
+        if (fuelEconomy != car.fuelEconomy) return false;
+        if (gps != car.gps) return false;
+        if (hook != car.hook) return false;
+        if (id != car.id) return false;
+        if (ownerAnnualKm != car.ownerAnnualKm) return false;
+        if (seats != car.seats) return false;
+        if (year != car.year) return false;
+        if (!brand.equals(car.brand)) return false;
+        if (comments != null ? !comments.equals(car.comments) : car.comments != null) return false;
+        if (fuel != car.fuel) return false;
+        if (location != null ? !location.equals(car.location) : car.location != null) return false;
+        if (!name.equals(car.name)) return false;
+        if (owner.getId() != car.owner.getId()) return false;
+        if (!type.equals(car.type)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + name.hashCode();
+        result = 31 * result + brand.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + (location != null ? location.hashCode() : 0);
+        result = 31 * result + seats;
+        result = 31 * result + doors;
+        result = 31 * result + year;
+        result = 31 * result + (gps ? 1 : 0);
+        result = 31 * result + (hook ? 1 : 0);
+        result = 31 * result + (fuel != null ? fuel.hashCode() : 0);
+        result = 31 * result + fuelEconomy;
+        result = 31 * result + estimatedValue;
+        result = 31 * result + ownerAnnualKm;
+        result = 31 * result + owner.getId();
+        result = 31 * result + (comments != null ? comments.hashCode() : 0);
+        return result;
+    }
 }
