@@ -12,5 +12,5 @@ import java.util.List;
 public interface NotificationDAO {
 
     public List<Notification> getNotificationListForUser(int userId) throws DataAccessException;
-    public Notification createNotification(User user, boolean read, String subject, String body, DateTime timestamp) throws DataAccessException;
+    public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException;
 }
