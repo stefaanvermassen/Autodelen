@@ -18,7 +18,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_FIELDS = "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status";
+            "user_id, user_firstname, user_lastname, user_phone, user_email, user_status";
 
     private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + " FROM infosessions " +
             "JOIN users ON infosession_host_user_id = user_id " +
@@ -114,10 +114,10 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             getInfoSessionsAfterStatement = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ses.infosession_id infosession_id, ses.infosession_type infosession_type, " +
                     "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees," +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-                    "user_id, user_password, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
+                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
                     "JOIN users ON infosession_host_user_id = user_id " +
                     "JOIN addresses ON infosession_address_id = address_id " +
-                    "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees) sub ON (ses.infosession_id = sub.infosession_id) " +
+                    "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees GROUP BY infosession_id) sub ON (ses.infosession_id = sub.infosession_id) " +
                     "WHERE ses.infosession_timestamp > ? " +
                     "ORDER BY infosession_timestamp ASC");
         }
