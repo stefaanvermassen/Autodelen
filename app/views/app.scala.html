@@ -21,8 +21,6 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
         @stylesheets @* To include stylesheets from external templates *@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-
-        <!-- Page-Level Plugin CSS - Main -->
     </head>
     <body>
         <div id="wrapper">
@@ -265,32 +263,26 @@
                             </div>
                             <!-- /input-group -->
                         </li>
-                        <li class="active">
+                        <li>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
-                        <li>
-                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Messages.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
-                        </li>
-                        <li>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-gears fa-fw"></i> Emailtemplates</a>
-                        </li>
-                        <li>
-                            <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
+                        <li class="active">
+                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Lener<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a href="@routes.InfoSessions.showUpcomingSessions"><!-- <i class="fa fa-lightbulb-o fa-fw"></i>  -->Infosessies</a>
+                                </li>
+                                <li>
+                                    <a href="@routes.Reserve.index"><!-- <i class="fa fa-pencil fa-fw"></i>  -->Reserveren</a>
+                                </li>
+                                <li>
+                                    <a href="@routes.Drives.index"><!-- <i class="fa fa-truck fa-fw"></i>  -->Ritten</a>
+                                </li>
+                                <li>
+                                    <a href="@routes.Receipts.index"><!-- <i class="fa fa-tasks fa-fw"></i>  -->Afrekeningen</a>
+                                </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>
@@ -302,10 +294,28 @@
                             <!-- /.nav-second-level -->
                         </li>
                         <li>
+                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Gebruiker<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                            <li>
+                                <a href="@routes.Messages.index"><!-- <i class="fa fa-envelope fa-fw"></i>  -->Berichten</a>
+                            </li>
+                            <li>
+                                <a href="@routes.Profile.index"><!-- <i class="fa fa-user fa-fw"></i>  -->Profiel</a>
+                            </li>
+                            <li>
+                                <a href="@routes.Settings.index"><!-- <i class="fa fa-gears fa-fw"></i>  -->Instellingen</a>
+                            </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
                             <a href="#"><i class="fa fa-wrench fa-fw"></i> Superuser<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
                                     <a href="@routes.UserRoles.index()">Gebruikersrollen</a>
+                                </li>
+                                <li>
+                                    <a href="@routes.EmailTemplates.showExistingTemplates()"><!-- <i class="fa fa-gears fa-fw"></i>  -->Emailtemplates</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

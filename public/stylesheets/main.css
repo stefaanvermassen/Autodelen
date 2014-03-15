@@ -1,3 +1,10 @@
+/* --- Menu --- */
+
+.submenu {
+	background-color: #eee;
+	padding: 8px 15px!important;
+}
+
 /* --- Timeline --- */
 .timeline > li > .timeline-panel {
 	width: 90%;
