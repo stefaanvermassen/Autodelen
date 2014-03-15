@@ -2,8 +2,12 @@
 @import scala.collection.mutable.Map;
 
     @defining(Map(
-        UserRole.ADMIN -> "Kan gewone gebruikers modereren.",
-        UserRole.SUPER_USER -> "Kan globale variabelen aanpassen, rechten beheren, ...")) { roleDesc =>
+        UserRole.CAR_SHARER -> "kan auto's delen",
+        UserRole.CAR_USER -> "Een auto's lenen",
+        UserRole.INFOSESSION_ADMIN -> "kan infosessies beheren",
+        UserRole.SUPER_USER -> "kan globale variabelen aanpassen, rechten beheren, ...",
+        UserRole.MAIL_ADMIN -> "kan email-templates aanpassen",
+        UserRole.RESERVATION_ADMIN -> "kan autoreservaties modereren")) { roleDesc =>
         @app("Bewerk roles") {
             <div id="page-header-wrapper">
                 <h1 class="page-header">Gebruikersrollen</h1>

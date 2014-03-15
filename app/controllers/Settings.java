@@ -7,6 +7,8 @@ import models.UserRole;
 import play.mvc.*;
 import views.html.*;
 
+import java.util.Set;
+
 public class Settings extends Controller {
 
     public static Result index() {
@@ -14,24 +16,32 @@ public class Settings extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result instantAdmin(){
-        if(DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.ADMIN)) {
-            flash("warning", "U heeft reeds administratorrechten.");
-            return badRequest(dashboard.render());
-        } else {
-            User user = DatabaseHelper.getUserProvider().getUser(session("email"));
-            try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                UserRoleDAO roleDao = context.getUserRoleDAO();
-                roleDao.addUserRole(user.getId(), UserRole.ADMIN);
-                context.commit();
+    public static Result instantAdmin() {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserRoleDAO dao = context.getUserRoleDAO();
+            Set<UserRole> roles = dao.getUserRoles(user.getId());
+            if (roles.contains(UserRole.SUPER_USER)) {
+                flash("warning", "U heeft reeds superuser rechten.");
+                return badRequest(dashboard.render());
+            } else {
+                try {
+                    dao.addUserRole(user.getId(), UserRole.SUPER_USER);
+                    context.commit();
+                    DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
+                    roles.add(UserRole.SUPER_USER);
 
-                DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
-                flash("success", "U heeft nu administratorrechten.");
-                return ok(dashboard.render());
-            } catch(DataAccessException ex){
-                throw ex;
+                    flash("success", "U heeft nu superuserrechten. Gelieve je extra rechten aan te duiden.");
+                    return ok(views.html.userroles.editroles.render(UserRoles.getUserRolesStatus(roles), user));
+                } catch (DataAccessException ex) {
+                    context.rollback();
+                    throw ex;
+                }
             }
+        } catch (DataAccessException ex) {
+            throw ex;
         }
+
     }
 
 }

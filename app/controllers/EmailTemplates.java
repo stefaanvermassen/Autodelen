@@ -6,6 +6,7 @@ import database.DataAccessException;
 import database.DatabaseHelper;
 import database.TemplateDAO;
 import models.EmailTemplate;
+import models.UserRole;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.emailtemplates.edit;
@@ -20,9 +21,7 @@ import java.util.Map;
  */
 public class EmailTemplates extends Controller {
 
-
-
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showExistingTemplates() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
@@ -34,7 +33,7 @@ public class EmailTemplates extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showTemplate(int templateId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
@@ -50,7 +49,7 @@ public class EmailTemplates extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result editTemplate() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();

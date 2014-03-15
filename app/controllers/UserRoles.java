@@ -49,7 +49,7 @@ public class UserRoles extends Controller {
     }
 
     @SuppressWarnings("unchecked")
-    private static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles) {
+    public static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles) {
         UserRole[] allRoles = UserRole.values();
         Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length - 1];
         int k = 0;
@@ -111,6 +111,9 @@ public class UserRoles extends Controller {
                             dao.addUserRole(userId, addedRole);
                         }
                         context.commit();
+
+                        // Invalidate the cache for a page refresh
+                        DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
 
                         flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
                         return ok(editroles.render(getUserRolesStatus(newRoles), user));

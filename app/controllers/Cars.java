@@ -106,7 +106,7 @@ public class Cars extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated()
     public static Result editCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -116,6 +116,12 @@ public class Cars extends Controller {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
+                User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
+                    flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                    return badRequest(carList());
+                }
+
                 CarModel model = new CarModel();
                 model.name = car.getName();
                 model.brand = car.getBrand();
@@ -159,6 +165,12 @@ public class Cars extends Controller {
 
                 if (car == null) {
                     flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                    return badRequest(carList());
+                }
+
+                User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
+                    flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
 
@@ -227,12 +239,19 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             try {
-                if (dao.getCar(carId) == null) {
+                Car car = dao.getCar(carId);
+                if (car == null) {
                     flash("danger", "De auto met ID= " + carId + " bestaat niet.");
                     return badRequest(carList());
                 } else {
-                    Car car = new Car();
-                    car.setId(carId);
+
+                    //TODO: this is repeat code, unify with above controllers as extra check
+                    User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+                    if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
+                        flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
+                        return badRequest(carList());
+                    }
+
                     dao.deleteCar(car);
                     context.commit();
                     flash("success", "De auto werd succesvol verwijderd.");
