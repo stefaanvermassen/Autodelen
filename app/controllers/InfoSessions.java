@@ -56,7 +56,7 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result newSession() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
 
@@ -79,7 +79,7 @@ public class InfoSessions extends Controller {
      * @param sessionId
      * @return
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result editSession(int sessionId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -112,7 +112,7 @@ public class InfoSessions extends Controller {
      * @param sessionId
      * @return
      */
-    @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result removeSession(int sessionId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -141,7 +141,7 @@ public class InfoSessions extends Controller {
      * @param sessionId
      * @return
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
@@ -238,7 +238,7 @@ public class InfoSessions extends Controller {
      * @param userId    Userid of the user to be removed
      * @return Status of the operation page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result removeUserFromSession(int sessionId, int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -266,7 +266,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
 
@@ -338,7 +338,7 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.ADMIN})
+    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
