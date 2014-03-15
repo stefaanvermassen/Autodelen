@@ -29,7 +29,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
 
     private PreparedStatement getTemplateByTitleStatement() throws SQLException {
         if (getTemplateByIdStatement == null) {
-            getTemplateByIdStatement = connection.prepareStatement("SELECT template_id, template_title, template_body " +
+            getTemplateByIdStatement = connection.prepareStatement("SELECT template_id, template_title, template_subject, template_body, template_send_mail, template_send_mail_changeable " +
                     "FROM Templates WHERE template_id = ?;");
         }
         return getTemplateByIdStatement;
@@ -37,7 +37,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
 
     private PreparedStatement getAllTemplatesStatement() throws SQLException {
         if (getAllTemplatesStatement == null) {
-            getAllTemplatesStatement = connection.prepareStatement("SELECT template_id, template_title, template_body " +
+            getAllTemplatesStatement = connection.prepareStatement("SELECT template_id, template_title, template_body, template_subject, template_send_mail, template_send_mail_changeable " +
                     "FROM Templates;");
         }
         return getAllTemplatesStatement;
@@ -45,13 +45,13 @@ public class JDBCTemplateDAO implements TemplateDAO {
 
     private PreparedStatement getUpdateTemplateStatement() throws SQLException {
         if (updateTemplateStatement == null) {
-            updateTemplateStatement = connection.prepareStatement("UPDATE Templates SET template_body = ? WHERE template_id = ?;");
+            updateTemplateStatement = connection.prepareStatement("UPDATE Templates SET template_subject = ?, template_body = ?, template_send_mail = ? WHERE template_id = ?;");
         }
         return updateTemplateStatement;
     }
 
     public EmailTemplate populateEmailTemplate(ResultSet rs) throws SQLException {
-        return new EmailTemplate(rs.getInt("template_id"), rs.getString("template_title"), rs.getString("template_body"), getUsableTags(rs.getInt("template_id")));
+        return new EmailTemplate(rs.getInt("template_id"), rs.getString("template_title"), rs.getString("template_body"), getUsableTags(rs.getInt("template_id")), rs.getString("template_subject"), rs.getBoolean("template_send_mail"), rs.getBoolean("template_send_mail_changeable"));
     }
 
     private PreparedStatement getTagsByTemplateIdStatement() throws SQLException {
@@ -131,11 +131,13 @@ public class JDBCTemplateDAO implements TemplateDAO {
     }
 
     @Override
-    public void updateTemplate(int templateID, String templateBody) throws DataAccessException {
+    public void updateTemplate(int templateID, String templateBody, String templateSubject, boolean templateSendMail) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateTemplateStatement();
-            ps.setString(1, templateBody);
-            ps.setInt(2,templateID);
+            ps.setString(1, templateSubject);
+            ps.setString(2, templateBody);
+            ps.setBoolean(3, templateSendMail);
+            ps.setInt(4,templateID);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating template.");
         } catch (SQLException e) {
