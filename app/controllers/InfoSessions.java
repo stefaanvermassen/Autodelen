@@ -381,7 +381,16 @@ public class InfoSessions extends Controller {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
 
+            //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
+            // Hack herpedy derp!!
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
+            for(InfoSession s : sessions){
+                if(enrolled.getId() == s.getId()) {
+                    enrolled = s;
+                    break;
+                }
+            }
+
             return infosessions.render(sessions, enrolled);
         } catch (DataAccessException ex) {
             throw ex;

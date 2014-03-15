@@ -89,7 +89,7 @@
                                     <tr role="row">
                                         <th>#</th>
                                         <th>Datum</th>
-                                        <th></th>
+                                        <th>Inschrijvingen</th>
                                         <th>Host</th>
                                         <th>Adres</th>
                                         <th>Acties</th>
@@ -100,6 +100,12 @@
                                     <tr @if(enrolled != null && session.getId == enrolled.getId){class="info"}>
                                         <td>@(index + 1)</td>
                                         <td>@session.getTime.toString("yyyy-MM-dd HH:mm:ss")</td>
+                                        @if(session.getMaxEnrollees != 0) {
+                                            <td>@session.getEnrolleeCount / @session.getMaxEnrollees</td>
+                                        } else {
+                                            <td>@session.getEnrolleeCount</td>
+                                        }
+
                                         <td>@session.getHost</td>
                                         <td>@session.getAddress</td>
                                         <td>
