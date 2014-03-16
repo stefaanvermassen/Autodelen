@@ -221,7 +221,7 @@ CREATE TABLE `CarRides` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Messages` (
+CREATE TABLE `Messages` ( # from user to user != Notifications
 	`message_id` INT NOT NULL AUTO_INCREMENT,
 	`message_from_user_id` INT NOT NULL,
 	`message_to_user_id` INT NOT NULL,
@@ -238,7 +238,10 @@ ENGINE=InnoDB;
 CREATE TABLE `Templates` (
 	`template_id` INT NOT NULL AUTO_INCREMENT,
 	`template_title` VARCHAR(255) NOT NULL,
+	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
 	`template_body` TEXT NOT NULL,
+	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, # Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
+	`template_send_mail_changeable` BIT(1) NOT NULL DEFAULT 1, # Mag aangepast worden? Bv wachtwoord reset/verificatie niet!
 	`template_last_edit` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`template_id`),
 	UNIQUE INDEX `template_title` (`template_title`)
@@ -272,3 +275,21 @@ CREATE TABLE `Verifications` (
 	PRIMARY KEY (`verification_user_id`, `verification_type`),
 	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `Users` (`user_id`)
 )
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `Notifications` ( # from system to user
+	`notification_id` INT NOT NULL AUTO_INCREMENT,
+	`notification_user_id` INT NOT NULL,
+	`notification_read` BIT(1) NOT NULL DEFAULT 0,
+	`notification_subject` VARCHAR(255),
+	`notification_body` TEXT,
+	`notification_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`notification_id`),
+	FOREIGN KEY (`notification_user_id`) REFERENCES Users(`user_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+
+

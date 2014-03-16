@@ -335,6 +335,7 @@ public class Login extends Controller {
                     flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
                     LoginModel model = new LoginModel();
                     model.email = user.getEmail();
+                    Mail.sendWelcomeMail(user);
                     return ok(login.render(Form.form(LoginModel.class).fill(model)));
                 } else {
                     return badRequest("De verificatiecode komt niet overeen met onze gegevens. TODO: nieuwe string voorstellen.");

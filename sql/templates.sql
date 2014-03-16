@@ -22,7 +22,7 @@ INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_reason");
 #INSERT INTO Templates(template_title, template_body) VALUES (?,?)
 
 #--Verificatie
-INSERT INTO Templates(template_title, template_body) VALUES (
+INSERT INTO Templates(template_title, template_body, template_send_mail_changeable) VALUES (
 "Verificatie", 
 "Beste %user_firstname% %user_lastname%,<br>
 <br>
@@ -30,7 +30,7 @@ Om uw e-mailadres te controleren vragen we u om op onderstaande link te klikken:
 %verification_url% <br>
 <br>
 Met vriendelijke groeten,<br>
-Dégage");
+Dégage", 0);
 
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "user_firstname";
@@ -147,7 +147,7 @@ INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 
 #--Wachtwoord reset
 
-INSERT INTO Templates(template_title, template_body) VALUES (
+INSERT INTO Templates(template_title, template_body, template_send_mail_changeable) VALUES (
 "Wachtwoord reset", 
 "Beste %user_firstname% %user_lastname%,<br>
 
@@ -155,7 +155,7 @@ Klik op onderstaande link om een nieuw wachtwoord te kiezen.<br>
 %password_reset_url%
 <br>
 Met vriendelijke groeten,<br>
-Dégage");
+Dégage", 0);
 
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_firstname";

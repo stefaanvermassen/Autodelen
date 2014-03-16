@@ -3,6 +3,7 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import models.*;
+import notifiers.Mail;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -331,6 +332,7 @@ public class InfoSessions extends Controller {
                             dao.registerUser(session, user);
                             context.commit();
                             flash("success", "U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".");
+                            Mail.sendInfoSessionEnrolledMail(user, session);
                             return redirect(routes.InfoSessions.detail(sessionId));
                         } catch (DataAccessException ex) {
                             context.rollback();
