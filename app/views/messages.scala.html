@@ -30,22 +30,24 @@
                 <!-- /.panel-heading -->
                 <div class="panel-body noverticalpadding">
                     <ul class="timeline noverticalmargin">
+                    @for((notification, index) <- notifications.zipWithIndex) {
                         <li class="timeline-inverted">
                             <div class="timeline-badge"><i class="fa fa-check"></i>
                             </div>
                             <div class="timeline-panel">
                                 <div class="timeline-heading">
                                     <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
+                                    <h4 class="timeline-title">@notification.getSubject</h4>
                                     <p>
-                                        <small class="text-muted"><i class="fa fa-time"></i> 11/12/13 14:56</small>
+                                        <small class="text-muted"><i class="fa fa-time"></i> @notification.getTimestamp</small>
                                     </p>
                                 </div>
                                 <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
+                                    @notification.getBody
                                 </div>
                             </div>
                         </li>
+                    }
                         <li class="timeline-inverted">
                             <div class="timeline-badge warning"><i class="fa fa-credit-card"></i>
                             </div>
