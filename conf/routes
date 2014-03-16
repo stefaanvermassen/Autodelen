@@ -29,7 +29,11 @@ POST        /reserve/reservation               controllers.Reserve.confirmReserv
 GET         /receipts                          controllers.Receipts.index()
 GET         /messages                          controllers.Messages.showNotifications()
 GET         /settings                          controllers.Settings.index()
-GET         /profile                           controllers.Profile.index()
+
+# Profile pages
+GET         /profile                           controllers.Profile.indexWithoutId()
+GET         /profile/byid                      controllers.Profile.index(userId: Int)
+POST        /smallprofile                      controllers.Profile.editSmallProfilePost(userId: Int)
 
 # Login screen
 GET         /login                             controllers.Login.login()

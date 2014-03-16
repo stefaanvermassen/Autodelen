@@ -2,6 +2,7 @@ package controllers.Security;
 
 import controllers.routes;
 import database.DatabaseHelper;
+import database.providers.UserRoleProvider;
 import models.User;
 import models.UserRole;
 import models.UserStatus;
@@ -11,6 +12,7 @@ import play.mvc.Http.*;
 
 import java.lang.annotation.*;
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Created by Benjamin on 26/02/14.
@@ -48,15 +50,16 @@ public class RoleSecured {
                     return F.Promise.pure(redirect(routes.Login.login()));
                 }
 
-                EnumSet<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
+                Set<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
 
                 // If user has got one of the specified roles, delegate to the requested page
                 if(securedRoles.length == 0)
                     return delegate.call(ctx);
                 else {
                     for(UserRole securedRole : securedRoles) {
-                        if(roles.contains(securedRole))
+                        if(UserRoleProvider.hasRole(roles, securedRole)){ // This also takes care of SU = has all roles logic
                             return delegate.call(ctx);
+                        }
                     }
                 }
                 // User is not authorized
