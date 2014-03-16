@@ -6,7 +6,7 @@ import models.Car;
 import models.Reservation;
 import models.ReservationStatus;
 import models.User;
-import notifiers.Mail;
+import notifiers.Notifier;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
@@ -62,7 +62,7 @@ public class Drives extends Controller {
             return badRequest(showIndex(refuseForm, errorIndex));
         Result result = adjustStatus(reservationId, ReservationStatus.REFUSED);
         if(result != null)
-            Mail.sendReservationRefusedByOwnerMail(user, refuseForm.get().reason);
+            Notifier.sendReservationRefusedByOwnerMail(user, refuseForm.get().reason);
         return result;
     }
 
