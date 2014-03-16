@@ -10,6 +10,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public TemplateDAO getTemplateDAO();
 
+    public NotificationDAO getNotificationDAO();
+
     public AddressDAO getAddressDAO();
     
     public CarDAO getCarDAO();

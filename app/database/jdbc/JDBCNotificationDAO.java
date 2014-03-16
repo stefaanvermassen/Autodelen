@@ -21,6 +21,10 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement createNotificationStatement;
     private PreparedStatement getNotificationListByUseridStatement;
 
+    public JDBCNotificationDAO(Connection connection) {
+        this.connection = connection;
+    }
+
     public static Notification populateNotification(ResultSet rs) throws SQLException {
         Notification notification = new Notification(rs.getInt("notification_id"), JDBCUserDAO.populateUser(rs, false, false),
                 rs.getBoolean("notification_read"), rs.getString("notification_subject"), rs.getString("notification_body"),
@@ -35,6 +39,14 @@ public class JDBCNotificationDAO implements NotificationDAO{
                     + "notification_body, notification_timestamp) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createNotificationStatement;
+    }
+
+    private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
+        if (getNotificationListByUseridStatement == null) {
+            getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM Notifications JOIN Users ON " +
+                    "notification_user_id= user_id WHERE notification_user_id=?;");
+        }
+        return getNotificationListByUseridStatement;
     }
 
 
@@ -74,13 +86,6 @@ public class JDBCNotificationDAO implements NotificationDAO{
         }
     }
 
-    private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
-        if (getNotificationListByUseridStatement == null) {
-            getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM Notifications JOIN Users ON " +
-                    "notification_user_id= user_id WHERE notification_user_id=1;");
-        }
-        return getNotificationListByUseridStatement;
-    }
 
     private List<Notification> getNotificationList(PreparedStatement ps) throws DataAccessException {
         List<Notification> list = new ArrayList<>();
