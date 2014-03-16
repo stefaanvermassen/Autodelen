@@ -37,25 +37,30 @@ public class RoleSecured {
 
         public F.Promise<SimpleResult> call(Context ctx) {
             try {
-                UserRole[] SecuredRoles = configuration.value();
+                UserRole[] securedRoles = configuration.value();
                 User user = DatabaseHelper.getUserProvider().getUser(ctx.session().get("email"), true);
                 // If user is null, redirect to login page
-                if(user == null || (user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING))
+                if(user == null) {
                     return F.Promise.pure(redirect(routes.Login.login()));
+                } else if((user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING))
+                {
+                    ctx.flash().put("danger", "Deze account is not niet geactiveerd of geblokkeerd.");
+                    return F.Promise.pure(redirect(routes.Login.login()));
+                }
 
                 EnumSet<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
 
                 // If user has got one of the specified roles, delegate to the requested page
-                if(SecuredRoles.length == 0)
+                if(securedRoles.length == 0)
                     return delegate.call(ctx);
                 else {
-                    for(UserRole securedRole : SecuredRoles) {
+                    for(UserRole securedRole : securedRoles) {
                         if(roles.contains(securedRole))
                             return delegate.call(ctx);
                     }
                 }
                 // User is not authorized
-                return F.Promise.pure((SimpleResult) unauthorized(views.html.defaultpages.unauthorized.render()));
+                return F.Promise.pure((SimpleResult) unauthorized(views.html.unauthorized.render(securedRoles)));
             }
             catch(Throwable t) {
                throw new RuntimeException(t);

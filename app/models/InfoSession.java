@@ -23,6 +23,7 @@ public class InfoSession {
     private User host;
     private List<Enrollee> enrolled;
     private int maxEnrollees;
+    private int enrolleeCount;
 
     public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, List<Enrollee> enrolled, int maxEnrollees) {
         this.id = id;
@@ -37,8 +38,24 @@ public class InfoSession {
         this.maxEnrollees = maxEnrollees;
     }
 
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int enrolleeCount, int maxEnrollees) {
+        this(id, type, time, address, host, null, maxEnrollees);
+        this.enrolled = null; //TODO: cleanup above constructor not to fix enrolled as null
+        this.enrolleeCount = enrolleeCount;
+    }
+
     public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int maxEnrollees) {
         this(id, type, time, address, host, NO_ENROLLEES, maxEnrollees);
+    }
+
+    /**
+     * Gets the current amount of enrollees
+     * @return When an enrollee list was provided this returns the size, otherwise it uses a cached count result
+     */
+    public int getEnrolleeCount(){
+        if(this.enrolled == null)
+            return enrolleeCount;
+        else return enrolled.size();
     }
 
     public int getId() {

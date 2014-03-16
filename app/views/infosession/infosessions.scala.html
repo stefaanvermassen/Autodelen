@@ -89,6 +89,7 @@
                                     <tr role="row">
                                         <th>#</th>
                                         <th>Datum</th>
+                                        <th>Inschrijvingen</th>
                                         <th>Host</th>
                                         <th>Adres</th>
                                         <th>Acties</th>
@@ -99,11 +100,21 @@
                                     <tr @if(enrolled != null && session.getId == enrolled.getId){class="info"}>
                                         <td>@(index + 1)</td>
                                         <td>@session.getTime.toString("yyyy-MM-dd HH:mm:ss")</td>
+                                        @if(session.getMaxEnrollees != 0) {
+                                            @if(session.getEnrolleeCount == session.getMaxEnrollees){
+                                                <td><strong>Volzet</strong></td>
+                                            } else {
+                                                <td>@session.getEnrolleeCount / @session.getMaxEnrollees</td>
+                                            }
+                                        } else {
+                                            <td>@session.getEnrolleeCount</td>
+                                        }
+
                                         <td>@session.getHost</td>
                                         <td>@session.getAddress</td>
                                         <td>
                                             <div class="btn-group btn-group-xs">
-                                                @if(enrolled == null) {
+                                                @if(enrolled == null && (session.getMaxEnrollees == 0 || session.getEnrolleeCount < session.getMaxEnrollees)) {
                                                     <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(session.getId)">inschrijven</a>
                                                 } else {
                                                     <button type="button" disabled="disabled" class="btn btn-success">inschrijven</button>

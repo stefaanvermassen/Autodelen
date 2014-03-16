@@ -120,12 +120,12 @@ public class InfoSessions extends Controller {
             try {
                 if (dao.getInfoSession(sessionId, false) == null) {
                     flash("danger", "Deze infosessie bestaat niet.");
-                    return badRequest(upcomingSessionsList());
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
                     dao.deleteInfoSession(sessionId);
                     context.commit();
                     flash("success", "De infosessie werd succesvol verwijderd.");
-                    return ok(upcomingSessionsList());
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
                 }
             } catch (DataAccessException ex) {
                 context.rollback();
@@ -153,7 +153,7 @@ public class InfoSessions extends Controller {
                 InfoSession session = dao.getInfoSession(sessionId, false);
                 if (session == null) {
                     flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
-                    return badRequest(upcomingSessionsList());
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
                 }
 
                 try {
@@ -174,10 +174,10 @@ public class InfoSessions extends Controller {
                         dao.updateInfosessionTime(session);
                     }
 
-                    //TODO: update maxEnrollees, type
+                    //TODO: update maxEnrollees, type SAVE (CHECK IF #ATTENDEES < NEW MAX!!!)
                     context.commit();
                     flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                    return detail(sessionId);
+                    return redirect(routes.InfoSessions.detail(sessionId));
                 } catch (DataAccessException ex) {
                     context.rollback();
                     throw ex;
@@ -197,14 +197,14 @@ public class InfoSessions extends Controller {
             InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
             if (alreadyAttending == null) {
                 flash("danger", "U bent niet ingeschreven voor een toekomstige infosessie.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 try {
                     dao.unregisterUser(alreadyAttending, user);
                     context.commit();
 
                     flash("success", "U bent succesvol uitgeschreven uit deze infosessie.");
-                    return showUpcomingSessions();
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
                 } catch (DataAccessException ex) {
                     context.rollback();
                     throw ex;
@@ -222,7 +222,7 @@ public class InfoSessions extends Controller {
             InfoSession session = dao.getInfoSession(sessionId, true);
             if (session == null) {
                 flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 return ok(detail.render(session));
             }
@@ -246,7 +246,7 @@ public class InfoSessions extends Controller {
             InfoSession is = dao.getInfoSession(sessionId, false);
             if (is == null) {
                 flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             }
 
             UserDAO udao = context.getUserDAO();
@@ -254,19 +254,26 @@ public class InfoSessions extends Controller {
             User user = udao.getUser(userId, false);
             if (user == null) {
                 flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             }
 
             dao.unregisterUser(is, user);
             context.commit();
 
             flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
-            return detail(sessionId);
+            return redirect(routes.InfoSessions.detail(sessionId));
         } catch (DataAccessException ex) {
             throw ex;
         }
     }
 
+    /**
+     * Method: GET
+     * @param sessionId
+     * @param userId
+     * @param status
+     * @return
+     */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -275,14 +282,14 @@ public class InfoSessions extends Controller {
             InfoSession is = dao.getInfoSession(sessionId, false);
             if (is == null) {
                 flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             }
 
             UserDAO udao = context.getUserDAO();
             User user = udao.getUser(userId, false);
             if (user == null) {
                 flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             }
 
             EnrollementStatus enrollStatus = Enum.valueOf(EnrollementStatus.class, status);
@@ -290,12 +297,17 @@ public class InfoSessions extends Controller {
             dao.setUserEnrollmentStatus(is, user, enrollStatus);
             context.commit();
             flash("success", "De gebruikerstatus werd succesvol aangepast.");
-            return detail(sessionId);
+            return redirect(routes.InfoSessions.detail(sessionId));
         } catch (DataAccessException ex) {
             throw ex;
         }
     }
 
+    /**
+     * Method: GET
+     * @param sessionId
+     * @return
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
@@ -306,19 +318,22 @@ public class InfoSessions extends Controller {
                 InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
                 if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
                     flash("danger", "U bent reeds al ingeschreven voor een infosessie.");
-                    return badRequest(upcomingSessionsList());
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    InfoSession session = dao.getInfoSession(sessionId, false);
+                    InfoSession session = dao.getInfoSession(sessionId, true); //TODO: just add going subclause (like in getAttending requirement)
                     if (session == null) {
                         flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
-                        return badRequest(upcomingSessionsList());
+                        return redirect(routes.InfoSessions.showUpcomingSessions());
+                    } else if (session.getMaxEnrollees() != 0 && session.getEnrolleeCount() == session.getMaxEnrollees()) {
+                        flash("danger", "Deze infosessie zit reeds vol.");
+                        return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         try {
                             dao.registerUser(session, user);
                             context.commit();
                             flash("success", "U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".");
                             Mail.sendInfoSessionEnrolledMail(user, session);
-                            return ok(upcomingSessionsList());
+                            return redirect(routes.InfoSessions.detail(sessionId));
                         } catch (DataAccessException ex) {
                             context.rollback();
                             throw ex;
@@ -330,7 +345,7 @@ public class InfoSessions extends Controller {
             }
         } else {
             flash("danger", "U bent reeds een geverifieerde gebruiker.");
-            return badRequest(upcomingSessionsList());
+            return redirect(routes.InfoSessions.showUpcomingSessions());
         }
     }
 
@@ -384,6 +399,18 @@ public class InfoSessions extends Controller {
             InfoSession enrolled = dao.getAttendingInfoSession(user);
 
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
+            if (enrolled != null) {
+                //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
+                // Hack herpedy derp!!
+
+                for (InfoSession s : sessions) {
+                    if (enrolled.getId() == s.getId()) {
+                        enrolled = s;
+                        break;
+                    }
+                }
+            }
+
             return infosessions.render(sessions, enrolled);
         } catch (DataAccessException ex) {
             throw ex;
