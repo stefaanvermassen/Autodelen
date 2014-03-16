@@ -44,16 +44,14 @@ public class Notifier extends Mailer {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.WELCOME);
             mail = replaceUserTags(user, template.getBody());
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
                 addFrom(NOREPLY);
                 send(mail);
-            }else{
-                NotificationDAO notificationDAO = context.getNotificationDAO();
-                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             }
-
         }catch (DataAccessException ex) {
             throw ex;
         }
@@ -66,14 +64,13 @@ public class Notifier extends Mailer {
             EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceInfoSessionTags(infoSession, mail);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
                 addFrom(NOREPLY);
                 send(mail);
-            }else{
-                NotificationDAO notificationDAO = context.getNotificationDAO();
-                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -87,14 +84,13 @@ public class Notifier extends Mailer {
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
                 addFrom(NOREPLY);
                 send(mail);
-            }else{
-                NotificationDAO notificationDAO = context.getNotificationDAO();
-                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -111,14 +107,13 @@ public class Notifier extends Mailer {
             mail = replaceCarReservationTags(carReservation, mail);
             //TODO Right address??
             mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
                 addFrom(NOREPLY);
                 send(mail);
-            }else{
-                NotificationDAO notificationDAO = context.getNotificationDAO();
-                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -132,14 +127,13 @@ public class Notifier extends Mailer {
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
             mail = replaceUserTags(user, template.getBody());
             mail = mail.replace("%reason%", reason);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
                 addFrom(NOREPLY);
                 send(mail);
-            }else{
-                NotificationDAO notificationDAO = context.getNotificationDAO();
-                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             }
         } catch (DataAccessException ex) {
             throw ex;
