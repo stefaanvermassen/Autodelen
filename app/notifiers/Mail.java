@@ -2,11 +2,9 @@ package notifiers;
 
 
 import controllers.routes;
-import database.DataAccessContext;
-import database.DataAccessException;
-import database.DatabaseHelper;
-import database.TemplateDAO;
+import database.*;
 import models.*;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
@@ -43,21 +41,23 @@ public class Mail extends Mailer {
 
     public static void sendWelcomeMail(User user) {
         String mail = "";
-        setSubject("Welkom %s", user.getFirstName());
-        addRecipient(user.getEmail());
-        addFrom(NOREPLY);
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.WELCOME);
             mail = replaceUserTags(user, template.getBody());
-        } catch (DataAccessException ex) {
-            mail = welcome.render(user).body();
-        }
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }else{
+                NotificationDAO notificationDAO = context.getNotificationDAO();
+                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            }
 
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
+        }catch (DataAccessException ex) {
+            throw ex;
         }
-
     }
 
     public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
