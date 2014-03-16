@@ -62,49 +62,49 @@ public class Mail extends Mailer {
 
     public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
         String mail = "";
-        setSubject("Bevestiging van uw inschrijving");
-        addRecipient(user.getEmail());
-        addFrom(NOREPLY);
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceInfoSessionTags(infoSession, mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }else{
+                NotificationDAO notificationDAO = context.getNotificationDAO();
+                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            }
         } catch (DataAccessException ex) {
             throw ex;
         }
-
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
-        }
-
     }
 
     public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
         String mail = "";
-        setSubject("Reservatie aanvraag voor uw auto");
-        addRecipient(user.getEmail());
-        addFrom(NOREPLY);
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }else{
+                NotificationDAO notificationDAO = context.getNotificationDAO();
+                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            }
         } catch (DataAccessException ex) {
             throw ex;
         }
-
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
-        }
-
     }
+
 
     public static void sendReservationApprovedByOwnerMail(User user, Reservation carReservation) {
         String mail = "";
-        setSubject("Reservatie goedgekeurd");
-        addRecipient(user.getEmail());
-        addFrom(NOREPLY);
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
@@ -112,34 +112,39 @@ public class Mail extends Mailer {
             mail = replaceCarReservationTags(carReservation, mail);
             //TODO Right address??
             mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }else{
+                NotificationDAO notificationDAO = context.getNotificationDAO();
+                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            }
         } catch (DataAccessException ex) {
             throw ex;
         }
-
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
-        }
-
     }
 
     public static void sendReservationRefusedByOwnerMail(User user, String reason) {
         String mail = "";
-        setSubject("Reservatie geweigerd");
-        addRecipient(user.getEmail());
-        addFrom(NOREPLY);
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
             mail = replaceUserTags(user, template.getBody());
             mail = mail.replace("%reason%", reason);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }else{
+                NotificationDAO notificationDAO = context.getNotificationDAO();
+                notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            }
         } catch (DataAccessException ex) {
             throw ex;
         }
-
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
-        }
-
     }
 
     public static void sendPasswordResetMail(User user, String verificationUrl) {
