@@ -18,7 +18,10 @@ import java.util.List;
  */
 public class Cars extends Controller {
 
+    private static final int PAGE_SIZE = 10;
+
     public static class CarModel {
+
         public String name;
         public String brand;
         public String type;
@@ -56,7 +59,31 @@ public class Cars extends Controller {
     }
 
     public static Result showCars() {
-        return ok(carList());
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+
+            int amountOfCars = dao.getAmountOfCars();
+            int amountOfPages = amountOfCars / PAGE_SIZE;
+            return ok(cars.render(amountOfPages));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    public static Result showCarsPage(int page) {
+        return ok(carList(page));
+    }
+
+    private static Html carList(int page) {
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+
+            List<Car> listOfCars = dao.getCarList(page, PAGE_SIZE);
+            return carspage.render(listOfCars, page);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     @RoleSecured.RoleAuthenticated()
@@ -115,12 +142,12 @@ public class Cars extends Controller {
 
             if (car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return badRequest(carList(1));
             } else {
                 User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
                 if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
-                    return badRequest(carList());
+                    return badRequest(carList(1));
                 }
 
                 CarModel model = new CarModel();
@@ -166,13 +193,13 @@ public class Cars extends Controller {
 
                 if (car == null) {
                     flash("danger", "Car met ID=" + carId + " bestaat niet.");
-                    return badRequest(carList());
+                    return badRequest(carList(1));
                 }
 
                 User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
                 if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
-                    return badRequest(carList());
+                    return badRequest(carList(1));
                 }
 
                 try {
@@ -225,7 +252,7 @@ public class Cars extends Controller {
 
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return badRequest(carList(1));
             } else {
                 return ok(detail.render(car));
             }
@@ -243,20 +270,20 @@ public class Cars extends Controller {
                 Car car = dao.getCar(carId);
                 if (car == null) {
                     flash("danger", "De auto met ID= " + carId + " bestaat niet.");
-                    return badRequest(carList());
+                    return badRequest(carList(1));
                 } else {
 
                     //TODO: this is repeat code, unify with above controllers as extra check
                     User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
                     if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
                         flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
-                        return badRequest(carList());
+                        return badRequest(carList(1));
                     }
 
                     dao.deleteCar(car);
                     context.commit();
                     flash("success", "De auto werd succesvol verwijderd.");
-                    return ok(carList());
+                    return ok(carList(1));
                 }
             } catch (DataAccessException ex) {
                 context.rollback();
@@ -266,16 +293,4 @@ public class Cars extends Controller {
             throw ex;
         }
     }
-
-    private static Html carList() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            CarDAO dao = context.getCarDAO();
-
-            List<Car> listOfCars = dao.getCarList(1, 50);
-            return cars.render(listOfCars);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
-    }
-
 }

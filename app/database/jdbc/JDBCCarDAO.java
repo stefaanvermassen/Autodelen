@@ -37,6 +37,7 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement deleteCarStatement;
     private PreparedStatement getGetCarListStatement;
     private PreparedStatement getGetCarListPageStatement;
+    private PreparedStatement getGetAmountOfCarsStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -130,6 +131,13 @@ public class JDBCCarDAO implements CarDAO{
             getGetCarListPageStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id limit ?, ?");
         }
         return getGetCarListPageStatement;
+    }
+
+    private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
+        if(getGetAmountOfCarsStatement == null) {
+            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars");
+        }
+        return getGetAmountOfCarsStatement;
     }
     
     @Override
@@ -258,12 +266,30 @@ public class JDBCCarDAO implements CarDAO{
 
     @Override
     public List<Car> getCarList() throws DataAccessException {
-            try {
-                PreparedStatement ps = getGetCarListStatement();
-                return getCars(ps);
+        try {
+            PreparedStatement ps = getGetCarListStatement();
+            return getCars(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
+
+    @Override
+    public int getAmountOfCars() throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfCarsStatement();
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_cars");
+                else return 0;
+
             } catch (SQLException ex) {
-                throw new DataAccessException("Could not retrieve a list of cars", ex);
+                throw new DataAccessException("Error reading count of cars", ex);
             }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of cars", ex);
+        }
     }
 
     @Override

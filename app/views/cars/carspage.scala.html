@@ -1,0 +1,29 @@
+@(cars: List[Car], page : Int)
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+    <thead>
+        <tr role="row">
+            <th>#</th>
+            <th>Naam</th>
+            <th>Merk</th>
+            <th>Eigenaar</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for((car, index) <- cars.zipWithIndex) {
+            <tr>
+                <td>@(index + 1)</td>
+                <td>@car.getName</td>
+                <td>@car.getBrand</td>
+                <td>@car.getOwner.getFirstName @car.getOwner.getLastName</td>
+                <td>
+                    <div class="btn-group btn-group-xs">
+                        <a href="@routes.Cars.detail(car.getId)" class="btn btn-primary">detail</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<button id="previousPage" type="button">Previous</button>
+<button id="nextPage" type="button">Next</button>

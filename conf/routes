@@ -71,6 +71,7 @@ POST        /emailtemplate/edit                controllers.EmailTemplates.editTe
 
 # Cars
 GET         /cars                              controllers.Cars.showCars()
+GET         /cars/page                         controllers.Cars.showCarsPage(page: Int)
 GET         /cars/new                          controllers.Cars.newCar()
 POST        /cars/new                          controllers.Cars.addNewCar()
 GET         /cars/view                         controllers.Cars.detail(id: Int)
@@ -83,3 +84,6 @@ GET         /assets/*file                      controllers.Assets.at(path="/publ
 
 # Support for webjar packages such as bootstrap
 GET         /webjars/*file                     controllers.WebJarAssets.at(file)
+
+# Javascript Routes
+GET         /javascriptRoutes                  controllers.Application.javascriptRoutes
