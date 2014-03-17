@@ -27,11 +27,11 @@ public class Reserve extends Controller {
         public String until;
 
         public DateTime getTimeFrom() {
-            return DATEFORMATTER.parseDateTime(from);
+            return DATEFORMATTER.parseDateTime(from).withSecondOfMinute(0);
         }
 
         public DateTime getTimeUntil() {
-            return DATEFORMATTER.parseDateTime(until);
+            return DATEFORMATTER.parseDateTime(until).withSecondOfMinute(0);
         }
 
         public String validate() {
@@ -40,7 +40,7 @@ public class Reserve extends Controller {
             DateTime until = getTimeFrom();
             if("".equals(from) || "".equals(until)) {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
-            } else if(from.isAfter(until)) {
+            } else if(from.isAfter(until) || from.isEqual(until)) {
                 return "De einddatum kan niet voor de begindatum liggen!";
             } else if(from.isBefore(now)) {
                 return "Een reservatie die plaats vindt voor vandaag is ongeldig";
