@@ -1,3 +1,27 @@
+/*
+ * HOW TO USE
+ *
+ * In the main listpage include this javascript
+ * and give values to variables amountOfPages, route, amountOfSortables
+ *  TODO: put amountOfPages not here yet but in the partial list page
+ *
+ * In the partial list page give the th-elements id="sortableX" where X = 1 to amountOfSortables to the columns you want to sort on
+ * Give these th-elements a name that the route-function takes as an argument and stands for the column to sort on
+ * This script will take care of the rest
+ *
+ * Example:
+ *
+ * var amountOfPages = @amountOfPages;
+ * var route = myJsRoutes.controllers.Cars.showCarsPage;
+ * var amountOfSortables = 2;
+ *
+ * In the partial file:
+ *  ...
+ *  <th name="name" id="sortable1" class="sortable">Naam</th>
+ *  <th name="brand" id="sortable2" class="sortable">Merk</th>
+ * ...
+ */
+
 /* Variables we can overwrite after we included the script */
 var previousBtnTxt = "Vorige";
 var nextBtnTxt = "Volgende";
