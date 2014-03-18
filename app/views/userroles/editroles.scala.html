@@ -10,7 +10,6 @@
         UserRole.RESERVATION_ADMIN -> "kan autoreservaties modereren")) { roleDesc =>
         @app("Bewerk roles") {
             <div id="page-header-wrapper">
-                <h1 class="page-header">Gebruikersrollen</h1>
                 <ol class="breadcrumb">
                     <li><a href="#">Home</a></li>
                     <li><a href="#">Library</a></li>
@@ -20,6 +19,7 @@
             </div>
 
             <div id="page-wrapper">
+                <h1 class="page-header">Gebruikersrollen</h1>
                 <h2>Rollen voor @user.getEmail</h2>
                 @if(!flash.isEmpty()) {
                     @for((msgKey, msgValue) <- flash) {

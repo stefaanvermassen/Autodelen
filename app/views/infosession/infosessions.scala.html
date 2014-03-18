@@ -34,7 +34,6 @@
 
 @app("Infosessies", stylesheets, scripts) {
 <div id="page-header-wrapper">
-    <h1 class="page-header">Infosessies</h1>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
         <li class="active">Infosessies</li>
@@ -45,6 +44,7 @@
     @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)) { isAdmin =>
         <div class="row">
             <div class="col-lg-12">
+                <h1 class="page-header">Infosessies</h1>
                 @if(!flash.isEmpty()) {
                     @for((msgKey, msgValue) <- flash) {
                         <div class="alert alert-@msgKey" data-dismiss="alert">

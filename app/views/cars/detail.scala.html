@@ -13,7 +13,6 @@
     }
 @app("Details Auto", Html(""), scripts) {
     <div id="page-header-wrapper">
-        <h1 class="page-header">Auto's</h1>
         <ol class="breadcrumb">
             <li><a href="#">Home</a></li>
             <li><a href="#">Auto's</a></li>
@@ -23,7 +22,8 @@
 
     <div id="page-wrapper">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-12">        
+            <h1 class="page-header">Auto's</h1>
             @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
                 @if(!flash.isEmpty()) {
                     @for((msgKey, msgValue) <- flash) {
