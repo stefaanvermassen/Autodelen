@@ -33,8 +33,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement unregisterUserForSession;
     private PreparedStatement getAttendeesForSession;
     private PreparedStatement setAddressForSession;
-    private PreparedStatement setTimeForSession;
     private PreparedStatement setUserEnrollmentStatusForSession;
+    private PreparedStatement updateInfoSession;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
@@ -45,6 +45,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             deleteInfoSession = connection.prepareStatement("DELETE FROM InfoSessions WHERE infosession_id = ?");
         }
         return deleteInfoSession;
+    }
+    
+    private PreparedStatement getUpdateInfoSessionStatement() throws SQLException {
+    	if(updateInfoSession==null){
+    		updateInfoSession = connection.prepareStatement("UPDATE InfoSessions SET infosession_type=?, infosession_max_enrollees=?, infosession_timestamp=? WHERE infosession_id=?");
+    	}
+    	return updateInfoSession;
     }
 
     private PreparedStatement getSetAddressForSession() throws SQLException {
@@ -59,13 +66,6 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             setUserEnrollmentStatusForSession = connection.prepareStatement("UPDATE infosessionenrollees SET enrollment_status = ? WHERE infosession_enrollee_id = ? AND infosession_id = ?");
         }
         return setUserEnrollmentStatusForSession;
-    }
-
-    private PreparedStatement getSetTimeForSession() throws SQLException {
-        if(setTimeForSession == null){
-            setTimeForSession = connection.prepareStatement("UPDATE infosessions SET infosession_timestamp = ? WHERE infosession_id = ?");
-        }
-        return setTimeForSession;
     }
 
     private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
@@ -227,23 +227,6 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public void updateInfosessionTime(InfoSession session) throws DataAccessException {
-        if(session.getId() == 0)
-            throw new DataAccessException("Cannot update time field on unsaved session.");
-
-        try {
-            PreparedStatement ps = getSetTimeForSession();
-            ps.setTimestamp(1, new Timestamp(session.getTime().getMillis()));
-            ps.setInt(2, session.getId());
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when updating time on infosession.");
-
-        } catch(SQLException ex) {
-            throw new DataAccessException("Failed to update infosession timestamp.", ex);
-        }
-    }
-
-    @Override
     public void updateInfoSessionAddress(InfoSession session) throws DataAccessException {
         Address address = session.getAddress();
         if(address == null || session.getId() == 0 || address.getId() == 0)
@@ -330,4 +313,25 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             throw new DataAccessException("Failed to fetch infosession for user", ex);
         }
     }
+    
+    /*
+     * Updates timestamp, type and max enrollees 
+     * for updating address see updateInfoSessionAddress(InfoSession)
+     */
+	@Override
+	public void updateInfoSession(InfoSession session) throws DataAccessException {
+        if (session.getId() == 0)
+            throw new DataAccessException("Failed to update session. Session doesn't exist in database.");
+		try {
+            PreparedStatement ps = getUpdateInfoSessionStatement();
+            ps.setString(1,session.getType().toString());
+            ps.setInt(2, session.getMaxEnrollees());
+            ps.setTimestamp(3, new Timestamp(session.getTime().getMillis()));
+            ps.setInt(4, session.getId());
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("InfoSession update did not affect any row.");
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to fetch infosession for user", ex);
+        }		
+	}
 }
