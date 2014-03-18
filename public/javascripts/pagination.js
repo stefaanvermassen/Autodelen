@@ -1,8 +1,10 @@
 var page = 1;
+var asc = 1; // true
+var orderBy = 0;
 $(document).ready(loadPage(1));
 
 function loadPage(nr) {
-    myJsRoutes.controllers.Cars.showCarsPage(nr).ajax({
+    route(nr, asc, orderBy).ajax({
         success : function(html) {
             $("#carsTable").html(html);
 
@@ -13,7 +15,7 @@ function loadPage(nr) {
             } else {
                 previousButton.onclick = function(){
                     page--;
-                    loadPage(page);
+                    loadPage(page, asc, orderBy);
                 };
             }
 
@@ -23,8 +25,25 @@ function loadPage(nr) {
             }
             nextButton.onclick = function(){
                 page++;
-                loadPage(page);
+                loadPage(page, asc, orderBy);
             };
+
+            // Sorting
+            var orderBys = new Array();
+            for (var i=1; i <= amountOfSortables; i++) {
+                var sortable = document.getElementById("sortable" + i);
+                sortable.onclick = function() {
+                    orderBy = this.getAttribute("name");
+                    alert(orderBy);
+                    asc = (asc + 1) % 2;
+                    page = 1;
+                    loadPage(page, asc, orderBy);
+                };
+            }
+
+            if(orderBy == 0) {
+                orderBy = $('#sortable1').attr('name');
+            }
 
         }
     });

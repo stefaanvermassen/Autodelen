@@ -71,7 +71,7 @@ POST        /emailtemplate/edit                controllers.EmailTemplates.editTe
 
 # Cars
 GET         /cars                              controllers.Cars.showCars()
-GET         /cars/page                         controllers.Cars.showCarsPage(page: Int)
+GET         /cars/page                         controllers.Cars.showCarsPage(page: Int, asc: Int, orderBy: String)
 GET         /cars/new                          controllers.Cars.newCar()
 POST        /cars/new                          controllers.Cars.addNewCar()
 GET         /cars/view                         controllers.Cars.detail(id: Int)
