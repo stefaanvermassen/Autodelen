@@ -5,6 +5,12 @@
 	padding: 8px 15px!important;
 }
 
+.avatar {
+	/*resize*/
+	width: 30px;
+	height: 30px;
+}
+
 /* --- Timeline --- */
 .timeline > li > .timeline-panel {
 	width: 90%;
@@ -105,23 +111,6 @@ body {
 	border-top: 1px solid #d6d6d6;
 	border-bottom: 1px solid #d6d6d6;
 	border-radius:0px;
-}
-
-
-/* --- Avatar --- */
-.avatar {
-	padding-top: 15px;
-}
-
-.avatar > img {
-	/*center*/
-    display: block;
-    margin-right: auto;
-    margin-left: auto;
-
-	/*resize*/
-	width: 150px;
-	height: 150px;
 }
 
 /* --- Flatstrap --- */
