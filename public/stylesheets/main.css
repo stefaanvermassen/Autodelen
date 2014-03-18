@@ -166,9 +166,8 @@ body {
 }
 
 .page-header {
-	padding: 20px 14px 20px;
-	margin: 0px;
-	border-bottom: 0px;
+	margin-top: 0px;
+	border-color: #d6d6d6;
 }
 
 #page-header-wrapper {
