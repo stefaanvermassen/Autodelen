@@ -164,64 +164,44 @@
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">
-                        <li>
+                        <li class="submenu">LENER</li>
+                        <li @if(title == "Dashboard") {class="active"}>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
-                        <li class="">
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Lener<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="@routes.InfoSessions.showUpcomingSessions"><!-- <i class="fa fa-lightbulb-o fa-fw"></i>  -->Infosessies</a>
-                                </li>
-                                <li>
-                                    <a href="@routes.Reserve.index"><!-- <i class="fa fa-pencil fa-fw"></i>  -->Reserveren</a>
-                                </li>
-                                <li>
-                                    <a href="@routes.Drives.index"><!-- <i class="fa fa-truck fa-fw"></i>  -->Ritten</a>
-                                </li>
-                                <li>
-                                    <a href="@routes.Receipts.index"><!-- <i class="fa fa-tasks fa-fw"></i>  -->Afrekeningen</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
+                        <li @if(title == "Infosessies") {class="active"}>
+                            <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
-                        <li>
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="@routes.Cars.showCars()">Auto's</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
+                        <li @if(title == "Reserveren") {class="active"}>
+                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
-                        <li>
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Gebruiker<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                            <li>
-                                <a href="@routes.Messages.showNotifications()"><!-- <i class="fa fa-envelope fa-fw"></i>  -->Berichten</a>
-                            </li>
-                            <li>
-                                <a href="@routes.Profile.index"><!-- <i class="fa fa-user fa-fw"></i>  -->Profiel</a>
-                            </li>
-                            <li>
-                                <a href="@routes.Settings.index"><!-- <i class="fa fa-gears fa-fw"></i>  -->Instellingen</a>
-                            </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
+                        <li @if(title == "Ritten") {class="active"}>
+                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
                         </li>
-                        <li>
-                            <a href="#"><i class="fa fa-wrench fa-fw"></i> Superuser<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="@routes.UserRoles.index()">Gebruikersrollen</a>
-                                </li>
-                                <li>
-                                    <a href="@routes.EmailTemplates.showExistingTemplates()"><!-- <i class="fa fa-gears fa-fw"></i>  -->Emailtemplates</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
+                        <li @if(title == "Afrekeningen") {class="active"}>
+                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
-                        <li>
+                        <li class="submenu">EIGENAAR</li>
+                        <li @if(title == "Auto's") {class="active"}>
+                            <a href="@routes.Cars.showCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                        </li>
+                        <li class="submenu">ACCOUNT</li>
+                        <li @if(title == "Berichten") {class="active"}>
+                            <a href="@routes.Messages.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                        </li>
+                        <li @if(title == "Profiel") {class="active"}>
+                            <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                        </li>
+                        <li @if(title == "Instellingen") {class="active"}>
+                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
+                        </li>
+                        <li class="submenu">SUPERUSER</li>
+                        <li @if(title == "Gebruikersrollen") {class="active"}>
+                            <a href="@routes.UserRoles.index()"><i class="fa fa-gears fa-fw"></i> Gebruikersrollen</a>
+                        </li>
+                        <li @if(title == "Emailtemplates") {class="active"}>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-gears fa-fw"></i> Emailtemplates</a>
+                        </li>
+                        <li @if(title == "Rapportering") {class="active"}>
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
                     </ul>

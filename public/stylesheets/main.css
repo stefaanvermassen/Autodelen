@@ -66,10 +66,31 @@
 	background-color: red;
 }
 
-@media(max-width:768px) {
-    .navbar-top-links {
-    	display:none;
-    }
+/* --- Side Menu --- */
+.navbar-static-side {
+	border-right: 1px solid #d6d6d6;
+	background-color: #f8f8f8;
+}
+
+.sidebar-collapse>.nav>li>a:hover, .sidebar-collapse>.nav>li>a:focus, .sidebar-collapse>.nav>.active {
+	background-color: #d6d6d6;
+}
+
+.navbar-static-side ul .submenu {
+	padding: 5px 0px 6px 10px;
+	font-size: 12px;
+	font-weight: bold;
+	color: #34383c;
+	background-color: #f0f0f0;
+	border-bottom: 1px solid #d6d6d6;
+}
+
+.nav > li > a {
+	color: #444;
+}
+
+.nav>li>a {
+	padding-left: 20px;
 }
 
 /* --- Timeline --- */
@@ -109,7 +130,7 @@
 	margin-right: 0px;
 }
 
-/* --- Breadcrumbs and general styling --- */
+/* --- General styling --- */
 
 html{
 	height: 100%;
@@ -136,6 +157,14 @@ body {
 	border-radius:0px;
 }
 
+.panel-default {
+	border-color: #d6d6d6;
+}
+
+.panel-heading {
+	border-color: #d6d6d6;
+}
+
 .page-header {
 	padding: 20px 14px 20px;
 	margin: 0px;
@@ -145,33 +174,32 @@ body {
 #page-header-wrapper {
 	margin: 0px;
 	margin-left: 250px;
-	border-left: 1px solid #e7e7e7;
 	background-color: #f6f6f6;
 }
 
 #page-wrapper {
-	height: 100%;
-	padding-top:20px;
 	min-height: 0px;
+	border-left: 0px;
 	background-color: #f6f6f6;
+	border-color: #d6d6d6;
 }
 
 .panel-default > .panel-heading {
-	background-color: #fafafa;
+	background-color: #f0f0f0;
 }
+
+/* --- Breadcrumbs --- */
 
 .breadcrumb > li + li:before {
     content: "> ";
 }
 
 .breadcrumb {
-	font-size: 12px;
-	background-color: #eaeaea;
-	margin-left:250px;
-	margin:0px;
-	border-top: 1px solid #d6d6d6;
+	background-color: #f0f0f0;
+	height: 29px;
 	border-bottom: 1px solid #d6d6d6;
-	border-radius:0px;
+	border-radius: 0px;
+	padding: 5px 15px;
 }
 
 /* --- Flatstrap --- */
@@ -185,6 +213,12 @@ body {
     box-shadow: none;
 }
 
+.dropdown-menu {
+	border-radius: 0px;
+}
+
+/* --- Responsive fixes --- */
+
 @media (max-width: 768px) {
 	.breadcrumb {
 		margin-left:0px;
@@ -193,27 +227,14 @@ body {
 	#page-header-wrapper {
 		margin-left: 0px;
 	}
+
+    .navbar-top-links {
+    	display:none;
+    }
 }
 
-
-
-/* Small devices (tablets, 768px and up) */
-@media (min-width: @screen-sm-min) {
-	.breadcrumb {
-		margin-left:0px;
+@media (min-width: 768px){
+	.navbar-static-side {
+		height: calc(100% - 50px);
 	}
-
-	#page-header-wrapper {
-		margin-left: 0px;
-	}
-}
-
-/* Medium devices (desktops, 992px and up) */
-@media (min-width: @screen-md-min) {
-
-}
-
-/* Large devices (large desktops, 1200px and up) */
-@media (min-width: @screen-lg-min) {
-
 }
