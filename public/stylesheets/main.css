@@ -1,14 +1,75 @@
-/* --- Menu --- */
+/* --- Top Menu --- */
 
-.submenu {
-	background-color: #eee;
-	padding: 8px 15px!important;
+.nav>li>.avatar:hover, .nav>li>.avatar:focus {
+	background-color: #34383c;
+}
+
+.nav>li>a:hover, .nav>li>a:focus {
+	background-color: #282b2e;
+}
+
+.navbar-top-links li .dropdown-toggle {
+	color: white;
+	background-color: #40454a;
+}
+
+.navbar-static-top {
+	background-color: #34383c;
+	border: none;
+}
+
+.navbar-top-links > li > a {
+	display: inline;
+	padding: 9px 15px 9px 15px;
+}
+
+.navbar-top-links > li > .avatar {
+	padding-right: 0px;
+	margin-right: 0px;
+	background-color: #34383c;
+}
+
+.navbar-top-links > li {
+	height: 36px;
+}
+
+.navbar-top-links > li:last-child {
+	margin-right: 0px;
+	height: 50px;
+}
+
+.navbar-default .navbar-brand {
+	color: white;
+}
+
+.navbar-default:hover .navbar-brand:hover{
+	color: white;
 }
 
 .avatar {
-	/*resize*/
-	width: 30px;
-	height: 30px;
+	width: 50px;
+	height: 50px;
+	display: inline-block;
+}
+
+.avatar > span {
+	padding-right: 15px;
+}
+
+.number {
+	padding:0px 2px;
+	position: absolute;
+	font-size: 9px;
+	top: 5px;
+	right: 12px;
+	color: white;
+	background-color: red;
+}
+
+@media(max-width:768px) {
+    .navbar-top-links {
+    	display:none;
+    }
 }
 
 /* --- Timeline --- */
