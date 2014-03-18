@@ -73,7 +73,6 @@ public class Cars extends Controller {
     public static Result showCarsPage(int page, int ascInt, String orderBy) {
         // TODO: orderBy not as String-argument?
         CarField carField;
-        System.out.println(orderBy);
         switch(orderBy) {
             case "brand" :
                 carField = CarField.BRAND;
