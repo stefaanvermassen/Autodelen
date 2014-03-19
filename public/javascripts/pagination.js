@@ -9,6 +9,9 @@
  * Give these th-elements a name that the route-function takes as an argument and stands for the column to sort on
  * This script will take care of the rest
  *
+ * In the element with id="buttons" all the navigation buttons will come
+ * This element has to have a name-attribute with in it the total amount of pages the list has
+ *
  * Example:
  *
  * In the main file between <script> -tags:
@@ -33,6 +36,8 @@ var buttonsAroundPage = 2;
 
 $(document).ready(loadPage(1, 1, 0));
 
+
+// The function to load a new page
 function loadPage(page, asc, orderBy) {
     route(page, asc, orderBy).ajax({
         success : function(html) {
