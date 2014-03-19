@@ -433,6 +433,8 @@
             this.updateNavArrows();
         },
 
+        // TODO: add disabled dates following each other to one date to disable full periods
+
         /**
          * ADJUSTED: Method to define the begin dates of periods that should be disabled
          */

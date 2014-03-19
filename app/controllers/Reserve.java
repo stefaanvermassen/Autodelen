@@ -3,6 +3,7 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import models.*;
+import notifiers.Notifier;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -12,6 +13,7 @@ import play.mvc.*;
 import views.html.reserve.*;
 import views.html.reserve.reserve2;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class Reserve extends Controller {
@@ -33,13 +35,13 @@ public class Reserve extends Controller {
 
         public String validate() {
             DateTime now = DateTime.now();
-            DateTime from = getTimeFrom();
-            DateTime until = getTimeFrom();
-            if("".equals(from) || "".equals(until)) {
+            DateTime dateFrom = getTimeFrom();
+            DateTime dateUntil = getTimeUntil();
+            if("".equals(dateFrom) || "".equals(dateUntil)) {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
-            } else if(from.isAfter(until) || from.isEqual(until)) {
+            } else if(dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
                 return "De einddatum kan niet voor de begindatum liggen!";
-            } else if(from.isBefore(now)) {
+            } else if(dateFrom.isBefore(now)) {
                 return "Een reservatie die plaats vindt voor vandaag is ongeldig";
             }
             return null;
@@ -70,14 +72,12 @@ public class Reserve extends Controller {
 
             ReservationDAO rdao = context.getReservationDAO();
             List<Reservation> reservations = rdao.getReservationListForCar(carId);
-            // Clean up: delete all reservations that belong to the past
-            DateTime now = DateTime.now();
-            for(Reservation reservation : reservations) {
-                DateTime from = DATEFORMATTER.parseDateTime(reservation.getFrom().toString("yyyy-MM-dd HH:mm:ss"));
-                DateTime until = DATEFORMATTER.parseDateTime(reservation.getTo().toString("yyyy-MM-dd HH:mm:ss"));
-                if(!from.isAfter(now) && !until.isAfter(now)) {
-                    rdao.deleteReservation(reservation);
-                }
+            Iterator<Reservation> it = reservations.iterator();
+            while(it.hasNext())
+            {
+                Reservation reservation = it.next();
+                if(reservation.getStatus() == ReservationStatus.REFUSED)
+                    it.remove();
             }
 
             return ok(reserve2.render(Form.form(ReservationModel.class), car, reservations));
@@ -109,7 +109,8 @@ public class Reserve extends Controller {
                 DateTime from = reservationForm.get().getTimeFrom();
                 DateTime until = reservationForm.get().getTimeUntil();
                 for(Reservation reservation : reservations) {
-                    if(!from.isAfter(reservation.getTo()) && !until.isBefore(reservation.getFrom())) {
+                    if(reservation.getStatus() != ReservationStatus.REFUSED &&
+                            (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
                         reservationForm.reject("De reservatie overlapt met een reeds bestaande reservatie!");
                         return badRequest(reserve2.render(reservationForm, car, reservations));
                     }
@@ -127,9 +128,8 @@ public class Reserve extends Controller {
                         rdao.updateReservation(reservation);
                         context.commit();
                     }
-                    return redirect(
-                            routes.Drives.index() // redirect to drives list
-                    );
+                    Notifier.sendReservationApproveRequestMail(user, reservation);
+                    return redirect(routes.Drives.index());
                 } else {
                     reservationForm.error("De reservatie kon niet aangemaakt worden. Contacteer de administrator");
                     return badRequest(reserve2.render(reservationForm, car, reservations));
