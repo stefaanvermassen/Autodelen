@@ -62,9 +62,7 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
-            int amountOfCars = dao.getAmountOfCars();
-            int amountOfPages = amountOfCars / PAGE_SIZE;
-            return ok(cars.render(amountOfPages));
+            return ok(cars.render());
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -96,7 +94,11 @@ public class Cars extends Controller {
             CarDAO dao = context.getCarDAO();
 
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE);
-            return carspage.render(listOfCars, page);
+
+            int amountOfCars = dao.getAmountOfCars();
+            int amountOfPages = amountOfCars / PAGE_SIZE;
+
+            return carspage.render(listOfCars, page, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }

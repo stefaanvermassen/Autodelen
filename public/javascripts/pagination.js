@@ -2,23 +2,23 @@
  * HOW TO USE
  *
  * In the main listpage include this javascript
- * and give values to variables amountOfPages, route, amountOfSortables
- *  TODO: put amountOfPages not here yet but in the partial list page
+ * and give a values to variable route
+ * optional variables: previousBtnTxt, nextBtnTxt, firstBtnTxt, lastBtnTxt, buttonsAroundPage
  *
- * In the partial list page give the th-elements id="sortableX" where X = 1 to amountOfSortables to the columns you want to sort on
+ * In the partial list page give the th-elements class="sortable"
  * Give these th-elements a name that the route-function takes as an argument and stands for the column to sort on
  * This script will take care of the rest
  *
  * Example:
  *
- * var amountOfPages = @amountOfPages;
+ * In the main file between <script> -tags:
+ * ...
  * var route = myJsRoutes.controllers.Cars.showCarsPage;
- * var amountOfSortables = 2;
  *
  * In the partial file:
  *  ...
- *  <th name="name" id="sortable1" class="sortable">Naam</th>
- *  <th name="brand" id="sortable2" class="sortable">Merk</th>
+ *  <th name="name" class="sortable">Naam</th>
+ *  <th name="brand" id= class="sortable">Merk</th>
  * ...
  */
 
@@ -37,7 +37,7 @@ function loadPage(page, asc, orderBy) {
     route(page, asc, orderBy).ajax({
         success : function(html) {
             $("#carsTable").html(html);
-
+            var amountOfPages = $('#buttons').attr('name');
             /*
              * Navigation buttons
              *
@@ -94,12 +94,12 @@ function loadPage(page, asc, orderBy) {
             /*
              * Sorting
              *
-             * All th-elements that we want to sort on have to have an id = "sortableX"
-             * Where X is a number between 1 and amountOfSortables
+             * All th-elements that we want to sort on have to have the class "sortable"
              * It also has to have a name attribute that will be used in the controller to know what to sort on
              */
-            for (var i=1; i <= amountOfSortables; i++) {
-                var sortable = document.getElementById("sortable" + i);
+            var sortables = document.getElementsByClassName('sortable');
+            for (var i=0; i < sortables.length; i++) {
+                var sortable = sortables[i];
                 sortable.onclick = function() {
                     var orderByNew = this.getAttribute("name");
                     if(orderBy == orderByNew) {
@@ -114,7 +114,7 @@ function loadPage(page, asc, orderBy) {
 
                 // Set class of sorted column to asc or desc (so we can style with css)
                 if(sortable.getAttribute("name") == orderBy) {
-                    sortable.setAttribute("class", sortable.getAttribute("class" + " " + (asc == 1 ? "asc" : "desc")));
+                    sortable.setAttribute("class", sortable.getAttribute("class") + " " + (asc == 1 ? "asc" : "desc"));
                 }
             }
 

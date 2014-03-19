@@ -1,13 +1,10 @@
-@(amountOfPages : Int)
 @import database.DatabaseHelper;
 
 @scripts = {
     <script src="@routes.Assets.at("javascripts/jquery-1.10.2.js")"></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
-        var amountOfPages = @amountOfPages;
         var route = myJsRoutes.controllers.Cars.showCarsPage;
-        var amountOfSortables = 2;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
