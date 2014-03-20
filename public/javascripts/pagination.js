@@ -7,10 +7,13 @@
  *
  * In the partial list page give the th-elements class="sortable"
  * Give these th-elements a name that the route-function takes as an argument and stands for the column to sort on
- * This script will take care of the rest
  *
  * In the element with id="buttons" all the navigation buttons will come
  * This element has to have a name-attribute with in it the total amount of pages the list has
+ *
+ * To sort, you create input-textfields with class="searchTextField"
+ * Give these input-elements a name that stands for the column to search in
+ * The search-button has to have the id="searchButton"
  *
  * Example:
  *
@@ -20,9 +23,14 @@
  *
  * In the partial file:
  *  ...
+ *  <input class="searchTextField" name="name" value="Naam" type="text">
+ *  <input class="searchTextField" name="brand" value="Merk" type="text">
+ *  <button id="searchButton">Zoek!</button>
+ *  ...
  *  <th name="name" class="sortable">Naam</th>
  *  <th name="brand" id= class="sortable">Merk</th>
  * ...
+ *  <p id="buttons" name="@amountOfPages"></p>
  */
 
 /* Variables we can overwrite after we included the script */
@@ -38,8 +46,8 @@ $(document).ready(loadPage(1, 1, "", ""));
 
 
 // The function to load a new page
-function loadPage(page, asc, orderBy, searchName) {
-    route(page, asc, orderBy, searchName).ajax({
+function loadPage(page, asc, orderBy, search) {
+    route(page, asc, orderBy, search).ajax({
         success : function(html) {
             $("#carsTable").html(html);
             var amountOfPages = $('#buttons').attr('name');
@@ -91,7 +99,7 @@ function loadPage(page, asc, orderBy, searchName) {
                 } else {
                     buttons[i].onclick = function() {
                         var p = parseInt(this.getAttribute("name"));
-                        loadPage(p, asc, orderBy, searchName);
+                        loadPage(p, asc, orderBy, search);
                     }
                 }
             }
@@ -114,7 +122,7 @@ function loadPage(page, asc, orderBy, searchName) {
                         asc = 1;
                     }
                     page = 1;
-                    loadPage(page, asc, orderByNew, searchName);
+                    loadPage(page, asc, orderByNew, search);
                 };
 
                 // Set class of sorted column to asc or desc (so we can style with css)
@@ -124,18 +132,39 @@ function loadPage(page, asc, orderBy, searchName) {
             }
 
             /*
-             * TODO: Filtering
+             * Filtering
+             *
+             * All input text fields that we want to search with have the class "searchTextField"
+             * It also has to have a name attribute that will be used in the controller to know what to search on
              */
-            var searchField = document.getElementById("searchfield");
-            if(searchName != "") {
-                searchField.value = searchName;
-            }
             var searchButton = document.getElementById("searchButton");
             searchButton.onclick = function() {
-                var searchText = document.getElementById("searchfield").value;
-                loadPage(1, 1, "", searchText);
+                var searchFields = document.getElementsByClassName("searchTextField");
+                var values = new Array();
+                var fields = new Array();
+                for(var i=0; i < searchFields.length; i++) {
+                    var searchField = searchFields[i];
+                    fields[i] = searchField.getAttribute('name');
+                    values[i] = searchField.value;
+                }
+                var searchString = createSearchString(fields, values);
+                loadPage(1, 1, "", searchString);
             }
 
         }
     });
+}
+
+/*
+ * Create a string "field1:value1,field2:value2" and so on
+ */
+function createSearchString(fields, values) {
+    var searchString = "";
+    for(var i = 0; i < fields.length; i++) {
+        searchString += fields[i] + ":" + values[i];
+        if(i != fields.length-1) {
+            searchString += ",";
+        }
+    }
+    return searchString;
 }

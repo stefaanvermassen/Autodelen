@@ -70,13 +70,22 @@ public class Cars extends Controller {
         }
     }
 
-    public static Result showCarsPage(int page, int ascInt, String orderBy, String name) {
+    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         CarField carField = CarField.stringToField(orderBy);
 
-        Filter<CarField> filter = new JDBCFilter<>();
-        filter.fieldContains(CarField.NAME, name);
         boolean asc = ascInt == 1;
+
+        Filter<CarField> filter = new JDBCFilter<>();
+        if(searchString != "") {
+            String[] searchStrings = searchString.split(",");
+            for(String s : searchStrings) {
+                String[] s2 = s.split(":");
+                String field = s2[0];
+                String value = s2[1];
+                filter.fieldContains(CarField.stringToField(field), value);
+            }
+        }
         return ok(carList(page, carField, asc, filter));
     }
 
