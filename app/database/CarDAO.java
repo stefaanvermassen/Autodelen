@@ -24,9 +24,9 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
     public void deleteCar(Car car) throws DataAccessException;
-    public int getAmountOfCars() throws DataAccessException;
+    public int getAmountOfCars(Filter<CarField> filter) throws DataAccessException;
     public List<Car> getCarList() throws DataAccessException; // TODO: delete this method, use with pages
     public List<Car> getCarList(int page, int pageSize) throws DataAccessException;
-    public List<Car> getCarList(CarField orderBy, boolean asc, int page, int pageSize) throws DataAccessException;
+    public List<Car> getCarList(CarField orderBy, boolean asc, int page, int pageSize, Filter<CarField> filter) throws DataAccessException;
     public List<Car> getCarsOfUser(int user_id) throws DataAccessException;
 }

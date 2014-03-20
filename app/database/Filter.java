@@ -5,6 +5,5 @@ package database;
  */
 public interface Filter<F extends Enum<F>> {
     public void fieldContains(F field, String string);
-    public void fieldStartsWith(F field, String string);
-    public void fieldEndsWith(F field, String string);
+    public String getFieldContains(F field);
 }

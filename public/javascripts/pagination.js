@@ -34,12 +34,12 @@ var lastBtnTxt = ">>";
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
 var buttonsAroundPage = 2;
 
-$(document).ready(loadPage(1, 1, 0));
+$(document).ready(loadPage(1, 1, "", ""));
 
 
 // The function to load a new page
-function loadPage(page, asc, orderBy) {
-    route(page, asc, orderBy).ajax({
+function loadPage(page, asc, orderBy, searchName) {
+    route(page, asc, orderBy, searchName).ajax({
         success : function(html) {
             $("#carsTable").html(html);
             var amountOfPages = $('#buttons').attr('name');
@@ -91,7 +91,7 @@ function loadPage(page, asc, orderBy) {
                 } else {
                     buttons[i].onclick = function() {
                         var p = parseInt(this.getAttribute("name"));
-                        loadPage(p, asc, orderBy);
+                        loadPage(p, asc, orderBy, searchName);
                     }
                 }
             }
@@ -114,7 +114,7 @@ function loadPage(page, asc, orderBy) {
                         asc = 1;
                     }
                     page = 1;
-                    loadPage(page, asc, orderByNew);
+                    loadPage(page, asc, orderByNew, searchName);
                 };
 
                 // Set class of sorted column to asc or desc (so we can style with css)
@@ -126,6 +126,16 @@ function loadPage(page, asc, orderBy) {
             /*
              * TODO: Filtering
              */
+            var searchField = document.getElementById("searchfield");
+            if(searchName != "") {
+                searchField.value = searchName;
+            }
+            var searchButton = document.getElementById("searchButton");
+            searchButton.onclick = function() {
+                var searchText = document.getElementById("searchfield").value;
+                loadPage(1, 1, "", searchText);
+            }
+
         }
     });
 }

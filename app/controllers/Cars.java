@@ -1,6 +1,8 @@
 package controllers;
 
 import database.*;
+import database.jdbc.JDBCCarDAO;
+import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
 
@@ -68,34 +70,28 @@ public class Cars extends Controller {
         }
     }
 
-    public static Result showCarsPage(int page, int ascInt, String orderBy) {
+    public static Result showCarsPage(int page, int ascInt, String orderBy, String name) {
         // TODO: orderBy not as String-argument?
-        CarField carField;
-        switch(orderBy) {
-            case "brand" :
-                carField = CarField.BRAND;
-                break;
-            default: // also name
-                carField = CarField.NAME;
-                break;
+        CarField carField = CarField.stringToField(orderBy);
 
-        }
+        Filter<CarField> filter = new JDBCFilter<>();
+        filter.fieldContains(CarField.NAME, name);
         boolean asc = ascInt == 1;
-        return ok(carList(page, carField, asc));
+        return ok(carList(page, carField, asc, filter));
     }
 
     private static Html carList() {
-        return carList(1, CarField.NAME, true);
+        return carList(1, CarField.NAME, true, null);
     }
 
-    private static Html carList(int page, CarField orderBy, boolean asc) {
+    private static Html carList(int page, CarField orderBy, boolean asc, Filter<CarField> filter) {
 
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
-            List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE);
+            List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 
-            int amountOfCars = dao.getAmountOfCars();
+            int amountOfCars = dao.getAmountOfCars(filter);
             int amountOfPages = amountOfCars / PAGE_SIZE;
 
             return carspage.render(listOfCars, page, amountOfPages);
