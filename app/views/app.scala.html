@@ -39,48 +39,30 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-bell fa-fw"></i>
-                            <!-- <span class="number">10</span> -->
+                            <span class="number">8</span>
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
+                            @defining(DatabaseHelper.getNotificationProvider().getNotifications(user.getId())) { notifications =>
+                                @for((notification, index) <- notifications.zipWithIndex) {
+                                    @if(index<3){
+                                        <li>
+                                            <a href="#">
+                                                <div>
+                                                    <strong>John Smith</strong>
+                                                    <span class="pull-right text-muted">
+                                                        <em>Yesterday</em>
+                                                    </span>
+                                                </div>
+                                                <div>@Html(notification.getBody.substring(0,80))...</div>
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
                             <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#">
-                                    <strong>Read All Messages</strong>
+                                <a class="text-center" href="@routes.Messages.showNotifications()">
+                                    <strong>Bekijk alle notificaties</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -141,7 +123,7 @@
                     <!-- /.dropdown -->
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>John Dough</span>
+                            <span>@user.toString</span>
                             <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
                         </a>
                         <ul class="dropdown-menu dropdown-user">
