@@ -46,7 +46,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
         if (getNotificationListByUseridStatement == null) {
             getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM Notifications JOIN Users ON " +
-                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_timestamp;");
+                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_timestamp DESC;");
         }
         return getNotificationListByUseridStatement;
     }
