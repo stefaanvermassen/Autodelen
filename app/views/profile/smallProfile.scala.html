@@ -1,27 +1,17 @@
-@(user: User, form: Form[Profile.EditSmallProfileModel])
-@helper.form(routes.Profile.editSmallProfilePost(user.getId), 'class -> "form-horizontal") {
-    @if(form.hasGlobalErrors) {
-        <div class="alert alert-danger alert-dismissable">
-            <strong>Error!</strong> @form.globalError.message
-        </div>
-    }
-    <div class="form-group">
-        @* TODO: profile pictures *@
-        <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
-    </div>
-    <div class="form-group">
-        <p class="form-control-static h2">@user.getFirstName @user.getLastName</p>
-    </div>
-    <div class="form-group">
-        <p class="form-control-static">@user.getEmail<br>
-
-        <span class="smallprofile-static">@if(user.getPhone != null && !user.getPhone.isEmpty) { @user.getPhone } else { Geen telefoon opgegeven. }</span>
-        <input id="phone" name="phone" type="text" placeholder="Telefoon" class="form-control input-md smallprofile-dynamic" value="@form("phone").value">
-
-        </p>
-    </div>
-    <div class="form-group">
-        <button class="btn btn-default btn-sm smallprofile-static" type="button" id="editSmallProfile">Wijzigen</button>
-        <button class="btn btn-default btn-sm smallprofile-dynamic" id="saveSmallProfile">Opslaan</button>
-    </div>
-}
+@(user: User)
+<!-- TODO: These are no form groups! -->
+<div class="form-group">
+    @* TODO: profile pictures *@
+    <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
+</div>
+<div class="form-group">
+    <p class="form-control-static h2">@user.getFirstName @user.getLastName</p>
+</div>
+<div class="form-group">
+    <p class="form-control-static">@user.getEmail <br>
+        <span>@if(user.getPhone != null && !user.getPhone.isEmpty) {
+            @user.getPhone
+        } else { Geen telefoon opgegeven. }</span>
+    </p>
+</div>
+<a class="btn btn-default btn-sm smallprofile-static" href="@routes.Profile.edit(user.getId)" >Wijzigen</a>
