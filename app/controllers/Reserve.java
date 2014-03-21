@@ -3,7 +3,6 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import models.*;
-import notifiers.Mail;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -13,9 +12,6 @@ import play.mvc.*;
 import views.html.reserve.*;
 import views.html.reserve.reserve2;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class Reserve extends Controller {

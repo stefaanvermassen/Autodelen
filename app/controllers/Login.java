@@ -8,7 +8,7 @@ import database.UserDAO;
 import models.User;
 import models.UserStatus;
 import models.VerificationType;
-import notifiers.Mail;
+import notifiers.Notifier;
 import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
 import play.data.validation.Constraints;
@@ -119,7 +119,7 @@ public class Login extends Controller {
                         dao.deleteVerificationString(user, VerificationType.REGISTRATION);
                         String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
                         context.commit();
-                        Mail.sendVerificationMail(user, verificationIdent);
+                        Notifier.sendVerificationMail(user, verificationIdent);
                         return ok(registrationok.render(user.getId(), verificationIdent, true));
                     } catch (DataAccessException ex) {
                         context.rollback();
@@ -168,7 +168,7 @@ public class Login extends Controller {
 
                         String newUuid = dao.createVerificationString(user, VerificationType.PWRESET);
                         context.commit();
-                        Mail.sendPasswordResetMail(user, newUuid);
+                        Notifier.sendPasswordResetMail(user, newUuid);
                         return ok(pwresetrequestok.render(user.getId(), newUuid, user.getEmail()));
                     } catch (DataAccessException ex) {
                         context.rollback();
@@ -335,7 +335,7 @@ public class Login extends Controller {
                     flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
                     LoginModel model = new LoginModel();
                     model.email = user.getEmail();
-                    Mail.sendWelcomeMail(user);
+                    Notifier.sendWelcomeMail(user);
                     return ok(login.render(Form.form(LoginModel.class).fill(model)));
                 } else {
                     return badRequest("De verificatiecode komt niet overeen met onze gegevens. TODO: nieuwe string voorstellen.");
@@ -371,7 +371,7 @@ public class Login extends Controller {
                         // Now we create a registration UUID
                         String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
                         context.commit();
-                        Mail.sendVerificationMail(user, verificationIdent);
+                        Notifier.sendVerificationMail(user, verificationIdent);
 
                         return ok(registrationok.render(user.getId(), verificationIdent, true));
                     } catch (DataAccessException ex) {
