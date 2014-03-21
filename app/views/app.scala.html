@@ -1,5 +1,5 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
-
+@import org.joda.time.format.DateTimeFormat
 @import database.DatabaseHelper;
 @defining(DatabaseHelper.getUserProvider().getUser(session.get("email"))) { user =>
 
@@ -39,48 +39,41 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-bell fa-fw"></i>
-                            <!-- <span class="number">10</span> -->
+                            @defining(DatabaseHelper.getNotificationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="number">@unread_number</span>
+                              }
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
+                            @defining(DatabaseHelper.getNotificationProvider().getNotifications(user.getId())) { notifications =>
+                                @for((notification, index) <- notifications.zipWithIndex) {
+                                    @if(index<3){
+                                        <li>
+                                            <a href="#">
+                                                <div>
+                                                    @if(!notification.getRead){
+                                                    <strong>Dégage [ongelezen]</strong>
+                                                        }else{
+                                                    <strong>Dégage</strong>
+                                                        }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
+                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
                             <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#">
-                                    <strong>Read All Messages</strong>
+                                <a class="text-center" href="@routes.Messages.showNotifications()">
+                                    <strong>Bekijk alle notificaties</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -141,7 +134,7 @@
                     <!-- /.dropdown -->
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>John Dough</span>
+                            <span>@user.toString</span>
                             <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
                         </a>
                         <ul class="dropdown-menu dropdown-user">
