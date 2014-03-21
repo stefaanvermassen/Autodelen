@@ -61,7 +61,10 @@
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
                                                     </span>
                                                 </div>
-                                                <div>@Html(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","").substring(0,80))...</div>
+                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
+                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
+                                                }
+
                                             </a>
                                         </li>
                                         <li class="divider"></li>
