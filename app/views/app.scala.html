@@ -39,14 +39,14 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-bell fa-fw"></i>
-                            @defining(DatabaseHelper.getNotificationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
                               @if(unread_number>0){
                                   <span class="number">@unread_number</span>
                               }
                             }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
-                            @defining(DatabaseHelper.getNotificationProvider().getNotifications(user.getId())) { notifications =>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
                                 @for((notification, index) <- notifications.zipWithIndex) {
                                     @if(index<3){
                                         <li>
@@ -72,7 +72,7 @@
                                 }
                             }
                             <li>
-                                <a class="text-center" href="@routes.Messages.showNotifications()">
+                                <a class="text-center" href="@routes.Notifications.showNotifications()">
                                     <strong>Bekijk alle notificaties</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
@@ -83,48 +83,41 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-envelope fa-fw"></i>
-                            <span class="number">8</span>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="number">@unread_number</span>
+                                }
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
+                            @defining(DatabaseHelper.getCommunicationProvider().getMessages(user.getId())) { messages =>
+                                @for((message, index) <- messages.zipWithIndex) {
+                                    @if(index<3){
+                                        <li>
+                                            <a href="#">
+                                                <div>
+                                                    @if(!message.isRead){
+                                                        <strong>Dégage [ongelezen]</strong>
+                                                    }else{
+                                                        <strong>Dégage</strong>
+                                                    }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(message.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { message_body =>
+                                                    <div>@Html(message_body.substring(0,math.min(80,message_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
                             <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#">
-                                    <strong>Read All Messages</strong>
+                                <a class="text-center" href="@routes.Messages.showMessages()">
+                                    <strong>Bekijk alle berichten</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -185,7 +178,10 @@
 
                         <li class="submenu">ACCOUNT</li>
                         <li @if(title == "Berichten") {class="active"}>
-                            <a href="@routes.Messages.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                            <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                        </li>
+                        <li @if(title == "Notificaties") {class="active"}>
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties</a>
                         </li>
                         <li @if(title == "Profiel") {class="active"}>
                             <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
