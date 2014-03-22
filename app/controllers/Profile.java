@@ -256,6 +256,7 @@ public class Profile extends Controller {
                     Address residenceAddress = user.getAddressResidence();
                     boolean deleteResidence = model.residenceAddress.isEmpty() && residenceAddress != null;
                     user.setAddressResidence(deleteResidence ? null : modifyAddress(model.residenceAddress, residenceAddress, adao));
+
                     dao.updateUser(user, true); // Full update (includes FKs)
 
                     // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
