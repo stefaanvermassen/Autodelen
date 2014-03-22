@@ -20,25 +20,26 @@
             <!-- Page-Level Plugin CSS - Main -->
     </head>
     <body>
-        <div class="container">
-        <div class="jumbotron">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="error-template">
-
-                            <h1><span class="glyphicon glyphicon-ban-circle"></span> Oeps!!</h1>
-                            <h2> Toegang geweigerd</h2>
-                            <div class="error-details">
-                                <p>U heeft een van volgende recht(en) nodig om deze pagina te openen:</p>
-                                <ul>
-                                    @for(role <- roles){
-                                        <li>@role</li>
-                                    }
-                                </ul>
-                            </div>
-                            <div class="error-actions">
-                                <a href="@routes.Application.index" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-home"></span>
-                                    Ga naar homepage</a><!--<a href="http://www.jquery2dotnet.com" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-envelope"></span> Contact Support </a>-->
+        <div id="wrapper">
+            <div class="container">
+                <div class="jumbotron">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="error-template">
+                                    <h1><span class="glyphicon glyphicon-ban-circle"></span> Oeps!!</h1>
+                                    <h2> Toegang geweigerd</h2>
+                                    <div class="error-details">
+                                        <p>U heeft een van volgende recht(en) nodig om deze pagina te openen:</p>
+                                        <ul>
+                                            @for(role <- roles){
+                                                <li>@role</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="error-actions">
+                                        <a href="@routes.Application.index" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-home"></span> Ga naar homepage</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

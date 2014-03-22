@@ -1,7 +1,7 @@
 @(users: List[User])
 @import database.DatabaseHelper;
 
-    @scripts = {
+@scripts = {
     <script src="@routes.Assets.at("../../../public/javascripts/plugins/dataTables/jquery.dataTables.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("../../../public/javascripts/plugins/dataTables/dataTables.bootstrap.js")" type="text/javascript"></script>
     <script>
@@ -9,8 +9,7 @@
         $('#dataTables-overview').dataTable( {
             "bFilter": true,
             "bInfo": false,
-            "bLengthChange": false,
-
+            "bLengthChange": true,
             "aoColumns": [
               null,
               null,
@@ -91,17 +90,6 @@
                                         </td>
                                     </tr>
                                 }
-                                <tr>
-                                    <td>1</td>
-                                    <td>John Dough</td>
-                                    <td>&#9398; &#9399; &#9400; &#9401; &#9402; &#9403; &#9404;</td>
-                                    <td>
-                                        <div class="btn-group btn-group-xs">
-                                            <a href="" class="btn btn-primary">bewerken</a>
-                                        </div>
-                                    </td>
-                                </tr>
-
                             </tbody>
                         </table>
                     </div>
