@@ -9,9 +9,9 @@
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
                 @if(infoSession.getMaxEnrollees == 0){
-                    <strong># deelnemers</strong> @infoSession.getEnrolleeCount (onbeperkt)
+                    <strong># deelnemers:</strong> @infoSession.getEnrolleeCount (onbeperkt)
                 } else {
-                    <strong># deelnemers</strong>
+                    <strong># deelnemers:</strong>
                     @if(infoSession.getEnrolleeCount < infoSession.getMaxEnrollees) {
                         @infoSession.getEnrolleeCount / @infoSession.getMaxEnrollees
                     } else {
@@ -19,13 +19,13 @@
                     }
                 }
             </p>
-            @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-
         </div>
     </div>
     <div class="col-lg-8">
-    <div class="well">
-            Map placeholder
-    </div>
+        <div class="well">
+
+                @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
+                Map placeholder
+        </div>
     </div>
 </div>
