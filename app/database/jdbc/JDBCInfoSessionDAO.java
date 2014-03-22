@@ -1,7 +1,9 @@
 package database.jdbc;
 
 import database.DataAccessException;
+import database.Filter;
 import database.InfoSessionDAO;
+import database.fields.InfoSessionField;
 import models.*;
 import org.joda.time.DateTime;
 
@@ -24,9 +26,32 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id";
 
+
+    // Also includes the # of attendees, this query is way too complex
+    private static String INFOSESSION_QUERY = "SELECT IFNULL(sub.total, 0) going, ses.infosession_id infosession_id, ses.infosession_type infosession_type, " +
+            "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees," +
+            "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+            "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
+            "JOIN users ON infosession_host_user_id = user_id " +
+            "JOIN addresses ON infosession_address_id = address_id " +
+            "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees GROUP BY infosession_id) sub ON (ses.infosession_id = sub.infosession_id) " +
+            "WHERE ses.infosession_timestamp > ? ";
+
+    private static String FILTER_FRAGMENT = "  "; // TODO: get something to filter on
+
+    private void fillFragment(PreparedStatement ps, Filter<InfoSessionField> filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = createInfoSessionFilter();
+        }
+        // TODO get something to filter on
+    }
+
     private PreparedStatement deleteInfoSession;
     private PreparedStatement createInfoSessionStatement;
     private PreparedStatement getInfoSessionsAfterStatement;
+    private PreparedStatement getInfoSessionsAfterPageByDateAscStatement;
+    private PreparedStatement getInfoSessionsAfterPageByDateDescStatement;
     private PreparedStatement getInfoSessionById;
     private PreparedStatement getInfosessionForUser;
     private PreparedStatement registerUserForSession;
@@ -35,6 +60,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement setAddressForSession;
     private PreparedStatement setTimeForSession;
     private PreparedStatement setUserEnrollmentStatusForSession;
+    private PreparedStatement getGetAmountOfInfoSessionsStatement;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
@@ -110,18 +136,27 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getGetInfoSessionsAfterStatement() throws SQLException {
         if (getInfoSessionsAfterStatement == null) {
-            // Also includes the # of attendees, this query is way too complex
-            getInfoSessionsAfterStatement = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ses.infosession_id infosession_id, ses.infosession_type infosession_type, " +
-                    "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees," +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
-                    "JOIN users ON infosession_host_user_id = user_id " +
-                    "JOIN addresses ON infosession_address_id = address_id " +
-                    "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees GROUP BY infosession_id) sub ON (ses.infosession_id = sub.infosession_id) " +
-                    "WHERE ses.infosession_timestamp > ? " +
+            getInfoSessionsAfterStatement = connection.prepareStatement(INFOSESSION_QUERY +
                     "ORDER BY infosession_timestamp ASC");
         }
         return getInfoSessionsAfterStatement;
+    }
+
+    private PreparedStatement getGetInfoSessionsAfterPageByDateAscStatement() throws SQLException {
+        if (getInfoSessionsAfterPageByDateAscStatement == null) {
+            // Also includes the # of attendees, this query is way too complex
+            getInfoSessionsAfterPageByDateAscStatement = connection.prepareStatement(INFOSESSION_QUERY +
+                    "ORDER BY infosession_timestamp ASC LIMIT ?, ?");
+        }
+        return getInfoSessionsAfterPageByDateAscStatement;
+    }
+    private PreparedStatement getGetInfoSessionsAfterPageByDateDescStatement() throws SQLException {
+        if (getInfoSessionsAfterPageByDateDescStatement == null) {
+            // Also includes the # of attendees, this query is way too complex
+            getInfoSessionsAfterPageByDateDescStatement = connection.prepareStatement(INFOSESSION_QUERY +
+                    "ORDER BY infosession_timestamp DESC LIMIT ?, ?");
+        }
+        return getInfoSessionsAfterPageByDateDescStatement;
     }
 
     private PreparedStatement getGetInfoSessionById() throws SQLException {
@@ -129,6 +164,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             getInfoSessionById = connection.prepareStatement(INFOSESSION_SELECTOR + " WHERE infosession_id = ?");
         }
         return getInfoSessionById;
+    }
+
+    private PreparedStatement getGetAmountOfInfoSessionsStatement() throws SQLException {
+        if(getGetAmountOfInfoSessionsStatement == null) {
+            // TODO: filter the WHERE statement
+            getGetAmountOfInfoSessionsStatement = connection.prepareStatement("SELECT COUNT(infosession_id) AS amount_of_infosessions FROM InfoSessions WHERE infosession_timestamp > ? " + FILTER_FRAGMENT);
+        }
+        return getGetAmountOfInfoSessionsStatement;
     }
 
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
@@ -143,6 +186,11 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             return new InfoSession(rs.getInt("infosession_id"), InfoSessionType.valueOf(rs.getString("infosession_type")), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs),
                     JDBCUserDAO.populateUser(rs, false, false), rs.getInt("infosession_max_enrollees"));
         }
+    }
+
+    @Override
+    public Filter<InfoSessionField> createInfoSessionFilter() {
+        return new JDBCFilter<InfoSessionField>();
     }
 
     @Override
@@ -227,6 +275,28 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
+    public int getAmountOfInfoSessions(Filter<InfoSessionField> filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfInfoSessionsStatement();
+            fillFragment(ps, filter, 1);
+            // TODO: do this in filter
+            DateTime since = DateTime.now();
+            ps.setTimestamp(1, new Timestamp(since.getMillis()));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_infosessions");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of infosessions", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of infosessions", ex);
+        }
+    }
+
+    @Override
     public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException {
         List<InfoSession> sessions = new ArrayList<InfoSession>();
         try {
@@ -242,6 +312,30 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not infosessions.", ex);
+        }
+    }
+
+    @Override
+    public List<InfoSession> getInfoSessionsAfter(DateTime since, InfoSessionField orderBy, boolean asc, int page, int pageSize, Filter<InfoSessionField> filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = null;
+            switch(orderBy) {
+                case DATE :
+                    ps = asc ? getGetInfoSessionsAfterPageByDateAscStatement() : getGetInfoSessionsAfterPageByDateDescStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create getInfoSessionsAfter statement");
+            }
+
+            ps.setTimestamp(1, new Timestamp(since.getMillis())); //TODO: convert to datetime see above
+            fillFragment(ps, filter, 2);
+            int first = (page-1)*pageSize;
+            ps.setInt(2, first);
+            ps.setInt(3, pageSize);
+            return getInfoSessions(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of infosessions", ex);
         }
     }
 
@@ -346,6 +440,18 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to fetch infosession for user", ex);
+        }
+    }
+
+    private List<InfoSession> getInfoSessions(PreparedStatement ps) {
+        List<InfoSession> infosessions = new ArrayList<>();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                infosessions.add(populateInfoSession(rs, true));
+            }
+            return infosessions;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error reading cars resultset", ex);
         }
     }
 }

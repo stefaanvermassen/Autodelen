@@ -5,6 +5,8 @@
  * and give a values to variable route
  * optional variables: previousBtnTxt, nextBtnTxt, firstBtnTxt, lastBtnTxt, buttonsAroundPage
  *
+ * In the element with id="resultsTable", the table will be loaded
+ *
  * In the partial list page give the th-elements class="sortable"
  * Give these th-elements a name that the route-function takes as an argument and stands for the column to sort on
  *
@@ -20,6 +22,10 @@
  * In the main file between <script> -tags:
  * ...
  * var route = myJsRoutes.controllers.Cars.showCarsPage;
+ * ...
+ * <div id="resultsTable">
+ *      <!-- Here comes the loaded table-->
+ * </div>
  *
  * In the partial file:
  *  ...
@@ -42,15 +48,37 @@ var lastBtnTxt = ">>";
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
 var buttonsAroundPage = 2;
 
+// Initially, we load the first page in ascending order, ordered by the default column, without filtering
 $(document).ready(loadPage(1, 1, "", ""));
 
+/*
+ * Filtering
+ *
+ * All input text fields that we want to search with have the class "searchTextField"
+ * It also has to have a name attribute that will be used in the controller to know what to search on
+ */
+var searchButton = document.getElementById("searchButton");
+searchButton.onclick = function() {
+    var searchFields = document.getElementsByClassName("searchTextField");
+    var values = new Array();
+    var fields = new Array();
+    for(var i=0; i < searchFields.length; i++) {
+        var searchField = searchFields[i];
+        fields[i] = searchField.getAttribute('name');
+        values[i] = searchField.value;
+    }
+    var searchString = createSearchString(fields, values);
+    loadPage(1, 1, "", searchString);
+}
 
 // The function to load a new page
 function loadPage(page, asc, orderBy, search) {
-    $("#carsTable").html("Loading...");
+    // TODO: write some better loading
+    $("#resultsTable").append("Loading...");
+
     route(page, asc, orderBy, search).ajax({
         success : function(html) {
-            $("#carsTable").html(html);
+            $("#resultsTable").html(html);
             // TODO: better way to pass amountOfResults and amountOfPages to javascript?
             var amountOfResultsAndPages = $('#buttons').attr('name').split(",");
             var amountOfResults = amountOfResultsAndPages[0];
@@ -139,27 +167,10 @@ function loadPage(page, asc, orderBy, search) {
                     sortable.setAttribute("class", sortable.getAttribute("class") + " " + (asc == 1 ? "asc" : "desc"));
                 }
             }
-
-            /*
-             * Filtering
-             *
-             * All input text fields that we want to search with have the class "searchTextField"
-             * It also has to have a name attribute that will be used in the controller to know what to search on
-             */
-            var searchButton = document.getElementById("searchButton");
-            searchButton.onclick = function() {
-                var searchFields = document.getElementsByClassName("searchTextField");
-                var values = new Array();
-                var fields = new Array();
-                for(var i=0; i < searchFields.length; i++) {
-                    var searchField = searchFields[i];
-                    fields[i] = searchField.getAttribute('name');
-                    values[i] = searchField.value;
-                }
-                var searchString = createSearchString(fields, values);
-                loadPage(1, 1, "", searchString);
-            }
-
+        },
+        error : function() {
+            // TODO: make clearer
+            $("#resultsTable").html("Er ging iets mis...");
         }
     });
 }

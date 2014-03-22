@@ -2,6 +2,9 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
+import database.fields.CarField;
+import database.fields.InfoSessionField;
+import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -19,6 +22,8 @@ import java.util.List;
  * Created by Cedric on 2/21/14.
  */
 public class InfoSessions extends Controller {
+
+    private static final int PAGE_SIZE = 10;
 
     private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
 
@@ -394,13 +399,54 @@ public class InfoSessions extends Controller {
         }
     }
 
-    private static Html upcomingSessionsList() {
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result showUpcomingSessions() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
 
-            List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
+            return ok(infosessions.render(enrolled));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result showUpcomingSessionsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        InfoSessionField infoSessionField = InfoSessionField.stringToField(orderBy);
+
+        // TODO: create asc and filter in method
+        boolean asc = ascInt == 1;
+
+        Filter<InfoSessionField> filter = new JDBCFilter<>();
+        if(searchString != "") {
+            String[] searchStrings = searchString.split(",");
+            for(String s : searchStrings) {
+                String[] s2 = s.split(":");
+                String field = s2[0];
+                String value = s2[1];
+                filter.fieldContains(InfoSessionField.stringToField(field), value);
+            }
+        }
+        return ok(upcommingSessionsList(page, infoSessionField, asc, filter));
+    }
+
+    private static Html upcomingSessionsList() {
+        return upcommingSessionsList(1, InfoSessionField.DATE, true, null);
+    }
+    private static Html upcommingSessionsList(int page, InfoSessionField orderBy, boolean asc, Filter<InfoSessionField> filter) {
+
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            InfoSession enrolled = dao.getAttendingInfoSession(user);
+            if(orderBy == null) {
+                orderBy = InfoSessionField.DATE;
+            }
+            List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
             if (enrolled != null) {
                 //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
                 // Hack herpedy derp!!
@@ -413,14 +459,13 @@ public class InfoSessions extends Controller {
                 }
             }
 
-            return infosessions.render(sessions, enrolled);
+            int amountOfResults = dao.getAmountOfInfoSessions(filter);
+            int amountOfPages = amountOfResults / PAGE_SIZE;
+
+            // TODO amount of results and amount of pages
+            return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
-    }
-
-    @RoleSecured.RoleAuthenticated()
-    public static Result showUpcomingSessions() {
-        return ok(upcomingSessionsList());
     }
 }

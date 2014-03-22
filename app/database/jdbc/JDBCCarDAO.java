@@ -5,14 +5,13 @@
 package database.jdbc;
 
 import database.CarDAO;
-import database.CarField;
+import database.fields.CarField;
 import database.DataAccessException;
 import database.Filter;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.sql.Date;
-import java.util.EnumMap;
 import java.util.List;
 
 import models.Address;
@@ -36,7 +35,7 @@ public class JDBCCarDAO implements CarDAO{
     private void fillFragment(PreparedStatement ps, Filter<CarField> filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = createCarListFilter();
+            filter = createCarFilter();
         }
         ps.setString(start, filter.getFieldContains(CarField.NAME));
         ps.setString(start+1, filter.getFieldContains(CarField.BRAND));
@@ -332,7 +331,7 @@ public class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public Filter<CarField> createCarListFilter() {
+    public Filter<CarField> createCarFilter() {
         return new JDBCFilter<CarField>();
     }
 
@@ -381,7 +380,7 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
-    public List<Car> getCars(PreparedStatement ps) {
+    private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

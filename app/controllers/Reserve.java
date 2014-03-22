@@ -2,6 +2,8 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
+import database.fields.CarField;
+import database.jdbc.JDBCFilter;
 import models.*;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -15,6 +17,8 @@ import views.html.reserve.reserve2;
 import java.util.List;
 
 public class Reserve extends Controller {
+
+    private static final int PAGE_SIZE = 10;
 
     private static final DateTimeFormatter DATEFORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
@@ -53,10 +57,43 @@ public class Reserve extends Controller {
     }
 
     public static Html showIndex() {
+        return reservations.render();
+    }
+
+    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        CarField carField = CarField.stringToField(orderBy);
+
+        // TODO: create asc and filter in method
+        boolean asc = ascInt == 1;
+
+        Filter<CarField> filter = new JDBCFilter<>();
+        if(searchString != "") {
+            String[] searchStrings = searchString.split(",");
+            for(String s : searchStrings) {
+                String[] s2 = s.split(":");
+                String field = s2[0];
+                String value = s2[1];
+                filter.fieldContains(CarField.stringToField(field), value);
+            }
+        }
+        return ok(carList(page, carField, asc, filter));
+    }
+
+    private static Html carList(int page, CarField orderBy, boolean asc, Filter<CarField> filter) {
+
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
-            List<Car> cars = dao.getCarList();
-            return reserve.render(cars);
+
+            if(orderBy == null) {
+                orderBy = CarField.NAME;
+            }
+            List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfCars(filter);
+            int amountOfPages = amountOfResults / PAGE_SIZE;
+
+            return reservationspage.render(listOfCars, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }

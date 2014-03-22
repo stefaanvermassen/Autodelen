@@ -1,7 +1,6 @@
 @import database.DatabaseHelper;
 
 @scripts = {
-    <script src="@routes.Assets.at("javascripts/jquery-1.10.2.js")"></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
         var route = myJsRoutes.controllers.Cars.showCarsPage;
@@ -55,7 +54,7 @@
                 </div>
                     <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div id="carsTable" class="table-responsive">
+                    <div id="resultsTable" class="table-responsive">
                         <!-- Here comes the loaded table-->
                     </div>
                 </div>

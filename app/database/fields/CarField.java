@@ -1,22 +1,22 @@
-package database;
+package database.fields;
 
 /**
  * Created by HannesM on 18/03/14.
  */
 public enum CarField { // Not Garfield
+        // TODO: add more fields
         NAME, BRAND;
 
         public static CarField stringToField(String string) {
-            CarField carField = null;
+            CarField field = null;
             switch(string) {
+                case "name":
+                    field = NAME;
+                    break;
                 case "brand" :
-                    carField = CarField.BRAND;
+                    field = BRAND;
                     break;
-                default: // also name
-                    carField = CarField.NAME;
-                    break;
-
             }
-            return carField;
+            return field;
         }
 }

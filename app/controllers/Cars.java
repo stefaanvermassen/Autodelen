@@ -1,12 +1,11 @@
 package controllers;
 
 import database.*;
-import database.jdbc.JDBCCarDAO;
+import database.fields.CarField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
 
-import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
@@ -61,29 +60,27 @@ public class Cars extends Controller {
     }
 
     public static Result showCars() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            CarDAO dao = context.getCarDAO();
-
-            return ok(cars.render());
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        return ok(cars.render());
     }
 
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         CarField carField = CarField.stringToField(orderBy);
 
+        // TODO: create asc and filter in method
         boolean asc = ascInt == 1;
 
         Filter<CarField> filter = new JDBCFilter<>();
         if(searchString != "") {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
+                System.out.println(s);
                 String[] s2 = s.split(":");
-                String field = s2[0];
-                String value = s2[1];
-                filter.fieldContains(CarField.stringToField(field), value);
+                if(s2.length == 2) {
+                    String field = s2[0];
+                    String value = s2[1];
+                    filter.fieldContains(CarField.stringToField(field), value);
+                }
             }
         }
         return ok(carList(page, carField, asc, filter));
@@ -98,12 +95,15 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
+            if(orderBy == null) {
+                orderBy = CarField.NAME;
+            }
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 
-            int amountOfCars = dao.getAmountOfCars(filter);
-            int amountOfPages = amountOfCars / PAGE_SIZE;
+            int amountOfResults = dao.getAmountOfCars(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
-            return carspage.render(listOfCars, page, amountOfCars, amountOfPages);
+            return carspage.render(listOfCars, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
