@@ -1,5 +1,88 @@
-@(form: Form[Profile.EditProfileModel], userId: Int)
+@(form: Form[Profile.EditProfileModel], userId: Int, countryList: List[String])
 
-@app("Profiel bewerken"){
-    <h2>Bewerken blabla</h2>
+@app("Profiel bewerken") {
+
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="#">Home</a></li>
+            <li><a href="@routes.Profile.indexWithoutId">Profiel</a></li>
+            <li class="active">Bewerken</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <h1 class="page-header">Profiel bewerken</h1>
+        <div class="row">
+        @helper.form(routes.Profile.edit(userId)) {
+            <div class="col-lg-3">
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
+                <div class="panel panel-default">
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="form-group">
+                            @* TODO: profile pictures *@
+                            <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
+                        </div>
+                        <div class="form-group">
+                            <p class="form-control-static h2">
+                                @helper.inputText(form("firstName"), '_label -> "Voornaam", 'placeholder -> "Voornaam")
+                                @helper.inputText(form("lastName"), '_label -> "Familienaam", 'placeholder -> "Familienaam")
+                        </div>
+                        <div class="form-group">
+                            <p class="form-control-static">
+                                @helper.inputText(form("email"), '_label -> "Email", 'placeholder -> "Email")
+                                @helper.inputText(form("phone"), '_label -> "Telefoon", 'placeholder -> "Telefoon")
+                                @helper.inputText(form("mobile"), '_label -> "GSM", 'placeholder -> "GSM")
+                            </p>
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                    <!-- /.panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Profiel??
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label class="h4">Domicilie-adres</label>
+                                @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land")
+                                <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h4">Verblijfsadres</label>
+                                <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h4">Rijksregisternummer</label>
+                                <p class="form-control-static">xx.xx.xx-xxx.xx</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="h4">Contactverantwoordelijke</label>
+                                <p class="form-control-static">Voornaam Achternaam</p>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-default btn-sm">wijzigen</button>
+                            </div>
+                        </form>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+        }
+            <!-- /row -->
+    </div>
 }

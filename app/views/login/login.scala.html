@@ -1,4 +1,4 @@
-@(form: Form[Login.LoginModel])
+@(form: Form[Login.LoginModel], redirect: String = null)
 
 <!DOCTYPE html>
 <html>
@@ -36,7 +36,7 @@
                                         </div>
                                     }
                                 }
-                                @helper.form(routes.Login.authenticate, 'class -> "form-horizontal") {
+                                @helper.form(routes.Login.authenticate(redirect), 'class -> "form-horizontal") {
                                     @if(form.hasGlobalErrors) {
                                         <div class="alert alert-danger alert-dismissable">
                                             <strong>Error!</strong> @form.globalError.message

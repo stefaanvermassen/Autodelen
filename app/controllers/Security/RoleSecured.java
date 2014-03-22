@@ -43,11 +43,11 @@ public class RoleSecured {
                 User user = DatabaseHelper.getUserProvider().getUser(ctx.session().get("email"), true);
                 // If user is null, redirect to login page
                 if(user == null) {
-                    return F.Promise.pure(redirect(routes.Login.login()));
+                    return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
                 } else if((user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING))
                 {
                     ctx.flash().put("danger", "Deze account is not niet geactiveerd of geblokkeerd.");
-                    return F.Promise.pure(redirect(routes.Login.login()));
+                    return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
                 }
 
                 Set<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance

@@ -36,8 +36,8 @@ GET         /profile/edit                      controllers.Profile.edit(userId: 
 GET         /profile/byid                      controllers.Profile.index(userId: Int)
 
 # Login screen
-GET         /login                             controllers.Login.login()
-POST        /login                             controllers.Login.authenticate()
+GET         /login                             controllers.Login.login(redirect ?= null)
+POST        /login                             controllers.Login.authenticate(redirect ?= null)
 GET         /logout                            controllers.Login.logout()
 GET         /register                          controllers.Login.register()
 POST        /register                          controllers.Login.register_process()
