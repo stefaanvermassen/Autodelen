@@ -1,20 +1,21 @@
 /* --- Top Menu --- */
 
-.nav>li>.avatar:hover, .nav>li>.avatar:focus {
-	background-color: #34383c;
-}
-
-.nav>li>a:hover, .nav>li>a:focus {
-	background-color: #282b2e;
-}
-
 .navbar-top-links li .dropdown-toggle {
 	color: white;
-	background-color: #40454a;
+	background: #96c770; /* Fall-back for browsers that don't support rgba */
+    background: rgba(255, 255, 255, .2);
+}
+
+.navbar-top-links:hover li:hover .dropdown-toggle:hover {
+	background: #63943d; /* Fall-back for browsers that don't support rgba */
+    background: rgba(0, 0, 0, .2);
+}
+.navbar-top-links:hover li:hover .avatar:hover {
+	background: transparent;
 }
 
 .navbar-static-top {
-	background-color: #34383c;
+	background-color: #7dba4d;
 	border: none;
 }
 
@@ -26,7 +27,7 @@
 .navbar-top-links > li > .avatar {
 	padding-right: 0px;
 	margin-right: 0px;
-	background-color: #34383c;
+	background-color: transparent;
 }
 
 .navbar-top-links > li {
