@@ -1,4 +1,4 @@
-@(notifications: java.util.List[Notification])
+@(messageList: java.util.List[Message])
 @import org.joda.time.format.DateTimeFormat
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
@@ -31,20 +31,20 @@
                 <!-- /.panel-heading -->
                 <div class="panel-body noverticalpadding">
                     <ul class="timeline noverticalmargin">
-                    @for((notification, index) <- notifications.zipWithIndex) {
+                    @for((message, index) <- messageList.zipWithIndex) {
                         <li class="timeline-inverted">
                             <div class="timeline-badge"><i class="fa fa-check"></i>
                             </div>
                             <div class="timeline-panel">
                                 <div class="timeline-heading">
                                     <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">@notification.getSubject</h4>
+                                    <h4 class="timeline-title">@message.getSubject</h4>
                                     <p>
-                                        <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</small>
+                                        <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</small>
                                     </p>
                                 </div>
                                 <div class="timeline-body">
-                                    @Html(notification.getBody)
+                                    @Html(message.getBody)
                                 </div>
                             </div>
                         </li>

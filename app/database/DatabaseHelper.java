@@ -1,6 +1,6 @@
 package database;
 
-import database.providers.NotificationProvider;
+import database.providers.CommunicationProvider;
 import database.providers.UserProvider;
 import database.providers.UserRoleProvider;
 import play.Logger;
@@ -14,7 +14,7 @@ public class DatabaseHelper {
     private static DataAccessProvider accessProvider;
     private static UserProvider userProvider;
     private static UserRoleProvider userRoleProvider;
-    private static NotificationProvider notificationProvider;
+    private static CommunicationProvider communicationProvider;
 
     public static UserProvider getUserProvider() {
         if (userProvider == null) {
@@ -30,11 +30,11 @@ public class DatabaseHelper {
         return userRoleProvider;
     }
 
-    public static NotificationProvider getNotificationProvider() {
-        if (notificationProvider == null) {
-            notificationProvider = new NotificationProvider(getDataAccessProvider(), getUserProvider());
+    public static CommunicationProvider getCommunicationProvider() {
+        if (communicationProvider == null) {
+            communicationProvider = new CommunicationProvider(getDataAccessProvider(), getUserProvider());
         }
-        return notificationProvider;
+        return communicationProvider;
     }
 
     public static void setDataAccessProvider(DataAccessProvider provider) {

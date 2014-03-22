@@ -63,7 +63,6 @@ public class JDBCNotificationDAO implements NotificationDAO{
     @Override
     public List<Notification> getNotificationListForUser(int userId) throws DataAccessException {
         try {
-            List<Notification> list = new ArrayList<>();
             PreparedStatement ps = getGetNotificationListByUseridStatement();
             ps.setInt(1, userId);
             return getNotificationList(ps);
@@ -107,8 +106,8 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                DatabaseHelper.getNotificationProvider().invalidateNotifications(user.getId());
-                DatabaseHelper.getNotificationProvider().invalidateNotificationNumber(user.getId());
+                DatabaseHelper.getCommunicationProvider().invalidateNotifications(user.getId());
+                DatabaseHelper.getCommunicationProvider().invalidateNotificationNumber(user.getId());
                 return new Notification(keys.getInt(1), user, false, subject, body, timestamp);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new notification.", ex);

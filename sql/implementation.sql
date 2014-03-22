@@ -225,6 +225,7 @@ CREATE TABLE `Messages` ( # from user to user != Notifications
 	`message_id` INT NOT NULL AUTO_INCREMENT,
 	`message_from_user_id` INT NOT NULL,
 	`message_to_user_id` INT NOT NULL,
+	`message_read` BIT(1) NOT NULL DEFAULT 0,
 	`message_subject` VARCHAR(255),
 	`message_body` TEXT,
 	`message_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
