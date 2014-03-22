@@ -86,7 +86,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `UserRoles` (
 	`userrole_userid` INT NOT NULL,
-	`userrole_role` ENUM('SUPER_USER', 'CAR_SHARER', 'CAR_USER', 'INFOSESSION_ADMIN', 'MAIL_ADMIN', 'RESERVATION_ADMIN') NOT NULL,
+	`userrole_role` ENUM('SUPER_USER', 'CAR_OWNER', 'CAR_USER', 'INFOSESSION_ADMIN', 'MAIL_ADMIN', 'RESERVATION_ADMIN') NOT NULL,
 	PRIMARY KEY (`userrole_userid`, `userrole_role`),
 	FOREIGN KEY (`userrole_userid`) REFERENCES Users(`user_id`)
 )
