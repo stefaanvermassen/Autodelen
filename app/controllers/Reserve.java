@@ -72,9 +72,11 @@ public class Reserve extends Controller {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
                 String[] s2 = s.split(":");
-                String field = s2[0];
-                String value = s2[1];
-                filter.fieldContains(CarField.stringToField(field), value);
+                if(s2.length == 2) {
+                    String field = s2[0];
+                    String value = s2[1];
+                    filter.fieldContains(CarField.stringToField(field), value);
+                }
             }
         }
         return ok(carList(page, carField, asc, filter));
@@ -91,7 +93,7 @@ public class Reserve extends Controller {
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 
             int amountOfResults = dao.getAmountOfCars(filter);
-            int amountOfPages = amountOfResults / PAGE_SIZE;
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
             return reservationspage.render(listOfCars, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {

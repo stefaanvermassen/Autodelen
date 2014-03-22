@@ -2,6 +2,7 @@
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
     <thead>
         <tr role="row">
+            <th>Naam</th>
             <th>Automerk</th>
             <th>Type</th>
             <th>Zitplaatsen</th>
@@ -12,6 +13,7 @@
     <tbody>
     @for(car <- cars) {
         <tr>
+            <td>@car.getName</td>
             <td>@car.getBrand</td>
             <td>@car.getType</td>
             <td>@car.getSeats</td>

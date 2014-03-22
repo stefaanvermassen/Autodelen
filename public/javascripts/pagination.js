@@ -1,8 +1,9 @@
 /*
  * HOW TO USE
  *
- * In the main listpage include this javascript
- * and give a values to variable route
+ * In the main html-listpage include this javascript
+ * and give a values to variable route, this route has to be added in conf/routes and
+ * in controllers.Application.javascriptRoutes()
  * optional variables: previousBtnTxt, nextBtnTxt, firstBtnTxt, lastBtnTxt, buttonsAroundPage
  *
  * In the element with id="resultsTable", the table will be loaded

@@ -18,7 +18,8 @@ public class Application extends Controller {
         return ok(
                 Routes.javascriptRouter("myJsRoutes",
                         routes.javascript.Cars.showCarsPage(),
-                        routes.javascript.InfoSessions.showUpcomingSessionsPage()
+                        routes.javascript.InfoSessions.showUpcomingSessionsPage(),
+                        routes.javascript.Reserve.showCarsPage()
                 )
         );
     }
