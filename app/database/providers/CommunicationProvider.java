@@ -94,7 +94,6 @@ public class CommunicationProvider {
     }
 
     public List<Message> getMessages(int userId, boolean cached) {
-        invalidateMessages(userId);
         String key = String.format(MESSAGES_BY_ID, userId);
         Object obj = null;
         if (cached) {
