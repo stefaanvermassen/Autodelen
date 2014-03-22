@@ -1,13 +1,7 @@
 @(form: Form[Login.EmailFormModel])
 
 @app("Wachtwoord vergeten - aanvraag") {
-    @if(!flash.isEmpty()) {
-        @for((msgKey, msgValue) <- flash) {
-            <div class="alert alert-@msgKey">
-            @msgValue
-            </div>
-        }
-    }
+    @flashes()
     @helper.form(routes.Login.resetPasswordRequestProcess,'class -> "form-horizontal") {
         @if(form.hasGlobalErrors) {
             <div class="alert alert-danger alert-dismissable">

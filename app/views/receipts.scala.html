@@ -1,7 +1,6 @@
 @app("Afrekeningen") {
 
 <div id="page-header-wrapper">
-    <h1 class="page-header">Afrekeningen</h1>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
         <li><a href="#">Library</a></li>
@@ -12,13 +11,8 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            @if(!flash.isEmpty()) {
-                @for((msgKey, msgValue) <- flash) {
-                    <div class="alert alert-@msgKey">
-                    @msgValue
-                    </div>
-                }
-            }
+            <h1 class="page-header">Afrekeningen</h1>
+            @flashes()
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-wrench"></i> Afrekeningen

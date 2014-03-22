@@ -27,13 +27,19 @@ POST        /reserve/reservation               controllers.Reserve.confirmReserv
 
 # User pages
 GET         /receipts                          controllers.Receipts.index()
-GET         /messages                          controllers.Messages.showNotifications()
+GET         /messages                          controllers.Messages.showMessages()
+GET         /notifications                     controllers.Notifications.showNotifications()
 GET         /settings                          controllers.Settings.index()
-GET         /profile                           controllers.Profile.index()
+
+# Profile pages
+GET         /profile                           controllers.Profile.indexWithoutId()
+GET         /profile/edit                      controllers.Profile.edit(userId: Int)
+POST        /profile/edit                      controllers.Profile.editPost(userId: Int)
+GET         /profile/byid                      controllers.Profile.index(userId: Int)
 
 # Login screen
-GET         /login                             controllers.Login.login()
-POST        /login                             controllers.Login.authenticate()
+GET         /login                             controllers.Login.login(redirect ?= null)
+POST        /login                             controllers.Login.authenticate(redirect ?= null)
 GET         /logout                            controllers.Login.logout()
 GET         /register                          controllers.Login.register()
 POST        /register                          controllers.Login.register_process()

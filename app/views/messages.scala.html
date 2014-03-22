@@ -1,4 +1,4 @@
-@(notifications: java.util.List[Notification])
+@(messageList: java.util.List[Message])
 @import org.joda.time.format.DateTimeFormat
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
@@ -6,7 +6,6 @@
 @app("Berichten", stylesheets) {
 
 <div id="page-header-wrapper">
-    <h1 class="page-header">Berichten</h1>
     <ol class="breadcrumb">
         <li><a href="#">Home</a></li>
         <li><a href="#">Library</a></li>
@@ -17,13 +16,8 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            @if(!flash.isEmpty()) {
-                @for((msgKey, msgValue) <- flash) {
-                    <div class="alert alert-@msgKey">
-                    @msgValue
-                    </div>
-                }
-            }
+            <h1 class="page-header">Berichten</h1>
+            @flashes()
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-comments"></i> Berichten
@@ -31,117 +25,24 @@
                 <!-- /.panel-heading -->
                 <div class="panel-body noverticalpadding">
                     <ul class="timeline noverticalmargin">
-                    @for((notification, index) <- notifications.zipWithIndex) {
+                    @for((message, index) <- messageList.zipWithIndex) {
                         <li class="timeline-inverted">
                             <div class="timeline-badge"><i class="fa fa-check"></i>
                             </div>
                             <div class="timeline-panel">
                                 <div class="timeline-heading">
                                     <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">@notification.getSubject</h4>
+                                    <h4 class="timeline-title">@message.getSubject</h4>
                                     <p>
-                                        <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</small>
+                                        <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</small>
                                     </p>
                                 </div>
                                 <div class="timeline-body">
-                                    @Html(notification.getBody)
+                                    @Html(message.getBody)
                                 </div>
                             </div>
                         </li>
                     }
-                        <li class="timeline-inverted">
-                            <div class="timeline-badge warning"><i class="fa fa-credit-card"></i>
-                            </div>
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
-                                </div>
-                                <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-inverted">
-                            <div class="timeline-badge danger"><i class="fa fa-credit-card"></i>
-                            </div>
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
-                                </div>
-                                <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-inverted">
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
-                                </div>
-                                <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-inverted">
-                            <div class="timeline-badge info"><i class="fa fa-save"></i>
-                            </div>
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
-                                </div>
-                                <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                    <hr>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
-                                            <i class="fa fa-cog"></i> 
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li><a href="#">Action</a>
-                                            </li>
-                                            <li><a href="#">Another action</a>
-                                            </li>
-                                            <li><a href="#">Something else here</a>
-                                            </li>
-                                            <li class="divider"></li>
-                                            <li><a href="#">Separated link</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-inverted">
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
-                                </div>
-                                <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="timeline-inverted">
-                            <div class="timeline-badge success"><i class="fa fa-thumbs-up"></i>
-                            </div>
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">Timeline Event</h4>
-                                </div>
-                                <div class="timeline-body">
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel justo eu mi scelerisque vulputate. Aliquam in metus eu lectus aliquet egestas.</p>
-                                </div>
-                            </div>
-                        </li>
                     </ul>
                 </div>
                 <!-- /.panel-body -->

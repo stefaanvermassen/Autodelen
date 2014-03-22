@@ -1,4 +1,4 @@
-@(infoSession: InfoSession)
+@(infoSession: InfoSession, enrolled: InfoSession = null)
 @import database.DatabaseHelper;
 @scripts = {
     <script>
@@ -13,9 +13,9 @@
 }
 @app("Details Infosessie", Html(""), scripts) {
 <div id="page-header-wrapper">
-    <h1 class="page-header">Infosessies</h1>
+    <!-- <h1 class="page-header">Infosessies</h1> -->
     <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
+        <li><a href="@routes.Dashboard.index">Dasboard</a></li>
         <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
         <li class="active">Details infosessie</li>
     </ol>
@@ -25,14 +25,7 @@
     <div class="row">
         <div class="col-lg-12">
         @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)) { isAdmin =>
-            @if(!flash.isEmpty()) {
-                @for((msgKey, msgValue) <- flash) {
-                    <div class="alert alert-@msgKey" data-dismiss="alert">
-                        <a class="close">×</a>
-                        @msgValue
-                    </div>
-                }
-            }
+           @flashes()
             @if(isAdmin) {
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -52,7 +45,17 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
+                    @* TODO: refine logic behind buttons *@
                     @detailPartial(infoSession)
+                    @if(enrolled == null ) {
+                        <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Inschrijven</a>
+                    } else {
+                        @if(enrolled.getId == infoSession.getId){
+                            <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven uit deze infosessie</a>
+                        } else {
+                            <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Uitschrijven uit andere infosessie en inschrijven voor deze infosessie</a>
+                        }
+                    }
                 </div>
             </div>
 
@@ -112,7 +115,7 @@
                                             </td>
                                             <td>
                                                 <a class="btn btn-danger btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">aanwezige verwijderen</a>
-                                            </td>       
+                                            </td>
                                         }
                                     </tr>
                                 }

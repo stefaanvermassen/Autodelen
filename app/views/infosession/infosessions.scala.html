@@ -8,9 +8,10 @@
         $('#dataTables-infosessions').dataTable( {
             "bFilter": true,
             "bInfo": false,
-            "bLengthChange": false,
+            "bLengthChange": true,
 
             "aoColumns": [
+              null,
               null,
               null,
               null,
@@ -22,7 +23,8 @@
                 "sNext": "Volgende",
                 "sPrevious": "Vorige"
               },
-              "sSearch": "Zoek: "
+              "sSearch": "Zoek: ",
+              "sLengthMenu": "_MENU_ items per pagina"
             }
         });
     });
@@ -34,9 +36,8 @@
 
 @app("Infosessies", stylesheets, scripts) {
 <div id="page-header-wrapper">
-    <h1 class="page-header">Infosessies</h1>
     <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
+        <li><a href="@routes.Dashboard.index">Dasboard</a></li>
         <li class="active">Infosessies</li>
     </ol>
 </div>
@@ -45,14 +46,8 @@
     @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)) { isAdmin =>
         <div class="row">
             <div class="col-lg-12">
-                @if(!flash.isEmpty()) {
-                    @for((msgKey, msgValue) <- flash) {
-                        <div class="alert alert-@msgKey" data-dismiss="alert">
-                            <a class="close">×</a>
-                            @msgValue
-                        </div>
-                    }
-                }
+                <h1 class="page-header">Infosessies</h1>
+                @flashes()
                 @if(isAdmin) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -67,7 +62,7 @@
                 @if(enrolled != null) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Ingeschreven
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen infosessie
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -79,7 +74,7 @@
                 }
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Geplande infosessies
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
@@ -88,7 +83,7 @@
                                 <thead>
                                     <tr role="row">
                                         <th>#</th>
-                                        <th>Datum</th>
+                                        <th>Tijdstip</th>
                                         <th>Inschrijvingen</th>
                                         <th>Host</th>
                                         <th>Adres</th>
@@ -99,7 +94,7 @@
                                 @for((session, index) <- sessions.zipWithIndex) {
                                     <tr @if(enrolled != null && session.getId == enrolled.getId){class="info"}>
                                         <td>@(index + 1)</td>
-                                        <td>@session.getTime.toString("yyyy-MM-dd HH:mm:ss")</td>
+                                        <td>@session.getTime.toString("dd-MM HH:mm")</td>
                                         @if(session.getMaxEnrollees != 0) {
                                             @if(session.getEnrolleeCount == session.getMaxEnrollees){
                                                 <td><strong>Volzet</strong></td>
@@ -119,12 +114,12 @@
                                                 } else {
                                                     <button type="button" disabled="disabled" class="btn btn-success">inschrijven</button>
                                                 }
+                                                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">details</a>
                                                 @if(enrolled != null && session.getId == enrolled.getId) {
                                                     <a class="btn btn-warning" href="@routes.InfoSessions.unenrollSession">uitschrijven</a>
                                                 } else {
                                                     <button disabled="disabled" type="button" class="btn btn-warning">uitschrijven</button>
                                                 }
-                                                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">detail</a>
                                             </div>
                                         </td>
                                     </tr>

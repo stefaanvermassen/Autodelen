@@ -217,14 +217,16 @@ public class InfoSessions extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result detail(int sessionId) {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession session = dao.getInfoSession(sessionId, true);
+            InfoSession enrolled = dao.getAttendingInfoSession(user);
             if (session == null) {
                 flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
-                return ok(detail.render(session));
+                return ok(detail.render(session, enrolled));
             }
         } catch (DataAccessException ex) {
             throw ex;

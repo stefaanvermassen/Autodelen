@@ -1,8 +1,97 @@
-/* --- Menu --- */
+/* --- Top Menu --- */
 
-.submenu {
-	background-color: #eee;
-	padding: 8px 15px!important;
+.navbar-top-links li .dropdown-toggle {
+	color: white;
+	background: #96c770; /* Fall-back for browsers that don't support rgba */
+    background: rgba(255, 255, 255, .2);
+}
+
+.navbar-top-links:hover li:hover .dropdown-toggle:hover {
+	background: #63943d; /* Fall-back for browsers that don't support rgba */
+    background: rgba(0, 0, 0, .2);
+}
+.navbar-top-links:hover li:hover .avatar:hover {
+	background: transparent;
+}
+
+.navbar-static-top {
+	background-color: #7dba4d;
+	border: none;
+}
+
+.navbar-top-links > li > a {
+	display: inline;
+	padding: 9px 15px 9px 15px;
+}
+
+.navbar-top-links > li > .avatar {
+	padding-right: 0px;
+	margin-right: 0px;
+	background-color: transparent;
+}
+
+.navbar-top-links > li {
+	height: 36px;
+}
+
+.navbar-top-links > li:last-child {
+	margin-right: 0px;
+	height: 50px;
+}
+
+.navbar-default .navbar-brand {
+	color: white;
+}
+
+.navbar-default:hover .navbar-brand:hover{
+	color: white;
+}
+
+.avatar {
+	width: 50px;
+	height: 50px;
+	display: inline-block;
+}
+
+.avatar > span {
+	padding-right: 15px;
+}
+
+.number {
+	padding:0px 2px;
+	position: absolute;
+	font-size: 9px;
+	top: 5px;
+	right: 12px;
+	color: white;
+	background-color: red;
+}
+
+/* --- Side Menu --- */
+.navbar-static-side {
+	border-right: 1px solid #d6d6d6;
+	background-color: #f8f8f8;
+}
+
+.sidebar-collapse>.nav>li>a:hover, .sidebar-collapse>.nav>li>a:focus, .sidebar-collapse>.nav>.active {
+	background-color: #d6d6d6;
+}
+
+.navbar-static-side ul .submenu {
+	padding: 5px 0px 6px 10px;
+	font-size: 12px;
+	font-weight: bold;
+	color: #34383c;
+	background-color: #f0f0f0;
+	border-bottom: 1px solid #d6d6d6;
+}
+
+.nav > li > a {
+	color: #444;
+}
+
+.nav>li>a {
+	padding-left: 20px;
 }
 
 /* --- Timeline --- */
@@ -42,7 +131,7 @@
 	margin-right: 0px;
 }
 
-/* --- Breadcrumbs and general styling --- */
+/* --- General styling --- */
 
 html{
 	height: 100%;
@@ -69,59 +158,52 @@ body {
 	border-radius:0px;
 }
 
+.panel-default {
+	border-color: #d6d6d6;
+}
+
+.panel-heading {
+	border-color: #d6d6d6;
+}
+
 .page-header {
-	padding: 20px 14px 20px;
-	margin: 0px;
-	border-bottom: 0px;
+	margin-top: 0px;
+	border-color: #d6d6d6;
 }
 
 #page-header-wrapper {
 	margin: 0px;
 	margin-left: 250px;
-	border-left: 1px solid #e7e7e7;
 	background-color: #f6f6f6;
 }
 
 #page-wrapper {
-	height: 100%;
-	padding-top:20px;
 	min-height: 0px;
+	border-left: 0px;
 	background-color: #f6f6f6;
+	border-color: #d6d6d6;
 }
 
 .panel-default > .panel-heading {
-	background-color: #fafafa;
+	background-color: #f0f0f0;
 }
+
+.jumbotron{
+	margin-top:20%;
+}
+
+/* --- Breadcrumbs --- */
 
 .breadcrumb > li + li:before {
     content: "> ";
 }
 
 .breadcrumb {
-	font-size: 12px;
-	background-color: #eaeaea;
-	margin-left:250px;
-	margin:0px;
-	border-top: 1px solid #d6d6d6;
+	background-color: #f0f0f0;
+	height: 29px;
 	border-bottom: 1px solid #d6d6d6;
-	border-radius:0px;
-}
-
-
-/* --- Avatar --- */
-.avatar {
-	padding-top: 15px;
-}
-
-.avatar > img {
-	/*center*/
-    display: block;
-    margin-right: auto;
-    margin-left: auto;
-
-	/*resize*/
-	width: 150px;
-	height: 150px;
+	border-radius: 0px;
+	padding: 5px 15px;
 }
 
 /* --- Flatstrap --- */
@@ -135,6 +217,12 @@ body {
     box-shadow: none;
 }
 
+.dropdown-menu {
+	border-radius: 0px;
+}
+
+/* --- Responsive fixes --- */
+
 @media (max-width: 768px) {
 	.breadcrumb {
 		margin-left:0px;
@@ -143,27 +231,14 @@ body {
 	#page-header-wrapper {
 		margin-left: 0px;
 	}
+
+    .navbar-top-links {
+    	display:none;
+    }
 }
 
-
-
-/* Small devices (tablets, 768px and up) */
-@media (min-width: @screen-sm-min) {
-	.breadcrumb {
-		margin-left:0px;
+@media (min-width: 768px){
+	.navbar-static-side {
+		height: calc(100% - 50px);
 	}
-
-	#page-header-wrapper {
-		margin-left: 0px;
-	}
-}
-
-/* Medium devices (desktops, 992px and up) */
-@media (min-width: @screen-md-min) {
-
-}
-
-/* Large devices (large desktops, 1200px and up) */
-@media (min-width: @screen-lg-min) {
-
 }
