@@ -28,6 +28,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private TemplateDAO templateDAO;
     private CarRideDAO carRideDAO;
     private NotificationDAO notificationDAO;
+    private MessageDAO messageDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -68,6 +69,14 @@ public class JDBCDataAccessContext implements DataAccessContext {
             notificationDAO = new JDBCNotificationDAO(connection);
         }
         return notificationDAO;
+    }
+
+    @Override
+    public MessageDAO getMessageDAO() {
+        if(messageDAO == null){
+            messageDAO = new JDBCMessageDAO(connection);
+        }
+        return messageDAO;
     }
 
     @Override
