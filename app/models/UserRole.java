@@ -10,5 +10,6 @@ public enum UserRole {
     CAR_USER,
     INFOSESSION_ADMIN,
     MAIL_ADMIN,
+    PROFILE_ADMIN,
     RESERVATION_ADMIN
 }
