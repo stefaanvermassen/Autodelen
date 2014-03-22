@@ -5,14 +5,12 @@
 package database.jdbc;
 
 import database.CarDAO;
+import database.fields.CarField;
 import database.DataAccessException;
-import database.providers.UserProvider;
+import database.Filter;
 
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.sql.Date;
 import java.util.List;
 
@@ -29,6 +27,21 @@ public class JDBCCarDAO implements CarDAO{
     
     private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
 
+    public static final String CAR_QUERY = "SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location " +
+            "INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id ";
+
+    public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_brand LIKE ? ";
+
+    private void fillFragment(PreparedStatement ps, Filter<CarField> filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = createCarFilter();
+        }
+        ps.setString(start, filter.getFieldContains(CarField.NAME));
+        ps.setString(start+1, filter.getFieldContains(CarField.BRAND));
+    }
+
+
     private Connection connection;
     private PreparedStatement createCarStatement;
     private PreparedStatement updateCarStatement;
@@ -36,7 +49,11 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement getCarsOfUserStatement;
     private PreparedStatement deleteCarStatement;
     private PreparedStatement getGetCarListStatement;
-    private PreparedStatement getGetCarListPageStatement;
+    private PreparedStatement getGetCarListPageByNameAscStatement;
+    private PreparedStatement getGetCarListPageByNameDescStatement;
+    private PreparedStatement getGetCarListPageByBrandAscStatement;
+    private PreparedStatement getGetCarListPageByBrandDescStatement;
+    private PreparedStatement getGetAmountOfCarsStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -120,16 +137,44 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getGetCarListStatement() throws SQLException {
         if(getGetCarListStatement == null) {
-            getGetCarListStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id");
+            getGetCarListStatement = connection.prepareStatement(CAR_QUERY);
         }
         return getGetCarListStatement;
     }
 
-    private PreparedStatement getGetCarListPageStatement() throws SQLException {
-        if(getGetCarListPageStatement == null) {
-            getGetCarListPageStatement = connection.prepareStatement("SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id limit ?, ?");
+
+    private PreparedStatement getGetCarListPageByNameAscStatement() throws SQLException {
+        if(getGetCarListPageByNameAscStatement == null) {
+            getGetCarListPageByNameAscStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?");
         }
-        return getGetCarListPageStatement;
+        return getGetCarListPageByNameAscStatement;
+    }
+
+    private PreparedStatement getGetCarListPageByNameDescStatement() throws SQLException {
+        if(getGetCarListPageByNameDescStatement == null) {
+            getGetCarListPageByNameDescStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT +"ORDER BY car_name desc LIMIT ?, ?");
+        }
+        return getGetCarListPageByNameDescStatement;
+    }
+    private PreparedStatement getGetCarListPageByBrandAscStatement() throws SQLException {
+        if(getGetCarListPageByBrandAscStatement == null) {
+            getGetCarListPageByBrandAscStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?");
+        }
+        return getGetCarListPageByBrandAscStatement;
+    }
+
+    private PreparedStatement getGetCarListPageByBrandDescStatement() throws SQLException {
+        if(getGetCarListPageByBrandDescStatement == null) {
+            getGetCarListPageByBrandDescStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?");
+        }
+        return getGetCarListPageByBrandDescStatement;
+    }
+
+    private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
+        if(getGetAmountOfCarsStatement == null) {
+            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars" + FILTER_FRAGMENT);
+        }
+        return getGetAmountOfCarsStatement;
     }
     
     @Override
@@ -258,21 +303,66 @@ public class JDBCCarDAO implements CarDAO{
 
     @Override
     public List<Car> getCarList() throws DataAccessException {
-            try {
-                PreparedStatement ps = getGetCarListStatement();
-                return getCars(ps);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Could not retrieve a list of cars", ex);
-            }
+        try {
+            PreparedStatement ps = getGetCarListStatement();
+            return getCars(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
     }
 
     @Override
-    public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
+    public int getAmountOfCars(Filter<CarField> filter) throws DataAccessException {
         try {
+            PreparedStatement ps = getGetAmountOfCarsStatement();
+            fillFragment(ps, filter, 1);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_cars");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of cars", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of cars", ex);
+        }
+    }
+
+    @Override
+    public Filter<CarField> createCarFilter() {
+        return new JDBCFilter<CarField>();
+    }
+
+    /*
+     * Default method
+     */
+    @Override
+    public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
+        return getCarList(CarField.NAME, true, page, pageSize, null);
+    }
+
+    @Override
+    public List<Car> getCarList(CarField orderBy, boolean asc, int page, int pageSize, Filter<CarField> filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = null;
+            switch(orderBy) {
+                case NAME :
+                    ps = asc ? getGetCarListPageByNameAscStatement() : getGetCarListPageByNameDescStatement();
+                    break;
+                case BRAND:
+                    ps = asc ? getGetCarListPageByBrandAscStatement() : getGetCarListPageByBrandDescStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create getCarList statement");
+            }
+
+            fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            PreparedStatement ps = getGetCarListPageStatement();
-            ps.setInt(1, first);
-            ps.setInt(2, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getCars(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
@@ -290,7 +380,7 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
-    public List<Car> getCars(PreparedStatement ps) {
+    private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
