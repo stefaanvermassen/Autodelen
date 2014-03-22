@@ -83,7 +83,11 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-envelope fa-fw"></i>
-                            <span class="number">8</span>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="number">@unread_number</span>
+                                }
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
                             @defining(DatabaseHelper.getCommunicationProvider().getMessages(user.getId())) { messages =>

@@ -15,6 +15,7 @@ public class CommunicationProvider {
     private static final String NOTIFICATIONS_BY_ID = "notification:id:%d";
     private static final String NOTIFICATION_NUMBER_BY_ID = "notification_number:id:%d";
     private static final String MESSAGES_BY_ID = "message:id:%d";
+    private static final String MESSAGE_NUMBER_BY_ID = "notification_number:id:%d";
     private DataAccessProvider provider;
     private UserProvider userProvider;
 
@@ -119,5 +120,38 @@ public class CommunicationProvider {
 
     public void invalidateMessages(int userId){
         Cache.remove(String.format(MESSAGES_BY_ID, userId));
+    }
+
+
+    public int getNumberOfUnreadMessages(int userId){
+        return getNumberOfUnreadMessages(userId, true);
+    }
+    public int getNumberOfUnreadMessages(int userId, boolean cached){
+        String key = String.format(MESSAGE_NUMBER_BY_ID, userId);
+        Object obj = null;
+        if (cached) {
+            obj = Cache.get(key);
+        }
+        if (obj == null || !(obj instanceof List)) {
+            try (DataAccessContext context = provider.getDataAccessContext()) {
+                MessageDAO dao = context.getMessageDAO();
+                int unread_number = -1;
+                unread_number = dao.getNumberOfUnreadMessages(userId);
+                if (unread_number != -1) {
+                    Cache.set(key, unread_number);
+                    return unread_number;
+                } else {
+                    return -1;
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        } else {
+            return (Integer) obj; //Type erasure problem from Java, works at runtime
+        }
+    }
+
+    public void invalidateMessageNumber(int userId){
+        Cache.remove(String.format(MESSAGE_NUMBER_BY_ID, userId));
     }
 }

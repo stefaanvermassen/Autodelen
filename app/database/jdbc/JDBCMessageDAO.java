@@ -87,7 +87,22 @@ public class JDBCMessageDAO implements MessageDAO {
 
     @Override
     public int getNumberOfUnreadMessages(int userId) throws DataAccessException {
-        return 0;
+        try {
+            PreparedStatement ps = getNumberOfUnreadMessagesStatement();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("unread_number");
+                }else{
+                    return 0;
+                }
+            }catch (SQLException e){
+                throw new DataAccessException("Error while reading message number resultset", e);
+
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the number of unread messages", e);
+        }
     }
 
     @Override
