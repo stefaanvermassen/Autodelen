@@ -188,6 +188,10 @@ body {
 	background-color: #f0f0f0;
 }
 
+.jumbotron{
+	margin-top:20%;
+}
+
 /* --- Breadcrumbs --- */
 
 .breadcrumb > li + li:before {
