@@ -2,58 +2,64 @@
 @import scala.collection.mutable.Map;
 
     @defining(Map(
-        UserRole.CAR_OWNER -> "kan auto's delen",
-        UserRole.CAR_USER -> "Een auto's lenen",
-        UserRole.INFOSESSION_ADMIN -> "kan infosessies beheren",
-        UserRole.SUPER_USER -> "kan globale variabelen aanpassen, rechten beheren, ...",
-        UserRole.MAIL_ADMIN -> "kan email-templates aanpassen",
+        UserRole.CAR_OWNER -> "Eigenaar",
+        UserRole.CAR_USER -> "Lener",
+        UserRole.INFOSESSION_ADMIN -> "Kan infosessies beheren",
+        UserRole.SUPER_USER -> "Kan globale variabelen aanpassen, rechten beheren, ...",
+        UserRole.MAIL_ADMIN -> "Kan email-templates aanpassen",
         UserRole.RESERVATION_ADMIN -> "kan autoreservaties modereren")) { roleDesc =>
         @app("Bewerk roles") {
             <div id="page-header-wrapper">
                 <ol class="breadcrumb">
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Library</a></li>
+                    <li><a href="@routes.Dashboard.index">Dashboard</a></li>
                     <li><a href="@routes.UserRoles.index">Gebruikersrollen</a></li>
                     <li class="active">Bewerken</li>
                 </ol>
             </div>
 
             <div id="page-wrapper">
-                <h1 class="page-header">Gebruikersrollen</h1>
-                <h2>Rollen voor @user.getEmail</h2>
-                @if(!flash.isEmpty()) {
-                    @for((msgKey, msgValue) <- flash) {
-                        <div class="alert alert-@msgKey">
-                        @msgValue
-                        </div>
-                    }
-                }
-                @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
-                    <fieldset>
-                        <div class="form-group">
-                        @for((role, checked) <- roles) {
-                            @* TODO: Cleaner syntax to add 'checked' attribute *@
-                            @if(checked) {
-                                <input type="checkbox" name="role" value="@role" checked> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
-                            } else {
-                                <input type="checkbox" name="role" value="@role"> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
-                                }
+                <div class="row">
+                    <div class="col-lg-12">
+                        @if(!flash.isEmpty()) {
+                            @for((msgKey, msgValue) <- flash) {
+                                <div class="alert alert-@msgKey">
+                                @msgValue
+                                </div>
+                            }
                         }
-                        </div>
+                        <h1 class="page-header">Gebruikersrollen</h1>
 
-                        <div class="form-group">
-                            <label class="col-md-1 control-label" for="reset"></label>
-                            <div class="col-md-12">
-                                <button id="reset" name="reset" class="btn btn-block btn-success">Wijzig rollen</button>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-wrench"></i> Rollen voor @user.getEmail
                             </div>
+                            <div class="panel-body">
+                                @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
+                                    <fieldset>
+                                        <div class="form-group">
+                                        @for((role, checked) <- roles) {
+                                            @* TODO: Cleaner syntax to add 'checked' attribute *@
+                                            @if(checked) {
+                                                <input type="checkbox" name="role" value="@role" checked> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
+                                            } else {
+                                                <input type="checkbox" name="role" value="@role"> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
+                                                }
+                                        }
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <button id="reset" name="reset" class="btn btn-block btn-success">Wijzig rollen</button>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                }
+                            </div>
+                            <!-- /.panel-body -->
                         </div>
-                    </fieldset>
-                }
-
-                <ul>
-
-                </ul>
+                        <!-- /.panel -->
+                    </div>
+                </div>
             </div>
         }
     }
-

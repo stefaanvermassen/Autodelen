@@ -198,14 +198,14 @@
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN)){
                         <li class="submenu">ADMIN</li>
                         <li @if(title == "Emailtemplates") {class="active"}>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-gears fa-fw"></i> Emailtemplates</a>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
                         </li>
                         }
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
                         <li class="submenu">SUPERUSER</li>
                         <li @if(title == "Gebruikersrollen") {class="active"}>
-                            <a href="@routes.UserRoles.index()"><i class="fa fa-gears fa-fw"></i> Gebruikersrollen</a>
+                            <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
                         </li>
                         <li @if(title == "Rapportering") {class="active"}>
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
