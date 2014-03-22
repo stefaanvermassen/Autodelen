@@ -19,6 +19,10 @@ public class Profile extends Controller {
     private static List<String> COUNTRIES;
     private static final Locale COUNTRY_LANGUAGE = new Locale("nl", "BE");
 
+    private static boolean nullOrEmpty(String s){
+        return s == null || s.isEmpty();
+    }
+
     public static class EditAddressModel { //TODO: unify with other models in controllers
 
         public String city;
@@ -43,8 +47,7 @@ public class Profile extends Controller {
         }
 
         public boolean isEmpty() {
-            return !((bus != null && !bus.isEmpty()) || (zipCode != null && !zipCode.isEmpty()) ||
-                    (city != null && !city.isEmpty()) || (street != null && !street.isEmpty()) || (number != null && !number.isEmpty()));
+            return nullOrEmpty(bus) && nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(number);
         }
     }
 
@@ -78,6 +81,12 @@ public class Profile extends Controller {
 
             this.domicileAddress.populate(user.getAddressDomicile());
             this.residenceAddress.populate(user.getAddressResidence());
+        }
+
+        public String validate(){
+            if(nullOrEmpty(firstName) || nullOrEmpty(lastName)){
+                return "Voor- en achternaam mogen niet leeg zijn.";
+            } else return null;
         }
     }
 
@@ -169,19 +178,19 @@ public class Profile extends Controller {
         if (user.getAddressResidence() != null) {
             total++;
         }
-        if (user.getCellphone() != null) {
+        if (!nullOrEmpty(user.getCellphone())) {
             total++;
         }
-        if (user.getFirstName() != null) {
+        if (!nullOrEmpty(user.getFirstName())) {
             total++;
         }
-        if (user.getLastName() != null) {
+        if (!nullOrEmpty(user.getLastName())) {
             total++;
         }
-        if (user.getPhone() != null) {
+        if (!nullOrEmpty(user.getPhone())) {
             total++;
         }
-        if (user.getEmail() != null) {
+        if (!nullOrEmpty(user.getEmail())) {
             total++;
         }
         if (user.getIdentityCard() != null) {
@@ -250,12 +259,12 @@ public class Profile extends Controller {
                     // Check domicile address
                     Address domicileAddress =  user.getAddressDomicile();
                     boolean deleteDomicile = model.domicileAddress.isEmpty() && domicileAddress != null;
-                    user.setAddressDomicile(deleteDomicile ? null : modifyAddress(model.domicileAddress, domicileAddress, adao));
+                    user.setAddressDomicile(deleteDomicile || model.domicileAddress.isEmpty() ? null : modifyAddress(model.domicileAddress, domicileAddress, adao));
 
                     // Residence address
                     Address residenceAddress = user.getAddressResidence();
                     boolean deleteResidence = model.residenceAddress.isEmpty() && residenceAddress != null;
-                    user.setAddressResidence(deleteResidence ? null : modifyAddress(model.residenceAddress, residenceAddress, adao));
+                    user.setAddressResidence(deleteResidence || model.residenceAddress.isEmpty() ? null : modifyAddress(model.residenceAddress, residenceAddress, adao));
 
                     dao.updateUser(user, true); // Full update (includes FKs)
 

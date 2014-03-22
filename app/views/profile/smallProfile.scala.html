@@ -2,16 +2,20 @@
 <!-- TODO: These are no form groups! -->
 <div class="form-group">
     @* TODO: profile pictures *@
-    <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
+<img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
 </div>
 <div class="form-group">
     <p class="form-control-static h2">@user.getFirstName @user.getLastName</p>
 </div>
 <div class="form-group">
-    <p class="form-control-static">@user.getEmail <br>
-        <span>@if(user.getPhone != null && !user.getPhone.isEmpty) {
-            @user.getPhone
-        } else { Geen telefoon opgegeven. }</span>
+    <p class="form-control-static"><strong>Email:</strong>@user.getEmail <br>
+    <span><strong>Telefoon (vast):</strong>@if(user.getPhone != null && !user.getPhone.isEmpty) {
+        <a href="tel:@user.getPhone">@user.getPhone</a>
+    } else { / }</span>
+    <br/>
+    <span><strong>GSM:</strong>@if(user.getCellphone != null && !user.getCellphone.isEmpty) {
+        <a href="tel:@user.getCellphone">@user.getCellphone</a>
+    } else { / }</span>
     </p>
 </div>
 <a class="btn btn-default btn-sm smallprofile-static" href="@routes.Profile.edit(user.getId)" >Wijzigen</a>
