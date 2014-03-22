@@ -102,7 +102,7 @@ public class Profile extends Controller {
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(session("email")); //user always has to exist (roleauthenticated)
-            return ok(index.render(user));
+            return ok(index.render(user, getProfileCompleteness(user)));
         } catch(DataAccessException ex){
             throw ex;
         }
@@ -126,7 +126,7 @@ public class Profile extends Controller {
                 return badRequest(views.html.unauthorized.render(new UserRole[] {UserRole.PROFILE_ADMIN }));
             }
 
-            return ok(index.render(user));
+            return ok(index.render(user, getProfileCompleteness(user)));
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -149,6 +149,28 @@ public class Profile extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    /**
+     * Returns a quotum on how complete the profile is.
+     * @param user
+     * @return Completeness in percents
+     */
+    private static int getProfileCompleteness(User user){
+        int total = 0;
+
+        if(user.getAddressDomicile() != null){ total++; }
+        if(user.getAddressResidence() != null){ total++; }
+        if(user.getCellphone() != null) { total++; }
+        if(user.getFirstName() != null) { total++; }
+        if(user.getLastName() != null) { total++; }
+        if(user.getPhone() != null) { total++; }
+        if(user.getEmail() != null) { total++; }
+        if(user.getIdentityCard() != null) { total++; }
+        if(user.getContractManager() != null) { total++; }
+       //TODO: profile picture
+
+        return (int)(((float)total / 9) * 100);
     }
 
     @RoleSecured.RoleAuthenticated()

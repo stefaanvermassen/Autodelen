@@ -22,13 +22,7 @@
             <div id="page-wrapper">
                 <h1 class="page-header">Gebruikersrollen</h1>
                 <h2>Rollen voor @user.getEmail</h2>
-                @if(!flash.isEmpty()) {
-                    @for((msgKey, msgValue) <- flash) {
-                        <div class="alert alert-@msgKey">
-                        @msgValue
-                        </div>
-                    }
-                }
+                @flashes()
                 @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
                     <fieldset>
                         <div class="form-group">

@@ -15,6 +15,10 @@
             <h1 class="page-header">Profiel bewerken</h1>
             <div class="row">
             @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
+                <div class="form-group">
+                    <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                </div>
+
                 <div class="col-lg-3">
                     @if(form.hasGlobalErrors) {
                         <div class="alert alert-danger alert-dismissable">
@@ -108,9 +112,6 @@
                         <!-- /.panel -->
                 </div>
                     <!-- /col-lg-12 -->
-                <div class="form-group">
-                    <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
-                </div>
             }
             </div>
                 <!-- /row -->

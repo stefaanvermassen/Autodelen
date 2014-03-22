@@ -10,13 +10,8 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-		    @if(!flash.isEmpty()) {
-		        @for((msgKey, msgValue) <- flash) {
-		            <div class="alert alert-@msgKey">
-		            @msgValue
-		            </div>
-		        }
-		    }
+		    @flashes()
+
             <h1 class="page-header">Dashboard</h1>
             <div class="panel panel-default">
                 <div class="panel-heading">

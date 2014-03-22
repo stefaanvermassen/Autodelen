@@ -1,4 +1,4 @@
-@(user: User)
+@(user: User, completeness: Int = 0)
 
 @app("Profiel") {
 
@@ -10,14 +10,23 @@
     </div>
 
     <div id="page-wrapper">
-        @if(!flash.isEmpty()) {
-            @for((msgKey, msgValue) <- flash) {
-                <div class="alert alert-@msgKey">
-                @msgValue
-                </div>
-            }
-        }
+        @flashes()
+
         <h1 class="page-header">Profiel</h1>
+        <div class="row">
+            <div class="col-md-10 col-md-push-1">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p>
+                            Profiel compleetheid:
+                        </p>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width:@completeness%;">@completeness%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-lg-3">
                 <div class="panel panel-default">
