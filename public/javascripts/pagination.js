@@ -47,18 +47,26 @@ $(document).ready(loadPage(1, 1, "", ""));
 
 // The function to load a new page
 function loadPage(page, asc, orderBy, search) {
+    $("#carsTable").html("Loading...");
     route(page, asc, orderBy, search).ajax({
         success : function(html) {
             $("#carsTable").html(html);
-            var amountOfPages = $('#buttons').attr('name');
+            // TODO: better way to pass amountOfResults and amountOfPages to javascript?
+            var amountOfResultsAndPages = $('#buttons').attr('name').split(",");
+            var amountOfResults = amountOfResultsAndPages[0];
+            var amountOfPages = amountOfResultsAndPages[1];
+
             /*
              * Navigation buttons
              *
              * These will come in the element with id="buttons"
              */
             // Button to go to first page and to previous page
-            var buttonString = "<button class='buttons' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
-                "<button class='buttons' id='previousPage' name='" + (page - 1)  + "' type='button'>" + previousBtnTxt + "</button> ";
+            var buttonString = "Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).<br>";
+            if(page != 1) {
+                buttonString += "<button class='buttons' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
+                    "<button class='buttons' id='previousPage' name='" + (page - 1)  + "' type='button'>" + previousBtnTxt + "</button> ";
+            }
 
             // Calculate how many previous pages we create buttons to (standard 2, but less if we can't go back more, or more when we can't go further more -> max 4)
             var previousPages = buttonsAroundPage;
@@ -83,10 +91,11 @@ function loadPage(page, asc, orderBy, search) {
                 nextPages++;
             }
 
-            // Button to go to last page and next page
-            buttonString += "<button class='buttons' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
-                "<button class='buttons' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
-
+            if(page != amountOfPages) {
+                // Button to go to last page and next page
+                buttonString += "<button class='buttons' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
+                    "<button class='buttons' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
+            }
             // Add the buttons to the html-file
             $("#buttons").html(buttonString);
 

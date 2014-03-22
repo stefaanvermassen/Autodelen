@@ -103,7 +103,7 @@ public class Cars extends Controller {
             int amountOfCars = dao.getAmountOfCars(filter);
             int amountOfPages = amountOfCars / PAGE_SIZE;
 
-            return carspage.render(listOfCars, page, amountOfPages);
+            return carspage.render(listOfCars, page, amountOfCars, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
