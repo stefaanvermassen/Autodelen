@@ -1,4 +1,5 @@
-@(form: Form[Profile.EditProfileModel], userId: Int, countryList: List[String])
+@(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
+@import database.DatabaseHelper;
 
 @app("Profiel bewerken") {
 
@@ -13,7 +14,7 @@
     <div id="page-wrapper">
         <h1 class="page-header">Profiel bewerken</h1>
         <div class="row">
-        @helper.form(routes.Profile.edit(userId)) {
+        @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
             <div class="col-lg-3">
                 @if(form.hasGlobalErrors) {
                     <div class="alert alert-danger alert-dismissable">
@@ -34,7 +35,7 @@
                         </div>
                         <div class="form-group">
                             <p class="form-control-static">
-                                @helper.inputText(form("email"), '_label -> "Email", 'placeholder -> "Email")
+                                @helper.inputText(form("email"), '_label -> "Email", 'placeholder -> "Email", 'disabled -> true)
                                 @helper.inputText(form("phone"), '_label -> "Telefoon", 'placeholder -> "Telefoon")
                                 @helper.inputText(form("mobile"), '_label -> "GSM", 'placeholder -> "GSM")
                             </p>
@@ -53,18 +54,35 @@
                     <div class="panel-body">
                         <form role="form">
                             <div class="form-group">
-                                <label class="h4">Domicilieadres</label>
-                                @helper.inputText(form("domicileAddress.street"), '_label -> "Straat", 'placeholder -> "Straat")
-                                @helper.inputText(form("domicileAddress.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
-                                @helper.inputText(form("domicileAddress.city"), '_label -> "Stad", 'placeholder -> "Stad")
-                                @helper.inputText(form("domicileAddress.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
-                                @helper.inputText(form("domicileAddress.bus"), '_label -> "Bus", 'placeholder -> "Bus")
-                                @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land")
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Domicilieadres</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        @helper.inputText(form("domicileAddress.street"), '_label -> "Straat", 'placeholder -> "Straat")
+                                        @helper.inputText(form("domicileAddress.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
+                                        @helper.inputText(form("domicileAddress.city"), '_label -> "Stad", 'placeholder -> "Stad")
+                                        @helper.inputText(form("domicileAddress.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
+                                        @helper.inputText(form("domicileAddress.bus"), '_label -> "Bus", 'placeholder -> "Bus")
+                                        @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land")
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="h4">Verblijfsadres</label>
-                                <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Verblijfsadres</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        @helper.inputText(form("residenceAddress.street"), '_label -> "Straat", 'placeholder -> "Straat")
+                                        @helper.inputText(form("residenceAddress.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
+                                        @helper.inputText(form("residenceAddress.city"), '_label -> "Stad", 'placeholder -> "Stad")
+                                        @helper.inputText(form("residenceAddress.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
+                                        @helper.inputText(form("residenceAddress.bus"), '_label -> "Bus", 'placeholder -> "Bus")
+                                        @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land")
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -73,10 +91,16 @@
                             </div>
                             <div class="form-group">
                                 <label class="h4">Contactverantwoordelijke</label>
-                                <p class="form-control-static">Voornaam Achternaam</p>
-                            </div>
-                            <div class="form-group">
-                                <button class="btn btn-default btn-sm">wijzigen</button>
+                                @defining(user.getContractManager) { manager =>
+                                    @if(manager != null) {
+                                        <p class="form-control-static">@manager.getFirstName @manager.getLastName</p>
+                                    } else {
+                                        <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
+                                    }
+                                }
+                                @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
+                                    <a href="#">Verantwoordelijke wijzigen (TODO)</a>
+                                }
                             </div>
                         </form>
                     </div>

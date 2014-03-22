@@ -2,92 +2,79 @@
 
 @app("Profiel") {
 
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
-        <li class="active">Profiel</li>
-    </ol>
-</div>
-
-<div id="page-wrapper">
-    <h1 class="page-header">Profiel</h1>
-    <div class="row">
-        <div class="col-lg-3">
-            <div class="panel panel-default">
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    @smallProfile(user)
-                </div>
-                <!-- /.panel-body -->
-            </div>
-        </div>
-        <div class="col-md-9">
-            <!-- /.panel -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Ontlener
-                </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <form role="form">
-                        <div class="form-group">
-                            <label class="h4">Domicilie-adres</label>
-                            <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="h4">Verblijfsadres</label>
-                            <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="h4">Rijksregisternummer</label>
-                            <p class="form-control-static">xx.xx.xx-xxx.xx</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="h4">Contactverantwoordelijke</label>
-                            <p class="form-control-static">Voornaam Achternaam</p>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-default btn-sm">wijzigen</button>
-                        </div>
-                    </form>
-                </div>
-                <!-- /.panel-body -->
-            </div>
-            <!-- /.panel -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar
-                </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <form role="form">
-                        <div class="form-group">
-                            <label class="h4">Domicilie-adres</label>
-                            <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="h4">Verblijfsadres</label>
-                            <p class="form-control-static">Straat 10,<br>0000 Postcode,<br>België</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="h4">Rijksregisternummer</label>
-                            <p class="form-control-static">xx.xx.xx-xxx.xx</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="h4">Contactverantwoordelijke</label>
-                            <p class="form-control-static">Voornaam Achternaam</p>
-                        </div>
-                        <div class="form-group">
-                            <button class="btn btn-default btn-sm">wijzigen</button>
-                        </div>
-                    </form>
-                </div>
-                <!-- /.panel-body -->
-            </div>
-            <!-- /.panel -->
-        </div>
-        <!-- /col-lg-12 -->
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="#">Home</a></li>
+            <li class="active">Profiel</li>
+        </ol>
     </div>
-    <!-- /row -->
-</div>
+
+    <div id="page-wrapper">
+        <h1 class="page-header">Profiel</h1>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="panel panel-default">
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                    @smallProfile(user)
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                    <!-- /.panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Details
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label class="h4">Domicilie-adres</label>
+                                @defining(user.getAddressDomicile) { address =>
+                                    @if(address != null) {
+                                        <p class="form-control-static">@address.getStreet @address.getNumber,
+                                            <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
+                                    } else {
+                                        <p>Niet gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                            <div class="form-group">
+                                <label class="h4">Verblijfsadres</label>
+                                @defining(user.getAddressResidence) { address =>
+                                    @if(address != null) {
+                                        <p class="form-control-static">@address.getStreet @address.getNumber,
+                                            <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
+                                    } else {
+                                        <p>Niet gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                            <div class="form-group">
+                                <label class="h4">Rijksregisternummer</label>
+                                <p class="form-control-static">
+                                    XXX.XXXX.XXXXXXX</p> @* TODO: nummer in identity card DAO *@
+                            </div>
+                            <div class="form-group">
+                                <label class="h4">Contactverantwoordelijke</label>
+                                @defining(user.getContractManager) { manager =>
+                                    @if(manager != null) {
+                                        <p class="form-control-static">@manager.getFirstName @manager.getLastName</p>
+                                    } else {
+                                        <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                        </form>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
 }

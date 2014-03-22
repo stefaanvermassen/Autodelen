@@ -13,6 +13,7 @@ import play.mvc.*;
 import views.html.profile.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,8 +32,10 @@ public class Profile extends Controller {
         public String country;
 
         public void populate(Address address){
-            if(address == null)
+            if(address == null) {
+                country = COUNTRY_LANGUAGE.getDisplayCountry(COUNTRY_LANGUAGE);
                 return;
+            }
 
             city = address.getCity();
             number = address.getCity();
@@ -89,6 +92,7 @@ public class Profile extends Controller {
                     COUNTRIES.add(obj.getDisplayCountry(COUNTRY_LANGUAGE));
                 }
             }
+            Collections.sort(COUNTRIES);
         }
         return COUNTRIES;
     }
@@ -141,7 +145,39 @@ public class Profile extends Controller {
 
             EditProfileModel model = new EditProfileModel();
             model.populate(user);
-            return ok(edit.render(Form.form(EditProfileModel.class).fill(model), userId, getCountryList()));
+            return ok(edit.render(Form.form(EditProfileModel.class).fill(model), user, getCountryList()));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result editPost(int userId){
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+            User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+
+            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(user.getId(), UserRole.PROFILE_ADMIN)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[] {UserRole.PROFILE_ADMIN }));
+            }
+
+            Form<EditProfileModel> profileForm = Form.form(EditProfileModel.class).bindFromRequest();
+            if (profileForm.hasErrors()) {
+                return badRequest(edit.render(profileForm, user, getCountryList()));
+            } else {
+                EditProfileModel model = profileForm.get();
+                try {
+
+
+                    context.commit();
+                    flash("success", "Het profiel werd succesvol aangepast.");
+                    return redirect(routes.Profile.index(userId));
+                } catch(DataAccessException ex){
+                    context.rollback();
+                    throw ex;
+                }
+            }
         } catch (DataAccessException ex) {
             throw ex;
         }
