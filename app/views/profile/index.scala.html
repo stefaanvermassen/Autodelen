@@ -10,6 +10,13 @@
     </div>
 
     <div id="page-wrapper">
+        @if(!flash.isEmpty()) {
+            @for((msgKey, msgValue) <- flash) {
+                <div class="alert alert-@msgKey">
+                @msgValue
+                </div>
+            }
+        }
         <h1 class="page-header">Profiel</h1>
         <div class="row">
             <div class="col-lg-3">

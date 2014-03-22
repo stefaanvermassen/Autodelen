@@ -1,58 +1,58 @@
 @(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
-@import database.DatabaseHelper;
+    @import database.DatabaseHelper;
 
-@app("Profiel bewerken") {
+    @app("Profiel bewerken") {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="@routes.Profile.indexWithoutId">Profiel</a></li>
-            <li class="active">Bewerken</li>
-        </ol>
-    </div>
+        <div id="page-header-wrapper">
+            <ol class="breadcrumb">
+                <li><a href="#">Home</a></li>
+                <li><a href="@routes.Profile.indexWithoutId">Profiel</a></li>
+                <li class="active">Bewerken</li>
+            </ol>
+        </div>
 
-    <div id="page-wrapper">
-        <h1 class="page-header">Profiel bewerken</h1>
-        <div class="row">
-        @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
-            <div class="col-lg-3">
-                @if(form.hasGlobalErrors) {
-                    <div class="alert alert-danger alert-dismissable">
-                        <strong>Error!</strong> @form.globalError.message
+        <div id="page-wrapper">
+            <h1 class="page-header">Profiel bewerken</h1>
+            <div class="row">
+            @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
+                <div class="col-lg-3">
+                    @if(form.hasGlobalErrors) {
+                        <div class="alert alert-danger alert-dismissable">
+                            <strong>Error!</strong> @form.globalError.message
+                        </div>
+                    }
+                    <div class="panel panel-default">
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="form-group">
+                                @* TODO: profile pictures *@
+                                <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
+                            </div>
+                            <div class="form-group">
+                                <p class="form-control-static h2">
+                                    @helper.inputText(form("firstName"), '_label -> "Voornaam", 'placeholder -> "Voornaam")
+                                    @helper.inputText(form("lastName"), '_label -> "Familienaam", 'placeholder -> "Familienaam")
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <p class="form-control-static">
+                                    @helper.inputText(form("email"), '_label -> "Email", 'placeholder -> "Email", 'disabled -> true)
+                                    @helper.inputText(form("phone"), '_label -> "Telefoon", 'placeholder -> "Telefoon")
+                                    @helper.inputText(form("mobile"), '_label -> "GSM", 'placeholder -> "GSM")
+                                </p>
+                            </div>
+                        </div>
+                            <!-- /.panel-body -->
                     </div>
-                }
-                <div class="panel panel-default">
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div class="form-group">
-                            @* TODO: profile pictures *@
-                            <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
-                        </div>
-                        <div class="form-group">
-                            <p class="form-control-static h2">
-                                @helper.inputText(form("firstName"), '_label -> "Voornaam", 'placeholder -> "Voornaam")
-                                @helper.inputText(form("lastName"), '_label -> "Familienaam", 'placeholder -> "Familienaam")
-                        </div>
-                        <div class="form-group">
-                            <p class="form-control-static">
-                                @helper.inputText(form("email"), '_label -> "Email", 'placeholder -> "Email", 'disabled -> true)
-                                @helper.inputText(form("phone"), '_label -> "Telefoon", 'placeholder -> "Telefoon")
-                                @helper.inputText(form("mobile"), '_label -> "GSM", 'placeholder -> "GSM")
-                            </p>
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
                 </div>
-            </div>
-            <div class="col-md-9">
-                    <!-- /.panel -->
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Profiel??
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <form role="form">
+                <div class="col-md-9">
+                        <!-- /.panel -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Profiel??
+                        </div>
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
                             <div class="form-group">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
@@ -98,20 +98,21 @@
                                         <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
                                     }
                                 }
-                                @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
+                                @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
                                     <a href="#">Verantwoordelijke wijzigen (TODO)</a>
                                 }
                             </div>
-                        </form>
+                        </div>
+                            <!-- /.panel-body -->
                     </div>
-                        <!-- /.panel-body -->
+                        <!-- /.panel -->
                 </div>
-                    <!-- /.panel -->
+                    <!-- /col-lg-12 -->
+                <div class="form-group">
+                    <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                </div>
+            }
             </div>
-                <!-- /col-lg-12 -->
+                <!-- /row -->
         </div>
-        <button class="btn btn-success" type="submit">Wijzigingen opslaan</button>
-        }
-            <!-- /row -->
-    </div>
-}
+    }
