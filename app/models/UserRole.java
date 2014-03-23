@@ -6,9 +6,10 @@ package models;
 public enum UserRole {
     USER,
     SUPER_USER,
-    CAR_SHARER,
+    CAR_OWNER,
     CAR_USER,
     INFOSESSION_ADMIN,
     MAIL_ADMIN,
+    PROFILE_ADMIN,
     RESERVATION_ADMIN
 }

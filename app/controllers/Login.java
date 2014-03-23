@@ -79,7 +79,7 @@ public class Login extends Controller {
      *
      * @return The login index page
      */
-    public static Result login() {
+    public static Result login(String redirect) {
         // Allow a force login when the user doesn't exist anymore
         String email = session("email");
         if (email != null) {
@@ -91,7 +91,7 @@ public class Login extends Controller {
 
         if (email == null) {
             return ok(
-                    login.render(Form.form(LoginModel.class))
+                    login.render(Form.form(LoginModel.class), redirect)
             );
         } else {
             return redirect(
@@ -240,7 +240,7 @@ public class Login extends Controller {
                         LoginModel model = new LoginModel();
                         model.email = user.getEmail();
 
-                        return ok(login.render(Form.form(LoginModel.class).fill(model)));
+                        return ok(login.render(Form.form(LoginModel.class).fill(model), null));
                     } else {
                         return badRequest("De verificatiecode komt niet overeen met onze gegevens.");
                     }
@@ -258,10 +258,10 @@ public class Login extends Controller {
      * @return Redirect to old page or login form
      */
 
-    public static Result authenticate() {
+    public static Result authenticate(String redirect) {
         Form<LoginModel> loginForm = Form.form(LoginModel.class).bindFromRequest();
         if (loginForm.hasErrors()) {
-            return badRequest(login.render(loginForm));
+            return badRequest(login.render(loginForm, redirect));
         } else {
             User user = DatabaseHelper.getUserProvider().getUser(loginForm.get().email);
             boolean goodCredentials = user != null && BCrypt.checkpw(loginForm.get().password, user.getPassword());
@@ -271,20 +271,24 @@ public class Login extends Controller {
                     loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
                     loginForm.data().put("reactivate", "True");
                     //TODO: link aanvraag nieuwe bevestigingscode
-                    return badRequest(login.render(loginForm));
+                    return badRequest(login.render(loginForm, redirect));
                 } else if (user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED) {
                     loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
-                    return badRequest(login.render(loginForm));
+                    return badRequest(login.render(loginForm, redirect));
                 } else {
                     session().clear();
                     session("email", loginForm.get().email);
-                    return redirect(
-                            routes.Dashboard.index() // go to dashboard page, authentication success
-                    );
+                    if(redirect != null){
+                        return redirect(redirect);
+                    } else {
+                        return redirect(
+                                routes.Dashboard.index() // go to dashboard page, authentication success
+                        );
+                    }
                 }
             } else {
                 loginForm.reject("Foute gebruikersnaam of wachtwoord.");
-                return badRequest(login.render(loginForm));
+                return badRequest(login.render(loginForm, redirect));
             }
         }
     }
@@ -301,7 +305,7 @@ public class Login extends Controller {
             );
         } else {
             return redirect(
-                    routes.Login.login()
+                    routes.Login.login(null)
             );
         }
     }
@@ -319,7 +323,7 @@ public class Login extends Controller {
                 return badRequest("Deze user bestaat niet."); //TODO: flash
             } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
                 flash("warning", "Deze gebruiker is reeds gevalideerd.");
-                return badRequest(login.render(Form.form(LoginModel.class))); //We don't include a preset email address here since we could leak ID -> email to public
+                return badRequest(login.render(Form.form(LoginModel.class), null)); //We don't include a preset email address here since we could leak ID -> email to public
             } else {
                 String ident = dao.getVerificationString(user, VerificationType.REGISTRATION);
                 if (ident == null) {
@@ -336,7 +340,7 @@ public class Login extends Controller {
                     LoginModel model = new LoginModel();
                     model.email = user.getEmail();
                     Notifier.sendWelcomeMail(user);
-                    return ok(login.render(Form.form(LoginModel.class).fill(model)));
+                    return ok(login.render(Form.form(LoginModel.class).fill(model), null));
                 } else {
                     return badRequest("De verificatiecode komt niet overeen met onze gegevens. TODO: nieuwe string voorstellen.");
                 }

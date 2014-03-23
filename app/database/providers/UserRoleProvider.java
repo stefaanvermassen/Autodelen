@@ -6,6 +6,7 @@ import models.UserRole;
 import play.cache.Cache;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Created by Cedric on 3/4/14.
@@ -32,8 +33,16 @@ public class UserRoleProvider {
         if(user == null)
             return false;
         else {
-            return getRoles(user.getId()).contains(role);
+            return hasRole(user.getId(), role);
         }
+    }
+
+    public boolean hasRole(int id, UserRole role){
+        return hasRole(getRoles(id), role);
+    }
+
+    public static boolean hasRole(Set<UserRole> roles, UserRole role){
+        return roles.contains(role) || roles.contains(UserRole.SUPER_USER); // Superuser has all roles!!
     }
 
     public EnumSet<UserRole> getRoles(int userId, boolean cached){

@@ -15,9 +15,12 @@ public class Application extends Controller {
     public static Result javascriptRoutes() {
         response().setContentType("text/javascript");
         return ok(
-                Routes.javascriptRouter("jsRoutes",
+                Routes.javascriptRouter("myJsRoutes",
                         // Routes
-                        controllers.routes.javascript.Reserve.filterReservations()
+                        routes.javascript.Cars.showCarsPage(),
+                        routes.javascript.InfoSessions.showUpcomingSessionsPage(),
+                        controllers.routes.javascript.Reserve.filterReservations(),
+                        routes.javascript.Reserve.showCarsPage()
                 )
         );
     }
