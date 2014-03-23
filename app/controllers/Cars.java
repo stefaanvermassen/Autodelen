@@ -1,7 +1,7 @@
 package controllers;
 
 import database.*;
-import database.fields.CarField;
+import database.fields.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
@@ -65,21 +65,21 @@ public class Cars extends Controller {
 
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        CarField carField = CarField.stringToField(orderBy);
+        FilterField carField = FilterField.stringToField(orderBy);
 
         // TODO: create asc and filter in method
         boolean asc = ascInt == 1;
 
-        Filter<CarField> filter = new JDBCFilter<>();
+        Filter filter = new JDBCFilter();
+        System.err.println("SEARCH STRING: " + searchString);
         if(searchString != "") {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
-                System.out.println(s);
-                String[] s2 = s.split(":");
+                String[] s2 = s.split("=");
                 if(s2.length == 2) {
                     String field = s2[0];
                     String value = s2[1];
-                    filter.fieldContains(CarField.stringToField(field), value);
+                    filter.fieldContains(FilterField.stringToField(field), value);
                 }
             }
         }
@@ -87,16 +87,16 @@ public class Cars extends Controller {
     }
 
     private static Html carList() {
-        return carList(1, CarField.NAME, true, null);
+        return carList(1, FilterField.NAME, true, null);
     }
 
-    private static Html carList(int page, CarField orderBy, boolean asc, Filter<CarField> filter) {
+    private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
             if(orderBy == null) {
-                orderBy = CarField.NAME;
+                orderBy = FilterField.NAME;
             }
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 

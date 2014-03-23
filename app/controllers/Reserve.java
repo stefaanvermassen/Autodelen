@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import database.fields.CarField;
+import database.fields.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
@@ -53,19 +53,6 @@ public class Reserve extends Controller {
 
     }
 
-    public static Result filterReservations(String name) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            CarDAO dao = context.getCarDAO();
-            List<Car> cars = dao.getCarList();
-            Thread.sleep(500);
-            return ok(reservePartial.render(cars));
-        } catch (DataAccessException ex) {
-            throw ex;
-        } catch (InterruptedException e) {
-            throw new DataAccessException("AW");
-        }
-    }
-
     @RoleSecured.RoleAuthenticated()
     public static Result index() {
         return ok(showIndex());
@@ -76,34 +63,39 @@ public class Reserve extends Controller {
     }
 
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new DataAccessException("AUW");
+        }
         // TODO: orderBy not as String-argument?
-        CarField carField = CarField.stringToField(orderBy);
+        FilterField carField = FilterField.stringToField(orderBy);
 
         // TODO: create asc and filter in method
         boolean asc = ascInt == 1;
 
-        Filter<CarField> filter = new JDBCFilter<>();
+        Filter filter = new JDBCFilter();
         if(searchString != "") {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
-                String[] s2 = s.split(":");
+                String[] s2 = s.split("=");
                 if(s2.length == 2) {
                     String field = s2[0];
                     String value = s2[1];
-                    filter.fieldContains(CarField.stringToField(field), value);
+                    filter.fieldContains(FilterField.stringToField(field), value);
                 }
             }
         }
         return ok(carList(page, carField, asc, filter));
     }
 
-    private static Html carList(int page, CarField orderBy, boolean asc, Filter<CarField> filter) {
-
+    private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
+            ReservationDAO rdao = context.getReservationDAO();
 
             if(orderBy == null) {
-                orderBy = CarField.NAME;
+                orderBy = FilterField.NAME;
             }
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 
@@ -174,13 +166,13 @@ public class Reserve extends Controller {
                 context.commit();
 
                 if (reservation != null) {
-                    // TODO: temporary test here if loaner is owner, later adjust
                     if(car.getOwner().getId() == user.getId()) {
                         reservation.setStatus(ReservationStatus.ACCEPTED);
                         rdao.updateReservation(reservation);
                         context.commit();
+                    } else {
+                        Notifier.sendReservationApproveRequestMail(user, reservation);
                     }
-                    Notifier.sendReservationApproveRequestMail(user, reservation);
                     return redirect(routes.Drives.index());
                 } else {
                     reservationForm.error("De reservatie kon niet aangemaakt worden. Contacteer de administrator");

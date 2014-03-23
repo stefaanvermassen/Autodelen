@@ -25,7 +25,6 @@ GET         /reserve                           controllers.Reserve.index()
 GET         /reserve/cars                      controllers.Reserve.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation               controllers.Reserve.reserve(carId: Int)
 POST        /reserve/reservation               controllers.Reserve.confirmReservation(cardId: Int)
-GET         /reserve/filtered                  controllers.Reserve.filterReservations(name: String)
 
 
 # User pages
@@ -97,6 +96,3 @@ GET         /assets/*file                      controllers.Assets.at(path="/publ
 
 # Support for webjar packages such as bootstrap
 GET         /webjars/*file                     controllers.WebJarAssets.at(file)
-
-# Javascript Routes
-GET         /javascriptRoutes                  controllers.Application.javascriptRoutes

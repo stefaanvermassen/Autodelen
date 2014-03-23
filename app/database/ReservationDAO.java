@@ -22,4 +22,5 @@ public interface ReservationDAO {
     public void deleteReservation(Reservation reservation) throws DataAccessException;
     public List<Reservation> getReservationListForUser(int userId) throws DataAccessException;
     public List<Reservation> getReservationListForCar(int carID) throws DataAccessException;
+    public boolean carIsUnavailable(int carId, Filter filter);
 }

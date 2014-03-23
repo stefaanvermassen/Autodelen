@@ -45,6 +45,7 @@ var previousBtnTxt = "Vorige";
 var nextBtnTxt = "Volgende";
 var firstBtnTxt = "<<";
 var lastBtnTxt = ">>";
+var loadingImage = 'assets/images/ajax-loader.gif';
 
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
 var buttonsAroundPage = 2;
@@ -59,23 +60,49 @@ $(document).ready(loadPage(1, 1, "", ""));
  * It also has to have a name attribute that will be used in the controller to know what to search on
  */
 var searchButton = document.getElementById("searchButton");
-searchButton.onclick = function() {
-    var searchFields = document.getElementsByClassName("searchTextField");
-    var values = new Array();
-    var fields = new Array();
-    for(var i=0; i < searchFields.length; i++) {
-        var searchField = searchFields[i];
-        fields[i] = searchField.getAttribute('name');
-        values[i] = searchField.value;
+if(searchButton != null) {
+    searchButton.onclick = function () {
+        var searchFields = document.getElementsByClassName("searchTextField");
+        var values = new Array();
+        var fields = new Array();
+        for (var i = 0; i < searchFields.length; i++) {
+            var searchField = searchFields[i];
+            fields[i] = searchField.getAttribute('name');
+            values[i] = searchField.value;
+        }
+        var searchString = createSearchString(fields, values);
+        loadPage(1, 1, "", searchString);
     }
-    var searchString = createSearchString(fields, values);
-    loadPage(1, 1, "", searchString);
 }
 
 // The function to load a new page
 function loadPage(page, asc, orderBy, search) {
-    // TODO: write some better loading
-    $("#resultsTable").append("Loading...");
+    // Fill in loading image inside the table if the table is already rendered
+    if(typeof $("#resultsTable").find('table').val() != 'undefined') {
+        // Calculate the number of columns to create a td with the colspan set to that number
+        var cols = $("#resultsTable").find('table').find('tr')[0].cells.length;
+        $("#resultsTable").find('table').find('tbody').html($('<tr>')
+                .append($('<td>')
+                    .attr('colspan', cols)
+                    .attr('style', 'text-align: center; background-color: #FFFFFF; padding: 8px;')
+                    .append($('<img>')
+                        .attr('alt', 'Loading...')
+                        .attr('src', loadingImage)
+                )
+            )
+        );
+    // Fill in loading image if the table is not yet rendered
+    } else {
+        $("#resultsTable").append($('<div>')
+            .attr('style', 'text-align: center;')
+            .append($('<img>')
+                .attr('alt', 'Loading...')
+                .attr('src', loadingImage)
+                )
+            .append($('<p>')
+                .text('Loading table'))
+        );
+    }
 
     route(page, asc, orderBy, search).ajax({
         success : function(html) {
@@ -182,7 +209,7 @@ function loadPage(page, asc, orderBy, search) {
 function createSearchString(fields, values) {
     var searchString = "";
     for(var i = 0; i < fields.length; i++) {
-        searchString += fields[i] + ":" + values[i];
+        searchString += fields[i] + "=" + values[i];
         if(i != fields.length-1) {
             searchString += ",";
         }

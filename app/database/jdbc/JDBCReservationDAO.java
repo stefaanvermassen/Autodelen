@@ -5,12 +5,14 @@
 package database.jdbc;
 
 import database.DataAccessException;
+import database.Filter;
 import database.ReservationDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.fields.FilterField;
 import models.Car;
 import models.Reservation;
 import models.ReservationStatus;
@@ -33,6 +35,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement deleteReservationStatement;
     private PreparedStatement getReservationListByUseridStatement;
     private PreparedStatement getReservationListByCaridStatement;
+    private PreparedStatement carIsUnavailableStatement;
 
     public JDBCReservationDAO(Connection connection) {
         this.connection = connection;
@@ -85,12 +88,22 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     private PreparedStatement getGetReservationListByCaridStatement() throws SQLException {
-        if (getReservationListByUseridStatement == null) {
+        if (getReservationListByCaridStatement == null) {
             // Only request the reservations for which the current user is the loaner or the owner
-            getReservationListByUseridStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
+            getReservationListByCaridStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
                     "WHERE car_id=?");
         }
-        return getReservationListByUseridStatement;
+        return getReservationListByCaridStatement ;
+    }
+
+    private PreparedStatement getCarIsUnavailableStatement() throws SQLException {
+        if (carIsUnavailableStatement == null) {
+            // Only request the reservations for which the current user is the loaner or the owner
+            carIsUnavailableStatement = connection.prepareStatement("SELECT count(*) AS unavailable FROM CarReservations " +
+                    "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id WHERE car_id = ? " +
+                    "AND ? < CarReservations.reservation_to AND ? >  CarReservations.reservation_from");
+        }
+        return carIsUnavailableStatement;
     }
 
     @Override
@@ -199,6 +212,27 @@ public class JDBCReservationDAO implements ReservationDAO{
         }catch (SQLException e){
             throw new DataAccessException("Error while reading reservation resultset", e);
 
+        }
+    }
+
+    @Override
+    public boolean carIsUnavailable(int carId, Filter filter) {
+        try {
+            PreparedStatement ps = getCarIsUnavailableStatement();
+            ps.setInt(1, carId);
+            ps.setString(2, filter.getFieldContains(FilterField.FROM, true));
+            ps.setString(3, filter.getFieldContains(FilterField.UNTIL, true));
+            //System.err.println(filter.getFieldContains(FilterField.FROM, true));
+            //System.err.println(filter.getFieldContains(FilterField.UNTIL, true));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return 1 == rs.getInt("unavailable");
+                return false;
+            } catch(SQLException e) {
+                throw new DataAccessException("Error while reading resultset");
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update reservation", e);
         }
     }
 
