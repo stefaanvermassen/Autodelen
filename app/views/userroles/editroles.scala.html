@@ -34,9 +34,10 @@
                                     @for((role, checked) <- roles) {
                                         @* TODO: Cleaner syntax to add 'checked' attribute *@
                                         @if(checked) {
-                                            <input type="checkbox" name="role" value="@role" checked> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
+
+                                            <input type="checkbox" name="role" value="@role" checked> @role @if(roleDesc.contains(role)) { - <span style="font-style:italic">@roleDesc(role)</span> } <br>
                                         } else {
-                                            <input type="checkbox" name="role" value="@role"> @role - <span style="font-style:italic">@roleDesc(role)</span> <br>
+                                            <input type="checkbox" name="role" value="@role"> @role @if(roleDesc.contains(role)) { - <span style="font-style:italic">@roleDesc(role)</span> }  <br>
                                             }
                                     }
                                     </div>

@@ -1,4 +1,4 @@
-@(infoSession: InfoSession)
+@(infoSession: InfoSession, mapDetails: Maps.MapDetails = null)
 <div class="row">
     <div class="col-lg-4">
         <div class="well">
@@ -23,9 +23,7 @@
     </div>
     <div class="col-lg-8">
         <div class="well">
-
-                @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-                Map placeholder
+            @map(mapDetails)
         </div>
     </div>
 </div>
