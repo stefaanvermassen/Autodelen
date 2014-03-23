@@ -257,7 +257,6 @@ public class InfoSessions extends Controller {
                 });
             } else {
                 final InfoSession enrolled = dao.getAttendingInfoSession(user);
-
                 if (SHOW_MAP) {
                     return Maps.getLatLongPromise(session.getAddress().getId()).map(
                             new F.Function<F.Tuple<Double, Double>, Result>() {
@@ -444,13 +443,29 @@ public class InfoSessions extends Controller {
 
 
     @RoleSecured.RoleAuthenticated()
-    public static Result showUpcomingSessions() {
+    public static F.Promise<Result> showUpcomingSessions() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
-            InfoSession enrolled = dao.getAttendingInfoSession(user);
+            final InfoSession enrolled = dao.getAttendingInfoSession(user);
 
-            return ok(infosessions.render(enrolled));
+            if(enrolled == null || !SHOW_MAP){
+                return F.Promise.promise(new F.Function0<Result>() {
+                    @Override
+                    public Result apply() throws Throwable {
+                        return ok(infosessions.render(enrolled, null));
+                    }
+                });
+            } else {
+                    return Maps.getLatLongPromise(enrolled.getAddress().getId()).map(
+                            new F.Function<F.Tuple<Double, Double>, Result>() {
+                                public Result apply(F.Tuple<Double, Double> coordinates) {
+                                    return ok(infosessions.render(enrolled,
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toLocalDate())));
+                                }
+                            }
+                    );
+            }
         } catch (DataAccessException ex) {
             throw ex;
         }
