@@ -63,11 +63,6 @@ public class Reserve extends Controller {
     }
 
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new DataAccessException("AUW");
-        }
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
 
