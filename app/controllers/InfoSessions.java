@@ -12,6 +12,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
 import play.data.Form;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.infosession.*;
@@ -24,6 +25,8 @@ import java.util.List;
 public class InfoSessions extends Controller {
 
     private static final int PAGE_SIZE = 10;
+
+    private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
 
     private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
 
@@ -220,20 +223,49 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    /*@RoleSecured.RoleAuthenticated()
     public static Result detail(int sessionId) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession session = dao.getInfoSession(sessionId, true);
-            InfoSession enrolled = dao.getAttendingInfoSession(user);
             if (session == null) {
                 flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
+                InfoSession enrolled = dao.getAttendingInfoSession(user);
                 return ok(detail.render(session, enrolled));
             }
         } catch (DataAccessException ex) {
+            throw ex;
+            //TODO: log
+        }
+    }*/
+
+    @RoleSecured.RoleAuthenticated()
+    public static F.Promise<Result> detail(int sessionId){
+        final User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            final InfoSessionDAO dao = context.getInfoSessionDAO();
+            final InfoSession session = dao.getInfoSession(sessionId, true);
+            if(session == null){
+                return F.Promise.promise(new F.Function0<Result>() {
+                    @Override
+                    public Result apply() throws Throwable {
+                        return badRequest("Sessie id bestaat niet.");
+                    }
+                });
+
+            } else {
+                final InfoSession enrolled = dao.getAttendingInfoSession(user);
+                return Maps.getLatLongPromise(session.getAddress().getId()).map(
+                        new F.Function<F.Tuple<Double, Double>, Result>() {
+                            public Result apply(F.Tuple<Double, Double> coordinates) {
+                                return ok(detail.render(session, enrolled, new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toLocalDate())));
+                            }
+                        });
+            }
+        } catch(DataAccessException ex){
             throw ex;
             //TODO: log
         }

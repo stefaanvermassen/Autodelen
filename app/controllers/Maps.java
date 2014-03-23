@@ -27,6 +27,36 @@ public class Maps extends Controller {
     private static final String TILE_URL = "http://tile.openstreetmap.org/%d/%d/%d.png";
     private static final String ADDRESS_RESOLVER = "http://nominatim.openstreetmap.org/search";
 
+    public static class MapDetails {
+        private double latitude;
+        private double longtitude;
+        private int zoom;
+        private String message;
+
+        public MapDetails(double latitude, double longtitude, int zoom, String message){
+            this.latitude = latitude;
+            this.longtitude = longtitude;
+            this.zoom = zoom;
+            this.message = message;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongtitude() {
+            return longtitude;
+        }
+
+        public int getZoom() {
+            return zoom;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
     @RoleSecured.RoleAuthenticated()
     public static Promise<Result> getMap(int zoom, int x, int y) {
         final Promise<Result> resultPromise = WS.url(String.format(TILE_URL, zoom, x, y)).get().map(
@@ -86,6 +116,6 @@ public class Maps extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showMap(){
-        return ok(simplemap.render(51.1891253d, 4.2355338d, "Afspraak 27/04/2014", 13));
+        return ok(simplemap.render(new MapDetails(51.1891253d, 4.2355338d, 13, "Afspraak 27/04/2014")));
     }
 }
