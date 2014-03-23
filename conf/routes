@@ -88,6 +88,11 @@ GET         /cars/edit                         controllers.Cars.editCar(carId: I
 POST        /cars/edit                         controllers.Cars.editCarPost(carId: Int)
 GET         /cars/delete                       controllers.Cars.removeCar(carId: Int)
 
+# Maps
+GET         /maps/tile                         controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
+GET         /maps/coordinates                  controllers.Maps.getLatLong(addressId: Int)
+GET         /maps/test                         controllers.Maps.showMap()
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                      controllers.Assets.at(path="/public", file)
 

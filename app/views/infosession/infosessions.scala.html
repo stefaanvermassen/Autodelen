@@ -1,4 +1,4 @@
-@(enrolled: InfoSession = null)
+@(enrolled: InfoSession = null, map: Maps.MapDetails = null)
 @import database.DatabaseHelper;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -6,9 +6,18 @@
         var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+
+    <!-- Maps: -->
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.js"))'></script>
+    <script src="@routes.Assets.at("javascripts/maps-custom.js")" type="text/javascript"></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+
+    <style>
+        #map { height: 400px; width: 1000px; } /* TODO: make responsive */
+    </style>
+    <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
 }
 
 @app("Infosessies", stylesheets, scripts) {
@@ -43,7 +52,7 @@
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @detailPartial(enrolled)
+                            @detailPartial(enrolled, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
                             <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
                         </div>
