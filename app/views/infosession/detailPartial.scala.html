@@ -1,4 +1,4 @@
-@(infoSession: InfoSession, map: Maps.MapDetails = null)
+@(infoSession: InfoSession, mapDetails: Maps.MapDetails = null)
 <div class="row">
     <div class="col-lg-4">
         <div class="well">
@@ -21,11 +21,9 @@
             </p>
         </div>
     </div>
-    @if(map != null) {
-        <div class="col-lg-8">
-            <div class="well">
-                <div id="map" data-lat="@map.getLatitude" data-lon="@map.getLongtitude" data-zoom="@map.getZoom" data-message="@map.getMessage"></div>
-            </div>
+    <div class="col-lg-8">
+        <div class="well">
+            @map(mapDetails)
         </div>
-    }
+    </div>
 </div>

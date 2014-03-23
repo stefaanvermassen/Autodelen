@@ -1,4 +1,4 @@
-@(enrolled: InfoSession = null)
+@(enrolled: InfoSession = null, map: Maps.MapDetails = null)
 @import database.DatabaseHelper;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -43,7 +43,7 @@
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @detailPartial(enrolled)
+                            @detailPartial(enrolled, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
                             <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
                         </div>
