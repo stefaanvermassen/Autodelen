@@ -120,12 +120,13 @@ public class Notifier extends Mailer {
         }
     }
 
-    public static void sendReservationRefusedByOwnerMail(User user, String reason) {
+    public static void sendReservationRefusedByOwnerMail(User user, Reservation carReservation, String reason) {
         String mail = "";
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
             mail = replaceUserTags(user, template.getBody());
+            mail = replaceCarReservationTags(carReservation, mail);
             mail = mail.replace("%reason%", reason);
             NotificationDAO notificationDAO = context.getNotificationDAO();
             notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());

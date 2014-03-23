@@ -1,9 +1,11 @@
 package database;
 
+import database.fields.FilterField;
+
 /**
  * Created by HannesM on 17/03/14.
  */
-public interface Filter<F extends Enum<F>> {
-    public void fieldContains(F field, String string);
-    public String getFieldContains(F field);
+public interface Filter {
+    public void fieldContains(FilterField field, String string);
+    public String getFieldContains(FilterField field, boolean exactValue);
 }

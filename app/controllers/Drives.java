@@ -51,7 +51,12 @@ public class Drives extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result approveReservation(int reservationId) {
-        return adjustStatus(reservationId, ReservationStatus.ACCEPTED);
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
+        if(reservation == null)
+            return badRequest(showIndex());
+        Notifier.sendReservationApprovedByOwnerMail(user, reservation);
+        return index();
     }
 
     @RoleSecured.RoleAuthenticated()
@@ -60,29 +65,31 @@ public class Drives extends Controller {
         Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
         if(refuseForm.hasErrors())
             return badRequest(showIndex(refuseForm, errorIndex));
-        Result result = adjustStatus(reservationId, ReservationStatus.REFUSED);
-        if(result != null)
-            Notifier.sendReservationRefusedByOwnerMail(user, refuseForm.get().reason);
-        return result;
+        Reservation reservation = adjustStatus(reservationId, ReservationStatus.REFUSED);
+        if(reservation == null) {
+            return badRequest(showIndex());
+        }
+        Notifier.sendReservationRefusedByOwnerMail(user, reservation, refuseForm.get().reason);
+        return index();
     }
 
-    public static Result adjustStatus(int reservationId, ReservationStatus status) {
+    public static Reservation adjustStatus(int reservationId, ReservationStatus status) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
             Reservation reservation = dao.getReservation(reservationId);
             if(reservation == null) {
                 flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
-                return badRequest(showIndex());
+                return null;
             }
             if(!isOwnerOfReservedCar(context, user, reservation)) {
                 flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
-                return badRequest(showIndex());
+                return null;
             }
             reservation.setStatus(status);
             dao.updateReservation(reservation);
             context.commit();
-            return index();
+            return null;
         } catch(DataAccessException ex) {
             throw ex;
         }
@@ -98,6 +105,7 @@ public class Drives extends Controller {
                 flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
                 return badRequest(showIndex());
             }
+            // TODO: only loaner may cancel the reservation
             if(!isOwnerOfReservedCar(context, user, reservation) && !isLoaner(reservation, user)) {
                 flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
                 return badRequest(showIndex());

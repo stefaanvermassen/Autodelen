@@ -1,9 +1,6 @@
-
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-    <script>
-        var route = myJsRoutes.controllers.Reserve.showCarsPage;
-    </script>
+    <script src="@routes.Assets.at("javascripts/reservation.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
 @stylesheets = {
@@ -22,68 +19,90 @@
     <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Reserveren</h1>
+            <!-- search panel -->
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Auto's zoeken
+                    <i class="fa fa-bar-chart-o fa-fw"></i>
+                    <a style="color: #000000" data-toggle="collapse" href="#searchwell">Auto's zoeken (klik hier)</a>
                 </div>
-                    <!-- /.panel-heading -->
-                <div class="panel-body">
-                        <!-- TODO: layout, more fields to search on -->
-                    <input class="searchTextField" name="name" value="Naam" type="text"><br>
-                    <input class="searchTextField" name="brand" value="Merk" type="text"><br>
-                    <button id="searchButton">Zoek!</button>
+                <div id="searchwell" class="panel-body panel-collapse collapse">
+                    <div class="well">
+                        <label>Auto zoeken op:</label>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input id="name" class="searchTextField form-control" name="name" type="text" class="form-control" placeholder="Naam">
+                            </div>
+                            <div class="col-xs-6">
+                                <input id="zipcode" class="searchTextField form-control" name="zipcode" type="number"  placeholder="Postcode">
+                            </div>
+                        </div><hr />
+                        <label>Functionaliteit:</label>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Minimaal aantal zitplaatsen">
+                            </div>
+                            <div class="col-xs-3">
+                                <div class="checkbox">
+                                    <label>
+                                        <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">
+                                        Gps aanwezig
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-xs-3">
+                                <div id="hook" class="checkbox">
+                                    <label>
+                                        <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">
+                                        Trekhaak aanwezig
+                                    </label>
+                                </div>
+                            </div>
+                        </div><hr />
+                        <label>Beschikbaarheid:</label>
+                        <div class="row">
+                            <div id="from" class="searchTextField" name="from" value="">
+                                <div class="col-xs-3">
+                                    <input id="dateFrom" type="date" class="form-control">
+                                </div>
+                                <div class="col-xs-2">
+                                    <input id="timeFrom" type="time" class="form-control" value="">
+                                </div>
+                            </div>
+                            <div class="col-xs-1">
+                            </div>
+                            <div id="until" class="searchTextField" name="until" value="">
+                                <div class="col-xs-3">
+                                    <input id="dateUntil" type="date" class="form-control" value="">
+                                </div>
+                                <div class="col-xs-2">
+                                    <input id="timeUntil" type="time" class="form-control" value="">
+                                </div>
+                            </div>
+                        </div><hr />
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <div class="btn-group btn-group">
+                                    <button id="searchButton" type="button" class="btn btn-success">Zoek</button>
+                                    <button id="reset" type="button" class="btn btn-primary">Verwijder zoekterm</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                    <!-- /.panel-body -->
             </div>
+            <!-- /.search panel -->
+            <!-- table panel -->
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart-o fa-fw"></i> Beschikbare auto's
                 </div>
                 <div class="panel-body">
-                    <!-- <form class="form-inline" role="form">
-                        <div class="form-group">
-                            <label for="inputName">Naam</label>
-                            <input type="text" class="form-control" id="inputName" placeholder="Naam">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="inputCapacity">Capaciteit</label>
-                            <input type="number" min="1" step="1" class="form-control" id="inputCapacity" placeholder="Capaciteit">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="locationInput">Standplaats</label>
-                            <input type="text" class="form-control" id="locationInput" placeholder="Standplaats">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="brandInput">Merk</label>
-                            <input type="text" class="form-control" id="brandInput" placeholder="Merk">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="fromInput">Van</label>
-                            <input type="date" class="form-control" id="fromInput" placeholder="">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="untillInput">Tot</label>
-                            <input type="date" class="form-control" id="untillInput" placeholder="">
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-default">Filter</button>
-                        </div>
-                    </form> -->
-
-                     <!-- TODO cars have names on their site -->
                     <div id="resultsTable" class="table-responsive">
                             <!-- Here comes the loaded table-->
                     </div>
                 </div>
-                <!-- /.panel-body -->
             </div>
-            <!-- /.panel -->
+            <!-- table panel -->
         </div>
         <!-- /col-lg-12 -->
     </div>

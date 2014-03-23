@@ -5,7 +5,6 @@
 package database.jdbc;
 
 import database.CarDAO;
-import database.fields.CarField;
 import database.DataAccessException;
 import database.Filter;
 
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
+import database.fields.FilterField;
 import models.Address;
 import models.Car;
 import models.CarFuel;
@@ -30,15 +30,24 @@ public class JDBCCarDAO implements CarDAO{
     public static final String CAR_QUERY = "SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location " +
             "INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id ";
 
-    public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_brand LIKE ? ";
+    public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_gps >= ? " +
+            "AND Cars.car_hook >= ? AND Cars.car_seats >= ? AND Addresses.address_zipcode LIKE ? " +
+            "AND Cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM Cars INNER JOIN Carreservations " +
+            "ON Carreservations.reservation_car_id = Cars.car_id " +
+            "WHERE ? < CarReservations.reservation_to  AND ? >  CarReservations.reservation_from)";
 
-    private void fillFragment(PreparedStatement ps, Filter<CarField> filter, int start) throws SQLException {
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = createCarFilter();
         }
-        ps.setString(start, filter.getFieldContains(CarField.NAME));
-        ps.setString(start+1, filter.getFieldContains(CarField.BRAND));
+        ps.setString(start, filter.getFieldContains(FilterField.NAME, false));
+        ps.setString(start+1, filter.getFieldContains(FilterField.GPS, true));
+        ps.setString(start+2, filter.getFieldContains(FilterField.HOOK, true));
+        ps.setString(start+3, filter.getFieldContains(FilterField.SEATS, true));
+        ps.setString(start+4, filter.getFieldContains(FilterField.ZIPCODE, false));
+        ps.setString(start+5, filter.getFieldContains(FilterField.FROM, true));
+        ps.setString(start+6, filter.getFieldContains(FilterField.UNTIL, true));
     }
 
 
@@ -172,7 +181,7 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
         if(getGetAmountOfCarsStatement == null) {
-            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars" + FILTER_FRAGMENT);
+            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location" + FILTER_FRAGMENT);
         }
         return getGetAmountOfCarsStatement;
     }
@@ -312,7 +321,7 @@ public class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public int getAmountOfCars(Filter<CarField> filter) throws DataAccessException {
+    public int getAmountOfCars(Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = getGetAmountOfCarsStatement();
             fillFragment(ps, filter, 1);
@@ -331,8 +340,8 @@ public class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public Filter<CarField> createCarFilter() {
-        return new JDBCFilter<CarField>();
+    public Filter createCarFilter() {
+        return new JDBCFilter();
     }
 
     /*
@@ -340,18 +349,18 @@ public class JDBCCarDAO implements CarDAO{
      */
     @Override
     public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
-        return getCarList(CarField.NAME, true, page, pageSize, null);
+        return getCarList(FilterField.NAME, true, page, pageSize, null);
     }
 
     @Override
-    public List<Car> getCarList(CarField orderBy, boolean asc, int page, int pageSize, Filter<CarField> filter) throws DataAccessException {
+    public List<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
                 case NAME :
                     ps = asc ? getGetCarListPageByNameAscStatement() : getGetCarListPageByNameDescStatement();
                     break;
-                case BRAND:
+                case SEATS:
                     ps = asc ? getGetCarListPageByBrandAscStatement() : getGetCarListPageByBrandDescStatement();
                     break;
             }
@@ -361,8 +370,8 @@ public class JDBCCarDAO implements CarDAO{
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(3, first);
-            ps.setInt(4, pageSize);
+            ps.setInt(8, first);
+            ps.setInt(9, pageSize);
             return getCars(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);

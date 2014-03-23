@@ -3,7 +3,7 @@ package database.jdbc;
 import database.DataAccessException;
 import database.Filter;
 import database.InfoSessionDAO;
-import database.fields.InfoSessionField;
+import database.fields.FilterField;
 import models.*;
 import org.joda.time.DateTime;
 
@@ -39,7 +39,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private static String FILTER_FRAGMENT = "  "; // TODO: get something to filter on
 
-    private void fillFragment(PreparedStatement ps, Filter<InfoSessionField> filter, int start) throws SQLException {
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = createInfoSessionFilter();
@@ -189,8 +189,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public Filter<InfoSessionField> createInfoSessionFilter() {
-        return new JDBCFilter<InfoSessionField>();
+    public Filter createInfoSessionFilter() {
+        return new JDBCFilter();
     }
 
     @Override
@@ -275,7 +275,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public int getAmountOfInfoSessions(Filter<InfoSessionField> filter) throws DataAccessException {
+    public int getAmountOfInfoSessions(Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = getGetAmountOfInfoSessionsStatement();
             fillFragment(ps, filter, 1);
@@ -316,7 +316,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public List<InfoSession> getInfoSessionsAfter(DateTime since, InfoSessionField orderBy, boolean asc, int page, int pageSize, Filter<InfoSessionField> filter) throws DataAccessException {
+    public List<InfoSession> getInfoSessionsAfter(DateTime since, FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {

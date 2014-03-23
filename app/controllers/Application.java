@@ -1,7 +1,5 @@
 package controllers;
 
-import database.DatabaseHelper;
-import models.User;
 import play.Routes;
 import play.mvc.*;
 
@@ -13,10 +11,12 @@ public class Application extends Controller {
         return ok(index.render());
     }
 
+    // Javascript routes
     public static Result javascriptRoutes() {
         response().setContentType("text/javascript");
         return ok(
                 Routes.javascriptRouter("myJsRoutes",
+                        // Routes
                         routes.javascript.Cars.showCarsPage(),
                         routes.javascript.InfoSessions.showUpcomingSessionsPage(),
                         routes.javascript.Reserve.showCarsPage()

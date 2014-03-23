@@ -2,8 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import database.fields.CarField;
-import database.fields.InfoSessionField;
+import database.fields.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
@@ -474,12 +473,12 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result showUpcomingSessionsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        InfoSessionField infoSessionField = InfoSessionField.stringToField(orderBy);
+        FilterField filterField = FilterField.stringToField(orderBy);
 
         // TODO: create asc and filter in method
         boolean asc = ascInt == 1;
 
-        Filter<InfoSessionField> filter = new JDBCFilter<>();
+        Filter filter = new JDBCFilter();
         if(searchString != "") {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
@@ -487,24 +486,24 @@ public class InfoSessions extends Controller {
                 if(s2.length == 2) {
                     String field = s2[0];
                     String value = s2[1];
-                    filter.fieldContains(InfoSessionField.stringToField(field), value);
+                    filter.fieldContains(FilterField.stringToField(field), value);
                 }
             }
         }
-        return ok(upcommingSessionsList(page, infoSessionField, asc, filter));
+        return ok(upcommingSessionsList(page, filterField, asc, filter));
     }
 
     private static Html upcomingSessionsList() {
-        return upcommingSessionsList(1, InfoSessionField.DATE, true, null);
+        return upcommingSessionsList(1, FilterField.DATE, true, null);
     }
-    private static Html upcommingSessionsList(int page, InfoSessionField orderBy, boolean asc, Filter<InfoSessionField> filter) {
+    private static Html upcommingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
             if(orderBy == null) {
-                orderBy = InfoSessionField.DATE;
+                orderBy = FilterField.DATE;
             }
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
             if (enrolled != null) {
