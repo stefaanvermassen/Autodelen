@@ -102,8 +102,10 @@ public class Maps extends Controller {
                                 new Function<WS.Response, F.Tuple<Double, Double>>() {
                                     public F.Tuple<Double, Double> apply(WS.Response response) {
                                         JsonNode node = response.asJson();
-                                        JsonNode first = node.get(0);
-                                        return new F.Tuple<>(first.get("lat").asDouble(), first.get("lon").asDouble());
+                                        if(node.size() > 0) {
+                                            JsonNode first = node.get(0);
+                                            return new F.Tuple<>(first.get("lat").asDouble(), first.get("lon").asDouble());
+                                        } else return null;
                                     }
                                 }
                         );

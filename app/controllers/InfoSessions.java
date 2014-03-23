@@ -255,15 +255,25 @@ public class InfoSessions extends Controller {
                         return badRequest("Sessie id bestaat niet.");
                     }
                 });
-
             } else {
                 final InfoSession enrolled = dao.getAttendingInfoSession(user);
-                return Maps.getLatLongPromise(session.getAddress().getId()).map(
-                        new F.Function<F.Tuple<Double, Double>, Result>() {
-                            public Result apply(F.Tuple<Double, Double> coordinates) {
-                                return ok(detail.render(session, enrolled, new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toLocalDate())));
+
+                if (SHOW_MAP) {
+                    return Maps.getLatLongPromise(session.getAddress().getId()).map(
+                            new F.Function<F.Tuple<Double, Double>, Result>() {
+                                public Result apply(F.Tuple<Double, Double> coordinates) {
+                                    return ok(detail.render(session, enrolled, new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toLocalDate())));
+                                }
                             }
-                        });
+                    );
+                } else {
+                    return F.Promise.promise(new F.Function0<Result>() {
+                        @Override
+                        public Result apply() throws Throwable {
+                            return ok(detail.render(session, enrolled, null));
+                        }
+                    });
+                }
             }
         } catch(DataAccessException ex){
             throw ex;
