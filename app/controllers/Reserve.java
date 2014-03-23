@@ -11,6 +11,7 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import views.html.reserve.*;
+import views.html.reserve.reserve;
 import views.html.reserve.reserve2;
 
 import java.util.Iterator;
@@ -49,6 +50,19 @@ public class Reserve extends Controller {
 
     }
 
+    public static Result filterReservations(String name) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            List<Car> cars = dao.getCarList();
+            Thread.sleep(500);
+            return ok(reservePartial.render(cars));
+        } catch (DataAccessException ex) {
+            throw ex;
+        } catch (InterruptedException e) {
+            throw new DataAccessException("AW");
+        }
+    }
+
     @RoleSecured.RoleAuthenticated()
     public static Result index() {
         return ok(showIndex());
@@ -58,7 +72,7 @@ public class Reserve extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             List<Car> cars = dao.getCarList();
-            return reserve.render(cars);
+            return reserve.render();
         } catch (DataAccessException ex) {
             throw ex;
         }

@@ -1,0 +1,33 @@
+@(cars: List[Car])
+    @if(cars.isEmpty) {
+        <tr>
+            <td style="text-align: center; background-color: #F0F0F0; padding: 8px;" colspan="6">
+                Geen enkele auto voldoet aan uw zoekterm(men)
+            </td>
+        </tr>
+    } else {
+        @for((car, index) <- cars.zipWithIndex) {
+            <tr>
+                <td>@{
+                    index + 1
+                }</td>
+                <td>@car.getName</td>
+                <td>@car.getSeats</td>
+                <td>
+                    @if(car.isGps) {
+                        <span class="label label-default">gps</span>
+                    }
+                    @if(car.isHook) {
+                        <span class="label label-default">trekhaak</span>
+                    }
+                </td>
+                <td>@car.getLocation</td>
+                <td>
+                    <div class="btn-group btn-group-xs">
+                        <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">details</a>
+                        <a class="btn btn-success" href="@routes.Reserve.reserve(car.getId)">reserveer</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    }
