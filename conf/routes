@@ -99,6 +99,9 @@ GET         /maps/tile                         controllers.Maps.getMap(zoom: Int
 GET         /maps/coordinates                  controllers.Maps.getLatLong(addressId: Int)
 GET         /maps/test                         controllers.Maps.showMap()
 
+# User Picker
+GET         /userpicker                        controllers.UserPicker.getList(search: String)
+
 # Javascript routing
 GET         /assets/javascripts/routes         controllers.Application.javascriptRoutes()
 

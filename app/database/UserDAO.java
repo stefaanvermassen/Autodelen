@@ -21,4 +21,5 @@ public interface UserDAO {
     public String createVerificationString(User user, VerificationType type) throws DataAccessException;
     public void deleteVerificationString(User user, VerificationType type) throws DataAccessException;
     public List<User> getAllUsers() throws DataAccessException; //TODO: remove, make paginated (otherwise heavy load on each call!!)
+    public List<User> searchUsers(String search) throws DataAccessException;
 }

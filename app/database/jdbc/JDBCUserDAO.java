@@ -44,6 +44,7 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
     private PreparedStatement getAllUsersStatement;
+    private PreparedStatement searchUsersStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
@@ -54,6 +55,13 @@ public class JDBCUserDAO implements UserDAO {
             getAllUsersStatement = connection.prepareStatement(USER_QUERY);
         }
         return getAllUsersStatement;
+    }
+
+    private PreparedStatement getSearchUsersStatement() throws SQLException {
+        if(searchUsersStatement == null){
+            searchUsersStatement = connection.prepareStatement(USER_QUERY + " WHERE users.user_firstname LIKE ?");
+        }
+        return searchUsersStatement;
     }
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
@@ -334,6 +342,25 @@ public class JDBCUserDAO implements UserDAO {
     public List<User> getAllUsers() throws DataAccessException {
         try {
             PreparedStatement ps = getGetAllUsersStatement();
+            List<User> users = new ArrayList<>();
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    users.add(populateUser(rs, false, true));
+                }
+                return users;
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read user resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get user list.", ex);
+        }
+    }
+
+    @Override
+    public List<User> searchUsers(String search) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSearchUsersStatement();
+            ps.setString(1, search + "%");
             List<User> users = new ArrayList<>();
             try(ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
