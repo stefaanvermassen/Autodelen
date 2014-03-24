@@ -71,7 +71,6 @@ public class Cars extends Controller {
         boolean asc = ascInt == 1;
 
         Filter filter = new JDBCFilter();
-        System.err.println("SEARCH STRING: " + searchString);
         if(searchString != "") {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {

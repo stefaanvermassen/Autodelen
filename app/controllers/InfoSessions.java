@@ -482,7 +482,7 @@ public class InfoSessions extends Controller {
         if(searchString != "") {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
-                String[] s2 = s.split(":");
+                String[] s2 = s.split("=");
                 if(s2.length == 2) {
                     String field = s2[0];
                     String value = s2[1];
