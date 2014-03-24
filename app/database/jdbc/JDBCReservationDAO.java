@@ -215,25 +215,4 @@ public class JDBCReservationDAO implements ReservationDAO{
         }
     }
 
-    @Override
-    public boolean carIsUnavailable(int carId, Filter filter) {
-        try {
-            PreparedStatement ps = getCarIsUnavailableStatement();
-            ps.setInt(1, carId);
-            ps.setString(2, filter.getFieldContains(FilterField.FROM, true));
-            ps.setString(3, filter.getFieldContains(FilterField.UNTIL, true));
-            //System.err.println(filter.getFieldContains(FilterField.FROM, true));
-            //System.err.println(filter.getFieldContains(FilterField.UNTIL, true));
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
-                    return 1 == rs.getInt("unavailable");
-                return false;
-            } catch(SQLException e) {
-                throw new DataAccessException("Error while reading resultset");
-            }
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to update reservation", e);
-        }
-    }
-
 }
