@@ -4,13 +4,16 @@ package database.fields;
  * Created by Benjamin on 23/03/2014.
  */
 public enum FilterField {
-    NAME, ZIPCODE, SEATS, GPS, HOOK, DATE, FROM, UNTIL, UNKNOWN;
+    NAME, ZIPCODE, SEATS, GPS, HOOK, DATE, FROM, UNTIL, UNKNOWN, BRAND;
 
     public static FilterField stringToField(String string) {
         FilterField field = null;
         switch(string) {
             case "name":
                 field = NAME;
+                break;
+            case "brand":
+                field = BRAND;
                 break;
             case "zipcode":
                 field = ZIPCODE;

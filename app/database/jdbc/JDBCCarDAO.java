@@ -30,7 +30,7 @@ public class JDBCCarDAO implements CarDAO{
     public static final String CAR_QUERY = "SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location " +
             "INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id ";
 
-    public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_gps >= ? " +
+    public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_brand LIKE ? AND Cars.car_gps >= ? " +
             "AND Cars.car_hook >= ? AND Cars.car_seats >= ? AND Addresses.address_zipcode LIKE ? " +
             "AND Cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM Cars INNER JOIN Carreservations " +
             "ON Carreservations.reservation_car_id = Cars.car_id " +
@@ -42,12 +42,13 @@ public class JDBCCarDAO implements CarDAO{
             filter = createCarFilter();
         }
         ps.setString(start, filter.getFieldContains(FilterField.NAME, false));
-        ps.setString(start+1, filter.getFieldContains(FilterField.GPS, true));
-        ps.setString(start+2, filter.getFieldContains(FilterField.HOOK, true));
-        ps.setString(start+3, filter.getFieldContains(FilterField.SEATS, true));
-        ps.setString(start+4, filter.getFieldContains(FilterField.ZIPCODE, false));
-        ps.setString(start+5, filter.getFieldContains(FilterField.FROM, true));
-        ps.setString(start+6, filter.getFieldContains(FilterField.UNTIL, true));
+        ps.setString(start+1, filter.getFieldContains(FilterField.BRAND, false));
+        ps.setString(start+2, filter.getFieldContains(FilterField.GPS, true));
+        ps.setString(start+3, filter.getFieldContains(FilterField.HOOK, true));
+        ps.setString(start+4, filter.getFieldContains(FilterField.SEATS, true));
+        ps.setString(start+5, filter.getFieldContains(FilterField.ZIPCODE, false));
+        ps.setString(start+6, filter.getFieldContains(FilterField.FROM, true));
+        ps.setString(start+7, filter.getFieldContains(FilterField.UNTIL, true));
     }
 
 
@@ -360,7 +361,7 @@ public class JDBCCarDAO implements CarDAO{
                 case NAME :
                     ps = asc ? getGetCarListPageByNameAscStatement() : getGetCarListPageByNameDescStatement();
                     break;
-                case SEATS:
+                case BRAND:
                     ps = asc ? getGetCarListPageByBrandAscStatement() : getGetCarListPageByBrandDescStatement();
                     break;
             }
@@ -370,8 +371,8 @@ public class JDBCCarDAO implements CarDAO{
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(8, first);
-            ps.setInt(9, pageSize);
+            ps.setInt(9, first);
+            ps.setInt(10, pageSize);
             return getCars(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);

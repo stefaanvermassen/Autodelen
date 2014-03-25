@@ -120,8 +120,8 @@ function loadPage(page, asc, orderBy, search) {
             // Button to go to first page and to previous page
             var buttonString = "Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).<br>";
             if(page != 1) {
-                buttonString += "<button class='buttons' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
-                    "<button class='buttons' id='previousPage' name='" + (page - 1)  + "' type='button'>" + previousBtnTxt + "</button> ";
+                buttonString += "<button class='buttons btn' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
+                    "<button class='buttons btn' id='previousPage' name='" + (page - 1)  + "' type='button'>" + previousBtnTxt + "</button> ";
             }
 
             // Calculate how many previous pages we create buttons to (standard 2, but less if we can't go back more, or more when we can't go further more -> max 4)
@@ -132,25 +132,25 @@ function loadPage(page, asc, orderBy, search) {
             }
             while(previousPages >= 1) {
                 if(page - previousPages >= 1) {
-                    buttonString += "<button class='buttons' id='previousPage" +  previousPages + "' name='" + (page - previousPages) + "' type='button'>" + (page - previousPages) + "</button> ";
+                    buttonString += "<button class='buttons btn' id='previousPage" +  previousPages + "' name='" + (page - previousPages) + "' type='button'>" + (page - previousPages) + "</button> ";
                     amountOfPreviousPages++;
                 }
                 previousPages--;
             }
             // Button for current page. Disabled ofcourse.
-            buttonString += "<button class='buttons' id='currentPage' name='" + page + "' type='button'>" + page + "</button> ";
+            buttonString += "<button class='buttons btn' id='currentPage' name='" + page + "' type='button'>" + page + "</button> ";
 
             // Calculate how many next pages we create buttons to (standard 2, but less if we can't go further more, or more when we can't go back more -> max 4)
             var nextPages = 1;
             while(page + nextPages <= amountOfPages && nextPages <= buttonsAroundPage + (buttonsAroundPage - amountOfPreviousPages)) {
-                buttonString += "<button class='buttons' id='nextPage" +  nextPages + "' name='" + (page + nextPages) + "' type='button'>" + (page + nextPages) + "</button> ";
+                buttonString += "<button class='buttons btn' id='nextPage" +  nextPages + "' name='" + (page + nextPages) + "' type='button'>" + (page + nextPages) + "</button> ";
                 nextPages++;
             }
 
             if(page != amountOfPages) {
                 // Button to go to last page and next page
-                buttonString += "<button class='buttons' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
-                    "<button class='buttons' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
+                buttonString += "<button class='buttons btn' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
+                    "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
             }
             // Add the buttons to the html-file
             $("#buttons").html(buttonString);

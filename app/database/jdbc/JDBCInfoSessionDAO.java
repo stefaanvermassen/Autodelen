@@ -96,10 +96,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
         if (getInfosessionForUser == null) {
-            getInfosessionForUser = connection.prepareStatement("SELECT " + INFOSESSION_FIELDS + " FROM infosessionenrollees " +
-                    "JOIN infosessions USING (infosession_id) " +
+            getInfosessionForUser = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
+                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
+                    "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
                     "JOIN users ON infosession_host_user_id = user_id " +
-                    "JOIN addresses ON infosession_address_id = address_id WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
+                    "JOIN addresses ON infosession_address_id = address_id " +
+                    "LEFT JOIN ( SELECT COUNT(*) total, ie2.infosession_id FROM infosessionenrollees ie2 GROUP BY ie2.infosession_id) sub ON (ie.infosession_id = sub.infosession_id) " +
+                    "WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
         }
         return getInfosessionForUser;
     }
@@ -434,7 +438,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next())
                     return null;
-                else return populateInfoSession(rs);
+                else return populateInfoSession(rs, true);
             } catch (SQLException ex) {
                 throw new DataAccessException("Invalid query for attending infosession.", ex);
             }
