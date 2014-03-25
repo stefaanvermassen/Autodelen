@@ -170,7 +170,7 @@ public class InfoSessions extends Controller {
                     DateTime time = editForm.get().getDateTime();
                     if (!session.getTime().equals(time)) {
                         session.setTime(time);
-                        dao.updateInfosessionTime(session);
+                        dao.updateInfoSession(session);
                     }
 
                     //TODO: update maxEnrollees, type
