@@ -10,6 +10,7 @@ import notifiers.Notifier;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
+import views.html.drives.driveDetails;
 import views.html.drives.drives;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class Drives extends Controller {
     }
 
     public static Html showIndex() {
-        return showIndex(null, -1);
+        return showIndex(null, 0);
     }
 
     public static Html showIndex(Form<RefuseModel> form, int errorIndex) {
@@ -50,18 +51,37 @@ public class Drives extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result approveReservation(int reservationId) {
+    public static Result details(int reservationId) {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            ReservationDAO rdao = context.getReservationDAO();
+            UserDAO udao = context.getUserDAO();
+            CarDAO cdao = context.getCarDAO();
+            Reservation reservation = rdao.getReservation(reservationId);
+            User loaner = udao.getUser(reservation.getUser().getId(), true);
+            Car car = cdao.getCar(reservation.getCar().getId());
+            User owner = udao.getUser(car.getOwner().getId(), true);
+            if(reservation == null || car == null || loaner == null || owner == null)
+                return badRequest(showIndex());
+            if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation))
+                return badRequest(showIndex());
+            return ok(driveDetails.render(reservation, car, owner, loaner));
+        } catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result approveReservation(int reservationId) {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
         if(reservation == null)
             return badRequest(showIndex());
-        Notifier.sendReservationApprovedByOwnerMail(user, reservation);
+        Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), reservation);
         return index();
     }
 
     @RoleSecured.RoleAuthenticated()
     public static Result refuseReservation(int reservationId, int errorIndex) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
         if(refuseForm.hasErrors())
             return badRequest(showIndex(refuseForm, errorIndex));
@@ -69,7 +89,7 @@ public class Drives extends Controller {
         if(reservation == null) {
             return badRequest(showIndex());
         }
-        Notifier.sendReservationRefusedByOwnerMail(user, reservation, refuseForm.get().reason);
+        Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), reservation, refuseForm.get().reason);
         return index();
     }
 
@@ -82,14 +102,14 @@ public class Drives extends Controller {
                 flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
                 return null;
             }
-            if(!isOwnerOfReservedCar(context, user, reservation)) {
+            if(!isOwnerOfReservedCar(context, user, reservation) || reservation.getStatus() != ReservationStatus.REQUEST) {
                 flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
                 return null;
             }
             reservation.setStatus(status);
             dao.updateReservation(reservation);
             context.commit();
-            return null;
+            return reservation;
         } catch(DataAccessException ex) {
             throw ex;
         }
