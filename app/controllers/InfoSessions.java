@@ -2,6 +2,8 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
+import database.fields.FilterField;
+import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -9,6 +11,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
 import play.data.Form;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.infosession.*;
@@ -19,6 +22,10 @@ import java.util.List;
  * Created by Cedric on 2/21/14.
  */
 public class InfoSessions extends Controller {
+
+    private static final int PAGE_SIZE = 10;
+
+    private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
 
     private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
 
@@ -215,20 +222,59 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    /*@RoleSecured.RoleAuthenticated()
     public static Result detail(int sessionId) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession session = dao.getInfoSession(sessionId, true);
-            InfoSession enrolled = dao.getAttendingInfoSession(user);
             if (session == null) {
                 flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
+                InfoSession enrolled = dao.getAttendingInfoSession(user);
                 return ok(detail.render(session, enrolled));
             }
         } catch (DataAccessException ex) {
+            throw ex;
+            //TODO: log
+        }
+    }*/
+
+    @RoleSecured.RoleAuthenticated()
+    public static F.Promise<Result> detail(int sessionId){
+        final User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            final InfoSessionDAO dao = context.getInfoSessionDAO();
+            final InfoSession session = dao.getInfoSession(sessionId, true);
+            if(session == null){
+                return F.Promise.promise(new F.Function0<Result>() {
+                    @Override
+                    public Result apply() throws Throwable {
+                        return badRequest("Sessie id bestaat niet.");
+                    }
+                });
+            } else {
+                final InfoSession enrolled = dao.getAttendingInfoSession(user);
+                if (SHOW_MAP) {
+                    return Maps.getLatLongPromise(session.getAddress().getId()).map(
+                            new F.Function<F.Tuple<Double, Double>, Result>() {
+                                public Result apply(F.Tuple<Double, Double> coordinates) {
+                                    return ok(detail.render(session, enrolled,
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toLocalDate())));
+                                }
+                            }
+                    );
+                } else {
+                    return F.Promise.promise(new F.Function0<Result>() {
+                        @Override
+                        public Result apply() throws Throwable {
+                            return ok(detail.render(session, enrolled, null));
+                        }
+                    });
+                }
+            }
+        } catch(DataAccessException ex){
             throw ex;
             //TODO: log
         }
@@ -394,13 +440,72 @@ public class InfoSessions extends Controller {
         }
     }
 
+
+    @RoleSecured.RoleAuthenticated()
+    public static F.Promise<Result> showUpcomingSessions() {
+        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            final InfoSession enrolled = dao.getAttendingInfoSession(user);
+
+            if(enrolled == null || !SHOW_MAP){
+                return F.Promise.promise(new F.Function0<Result>() {
+                    @Override
+                    public Result apply() throws Throwable {
+                        return ok(infosessions.render(enrolled, null));
+                    }
+                });
+            } else {
+                    return Maps.getLatLongPromise(enrolled.getAddress().getId()).map(
+                            new F.Function<F.Tuple<Double, Double>, Result>() {
+                                public Result apply(F.Tuple<Double, Double> coordinates) {
+                                    return ok(infosessions.render(enrolled,
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toLocalDate())));
+                                }
+                            }
+                    );
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result showUpcomingSessionsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField filterField = FilterField.stringToField(orderBy);
+
+        // TODO: create asc and filter in method
+        boolean asc = ascInt == 1;
+
+        Filter filter = new JDBCFilter();
+        if(searchString != "") {
+            String[] searchStrings = searchString.split(",");
+            for(String s : searchStrings) {
+                String[] s2 = s.split("=");
+                if(s2.length == 2) {
+                    String field = s2[0];
+                    String value = s2[1];
+                    filter.fieldContains(FilterField.stringToField(field), value);
+                }
+            }
+        }
+        return ok(upcommingSessionsList(page, filterField, asc, filter));
+    }
+
     private static Html upcomingSessionsList() {
+        return upcommingSessionsList(1, FilterField.DATE, true, null);
+    }
+    private static Html upcommingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
+
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
-
-            List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now());
+            if(orderBy == null) {
+                orderBy = FilterField.DATE;
+            }
+            List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
             if (enrolled != null) {
                 //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
                 // Hack herpedy derp!!
@@ -413,14 +518,13 @@ public class InfoSessions extends Controller {
                 }
             }
 
-            return infosessions.render(sessions, enrolled);
+            int amountOfResults = dao.getAmountOfInfoSessions(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            // TODO amount of results and amount of pages
+            return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
-    }
-
-    @RoleSecured.RoleAuthenticated()
-    public static Result showUpcomingSessions() {
-        return ok(upcomingSessionsList());
     }
 }

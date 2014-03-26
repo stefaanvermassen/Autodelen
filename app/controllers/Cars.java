@@ -1,10 +1,11 @@
 package controllers;
 
 import database.*;
+import database.fields.FilterField;
+import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
 
-import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
@@ -18,7 +19,10 @@ import java.util.List;
  */
 public class Cars extends Controller {
 
+    private static final int PAGE_SIZE = 10;
+
     public static class CarModel {
+
         public String name;
         public String brand;
         public String type;
@@ -56,7 +60,52 @@ public class Cars extends Controller {
     }
 
     public static Result showCars() {
-        return ok(carList());
+        return ok(cars.render());
+    }
+
+    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField carField = FilterField.stringToField(orderBy);
+
+        // TODO: create asc and filter in method
+        boolean asc = ascInt == 1;
+
+        Filter filter = new JDBCFilter();
+        if(searchString != "") {
+            String[] searchStrings = searchString.split(",");
+            for(String s : searchStrings) {
+                String[] s2 = s.split("=");
+                if(s2.length == 2) {
+                    String field = s2[0];
+                    String value = s2[1];
+                    filter.fieldContains(FilterField.stringToField(field), value);
+                }
+            }
+        }
+        return ok(carList(page, carField, asc, filter));
+    }
+
+    private static Html carList() {
+        return carList(1, FilterField.NAME, true, null);
+    }
+
+    private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+
+            if(orderBy == null) {
+                orderBy = FilterField.NAME;
+            }
+            List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfCars(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return carspage.render(listOfCars, page, amountOfResults, amountOfPages);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     @RoleSecured.RoleAuthenticated()
@@ -81,7 +130,7 @@ public class Cars extends Controller {
                             model.address_number, model.address_bus);
 
                     // TODO: also accept other users (only admin can do this)
-                    // TODO: get boolean out (hook and gps) of form, enum fuel
+                    // TODO: get boolean out (hook and gps) of form, enum fuel, comments
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, false, false, CarFuel.DIESEL, model.fuelEconomy, model.estimatedValue,
                             model.ownerAnnualKm, user, "");
@@ -266,16 +315,4 @@ public class Cars extends Controller {
             throw ex;
         }
     }
-
-    private static Html carList() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            CarDAO dao = context.getCarDAO();
-
-            List<Car> listOfCars = dao.getCarList(1, 50);
-            return cars.render(listOfCars);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
-    }
-
 }

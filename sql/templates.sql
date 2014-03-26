@@ -23,7 +23,7 @@ INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_reason");
 
 #--Verificatie
 INSERT INTO Templates(template_title, template_body, template_send_mail_changeable) VALUES (
-"Verificatie", 
+"Verificatie",
 "Beste %user_firstname% %user_lastname%,<br>
 <br>
 Om uw e-mailadres te controleren vragen we u om op onderstaande link te klikken:<br>
@@ -41,7 +41,7 @@ SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_
 
 #--Welkom
 INSERT INTO Templates(template_title, template_body) VALUES (
-"Welkom", 
+"Welkom",
 "Beste %user_firstname% %user_lastname%,<br>
 <br>
 Welkom bij Dégage!<br>
@@ -56,7 +56,7 @@ SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_
 
 #--Infosessie ingeschreven
 INSERT INTO Templates(template_title, template_body) VALUES (
-"Infosessie ingeschreven", 
+"Infosessie ingeschreven",
 "Beste %user_firstname% %user_lastname%,<br>
 <br>
 U heeft zich ingeschreven voor een infosessie op %infosession_date%. <br>
@@ -77,7 +77,7 @@ SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_
 
 #--Reservatie bevestigen
 INSERT INTO Templates(template_title, template_body) VALUES (
-"Reservatie bevestigen", 
+"Reservatie bevestigen",
 "Beste %user_firstname% %user_lastname%,<br>
 <br>
 Iemand wilt uw auto reserven van %reservation_from% tot %reservation_to%.<br>
@@ -100,7 +100,7 @@ SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_
 
 #--Reservatie bevestigd
 INSERT INTO Templates(template_title, template_body) VALUES (
-"Reservatie bevestigd", 
+"Reservatie bevestigd",
 "Beste %user_firstname% %user_lastname%,<br>
 
 Uw reservatie is bevestigd, de auto is gereserveerd van %reservation_from% tot %reservation_to%.<br>
@@ -131,7 +131,7 @@ INSERT INTO Templates(template_title, template_body) VALUES (
   "Reservatie geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Uw reservatie werd geweigerd door de eigenaar om volgende reden:<br>
+  Uw reservatie, van %reservation_from% tot %reservation_to%, werd geweigerd door de eigenaar om volgende reden:<br>
   <br>
   %reservation_reason%<br>
   <br>
@@ -143,12 +143,16 @@ INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_lastname";
 INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_from";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_to";
+INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_reason";
 
 #--Wachtwoord reset
 
 INSERT INTO Templates(template_title, template_body, template_send_mail_changeable) VALUES (
-"Wachtwoord reset", 
+"Wachtwoord reset",
 "Beste %user_firstname% %user_lastname%,<br>
 
 Klik op onderstaande link om een nieuw wachtwoord te kiezen.<br>
