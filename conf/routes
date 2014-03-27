@@ -34,8 +34,10 @@ GET         /settings                          controllers.Settings.index()
 
 # Notifiers
 GET         /messages                          controllers.Messages.showMessages()
-GET         /messages/add                      controllers.Messages.addMessage()
+GET         /messages/new                      controllers.Messages.newMessage()
+POST        /messages/new                      controllers.Messages.createNewMessage()
 GET         /notifications                     controllers.Notifications.showNotifications()
+GET         /autocompleteSearch                controllers.Messages.autocompleteLabelAndValue(term: String ?= "")
 
 # Profile pages
 GET         /profile                           controllers.Profile.indexWithoutId()
