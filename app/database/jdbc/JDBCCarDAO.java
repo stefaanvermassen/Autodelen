@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
-import database.fields.FilterField;
+import database.FilterField;
 import models.Address;
 import models.Car;
 import models.CarFuel;
@@ -41,11 +41,11 @@ public class JDBCCarDAO implements CarDAO{
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = createCarFilter();
         }
-        ps.setString(start, filter.getFieldContains(FilterField.NAME, false));
-        ps.setString(start+1, filter.getFieldContains(FilterField.BRAND, false));
-        ps.setString(start+2, filter.getFieldContains(FilterField.GPS, true));
-        ps.setString(start+3, filter.getFieldContains(FilterField.HOOK, true));
-        ps.setString(start+4, filter.getFieldContains(FilterField.SEATS, true));
+        ps.setString(start, filter.getFieldContains(FilterField.CAR_NAME, false));
+        ps.setString(start+1, filter.getFieldContains(FilterField.CAR_BRAND, false));
+        ps.setString(start+2, filter.getFieldContains(FilterField.CAR_GPS, true));
+        ps.setString(start+3, filter.getFieldContains(FilterField.CAR_HOOK, true));
+        ps.setString(start+4, filter.getFieldContains(FilterField.CAR_SEATS, true));
         ps.setString(start+5, filter.getFieldContains(FilterField.ZIPCODE, false));
         ps.setString(start+6, filter.getFieldContains(FilterField.FROM, true));
         ps.setString(start+7, filter.getFieldContains(FilterField.UNTIL, true));
@@ -321,6 +321,11 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
+    /**
+     * @param filter The filter to apply to
+     * @return The amount of filtered cars
+     * @throws DataAccessException
+     */
     @Override
     public int getAmountOfCars(Filter filter) throws DataAccessException {
         try {
@@ -345,23 +350,34 @@ public class JDBCCarDAO implements CarDAO{
         return new JDBCFilter();
     }
 
-    /*
-     * Default method
+    /**
+     * Get a carlist, with the default ordering and without filtering
+     * @param page The page you want to see
+     * @param pageSize The page size
+     * @return The page of list of cars
      */
     @Override
     public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
-        return getCarList(FilterField.NAME, true, page, pageSize, null);
+        return getCarList(FilterField.CAR_NAME, true, page, pageSize, null);
     }
 
+    /**
+     * @param orderBy The field you want to order by
+     * @param asc Ascending
+     * @param page The page you want to see
+     * @param pageSize The page size
+     * @param filter The filter you want to apply
+     * @return List of cars with custom ordering and filtering
+     */
     @Override
     public List<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
-                case NAME :
+                case CAR_NAME:
                     ps = asc ? getGetCarListPageByNameAscStatement() : getGetCarListPageByNameDescStatement();
                     break;
-                case BRAND:
+                case CAR_BRAND:
                     ps = asc ? getGetCarListPageByBrandAscStatement() : getGetCarListPageByBrandDescStatement();
                     break;
             }
@@ -379,6 +395,12 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
+    /**
+     *
+     * @param user_id The id of the user
+     * @return The cars of the user (without pagination)
+     * @throws DataAccessException
+     */
     @Override
     public List<Car> getCarsOfUser(int user_id) throws DataAccessException {
         try {
@@ -389,6 +411,7 @@ public class JDBCCarDAO implements CarDAO{
             throw new DataAccessException("Could not retrieve a list of cars for user with id " + user_id, ex);
         }
     }
+
 
     private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();
