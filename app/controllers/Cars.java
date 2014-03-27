@@ -67,21 +67,8 @@ public class Cars extends Controller {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
 
-        // TODO: create asc and filter in method
-        boolean asc = ascInt == 1;
-
-        Filter filter = new JDBCFilter();
-        if(searchString != "") {
-            String[] searchStrings = searchString.split(",");
-            for(String s : searchStrings) {
-                String[] s2 = s.split("=");
-                if(s2.length == 2) {
-                    String field = s2[0];
-                    String value = s2[1];
-                    filter.fieldContains(FilterField.stringToField(field), value);
-                }
-            }
-        }
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
         return ok(carList(page, carField, asc, filter));
     }
 
