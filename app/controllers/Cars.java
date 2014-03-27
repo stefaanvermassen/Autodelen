@@ -1,7 +1,7 @@
 package controllers;
 
 import database.*;
-import database.fields.FilterField;
+import database.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
@@ -108,7 +108,7 @@ public class Cars extends Controller {
     }
 
     private static Html carList() {
-        return carList(1, FilterField.NAME, true, null);
+        return carList(1, FilterField.CAR_NAME, true, null);
     }
 
     private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
@@ -117,7 +117,7 @@ public class Cars extends Controller {
             CarDAO dao = context.getCarDAO();
 
             if(orderBy == null) {
-                orderBy = FilterField.NAME;
+                orderBy = FilterField.CAR_NAME;
             }
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 

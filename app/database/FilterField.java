@@ -1,4 +1,4 @@
-package database.fields;
+package database;
 
 /**
  * Created by Benjamin on 23/03/2014.
@@ -8,7 +8,7 @@ package database.fields;
  * Fields we can filter on the DAOs
  */
 public enum FilterField {
-    NAME, ZIPCODE, SEATS, GPS, HOOK, DATE, FROM, UNTIL, UNKNOWN, BRAND;
+    CAR_NAME, ZIPCODE, CAR_SEATS, CAR_GPS, CAR_HOOK, DATE, FROM, UNTIL, UNKNOWN, CAR_BRAND;
 
     /**
      *
@@ -19,22 +19,22 @@ public enum FilterField {
         FilterField field = null;
         switch(string) {
             case "name":
-                field = NAME;
+                field = CAR_NAME;
                 break;
             case "brand":
-                field = BRAND;
+                field = CAR_BRAND;
                 break;
             case "zipcode":
                 field = ZIPCODE;
                 break;
             case "seats":
-                field = SEATS;
+                field = CAR_SEATS;
                 break;
             case "gps":
-                field = GPS;
+                field = CAR_GPS;
                 break;
             case "hook":
-                field = HOOK;
+                field = CAR_HOOK;
                 break;
             case "from":
                 field = FROM;

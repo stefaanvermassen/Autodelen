@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import database.fields.FilterField;
+import database.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;

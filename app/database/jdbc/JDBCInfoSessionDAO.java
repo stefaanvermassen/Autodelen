@@ -3,7 +3,7 @@ package database.jdbc;
 import database.DataAccessException;
 import database.Filter;
 import database.InfoSessionDAO;
-import database.fields.FilterField;
+import database.FilterField;
 import models.*;
 import org.joda.time.DateTime;
 

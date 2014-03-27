@@ -1,9 +1,8 @@
 package database.jdbc;
 
 import database.Filter;
-import database.fields.FilterField;
+import database.FilterField;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
