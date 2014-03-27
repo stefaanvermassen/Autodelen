@@ -3,9 +3,18 @@ package database.fields;
 /**
  * Created by Benjamin on 23/03/2014.
  */
+
+/**
+ * Fields we can filter on the DAOs
+ */
 public enum FilterField {
     NAME, ZIPCODE, SEATS, GPS, HOOK, DATE, FROM, UNTIL, UNKNOWN, BRAND;
 
+    /**
+     *
+     * @param string The string corresponding to the FilterField
+     * @return The corresponding FilterField (or null if there is none)
+     */
     public static FilterField stringToField(String string) {
         FilterField field = null;
         switch(string) {
