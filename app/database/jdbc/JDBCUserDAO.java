@@ -9,7 +9,6 @@ import models.*;
 import java.sql.*;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -34,6 +33,7 @@ public class JDBCUserDAO implements UserDAO {
             "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
             "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
 
+    // TODO: more fields to sort on
     public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
@@ -59,6 +59,7 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getAllUsersStatement;
     private PreparedStatement getGetUserListPageByNameAscStatement;
     private PreparedStatement getGetUserListPageByNameDescStatement;
+    private PreparedStatement getGetAmountOfUsersStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
@@ -143,16 +144,23 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getGetUserListPageByNameAscStatement() throws SQLException {
         if(getGetUserListPageByNameAscStatement == null) {
-            getGetUserListPageByNameAscStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT + "ORDER BY user_firstname, user_lastname asc LIMIT ?, ?");
+            getGetUserListPageByNameAscStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname asc, users.user_lastname asc LIMIT ?, ?");
         }
         return getGetUserListPageByNameAscStatement;
     }
 
     private PreparedStatement getGetUserListPageByNameDescStatement() throws SQLException {
         if(getGetUserListPageByNameDescStatement == null) {
-            getGetUserListPageByNameDescStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT +"ORDER BY user_firstname, user_lastname desc LIMIT ?, ?");
+            getGetUserListPageByNameDescStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT +"ORDER BY users.user_firstname desc, users.user_lastname desc LIMIT ?, ?");
         }
         return getGetUserListPageByNameDescStatement;
+    }
+
+    private PreparedStatement getGetAmountOfUsersStatement() throws SQLException {
+        if(getGetAmountOfUsersStatement == null) {
+            getGetAmountOfUsersStatement = connection.prepareStatement("SELECT COUNT(user_id) AS amount_of_users FROM Users" + FILTER_FRAGMENT);
+        }
+        return getGetAmountOfUsersStatement;
     }
 
     public static User populateUser(ResultSet rs, boolean withPassword, boolean withRest) throws SQLException {
@@ -377,8 +385,32 @@ public class JDBCUserDAO implements UserDAO {
         }
     }
 
+    /**
+     * @param filter The filter to apply to
+     * @return The amount of filtered cars
+     * @throws DataAccessException
+     */
     @Override
-    public List<User> getUsersList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public int getAmountOfUsers(Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfUsersStatement();
+            fillFragment(ps, filter, 1);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_users");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of users", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of users", ex);
+        }
+    }
+
+    @Override
+    public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
@@ -387,16 +419,16 @@ public class JDBCUserDAO implements UserDAO {
                     break;
             }
             if(ps == null) {
-                throw new DataAccessException("Could not create getCarList statement");
+                throw new DataAccessException("Could not create getUserList statement");
             }
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(9, first);
-            ps.setInt(10, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getUsers(ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
+            throw new DataAccessException("Could not retrieve a list of users", ex);
         }
     }
 
@@ -404,11 +436,11 @@ public class JDBCUserDAO implements UserDAO {
         List<User> users = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                users.add(populateUser(rs, false,true));
+                users.add(populateUser(rs, false, true));
             }
             return users;
         } catch (SQLException ex) {
-            throw new DataAccessException("Error reading cars resultset", ex);
+            throw new DataAccessException("Error reading users resultset", ex);
         }
     }
 }

@@ -11,6 +11,7 @@ GET         /dashboard                         controllers.Dashboard.index()
 
 # UserRoles
 GET         /userroles                         controllers.UserRoles.index()
+GET         /userroles/page                    controllers.UserRoles.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /userroles/edit                    controllers.UserRoles.edit(userId: Int)
 POST        /userroles/edit                    controllers.UserRoles.editPost(userId: Int)
 
@@ -39,6 +40,10 @@ GET         /profile                           controllers.Profile.indexWithoutI
 GET         /profile/edit                      controllers.Profile.edit(userId: Int)
 POST        /profile/edit                      controllers.Profile.editPost(userId: Int)
 GET         /profile/byid                      controllers.Profile.index(userId: Int)
+
+# Users
+GET         /users                             controllers.Users.showUsers()
+GET         /users/page                        controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Login screen
 GET         /login                             controllers.Login.login(redirect ?= null)

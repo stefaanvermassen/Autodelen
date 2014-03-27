@@ -180,7 +180,7 @@ function loadPage(page, asc, orderBy, search) {
                 var sortable = sortables[i];
                 sortable.onclick = function() {
                     var orderByNew = this.getAttribute("name");
-                    if(orderBy == orderByNew) {
+                    if(orderBy == orderByNew || orderBy == "") {
                         // Change order asc <-> desc if we click on the column that already is ordered
                         asc = (asc + 1) % 2;
                     } else { // Else do asc order

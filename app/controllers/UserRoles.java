@@ -4,6 +4,7 @@ import controllers.Security.RoleSecured;
 import database.*;
 import models.User;
 import models.UserRole;
+import play.api.templates.Html;
 import play.mvc.*;
 
 import scala.Tuple2;
@@ -13,14 +14,46 @@ import java.util.*;
 
 public class UserRoles extends Controller {
 
+    private static final int PAGE_SIZE = 10;
+
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result index() {
-        //TODO: User picker / filter (paginated) -> Karsten??
+        return ok(overview.render());
+    }
+
+    /**
+     *
+     * @param page The page in the userlists
+     * @param ascInt An integer representing ascending (1) or descending (0)
+     * @param orderBy A field representing the field to order on
+     * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
+     * @return A partial page with a table of users of the corresponding page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result showUsersPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField carField = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+        return ok(userList(page, carField, asc, filter));
+    }
+
+    private static Html userList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
-            return ok(overview.render(dao.getAllUsers()));
+
+            if(orderBy == null) {
+                orderBy = FilterField.USER_NAME;
+            }
+            List<User> listOfUsers = dao.getUserList(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfUsers(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return userspage.render(listOfUsers, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
-            throw ex;//TODO?
+            throw ex;
         }
     }
 
@@ -37,7 +70,7 @@ public class UserRoles extends Controller {
             User user = udao.getUser(userId, true);
             if (user == null) {
                 flash("danger", "GebruikersID " + userId + " bestaat niet.");
-                return badRequest(overview.render(udao.getAllUsers()));
+                return badRequest(overview.render());
             } else {
                 UserRoleDAO dao = context.getUserRoleDAO();
                 Set<UserRole> roles = dao.getUserRoles(userId);
@@ -76,7 +109,7 @@ public class UserRoles extends Controller {
             User user = udao.getUser(userId, true);
             if (user == null) {
                 flash("danger", "GebruikersID " + userId + " bestaat niet.");
-                return badRequest(overview.render(udao.getAllUsers()));
+                return badRequest(overview.render());
             } else {
                 UserRoleDAO dao = context.getUserRoleDAO();
                 Set<UserRole> oldRoles = dao.getUserRoles(userId);
