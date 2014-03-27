@@ -3,7 +3,6 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -481,7 +480,7 @@ public class InfoSessions extends Controller {
     }
 
     private static Html upcomingSessionsList() {
-        return upcommingSessionsList(1, FilterField.DATE, true, null);
+        return upcommingSessionsList(1, FilterField.INFOSESSION_DATE, true, null);
     }
     private static Html upcommingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
@@ -490,7 +489,7 @@ public class InfoSessions extends Controller {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
             if(orderBy == null) {
-                orderBy = FilterField.DATE;
+                orderBy = FilterField.INFOSESSION_DATE;
             }
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
             if (enrolled != null) {

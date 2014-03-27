@@ -1,6 +1,8 @@
 package database.jdbc;
 
 import database.DataAccessException;
+import database.Filter;
+import database.FilterField;
 import database.UserDAO;
 import models.*;
 
@@ -32,6 +34,17 @@ public class JDBCUserDAO implements UserDAO {
             "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
             "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
 
+    public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? ";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = new JDBCFilter();
+        }
+        ps.setString(start, filter.getFieldContains(FilterField.USER_FIRSTNAME, false));
+        ps.setString(start+1, filter.getFieldContains(FilterField.USER_LASTNAME, false));
+    }
+
     private Connection connection;
     private PreparedStatement getUserByEmailStatement;
     private PreparedStatement smallGetUserByIdStatement;
@@ -44,6 +57,8 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
     private PreparedStatement getAllUsersStatement;
+    private PreparedStatement getGetUserListPageByNameAscStatement;
+    private PreparedStatement getGetUserListPageByNameDescStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
@@ -124,6 +139,20 @@ public class JDBCUserDAO implements UserDAO {
     		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, user_agree_terms=?, user_contract_manager_id=? WHERE user_id = ?");
     	}
     	return updateUserStatement;
+    }
+
+    private PreparedStatement getGetUserListPageByNameAscStatement() throws SQLException {
+        if(getGetUserListPageByNameAscStatement == null) {
+            getGetUserListPageByNameAscStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT + "ORDER BY user_firstname, user_lastname asc LIMIT ?, ?");
+        }
+        return getGetUserListPageByNameAscStatement;
+    }
+
+    private PreparedStatement getGetUserListPageByNameDescStatement() throws SQLException {
+        if(getGetUserListPageByNameDescStatement == null) {
+            getGetUserListPageByNameDescStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT +"ORDER BY user_firstname, user_lastname desc LIMIT ?, ?");
+        }
+        return getGetUserListPageByNameDescStatement;
     }
 
     public static User populateUser(ResultSet rs, boolean withPassword, boolean withRest) throws SQLException {
@@ -345,6 +374,41 @@ public class JDBCUserDAO implements UserDAO {
             }
         } catch(SQLException ex){
             throw new DataAccessException("Failed to get user list.", ex);
+        }
+    }
+
+    @Override
+    public List<User> getUsersList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = null;
+            switch(orderBy) {
+                case USER_NAME:
+                    ps = asc ? getGetUserListPageByNameAscStatement() : getGetUserListPageByNameDescStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create getCarList statement");
+            }
+
+            fillFragment(ps, filter, 1);
+            int first = (page-1)*pageSize;
+            ps.setInt(9, first);
+            ps.setInt(10, pageSize);
+            return getUsers(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
+
+    private List<User> getUsers(PreparedStatement ps) {
+        List<User> users = new ArrayList<>();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                users.add(populateUser(rs, false,true));
+            }
+            return users;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error reading cars resultset", ex);
         }
     }
 }
