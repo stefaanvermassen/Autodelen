@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import database.fields.FilterField;
+import database.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
@@ -147,7 +147,7 @@ public class Reserve extends Controller {
             CarDAO dao = context.getCarDAO();
 
             FilterField orderby = FilterField.stringToField(orderBy);
-            orderby = (orderby == null) ? FilterField.NAME : orderby;
+            orderby = (orderby == null) ? FilterField.CAR_NAME : orderby;
 
             Filter filter = new JDBCFilter();
             if(searchString != "") {

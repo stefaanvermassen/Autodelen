@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import database.fields.FilterField;
+import database.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
@@ -521,7 +521,6 @@ public class InfoSessions extends Controller {
             int amountOfResults = dao.getAmountOfInfoSessions(filter);
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
-            // TODO amount of results and amount of pages
             return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;

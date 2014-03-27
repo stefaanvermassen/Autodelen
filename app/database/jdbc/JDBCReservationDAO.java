@@ -5,14 +5,12 @@
 package database.jdbc;
 
 import database.DataAccessException;
-import database.Filter;
 import database.ReservationDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import database.fields.FilterField;
 import models.Car;
 import models.Reservation;
 import models.ReservationStatus;
@@ -181,7 +179,6 @@ public class JDBCReservationDAO implements ReservationDAO{
     @Override
     public List<Reservation> getReservationListForUser(int userId) throws DataAccessException {
         try {
-            List<Reservation> list = new ArrayList<>();
             PreparedStatement ps = getGetReservationListByUseridStatement();
             ps.setInt(1, userId);
             ps.setInt(2, userId);

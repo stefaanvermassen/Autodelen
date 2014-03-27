@@ -4,7 +4,6 @@
  */
 package database;
 
-import database.fields.FilterField;
 import models.Car;
 import models.CarFuel;
 import models.Address;
