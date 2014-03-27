@@ -18,25 +18,54 @@ import views.html.reserve.reserve2;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Controller responsible to display and filter cars and to enable a user to reserve a car.
+ *
+ */
 public class Reserve extends Controller {
 
+    // The number of cars displayed in the table of the index page
     private static final int PAGE_SIZE = 10;
 
+    // Formatter to translate a string to a datetime
     private static final DateTimeFormatter DATEFORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
+    /**
+     * Class implementing a model wrapped in a form.
+     * This model is used during the form submission when a user submits
+     * a reservation for a car.
+     * The user is obligated to provide information about the reservation:
+     * - the start date and time
+     * - the end date and time
+     */
     public static class ReservationModel {
+        // Date and time from which the user wants to loan the car
         public String from;
+        // Date and time the user will return the car to the owner
         public String until;
 
+        /**
+         * @return the start datetime of the reservation
+         */
         public DateTime getTimeFrom() {
             return DATEFORMATTER.parseDateTime(from).withSecondOfMinute(0);
         }
 
+        /**
+         * @return the end datetime of the reservation
+         */
         public DateTime getTimeUntil() {
             return DATEFORMATTER.parseDateTime(until).withSecondOfMinute(0);
         }
 
+        /**
+         * Validates the form:
+         * - the start date and time, and the end date and time are specified
+         * - the start date and time of a reservation is before the end date and time
+         * - the start date is after the date of today
+         * @return an error string or null
+         */
         public String validate() {
             DateTime now = DateTime.now();
             DateTime dateFrom = getTimeFrom();
@@ -53,11 +82,17 @@ public class Reserve extends Controller {
 
     }
 
+    /**
+     * Method: GET
+     *
+     * @return the reservation index page containing all cars
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result index() {
         return ok(showIndex());
     }
 
+    // TODO: both methods to one
     public static Html showIndex() {
         return reservations.render();
     }
