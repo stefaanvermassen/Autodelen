@@ -1,7 +1,7 @@
 package controllers;
 
 import database.Filter;
-import database.fields.FilterField;
+import database.FilterField;
 import database.jdbc.JDBCFilter;
 
 /**
