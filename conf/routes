@@ -16,6 +16,7 @@ POST        /userroles/edit                    controllers.UserRoles.editPost(us
 
 # Drives
 GET         /drives                            controllers.Drives.index()
+GET         /drives/details                    controllers.Drives.details(reservationId: Int)
 GET         /drives/approved                   controllers.Drives.approveReservation(reservationId: Int)
 POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int)
 GET         /drives/cancelled                  controllers.Drives.cancelReservation(reservationId: Int)

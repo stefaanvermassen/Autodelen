@@ -79,6 +79,7 @@ public class Notifier extends Mailer {
 
     public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
         String mail = "";
+        // TODO: add url of detail page drives to notification
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
@@ -106,7 +107,8 @@ public class Notifier extends Mailer {
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
             //TODO Right address??
-            mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
+            //TODO : uncomment when nullpointer (getLocation() == null) resolved!
+            //mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
             NotificationDAO notificationDAO = context.getNotificationDAO();
             notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
@@ -127,7 +129,7 @@ public class Notifier extends Mailer {
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
-            mail = mail.replace("%reason%", reason);
+            mail = mail.replace("%reservation_reason%", reason);
             NotificationDAO notificationDAO = context.getNotificationDAO();
             notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){

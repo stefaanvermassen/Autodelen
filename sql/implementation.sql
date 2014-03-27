@@ -237,7 +237,7 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `Templates` (
-	`template_id` INT NOT NULL AUTO_INCREMENT,
+	`template_id` INT NOT NULL,
 	`template_title` VARCHAR(255) NOT NULL,
 	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
 	`template_body` TEXT NOT NULL,
