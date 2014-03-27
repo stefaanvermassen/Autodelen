@@ -1,7 +1,7 @@
 package controllers;
 
 import database.*;
-import database.fields.FilterField;
+import database.FilterField;
 import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
@@ -14,8 +14,9 @@ import views.html.cars.*;
 
 import java.util.List;
 
+
 /**
- * Created by Benjamin on 27/02/14.
+ * Controller responsible for creating, updating and showing of cars
  */
 public class Cars extends Controller {
 
@@ -45,10 +46,20 @@ public class Cars extends Controller {
         public String address_bus;
 
         //TODO: check input (year,...)
+
+        /**
+         * Validates the form:
+         *      - Address zip and city cannot be empty
+         *      - Car name and brand cannot be empty
+         *      - There have to be at least 2 doors and seats
+         * @return An error string or null
+         */
         public String validate() {
             // TODO: temporary only check if city is not null
             if("".equals(address_zip) || "".equals(address_city))
                 return "Geef aub het adres op.";
+            else if(name.length() <= 0)
+                return "Geef aub de autonaam op.";
             else if(brand.length() <= 0)
                 return "Geef aub het automerk op.";
             else if(seats < 2)
@@ -59,34 +70,32 @@ public class Cars extends Controller {
         }
     }
 
+    /**
+     * @return The cars index-page with all cars
+     */
     public static Result showCars() {
         return ok(cars.render());
     }
 
+    /**
+     *
+     * @param page The page in the carlists
+     * @param ascInt An integer representing ascending (1) or descending (0)
+     * @param orderBy A field representing the field to order on
+     * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
+     * @return A partial page with a table of cars of the corresponding page
+     */
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
 
-        // TODO: create asc and filter in method
-        boolean asc = ascInt == 1;
-
-        Filter filter = new JDBCFilter();
-        if(searchString != "") {
-            String[] searchStrings = searchString.split(",");
-            for(String s : searchStrings) {
-                String[] s2 = s.split("=");
-                if(s2.length == 2) {
-                    String field = s2[0];
-                    String value = s2[1];
-                    filter.fieldContains(FilterField.stringToField(field), value);
-                }
-            }
-        }
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
         return ok(carList(page, carField, asc, filter));
     }
 
     private static Html carList() {
-        return carList(1, FilterField.NAME, true, null);
+        return carList(1, FilterField.CAR_NAME, true, null);
     }
 
     private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
@@ -95,7 +104,7 @@ public class Cars extends Controller {
             CarDAO dao = context.getCarDAO();
 
             if(orderBy == null) {
-                orderBy = FilterField.NAME;
+                orderBy = FilterField.CAR_NAME;
             }
             List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
 
@@ -108,11 +117,18 @@ public class Cars extends Controller {
         }
     }
 
+    /**
+     * @return A form to create a new car
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result newCar() {
         return ok(addcar.render(Form.form(CarModel.class), 0));
     }
-    
+
+    /**
+     * Method: POST
+     * @return redirect to the CarForm you just filled in or to the cars-index page
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
@@ -156,6 +172,10 @@ public class Cars extends Controller {
         }
     }
 
+    /**
+     * @param carId The car to edit
+     * @return A form to edit the car
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result editCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -203,6 +223,12 @@ public class Cars extends Controller {
         }
     }
 
+    /**
+     * Method: POST
+     *
+     * @param carId The car to edit
+     * @return Redirect to the car-index page on error or the car detail-page on succes
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result editCarPost(int carId) {
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
@@ -266,6 +292,11 @@ public class Cars extends Controller {
         }
     }
 
+    /**
+     *
+     * @param carId The car to show details of
+     * @return A detail page of the car
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result detail(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -284,6 +315,11 @@ public class Cars extends Controller {
         }
     }
 
+    /**
+     * TODO: delete this out of final version
+     * @param carId The car to be removed
+     * @return redirect to the index carpage, with error-messages if there were any problems
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result removeCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
