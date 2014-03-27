@@ -9,7 +9,8 @@ import models.Message;
 import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.messages;
+import views.html.notifiers.addmessage;
+import views.html.notifiers.messages;
 
 import java.util.List;
 
@@ -25,6 +26,11 @@ public class Messages extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result addMessage() {
+        return ok(addmessage.render());
     }
 
 }
