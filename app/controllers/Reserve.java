@@ -29,7 +29,7 @@ public class Reserve extends Controller {
 
     // Formatter to translate a string to a datetime
     private static final DateTimeFormatter DATEFORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     /**
      * Class implementing a model wrapped in a form.
@@ -92,10 +92,22 @@ public class Reserve extends Controller {
         return ok(showIndex());
     }
 
+    /**
+     * @return The html context of the reservations index page
+     */
     public static Html showIndex() {
         return reservations.render();
     }
 
+    /**
+     * Method: GET
+     *
+     * Render the details page of a future reservation for a car where the user is able to
+     * confirm the reservation and specify the start and end of the reservation
+     *
+     * @param carId the id of the car for which the reservationsdetails ought to be rendered
+     * @return the details page of a future reservation for a car
+     */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER})
     public static Result reserve(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -118,6 +130,16 @@ public class Reserve extends Controller {
         }
     }
 
+    /**
+     * Method: POST
+     *
+     * Confirmation of a reservation. The reservation is validated.
+     * If the reservation is valid, the reservation is created and the owner is
+     * informed of the request for a reservation.
+     *
+     * @param carId The id of the car for which the reservation is being confirmed
+     * @return the user is redirected to the drives page
+     */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER})
     public static Result confirmReservation(int carId) {
         // Get the car object to test whether the operation is legal
@@ -176,6 +198,21 @@ public class Reserve extends Controller {
 
     // Partial
 
+    /**
+     * Method: GET
+     *
+     * Method to render a partial page containing an amount of cars for reservation that ought to be displayed
+     * corresponding a:
+     * - a search string
+     * - the number of cars to be rendered per page
+     * - the page that's being rendered
+     *
+     * @param page the page to be rendered
+     * @param asc boolean int, if 1 the records are ordered ascending
+     * @param orderBy the string designating the filterfield on which to order
+     * @param searchString the string containing all search information
+     * @return the requested page of cars for reservation
+     */
     public static Result showCarsPage(int page, int asc, String orderBy, String searchString) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();

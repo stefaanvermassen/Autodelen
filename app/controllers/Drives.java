@@ -84,10 +84,10 @@ public class Drives extends Controller {
     /**
      * Method: GET
      *
-     * Called when a reservation of a car is approved by the owner.
+     * Render the detailpage of a drive/reservation.
      *
-     * @param reservationId The id of the reservation being approved
-     * @return the drives index page
+     * @param reservationId the id of the reservation of which the details are requested
+     * @return the detail page of specific drive/reservation
      */
     @RoleSecured.RoleAuthenticated()
     public static Result details(int reservationId) {
@@ -110,6 +110,14 @@ public class Drives extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     *
+     * Called when a reservation of a car is approved by the owner.
+     *
+     * @param reservationId The id of the reservation being approved
+     * @return the drives index page
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result approveReservation(int reservationId) {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
@@ -188,8 +196,7 @@ public class Drives extends Controller {
                 flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
                 return badRequest(showIndex());
             }
-            // TODO: only loaner may cancel the reservation
-            if(!isOwnerOfReservedCar(context, user, reservation) && !isLoaner(reservation, user)) {
+            if(!isLoaner(reservation, user)) {
                 flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
                 return badRequest(showIndex());
             }
