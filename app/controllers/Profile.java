@@ -19,7 +19,7 @@ public class Profile extends Controller {
     private static List<String> COUNTRIES;
     private static final Locale COUNTRY_LANGUAGE = new Locale("nl", "BE");
 
-    private static boolean nullOrEmpty(String s){
+    private static boolean nullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }
 
@@ -83,17 +83,17 @@ public class Profile extends Controller {
             this.residenceAddress.populate(user.getAddressResidence());
         }
 
-        public String validate(){
-            if(nullOrEmpty(firstName) || nullOrEmpty(lastName)){
+        public String validate() {
+            if (nullOrEmpty(firstName) || nullOrEmpty(lastName)) {
                 return "Voor- en achternaam mogen niet leeg zijn.";
             } else return null;
         }
     }
 
     /**
-     * Lazy loads a countryname list in Dutch
+     * Lazy loads a country list in current configured locale
      *
-     * @return
+     * @return A list of all countries enabled in the Java locale
      */
     private static List<String> getCountryList() {
         if (COUNTRIES == null) {
@@ -109,17 +109,23 @@ public class Profile extends Controller {
         return COUNTRIES;
     }
 
+    /**
+     * Method: GET
+     *
+     * @return A profile page for the currently requesting user
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result indexWithoutId() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(session("email")); //user always has to exist (roleauthenticated)
-            return ok(index.render(user, getProfileCompleteness(user)));
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        User user = DatabaseHelper.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
+        return ok(index.render(user, getProfileCompleteness(user)));
     }
 
+    /**
+     * Method: GET
+     *
+     * @param userId The userId of the user (only available to administrator or user itself)
+     * @return The profilepage of the user
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result index(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -131,7 +137,7 @@ public class Profile extends Controller {
                 return redirect(routes.Dashboard.index());
             }
 
-            User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
 
             // Only a profile admin or
             if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(user.getId(), UserRole.PROFILE_ADMIN)) {
@@ -144,12 +150,19 @@ public class Profile extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     * Creates a prefilled form to edit the profile
+     *
+     * @param userId The user to edit
+     * @return A user edit page
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result edit(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
-            User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
 
             if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(user.getId(), UserRole.PROFILE_ADMIN)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
@@ -166,7 +179,7 @@ public class Profile extends Controller {
     /**
      * Returns a quotum on how complete the profile is.
      *
-     * @param user
+     * @param user The user to quote
      * @return Completeness in percents
      */
     private static int getProfileCompleteness(User user) {
@@ -204,6 +217,14 @@ public class Profile extends Controller {
         return (int) (((float) total / 9) * 100);
     }
 
+    /**
+     * Modifies, creates or deletes an address in the database based on the provided form data and current address
+     *
+     * @param model   The submitted form data
+     * @param address The already-set address for the user
+     * @param dao     The DAO to edit addresses
+     * @return The changed or null if deleted
+     */
     private static Address modifyAddress(EditAddressModel model, Address address, AddressDAO dao) {
         if (address == null) {
             // User entered new address in fields
@@ -230,12 +251,19 @@ public class Profile extends Controller {
         return address;
     }
 
+    /**
+     * Method: POST
+     * Changes the users profile based on submitted form data
+     *
+     * @param userId The user id to change
+     * @return The new profile page, or the edit form when errors occured
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result editPost(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
-            User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
 
             if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(user.getId(), UserRole.PROFILE_ADMIN)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
@@ -257,7 +285,7 @@ public class Profile extends Controller {
                     // Because of constraints with FK we have to set them to NULL first in user before deleting them
 
                     // Check domicile address
-                    Address domicileAddress =  user.getAddressDomicile();
+                    Address domicileAddress = user.getAddressDomicile();
                     boolean deleteDomicile = model.domicileAddress.isEmpty() && domicileAddress != null;
                     user.setAddressDomicile(deleteDomicile || model.domicileAddress.isEmpty() ? null : modifyAddress(model.domicileAddress, domicileAddress, adao));
 
@@ -270,10 +298,10 @@ public class Profile extends Controller {
 
                     // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
                     // TODO: soft-delete addresses and keep references
-                    if(deleteDomicile)
+                    if (deleteDomicile)
                         adao.deleteAddress(domicileAddress);
 
-                    if(deleteResidence)
+                    if (deleteResidence)
                         adao.deleteAddress(residenceAddress);
 
                     //TODO: identity card & numbers, profile picture

@@ -14,8 +14,14 @@ import java.util.*;
 
 public class UserRoles extends Controller {
 
+
     private static final int PAGE_SIZE = 10;
 
+    /**
+     * Method: GET
+     * Shows a list of all users and their roles
+     * @return A table with all users and their userroles
+     */
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result index() {
         return ok(overview.render());
@@ -59,7 +65,7 @@ public class UserRoles extends Controller {
 
     /**
      * Method: GET
-     *
+     * Returns a form to edit a users roles
      * @param userId
      * @return
      */
@@ -81,6 +87,11 @@ public class UserRoles extends Controller {
         }
     }
 
+    /**
+     * Creates a mapping between all roles and a boolean whether the rule is set in the provided role set
+     * @param assignedRoles The roles which the user has enabled
+     * @return An array of all roles and their corresponding status (enabled | disabled)
+     */
     @SuppressWarnings("unchecked")
     public static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles) {
         UserRole[] allRoles = UserRole.values();
@@ -97,9 +108,9 @@ public class UserRoles extends Controller {
 
     /**
      * Method: POST
-     *
-     * @param userId
-     * @return
+     * Finilizes a userrole edit submission form and saves the new roles to the database
+     * @param userId The user ID which has been edited
+     * @return The user edit page with the newly assigned roles if successfull, error message otherwise
      */
     @SuppressWarnings("unchecked")
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
@@ -117,6 +128,7 @@ public class UserRoles extends Controller {
                 Map<String, String[]> map = request().body().asFormUrlEncoded();
                 String[] checkedVal = map.get("role"); // get selected topics
 
+                // Parse the POST values whether they contain the roles (only checked get posted)
                 Set<UserRole> newRoles = EnumSet.of(UserRole.USER);
                 if (checkedVal != null) {
                     for (String strRole : checkedVal) {
@@ -124,9 +136,11 @@ public class UserRoles extends Controller {
                     }
                 }
 
+                // Get all newly assigned roles
                 Set<UserRole> addedRoles = EnumSet.copyOf(newRoles);
                 addedRoles.removeAll(oldRoles);
 
+                // Get all removed roles
                 Set<UserRole> removedRoles = EnumSet.copyOf(oldRoles);
                 removedRoles.removeAll(newRoles);
 
@@ -146,7 +160,7 @@ public class UserRoles extends Controller {
                         context.commit();
 
                         // Invalidate the cache for a page refresh
-                        DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
+                        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
 
                         flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
                         return ok(editroles.render(getUserRolesStatus(newRoles), user));

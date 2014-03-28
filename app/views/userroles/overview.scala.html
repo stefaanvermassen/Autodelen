@@ -32,7 +32,7 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <p><a class="btn btn-default" href="@routes.UserRoles.edit(DatabaseHelper.getUserProvider.getUser(session.get("email")).getId)">
+                        <p><a class="btn btn-default" href="@routes.UserRoles.edit(DatabaseHelper.getUserProvider.getUser().getId)">
                             Eigen rollen bewerken</a></p>
                     </div>
                         <!-- /.panel-body -->
@@ -58,6 +58,7 @@
                                 <div class="btn-group btn-group">
                                     <button id="searchButton" class="btn btn-success">Zoek!</button>
                                 </div>
+
                             </div>
                         </div>
                     </div>

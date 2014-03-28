@@ -26,10 +26,8 @@ public class InfoSessions extends Controller {
 
     private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
 
-    private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
-
     public static class InfoSessionCreationModel {
-        public String time; //TODO: use date format here
+        public DateTime time;
         public int max_enrollees;
         public InfoSessionType type;
 
@@ -40,15 +38,10 @@ public class InfoSessions extends Controller {
         public String address_number;
         public String address_bus;
 
-        public DateTime getDateTime() {
-            return DATEFORMATTER.parseDateTime(time);
-            //return null;
-        }
-
         public String validate() {
-            if (time == null || time.isEmpty()) {
+            if (time == null) {
                 return "Gelieve het tijdsveld in te vullen";
-            } else if (DateTime.now().isAfter(getDateTime())) {
+            } else if (DateTime.now().isAfter(time)) {
                 return "Je kan enkel een infosessie plannen na de huidige datum.";
             }
             return null;
@@ -60,12 +53,11 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
-     *
-     * @return
+     * @return An infosession form
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result newSession() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
 
         if (user.getAddressDomicile() != null) {
             InfoSessionCreationModel model = new InfoSessionCreationModel();
@@ -83,8 +75,8 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      *
-     * @param sessionId
-     * @return
+     * @param sessionId SessionId to edit
+     * @return An infosession form for given id
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result editSession(int sessionId) {
@@ -97,7 +89,7 @@ public class InfoSessions extends Controller {
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
                 model.type = is.getType();
-                model.time = is.getTime().toString(DATEFORMATTER);
+                model.time = is.getTime();
                 model.max_enrollees = is.getMaxEnrollees();
                 model.address_city = is.getAddress().getCity();
                 model.address_zip = is.getAddress().getZip();
@@ -116,8 +108,8 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      *
-     * @param sessionId
-     * @return
+     * @param sessionId SessionID to remove
+     * @return A result redirect whether delete was successfull or not.
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result removeSession(int sessionId) {
@@ -144,9 +136,9 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: POST
-     *
-     * @param sessionId
-     * @return
+     * Edits the session for given ID, based on submitted form data
+     * @param sessionId SessionID to edit
+     * @return Redirect to edited session, or the form if errors occured
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result editSessionPost(int sessionId) {
@@ -174,7 +166,7 @@ public class InfoSessions extends Controller {
                     adao.updateAddress(address);
 
                     // Now we update the time
-                    DateTime time = editForm.get().getDateTime();
+                    DateTime time = editForm.get().time;
                     if (!session.getTime().equals(time)) {
                         session.setTime(time);
                         dao.updateInfosessionTime(session);
@@ -194,9 +186,14 @@ public class InfoSessions extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     * Unenrolls the user for his subscribed infosession.
+     * @return A redirect to the overview page with message if unenrollment was successfull.
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result unenrollSession() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
 
@@ -240,9 +237,15 @@ public class InfoSessions extends Controller {
         }
     }*/
 
+    /**
+     * Method: GET
+     * Returns the detail promise of the given sessionId. If enabled, this also fetches map location and enables the map view.
+     * @param sessionId The sessionId to which the detail belongs to
+     * @return A session detail page promise
+     */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> detail(int sessionId){
-        final User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        final User user = DatabaseHelper.getUserProvider().getUser();
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             final InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession session = dao.getInfoSession(sessionId, true);
@@ -260,7 +263,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(detail.render(session, enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toLocalDate())));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
                                 }
                             }
                     );
@@ -316,10 +319,10 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
-     * @param sessionId
-     * @param userId
-     * @param status
-     * @return
+     * @param sessionId SessionID to change userstatus on
+     * @param userId UserID of the user to change status of
+     * @param status New status of the user.
+     * @return Redirect to the session detail page if successful.
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
@@ -352,12 +355,12 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
-     * @param sessionId
-     * @return
+     * @param sessionId The sessionId to enroll to
+     * @return A redirect to the detail page to which the user has subscribed
      */
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         if (user.getStatus() == UserStatus.REGISTERED) {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -399,8 +402,8 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: POST
-     *
-     * @return
+     * Creates a new infosession based on submitted form data
+     * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result createNewSession() {
@@ -412,13 +415,13 @@ public class InfoSessions extends Controller {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
 
                 try {
-                    User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+                    User user = DatabaseHelper.getUserProvider().getUser();
 
                     AddressDAO adao = context.getAddressDAO();
                     Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     //TODO: read InfoSessionType from form
-                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().getDateTime(), createForm.get().max_enrollees); //TODO: allow other hosts
+                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time, createForm.get().max_enrollees); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {
@@ -439,10 +442,14 @@ public class InfoSessions extends Controller {
         }
     }
 
-
+    /**
+     * Method: GET
+     * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
+     * @return
+     */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> showUpcomingSessions() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession enrolled = dao.getAttendingInfoSession(user);
@@ -459,7 +466,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(infosessions.render(enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toLocalDate())));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
                                 }
                             }
                     );
@@ -469,6 +476,14 @@ public class InfoSessions extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     * @param page The page number to fetch
+     * @param ascInt
+     * @param orderBy The orderby type, ASC or DESC
+     * @param searchString The string to search for
+     * @return A partial view of the table containing the filtered sessions
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result showUpcomingSessionsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -479,12 +494,25 @@ public class InfoSessions extends Controller {
         return ok(upcommingSessionsList(page, filterField, asc, filter));
     }
 
+    /**
+     * Gets the first page of the infosessions.
+     * @return HTML table partial of infosession table
+     */
     private static Html upcomingSessionsList() {
         return upcommingSessionsList(1, FilterField.INFOSESSION_DATE, true, null);
     }
+
+    /**
+     * Gets the upcomming infosession html block filtered
+     * @param page
+     * @param orderBy Orderby type ASC or DESC
+     * @param asc
+     * @param filter The filter to apply to
+     * @return The html patial table of upcoming sessions for this filter
+     */
     private static Html upcommingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
