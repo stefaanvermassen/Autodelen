@@ -264,7 +264,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(detail.render(session, enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toLocalDate())));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
                                 }
                             }
                     );
@@ -467,7 +467,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(infosessions.render(enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toLocalDateTime())));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
                                 }
                             }
                     );
