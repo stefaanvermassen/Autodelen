@@ -8,6 +8,7 @@ import models.Address;
 import models.UserRole;
 import play.cache.Cache;
 import models.User;
+import play.mvc.Controller;
 
 import java.util.EnumSet;
 
@@ -57,12 +58,34 @@ public class UserProvider {
         throw new RuntimeException("Not implemented yet. Unify with email (use same objects)");
     }
 
+    /**
+     * Returns the user based on session
+     * @param cached Whether to use a cached version or not
+     * @return The user for current session
+     */
+    public User getUser(boolean cached){
+        String email = Controller.session("email");
+        if(email == null || email.isEmpty())
+            return null;
+        else return getUser(email, cached);
+    }
+
+
+    public User getUser() {
+        return getUser(true);
+    }
+
+    public void createUserSession(User user){
+        Controller.session("email", user.getEmail());
+    }
+
+
     public User getUser(int userId) throws DataAccessException {
         return getUser(userId, true);
     }
 
-    public void invalidateUser(String email) {
-        Cache.remove(String.format(USER_BY_EMAIL, email));
+    public void invalidateUser(User user) {
+        Cache.remove(String.format(USER_BY_EMAIL, user.getEmail()));
     }
 
     public User getUser(String email, boolean cached) throws DataAccessException {
