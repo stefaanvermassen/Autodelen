@@ -378,7 +378,6 @@ public class Login extends Controller {
             return badRequest(register.render(registerForm));
         } else {
             session().clear();
-            System.out.println(registerForm.get().password);
             User otherUser = DatabaseHelper.getUserProvider().getUser(registerForm.get().email);
             if (otherUser != null) {
                 registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
