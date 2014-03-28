@@ -91,9 +91,8 @@ public class Profile extends Controller {
     }
 
     /**
-     * Lazy loads a countryname list in Dutch
-     *
-     * @return
+     * Lazy loads a country list in current configured locale
+     * @return A list of all countries enabled in the Java locale
      */
     private static List<String> getCountryList() {
         if (COUNTRIES == null) {
@@ -109,6 +108,10 @@ public class Profile extends Controller {
         return COUNTRIES;
     }
 
+    /**
+     * Method: GET
+     * @return A profile page for the currently requesting user
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result indexWithoutId() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -120,6 +123,11 @@ public class Profile extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     * @param userId The userId of the user (only available to administrator or user itself)
+     * @return The profilepage of the user
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result index(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -144,6 +152,12 @@ public class Profile extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     * Creates a prefilled form to edit the profile
+     * @param userId The user to edit
+     * @return A user edit page
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result edit(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -166,7 +180,7 @@ public class Profile extends Controller {
     /**
      * Returns a quotum on how complete the profile is.
      *
-     * @param user
+     * @param user The user to quote
      * @return Completeness in percents
      */
     private static int getProfileCompleteness(User user) {
@@ -204,6 +218,13 @@ public class Profile extends Controller {
         return (int) (((float) total / 9) * 100);
     }
 
+    /**
+     * Modifies, creates or deletes an address in the database based on the provided form data and current address
+     * @param model The submitted form data
+     * @param address The already-set address for the user
+     * @param dao The DAO to edit addresses
+     * @return The changed or null if deleted
+     */
     private static Address modifyAddress(EditAddressModel model, Address address, AddressDAO dao) {
         if (address == null) {
             // User entered new address in fields
@@ -230,6 +251,12 @@ public class Profile extends Controller {
         return address;
     }
 
+    /**
+     * Method: POST
+     * Changes the users profile based on submitted form data
+     * @param userId The user id to change
+     * @return The new profile page, or the edit form when errors occured
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result editPost(int userId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {

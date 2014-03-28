@@ -102,8 +102,8 @@ public class Login extends Controller {
 
     /**
      * Method: GET
-     *
-     * @return
+     * This resets the previous email verification link and generates a new one. This can be used when the old email hasn't been received
+     * @return A status page whether the request for a new verification link was successful
      */
     public static Result requestNewEmailVerificationProcess(String email) {
         //TODO: prevent people from spamming this URL as this might DDOS the mailserver (CRSF token and POST instead of GET)
@@ -137,7 +137,7 @@ public class Login extends Controller {
     /**
      * Method: GET
      *
-     * @return
+     * @return A page where the user can request a password reset
      */
     public static Result resetPasswordRequest() {
         return ok(singlemailform.render(Form.form(EmailFormModel.class)));
@@ -145,8 +145,8 @@ public class Login extends Controller {
 
     /**
      * Method: POST
-     *
-     * @return
+     * This sends a password reset request to the user based on the submitted form data.
+     * @return A status page whether the password reset was successfull
      */
     public static Result resetPasswordRequestProcess() {
         Form<EmailFormModel> resetForm = Form.form(EmailFormModel.class).bindFromRequest();
@@ -183,10 +183,10 @@ public class Login extends Controller {
 
     /**
      * Method: GET
-     *
-     * @param userId
-     * @param uuid
-     * @return
+     * Finalizes the password reset procedure given a correct reset code and userID
+     * @param userId The userId of the user who requested the reset
+     * @param uuid The unique reset code the user received to reset the password
+     * @return A status page whether reset was successfull or not
      */
     public static Result resetPassword(int userId, String uuid) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -210,9 +210,9 @@ public class Login extends Controller {
 
     /**
      * Method: POST
-     *
-     * @param userId
-     * @param uuid
+     * Starts a password reset procedure based on submitted form data.
+     * @param userId The id of the user who requested the password reset
+     * @param uuid 
      * @return
      */
     public static Result resetPasswordProcess(int userId, String uuid) {
@@ -253,9 +253,9 @@ public class Login extends Controller {
 
     /**
      * Method: POST
-     * Processes the form data
+     * Processes a submitted login form
      *
-     * @return Redirect to old page or login form
+     * @return Redirect to page or login form when an error occured
      */
 
     public static Result authenticate(String redirect) {
@@ -310,10 +310,22 @@ public class Login extends Controller {
         }
     }
 
+    /**
+     * Hashes a password using the BCRYPT iteration hashing method including a salt.
+     * @param password The password to be hashed
+     * @return The hashed password including the salt
+     */
     private static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 
+    /**
+     * Method: GET
+     * Finalizes a registration procedure
+     * @param userId The user ID
+     * @param uuid The registration verification code
+     * @return A login page when successful, or error message when verification code is invalid
+     */
     public static Result register_verification(int userId, String uuid) {
 
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -352,7 +364,7 @@ public class Login extends Controller {
 
     /**
      * Method: POST
-     *
+     * Creates a pending user registration
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
@@ -393,7 +405,6 @@ public class Login extends Controller {
     /**
      * Method: GET
      * Logs the user out
-     *
      * @return Redirect to index page
      */
     @RoleSecured.RoleAuthenticated()
