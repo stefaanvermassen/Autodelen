@@ -20,7 +20,7 @@ public class Notifications extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showNotifications() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             NotificationDAO dao = context.getNotificationDAO();
             List<Notification> notificationList = dao.getNotificationListForUser(user.getId());

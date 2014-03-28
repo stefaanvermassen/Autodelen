@@ -65,7 +65,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result newSession() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
 
         if (user.getAddressDomicile() != null) {
             InfoSessionCreationModel model = new InfoSessionCreationModel();
@@ -201,7 +201,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result unenrollSession() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
 
@@ -253,7 +253,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> detail(int sessionId){
-        final User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        final User user = DatabaseHelper.getUserProvider().getUser();
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             final InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession session = dao.getInfoSession(sessionId, true);
@@ -368,7 +368,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         if (user.getStatus() == UserStatus.REGISTERED) {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -423,7 +423,7 @@ public class InfoSessions extends Controller {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
 
                 try {
-                    User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+                    User user = DatabaseHelper.getUserProvider().getUser();
 
                     AddressDAO adao = context.getAddressDAO();
                     Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
@@ -457,7 +457,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> showUpcomingSessions() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession enrolled = dao.getAttendingInfoSession(user);
@@ -520,7 +520,7 @@ public class InfoSessions extends Controller {
      */
     private static Html upcommingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);

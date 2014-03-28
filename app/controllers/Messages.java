@@ -36,7 +36,7 @@ public class Messages extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showMessages() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             MessageDAO dao = context.getMessageDAO();
             List<Message> messageList = dao.getReceivedMessageListForUser(user.getId());
@@ -63,7 +63,7 @@ public class Messages extends Controller {
                 MessageDAO dao = context.getMessageDAO();
 
                 try {
-                    User sender = DatabaseHelper.getUserProvider().getUser(session("email"));
+                    User sender = DatabaseHelper.getUserProvider().getUser();
                     User receiver = DatabaseHelper.getUserProvider().getUser(createForm.get().useremail);
                     Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body, new DateTime());
                     if (mes != null) {

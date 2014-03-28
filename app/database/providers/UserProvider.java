@@ -9,6 +9,7 @@ import models.UserRole;
 import play.cache.Cache;
 import models.User;
 import play.mvc.Controller;
+import play.mvc.Http;
 
 import java.util.EnumSet;
 
@@ -64,12 +65,15 @@ public class UserProvider {
      * @return The user for current session
      */
     public User getUser(boolean cached){
-        String email = Controller.session("email");
+        return getUser(Controller.session(), cached);
+    }
+
+    public User getUser(Http.Session session, boolean cached){
+        String email = session.get("email");
         if(email == null || email.isEmpty())
             return null;
         else return getUser(email, cached);
     }
-
 
     public User getUser() {
         return getUser(true);
@@ -120,7 +124,7 @@ public class UserProvider {
 
     public void updateUser(User user) throws DataAccessException {
         try (DataAccessContext context = provider.getDataAccessContext()) {
-            invalidateUser(user.getEmail());
+            invalidateUser(user);
             UserDAO dao = context.getUserDAO();
             dao.updateUser(user, true);
             context.commit();
@@ -131,7 +135,7 @@ public class UserProvider {
 
     public void deleteUser(User user) throws DataAccessException {
         try (DataAccessContext context = provider.getDataAccessContext()) {
-            invalidateUser(user.getEmail());
+            invalidateUser(user);
             UserDAO dao = context.getUserDAO();
             dao.deleteUser(user);
             context.commit();

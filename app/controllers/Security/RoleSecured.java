@@ -40,7 +40,8 @@ public class RoleSecured {
         public F.Promise<SimpleResult> call(Context ctx) {
             try {
                 UserRole[] securedRoles = configuration.value();
-                User user = DatabaseHelper.getUserProvider().getUser(ctx.session().get("email"), true);
+                User user = DatabaseHelper.getUserProvider().getUser(ctx.session(), true); // get user from session
+
                 // If user is null, redirect to login page
                 if(user == null) {
                     return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));

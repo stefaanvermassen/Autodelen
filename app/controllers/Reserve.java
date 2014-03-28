@@ -115,7 +115,7 @@ public class Reserve extends Controller {
                 }
 
                 // Create the reservation
-                User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+                User user = DatabaseHelper.getUserProvider().getUser();
                 Reservation reservation = rdao.createReservation(from, until, car, user);
                 context.commit();
 

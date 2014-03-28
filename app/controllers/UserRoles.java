@@ -126,7 +126,7 @@ public class UserRoles extends Controller {
                         context.commit();
 
                         // Invalidate the cache for a page refresh
-                        DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
+                        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
 
                         flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
                         return ok(editroles.render(getUserRolesStatus(newRoles), user));
