@@ -15,6 +15,13 @@ public class Settings extends Controller {
         return ok(settings.render());
     }
 
+
+    /**
+     * Method: GET
+     * Temporary method to create a superuser
+     * @return Redirect to the userrole page
+     */
+    @Deprecated
     @RoleSecured.RoleAuthenticated()
     public static Result instantAdmin() {
         User user = DatabaseHelper.getUserProvider().getUser(session("email"));

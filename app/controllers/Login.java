@@ -253,9 +253,9 @@ public class Login extends Controller {
 
     /**
      * Method: POST
-     * Processes the form data
+     * Processes a submitted login form
      *
-     * @return Redirect to old page or login form
+     * @return Redirect to page or login form when an error occured
      */
 
     public static Result authenticate(String redirect) {
@@ -310,10 +310,22 @@ public class Login extends Controller {
         }
     }
 
+    /**
+     * Hashes a password using the BCRYPT iteration hashing method including a salt.
+     * @param password The password to be hashed
+     * @return The hashed password including the salt
+     */
     private static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 
+    /**
+     * Method: GET
+     * Finalizes a registration procedure
+     * @param userId The user ID
+     * @param uuid The registration verification code
+     * @return A login page when successful, or error message when verification code is invalid
+     */
     public static Result register_verification(int userId, String uuid) {
 
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -352,7 +364,7 @@ public class Login extends Controller {
 
     /**
      * Method: POST
-     *
+     * Creates a pending user registration
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
@@ -393,7 +405,6 @@ public class Login extends Controller {
     /**
      * Method: GET
      * Logs the user out
-     *
      * @return Redirect to index page
      */
     @RoleSecured.RoleAuthenticated()
