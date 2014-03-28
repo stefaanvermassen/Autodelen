@@ -1,7 +1,5 @@
 package database;
 
-import database.fields.FilterField;
-
 /**
  * Created by HannesM on 17/03/14.
  */

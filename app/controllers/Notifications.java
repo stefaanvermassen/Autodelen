@@ -9,7 +9,7 @@ import models.Notification;
 import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.notifications;
+import views.html.notifiers.notifications;
 
 import java.util.List;
 

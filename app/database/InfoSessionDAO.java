@@ -4,7 +4,6 @@
  */
 package database;
 
-import database.fields.FilterField;
 import models.*;
 import org.joda.time.DateTime;
 
