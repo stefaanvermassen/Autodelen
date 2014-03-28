@@ -1,9 +1,13 @@
 @scripts = {
-    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-    <script src="@routes.Assets.at("javascripts/reservation.js")"></script>
+    <script type="text/javascript" src="@routes.Application.javascriptRoutes()"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
+    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
+    <script src="@routes.Assets.at("javascripts/app/reservations.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
 @stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
 }
 @app("Reserveren", stylesheets, scripts) {
@@ -29,19 +33,19 @@
                     <div class="well">
                         <label>Auto zoeken op:</label>
                         <div class="row">
-                            <div class="col-xs-6">
+                            <div class="col-sm-6">
                                 <input id="name" class="searchTextField form-control" name="name" type="text" class="form-control" placeholder="Naam">
                             </div>
-                            <div class="col-xs-6">
+                            <div class="col-sm-6">
                                 <input id="zipcode" class="searchTextField form-control" name="zipcode" type="number"  placeholder="Postcode">
                             </div>
                         </div><hr />
                         <label>Functionaliteit:</label>
                         <div class="row">
-                            <div class="col-xs-6">
+                            <div class="col-sm-6">
                                 <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Minimaal aantal zitplaatsen">
                             </div>
-                            <div class="col-xs-3">
+                            <div class="col-sm-3">
                                 <div class="checkbox">
                                     <label>
                                         <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">
@@ -49,7 +53,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-xs-3">
+                            <div class="col-sm-3">
                                 <div id="hook" class="checkbox">
                                     <label>
                                         <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">
@@ -60,22 +64,18 @@
                         </div><hr />
                         <label>Beschikbaarheid:</label>
                         <div class="row">
-                            <div id="from" class="searchTextField" name="from" value="">
-                                <div class="col-xs-3">
-                                    <input id="dateFrom" type="date" class="form-control">
-                                </div>
-                                <div class="col-xs-2">
-                                    <input id="timeFrom" type="time" class="form-control" value="">
+                            <div class="col-sm-6">
+                                <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
+                                    <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                 </div>
                             </div>
-                            <div class="col-xs-1">
-                            </div>
-                            <div id="until" class="searchTextField" name="until" value="">
-                                <div class="col-xs-3">
-                                    <input id="dateUntil" type="date" class="form-control" value="">
-                                </div>
-                                <div class="col-xs-2">
-                                    <input id="timeUntil" type="time" class="form-control" value="">
+                            <div class="col-sm-6">
+                                <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_until">
+                                    <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                 </div>
                             </div>
                         </div><hr />

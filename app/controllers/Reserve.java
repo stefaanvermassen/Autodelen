@@ -23,7 +23,7 @@ public class Reserve extends Controller {
     private static final int PAGE_SIZE = 10;
 
     private static final DateTimeFormatter DATEFORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     public static class ReservationModel {
         public String from;
