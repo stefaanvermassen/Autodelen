@@ -27,10 +27,8 @@ public class InfoSessions extends Controller {
 
     private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
 
-    private static final DateTimeFormatter DATEFORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
-
     public static class InfoSessionCreationModel {
-        public String time; //TODO: use date format here
+        public DateTime time;
         public int max_enrollees;
         public InfoSessionType type;
 
@@ -41,15 +39,10 @@ public class InfoSessions extends Controller {
         public String address_number;
         public String address_bus;
 
-        public DateTime getDateTime() {
-            return DATEFORMATTER.parseDateTime(time);
-            //return null;
-        }
-
         public String validate() {
-            if (time == null || time.isEmpty()) {
+            if (time == null) {
                 return "Gelieve het tijdsveld in te vullen";
-            } else if (DateTime.now().isAfter(getDateTime())) {
+            } else if (DateTime.now().isAfter(time)) {
                 return "Je kan enkel een infosessie plannen na de huidige datum.";
             }
             return null;
@@ -97,7 +90,7 @@ public class InfoSessions extends Controller {
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
                 model.type = is.getType();
-                model.time = is.getTime().toString(DATEFORMATTER);
+                model.time = is.getTime();
                 model.max_enrollees = is.getMaxEnrollees();
                 model.address_city = is.getAddress().getCity();
                 model.address_zip = is.getAddress().getZip();
@@ -174,7 +167,7 @@ public class InfoSessions extends Controller {
                     adao.updateAddress(address);
 
                     // Now we update the time
-                    DateTime time = editForm.get().getDateTime();
+                    DateTime time = editForm.get().time;
                     if (!session.getTime().equals(time)) {
                         session.setTime(time);
                         dao.updateInfosessionTime(session);
@@ -429,7 +422,7 @@ public class InfoSessions extends Controller {
                     Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     //TODO: read InfoSessionType from form
-                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().getDateTime(), createForm.get().max_enrollees); //TODO: allow other hosts
+                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time, createForm.get().max_enrollees); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {
@@ -474,7 +467,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(infosessions.render(enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toLocalDate())));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toLocalDateTime())));
                                 }
                             }
                     );
