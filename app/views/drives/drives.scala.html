@@ -1,37 +1,11 @@
 @(userId: Int, errorIndex: Int, form: play.data.Form[Drives.RefuseModel], reservations: List[Reservation])
 @scripts = {
-    <script src="@routes.Assets.at("javascripts/plugins/dataTables/jquery.dataTables.js")" type="text/javascript"></script>
-    <script src="@routes.Assets.at("javascripts/plugins/dataTables/dataTables.bootstrap.js")" type="text/javascript"></script>
-
     <script>
-        $(document).ready(function() {
-            $('#dataTables-drives').dataTable( {
-                "bFilter": true,
-                "bInfo": false,
-                "bLengthChange": false,
+        var index = @errorIndex;
 
-                "aoColumns": [
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  { "bSortable": false }
-                ],
-                "oLanguage": {
-                  "oPaginate": {
-                    "sNext": "Volgende",
-                    "sPrevious": "Vorige"
-                  },
-                  "sSearch": "Zoek: "
-                }
-            });
-            @if(form.hasGlobalErrors) {
-                flipHidden(@errorIndex);
-            };
-        });
+        @if(form.hasGlobalErrors) {
+                flipHidden(index);
+        };
 
         function flipHidden(index) {
             var hid1 = $("#hidden1_" + index);
@@ -117,32 +91,42 @@
                                             @reservation.getStatus.getDescription
                                         </td>
                                         <!-- TODO: temporary give action cancel for both accepted as refused -->
-                                        @if(reservation.getUser.getId == userId || reservation.getStatus != ReservationStatus.REQUEST) {
+                                        @if(reservation.getUser.getId == userId) {
                                             <td>
                                                 <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">verwijder</a>
+                                                    <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
+                                                    <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">annuleer</a>
                                                 </div>
                                             </td>
                                         } else {
                                             <td>
-                                                <div id="hidden1_@index" class="btn-group btn-group-xs">
-                                                    <a class="btn btn-success" href="@routes.Drives.approveReservation(reservation.getId)">goedkeuren</a>
-                                                    <a class="btn btn-warning" onclick="flipHidden(@index)">afkeuren</a>
+                                            @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                                                    <div id="hidden1_@index" class="btn-group btn-group-xs">
+                                                        <a class="btn btn-success" href="@routes.Drives.approveReservation(reservation.getId)">goedkeuren</a>
+                                                        <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
+                                                        <a class="btn btn-warning" onclick="flipHidden(@index)">afkeuren</a>
+                                                    </div>
+                                                    <div id="hidden2_@index" class="hidden">
+                                                        @helper.form(routes.Drives.refuseReservation(reservation.getId, index), 'class -> "form-horizontal") {
+                                                            <fieldset>
+                                                                <div class="form-group">
+                                                                    <label class="col-md-1 control-label" for="reason"></label>
+                                                                    <textarea rows="8" id="reason" name="reason" type="text" placeholder="Reden voor weigering" class="form-control input-md" value="@form("reason").value"></textarea>
+                                                                </div>
+                                                                <div class="btn-group btn-group-xs">
+                                                                    <button id="submit" name="submit" class="btn btn-success btn-xs">
+                                                                        afkeuren</button>
+                                                                    <a class="btn btn-warning" onclick="var index = @index; flipHidden(index);">
+                                                                        annuleer</a>
+                                                                </div>
+                                                            </fieldset>
+                                                        }
+                                                    </div>
+                                            } else {
+                                                <div class="btn-group btn-group-xs">
+                                                    <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
                                                 </div>
-                                                <div id="hidden2_@index" class="hidden">
-                                                    @helper.form(routes.Drives.refuseReservation(reservation.getId, index), 'class -> "form-horizontal") {
-                                                        <fieldset>
-                                                            <div class="form-group">
-                                                                <label class="col-md-1 control-label" for="reason"></label>
-                                                                <textarea rows="8" id="reason" name="reason" type="text" placeholder="Reden voor weigering" class="form-control input-md" value="@form("reason").value"></textarea>
-                                                            </div>
-                                                            <div class="btn-group btn-group-xs">
-                                                                <button id="submit" name="submit" class="btn btn-success btn-xs">afkeuren</button>
-                                                                <a class="btn btn-warning" onclick="flipHidden(@index)">annuleer</a>
-                                                            </div>
-                                                        </fieldset>
-                                                    }
-                                                </div>
+                                            }
                                             </td>
                                         }
                                     </tr>

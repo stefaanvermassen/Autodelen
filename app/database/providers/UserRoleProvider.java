@@ -72,7 +72,7 @@ public class UserRoleProvider {
         }
     }
 
-    public void invalidateRoles(int userId){
-        Cache.remove(String.format(ROLES_BY_ID, userId));
+    public void invalidateRoles(User user){
+        Cache.remove(String.format(ROLES_BY_ID, user.getId()));
     }
 }

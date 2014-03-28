@@ -4,6 +4,14 @@
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
         var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
+
+
+        // Show confirm message to subscribe to an infosession
+        function confirmSubscription(id){
+            if(confirm('U bent reeds ingeschreven voor een infosessie. Bent u zeker dat u deze wil wijzigen?')){
+                window.location = myJsRoutes.controllers.InfoSessions.enrollSession(id ).url;
+            }
+        }
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 
