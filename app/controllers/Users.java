@@ -24,7 +24,7 @@ public class Users extends Controller {
     /**
      * @return The users index-page with all users
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     public static Result showUsers() {
         return ok(users.render());
     }
@@ -37,7 +37,7 @@ public class Users extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of users of the corresponding page
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     public static Result showUsersPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
