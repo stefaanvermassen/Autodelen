@@ -16,15 +16,13 @@
             var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
             from.getMinutes(), 0);
             var adjustedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
-            from.getMinutes(), 0);
-            adjustedFrom.setMinutes(adjustedFrom.getMinutes() - 5);
+            from.getMinutes() - 5, 0);
 
             var until = new Date("@reservation.getTo.toString("yyyy-MM-dd HH:mm")");
             var correctedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
             until.getMinutes(), 0);
             var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
-            until.getMinutes(), 0);
-            adjustedUntil.setMinutes(adjustedUntil.getMinutes() + 5);
+            until.getMinutes() + 5, 0);
 
             startDatesDisabled.push(correctedFrom);
             endDatesDisabled.push(correctedUntil);
