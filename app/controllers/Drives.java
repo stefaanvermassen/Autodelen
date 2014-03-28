@@ -38,7 +38,7 @@ public class Drives extends Controller {
     }
 
     public static Html showIndex(Form<RefuseModel> form, int errorIndex) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
             List<Reservation> reservations = dao.getReservationListForUser(user.getId());
@@ -52,7 +52,7 @@ public class Drives extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result details(int reservationId) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO rdao = context.getReservationDAO();
             UserDAO udao = context.getUserDAO();
@@ -94,7 +94,7 @@ public class Drives extends Controller {
     }
 
     public static Reservation adjustStatus(int reservationId, ReservationStatus status) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
             Reservation reservation = dao.getReservation(reservationId);
@@ -117,7 +117,7 @@ public class Drives extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result cancelReservation(int reservationId) {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
             Reservation reservation = dao.getReservation(reservationId);

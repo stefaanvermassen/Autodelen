@@ -138,7 +138,7 @@ public class Cars extends Controller {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 try {
-                    User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+                    User user = DatabaseHelper.getUserProvider().getUser();
                     CarModel model = carForm.get();
                     AddressDAO adao = context.getAddressDAO();
                     // TODO: add country
@@ -186,7 +186,7 @@ public class Cars extends Controller {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
-                User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+                User currentUser = DatabaseHelper.getUserProvider().getUser();
                 if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
@@ -244,7 +244,7 @@ public class Cars extends Controller {
                     return badRequest(carList());
                 }
 
-                User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+                User currentUser = DatabaseHelper.getUserProvider().getUser();
                 if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
@@ -332,7 +332,7 @@ public class Cars extends Controller {
                 } else {
 
                     //TODO: this is repeat code, unify with above controllers as extra check
-                    User currentUser = DatabaseHelper.getUserProvider().getUser(session("email"));
+                    User currentUser = DatabaseHelper.getUserProvider().getUser();
                     if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
                         flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
                         return badRequest(carList());

@@ -9,6 +9,7 @@ import models.User;
 import models.UserStatus;
 import models.VerificationType;
 import notifiers.Notifier;
+import org.h2.engine.Database;
 import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
 import play.data.validation.Constraints;
@@ -81,15 +82,12 @@ public class Login extends Controller {
      */
     public static Result login(String redirect) {
         // Allow a force login when the user doesn't exist anymore
-        String email = session("email");
-        if (email != null) {
-            if (DatabaseHelper.getUserProvider().getUser(email, false) == null) { // check if user really exists (not from cache)
-                session().clear();
-                email = null;
-            }
+        User user = DatabaseHelper.getUserProvider().getUser(false);
+        if (user == null && !session().isEmpty()) {
+            session().clear();
         }
 
-        if (email == null) {
+        if (user == null) {
             return ok(
                     login.render(Form.form(LoginModel.class), redirect)
             );
@@ -103,6 +101,7 @@ public class Login extends Controller {
     /**
      * Method: GET
      * This resets the previous email verification link and generates a new one. This can be used when the old email hasn't been received
+     *
      * @return A status page whether the request for a new verification link was successful
      */
     public static Result requestNewEmailVerificationProcess(String email) {
@@ -146,6 +145,7 @@ public class Login extends Controller {
     /**
      * Method: POST
      * This sends a password reset request to the user based on the submitted form data.
+     *
      * @return A status page whether the password reset was successfull
      */
     public static Result resetPasswordRequestProcess() {
@@ -184,8 +184,9 @@ public class Login extends Controller {
     /**
      * Method: GET
      * Finalizes the password reset procedure given a correct reset code and userID
+     *
      * @param userId The userId of the user who requested the reset
-     * @param uuid The unique reset code the user received to reset the password
+     * @param uuid   The unique reset code the user received to reset the password
      * @return A status page whether reset was successfull or not
      */
     public static Result resetPassword(int userId, String uuid) {
@@ -211,8 +212,9 @@ public class Login extends Controller {
     /**
      * Method: POST
      * Starts a password reset procedure based on submitted form data.
+     *
      * @param userId The id of the user who requested the password reset
-     * @param uuid 
+     * @param uuid
      * @return
      */
     public static Result resetPasswordProcess(int userId, String uuid) {
@@ -235,7 +237,7 @@ public class Login extends Controller {
                         dao.updateUser(user, true);
                         context.commit();
 
-                        DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
+                        DatabaseHelper.getUserProvider().invalidateUser(user);
                         flash("success", "Uw wachtwoord werd succesvol gewijzigd.");
                         LoginModel model = new LoginModel();
                         model.email = user.getEmail();
@@ -277,8 +279,8 @@ public class Login extends Controller {
                     return badRequest(login.render(loginForm, redirect));
                 } else {
                     session().clear();
-                    session("email", loginForm.get().email);
-                    if(redirect != null){
+                    DatabaseHelper.getUserProvider().createUserSession(user);
+                    if (redirect != null) {
                         return redirect(redirect);
                     } else {
                         return redirect(
@@ -299,7 +301,7 @@ public class Login extends Controller {
      * @return Page to register to
      */
     public static Result register() {
-        if (session("email") == null) {
+        if (DatabaseHelper.getUserProvider().getUser() == null) {
             return ok(
                     register.render(Form.form(RegisterModel.class))
             );
@@ -312,6 +314,7 @@ public class Login extends Controller {
 
     /**
      * Hashes a password using the BCRYPT iteration hashing method including a salt.
+     *
      * @param password The password to be hashed
      * @return The hashed password including the salt
      */
@@ -322,8 +325,9 @@ public class Login extends Controller {
     /**
      * Method: GET
      * Finalizes a registration procedure
+     *
      * @param userId The user ID
-     * @param uuid The registration verification code
+     * @param uuid   The registration verification code
      * @return A login page when successful, or error message when verification code is invalid
      */
     public static Result register_verification(int userId, String uuid) {
@@ -346,7 +350,7 @@ public class Login extends Controller {
 
                     dao.updateUser(user, true);
                     context.commit();
-                    DatabaseHelper.getUserProvider().invalidateUser(user.getEmail());
+                    DatabaseHelper.getUserProvider().invalidateUser(user);
 
                     flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
                     LoginModel model = new LoginModel();
@@ -365,6 +369,7 @@ public class Login extends Controller {
     /**
      * Method: POST
      * Creates a pending user registration
+     *
      * @return Redirect and logged in session if success
      */
     public static Result register_process() {
@@ -405,13 +410,14 @@ public class Login extends Controller {
     /**
      * Method: GET
      * Logs the user out
+     *
      * @return Redirect to index page
      */
     @RoleSecured.RoleAuthenticated()
     public static Result logout() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
-        DatabaseHelper.getUserProvider().invalidateUser(session("email"));
-        DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
+        User user = DatabaseHelper.getUserProvider().getUser();
+        DatabaseHelper.getUserProvider().invalidateUser(user);
+        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
 
         session().clear();
         return redirect(
