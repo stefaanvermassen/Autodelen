@@ -3,12 +3,9 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
 import play.data.Form;
 import play.libs.F;
@@ -54,6 +51,7 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @return An infosession form
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
@@ -138,6 +136,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: POST
      * Edits the session for given ID, based on submitted form data
+     *
      * @param sessionId SessionID to edit
      * @return Redirect to edited session, or the form if errors occured
      */
@@ -190,6 +189,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      * Unenrolls the user for his subscribed infosession.
+     *
      * @return A redirect to the overview page with message if unenrollment was successfull.
      */
     @RoleSecured.RoleAuthenticated()
@@ -241,16 +241,17 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      * Returns the detail promise of the given sessionId. If enabled, this also fetches map location and enables the map view.
+     *
      * @param sessionId The sessionId to which the detail belongs to
      * @return A session detail page promise
      */
     @RoleSecured.RoleAuthenticated()
-    public static F.Promise<Result> detail(int sessionId){
+    public static F.Promise<Result> detail(int sessionId) {
         final User user = DatabaseHelper.getUserProvider().getUser();
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             final InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession session = dao.getInfoSession(sessionId, true);
-            if(session == null){
+            if (session == null) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
@@ -277,7 +278,7 @@ public class InfoSessions extends Controller {
                     });
                 }
             }
-        } catch(DataAccessException ex){
+        } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
         }
@@ -320,9 +321,10 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @param sessionId SessionID to change userstatus on
-     * @param userId UserID of the user to change status of
-     * @param status New status of the user.
+     * @param userId    UserID of the user to change status of
+     * @param status    New status of the user.
      * @return Redirect to the session detail page if successful.
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
@@ -356,6 +358,7 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @param sessionId The sessionId to enroll to
      * @return A redirect to the detail page to which the user has subscribed
      */
@@ -367,22 +370,24 @@ public class InfoSessions extends Controller {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
 
                 InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
-                if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
-                    flash("danger", "U bent reeds al ingeschreven voor een infosessie.");
+                InfoSession session = dao.getInfoSession(sessionId, true); //TODO: just add going subclause (like in getAttending requirement)
+                if (session == null) {
+                    flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    InfoSession session = dao.getInfoSession(sessionId, true); //TODO: just add going subclause (like in getAttending requirement)
-                    if (session == null) {
-                        flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
-                        return redirect(routes.InfoSessions.showUpcomingSessions());
-                    } else if (session.getMaxEnrollees() != 0 && session.getEnrolleeCount() == session.getMaxEnrollees()) {
+                    if (session.getMaxEnrollees() != 0 && session.getEnrolleeCount() == session.getMaxEnrollees()) {
                         flash("danger", "Deze infosessie zit reeds vol.");
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         try {
+                            if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
+                                dao.unregisterUser(alreadyAttending, user);
+                            }
                             dao.registerUser(session, user);
+
                             context.commit();
-                            flash("success", "U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".");
+                            flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".") :
+                                    "U bent van infosessie veranderd naar " + session.getTime().toString("dd/MM/yyyy"));
                             Notifier.sendInfoSessionEnrolledMail(user, session);
                             return redirect(routes.InfoSessions.detail(sessionId));
                         } catch (DataAccessException ex) {
@@ -404,6 +409,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: POST
      * Creates a new infosession based on submitted form data
+     *
      * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
@@ -446,6 +452,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
+     *
      * @return
      */
     @RoleSecured.RoleAuthenticated()
@@ -455,7 +462,7 @@ public class InfoSessions extends Controller {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession enrolled = dao.getAttendingInfoSession(user);
 
-            if(enrolled == null || !SHOW_MAP){
+            if (enrolled == null || !SHOW_MAP) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
@@ -463,14 +470,14 @@ public class InfoSessions extends Controller {
                     }
                 });
             } else {
-                    return Maps.getLatLongPromise(enrolled.getAddress().getId()).map(
-                            new F.Function<F.Tuple<Double, Double>, Result>() {
-                                public Result apply(F.Tuple<Double, Double> coordinates) {
-                                    return ok(infosessions.render(enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
-                                }
+                return Maps.getLatLongPromise(enrolled.getAddress().getId()).map(
+                        new F.Function<F.Tuple<Double, Double>, Result>() {
+                            public Result apply(F.Tuple<Double, Double> coordinates) {
+                                return ok(infosessions.render(enrolled,
+                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
                             }
-                    );
+                        }
+                );
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -479,9 +486,10 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
-     * @param page The page number to fetch
+     *
+     * @param page         The page number to fetch
      * @param ascInt
-     * @param orderBy The orderby type, ASC or DESC
+     * @param orderBy      The orderby type, ASC or DESC
      * @param searchString The string to search for
      * @return A partial view of the table containing the filtered sessions
      */
@@ -492,32 +500,34 @@ public class InfoSessions extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(upcommingSessionsList(page, filterField, asc, filter));
+        return ok(upcomingSessionsList(page, filterField, asc, filter));
     }
 
     /**
      * Gets the first page of the infosessions.
+     *
      * @return HTML table partial of infosession table
      */
     private static Html upcomingSessionsList() {
-        return upcommingSessionsList(1, FilterField.DATE, true, null);
+        return upcomingSessionsList(1, FilterField.DATE, true, null);
     }
 
     /**
      * Gets the upcomming infosession html block filtered
+     *
      * @param page
      * @param orderBy Orderby type ASC or DESC
      * @param asc
-     * @param filter The filter to apply to
+     * @param filter  The filter to apply to
      * @return The html patial table of upcoming sessions for this filter
      */
-    private static Html upcommingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html upcomingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
-            if(orderBy == null) {
+            if (orderBy == null) {
                 orderBy = FilterField.DATE;
             }
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
@@ -534,7 +544,7 @@ public class InfoSessions extends Controller {
             }
 
             int amountOfResults = dao.getAmountOfInfoSessions(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
 
             return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
