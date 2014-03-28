@@ -1,15 +1,13 @@
 package database.jdbc;
 
 import database.DataAccessException;
+import database.DatabaseHelper;
 import database.MessageDAO;
 import models.Message;
 import models.User;
 import org.joda.time.DateTime;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +23,7 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement getReceivedMessageListByUseridStatement;
     private PreparedStatement getSentMessageListByUseridStatement;
     private PreparedStatement getNumberOfUnreadMessagesStatement;
+    private PreparedStatement setReadStatement;
 
     public JDBCMessageDAO(Connection connection) {
         this.connection = connection;
@@ -56,6 +55,13 @@ public class JDBCMessageDAO implements MessageDAO {
                     "WHERE message_from_user_id=? ORDER BY message_timestamp DESC;");
         }
         return getSentMessageListByUseridStatement;
+    }
+
+    private PreparedStatement getSetReadStatement() throws SQLException {
+        if (setReadStatement == null) {
+            setReadStatement = connection.prepareStatement("UPDATE Messages SET message_read = ? WHERE message_id = ?;");
+        }
+        return setReadStatement;
     }
 
     private PreparedStatement getNumberOfUnreadMessagesStatement() throws SQLException {
@@ -106,12 +112,44 @@ public class JDBCMessageDAO implements MessageDAO {
     }
 
     @Override
-    public Message createMessage(User sender, User receiver, String subject, String body) throws DataAccessException {
-        return null;
+    public Message createMessage(User sender, User receiver, String subject, String body, DateTime timestamp) throws DataAccessException {
+        try{
+            PreparedStatement ps = getCreateMessageStatement();
+            ps.setInt(1, sender.getId());
+            ps.setInt(2, receiver.getId());
+            ps.setBoolean(3, false);
+            ps.setString(4, subject);
+            ps.setString(5,body);
+            ps.setTimestamp(6, new Timestamp(timestamp.getMillis()));
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating message.");
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+                DatabaseHelper.getCommunicationProvider().invalidateMessages(receiver.getId());
+                DatabaseHelper.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
+                return new Message(keys.getInt(1), sender, receiver, false, subject, body, timestamp);
+            } catch (SQLException ex) {
+                throw new DataAccessException("Failed to get primary key for new message.", ex);
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to create message", e);
+        }
     }
 
     @Override
     public void markMessageAsRead(int messageID) throws DataAccessException {
+
+        try {
+            PreparedStatement ps = getSetReadStatement();
+            ps.setBoolean(1, false);
+            ps.setInt(2,messageID);
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating message.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 

@@ -15,9 +15,16 @@ public class Settings extends Controller {
         return ok(settings.render());
     }
 
+
+    /**
+     * Method: GET
+     * Temporary method to create a superuser
+     * @return Redirect to the userrole page
+     */
+    @Deprecated
     @RoleSecured.RoleAuthenticated()
     public static Result instantAdmin() {
-        User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserRoleDAO dao = context.getUserRoleDAO();
             Set<UserRole> roles = dao.getUserRoles(user.getId());
@@ -28,7 +35,7 @@ public class Settings extends Controller {
                 try {
                     dao.addUserRole(user.getId(), UserRole.SUPER_USER);
                     context.commit();
-                    DatabaseHelper.getUserRoleProvider().invalidateRoles(user.getId());
+                    DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
                     roles.add(UserRole.SUPER_USER);
 
                     flash("success", "U heeft nu superuserrechten. Gelieve je extra rechten aan te duiden.");

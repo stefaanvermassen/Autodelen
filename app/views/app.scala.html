@@ -1,7 +1,7 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
 @import org.joda.time.format.DateTimeFormat
 @import database.DatabaseHelper;
-@defining(DatabaseHelper.getUserProvider().getUser(session.get("email"))) { user =>
+@defining(DatabaseHelper.getUserProvider().getUser()) { user =>
 
 <!DOCTYPE html>
 <html>

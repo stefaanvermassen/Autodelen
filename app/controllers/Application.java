@@ -22,7 +22,8 @@ public class Application extends Controller {
                         // Routes
                         routes.javascript.Cars.showCarsPage(),
                         routes.javascript.InfoSessions.showUpcomingSessionsPage(),
-                        routes.javascript.Reserve.showCarsPage()
+                        routes.javascript.Reserve.showCarsPage(),
+                        routes.javascript.InfoSessions.enrollSession()
                 )
         );
     }

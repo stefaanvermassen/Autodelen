@@ -3,7 +3,7 @@ package database.jdbc;
 import database.DataAccessException;
 import database.Filter;
 import database.InfoSessionDAO;
-import database.fields.FilterField;
+import database.FilterField;
 import models.*;
 import org.joda.time.DateTime;
 
@@ -96,10 +96,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
         if (getInfosessionForUser == null) {
-            getInfosessionForUser = connection.prepareStatement("SELECT " + INFOSESSION_FIELDS + " FROM infosessionenrollees " +
-                    "JOIN infosessions USING (infosession_id) " +
+            getInfosessionForUser = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
+                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
+                    "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
                     "JOIN users ON infosession_host_user_id = user_id " +
-                    "JOIN addresses ON infosession_address_id = address_id WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
+                    "JOIN addresses ON infosession_address_id = address_id " +
+                    "LEFT JOIN ( SELECT COUNT(*) total, ie2.infosession_id FROM infosessionenrollees ie2 GROUP BY ie2.infosession_id) sub ON (ie.infosession_id = sub.infosession_id) " +
+                    "WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?");
         }
         return getInfosessionForUser;
     }
@@ -174,10 +178,23 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         return getGetAmountOfInfoSessionsStatement;
     }
 
+    /**
+     *
+     * @param rs The resultset that contains the necessary information
+     * @return An Infosession with the information from the resultset without the list of enrollees
+     * @throws SQLException
+     */
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
         return populateInfoSession(rs, false);
     }
 
+    /**
+     *
+     * @param rs The resultset that contains the necessary information
+     * @param includesGoing Includes the enrollees too?
+     * @return An Infosession with the information from the resultset
+     * @throws SQLException
+     */
     public static InfoSession populateInfoSession(ResultSet rs, boolean includesGoing) throws SQLException {
         if (includesGoing) {
             return new InfoSession(rs.getInt("infosession_id"), InfoSessionType.valueOf(rs.getString("infosession_type")), new DateTime(rs.getTimestamp("infosession_timestamp")),
@@ -252,13 +269,6 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
     }
 
-    /**
-     * Updates the time field only
-     *
-     * @param id
-     * @return
-     * @throws DataAccessException
-     */
     @Override
     public boolean deleteInfoSession(int id) throws DataAccessException {
         try {
@@ -274,6 +284,12 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         return true;
     }
 
+    /**
+     *
+     * @param filter The filter to apply to
+     * @return The amount of filtered infosessions, SINCE TODAY
+     * @throws DataAccessException
+     */
     @Override
     public int getAmountOfInfoSessions(Filter filter) throws DataAccessException {
         try {
@@ -296,6 +312,12 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
     }
 
+    /**
+     *
+     * @param since The date we want the infosessions to be after
+     * @return List of all infosessions, without pagination or filtering
+     * @throws DataAccessException
+     */
     @Override
     public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException {
         List<InfoSession> sessions = new ArrayList<InfoSession>();
@@ -315,6 +337,16 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
     }
 
+    /**
+     *
+     * @param orderBy The field you want to order by
+     * @param asc Ascending
+     * @param page The page you want to see
+     * @param pageSize The page size
+     * @param filter The filter you want to apply
+     * @return List of infosessions with custom ordering and filtering
+     * @throws DataAccessException
+     */
     @Override
     public List<InfoSession> getInfoSessionsAfter(DateTime since, FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
@@ -424,6 +456,12 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
     }
 
+    /**
+     *
+     * @param user The user
+     * @return The infosession after this time, the user is enrolled in
+     * @throws DataAccessException
+     */
     @Override
     public InfoSession getAttendingInfoSession(User user) throws DataAccessException {
         try {
@@ -434,7 +472,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next())
                     return null;
-                else return populateInfoSession(rs);
+                else return populateInfoSession(rs, true);
             } catch (SQLException ex) {
                 throw new DataAccessException("Invalid query for attending infosession.", ex);
             }
