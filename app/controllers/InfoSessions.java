@@ -522,13 +522,12 @@ public class InfoSessions extends Controller {
      * @return The html patial table of upcoming sessions for this filter
      */
     private static Html upcomingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
-
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
-            if (orderBy == null) {
-                orderBy = FilterField.DATE;
+            if(orderBy == null) {
+                orderBy = FilterField.INFOSESSION_DATE;
             }
             List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
             if (enrolled != null) {

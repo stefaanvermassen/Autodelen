@@ -8,7 +8,12 @@ package database;
  * Fields we can filter on the DAOs
  */
 public enum FilterField {
-    CAR_NAME, ZIPCODE, CAR_SEATS, CAR_GPS, CAR_HOOK, DATE, FROM, UNTIL, UNKNOWN, CAR_BRAND;
+    CAR_NAME, CAR_BRAND, CAR_SEATS, CAR_GPS, CAR_HOOK,
+    USER_NAME, USER_FIRSTNAME, USER_LASTNAME,
+    ZIPCODE,
+    INFOSESSION_DATE,
+    FROM, UNTIL,
+    UNKNOWN;
 
     /**
      *
@@ -43,7 +48,16 @@ public enum FilterField {
                 field = UNTIL;
                 break;
             case "date" :
-                field = DATE;
+                field = INFOSESSION_DATE;
+                break;
+            case "user_name":
+                field = USER_NAME;
+                break;
+            case "user_firstname":
+                field = USER_FIRSTNAME;
+                break;
+            case "user_lastname":
+                field = USER_LASTNAME;
                 break;
         }
         return field;

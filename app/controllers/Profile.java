@@ -164,7 +164,7 @@ public class Profile extends Controller {
             User user = dao.getUser(userId, true);
             User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(user.getId(), UserRole.PROFILE_ADMIN)) {
+            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 
@@ -265,7 +265,7 @@ public class Profile extends Controller {
             User user = dao.getUser(userId, true);
             User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(user.getId(), UserRole.PROFILE_ADMIN)) {
+            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 

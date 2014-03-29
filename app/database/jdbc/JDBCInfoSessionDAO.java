@@ -352,7 +352,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
-                case DATE :
+                case INFOSESSION_DATE:
                     ps = asc ? getGetInfoSessionsAfterPageByDateAscStatement() : getGetInfoSessionsAfterPageByDateDescStatement();
                     break;
             }
