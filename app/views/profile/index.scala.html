@@ -1,20 +1,17 @@
 @(user: User, completeness: Int = 0)
 
 @app("Profiel") {
-
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
-            <li><a href="#">Home</a></li>
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
             <li class="active">Profiel</li>
         </ol>
     </div>
-
     <div id="page-wrapper">
         @flashes()
-
         <h1 class="page-header">Profiel</h1>
         <div class="row">
-            <div class="col-md-10 col-md-push-1">
+            <div class="col-lg-12">
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <p>

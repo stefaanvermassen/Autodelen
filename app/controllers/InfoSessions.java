@@ -242,7 +242,6 @@ public class InfoSessions extends Controller {
      * @return A session detail page promise
      */
     @RoleSecured.RoleAuthenticated()
-
     public static F.Promise<Result> detail(int sessionId) {
         final User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {

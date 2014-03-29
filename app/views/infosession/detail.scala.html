@@ -16,12 +16,9 @@
     </script>
 }
 
-    @stylesheets = {
-        <style>
-            #map { height: 400px; width: 1000px; } /* TODO: make responsive */
-        </style>
-        <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
-    }
+@stylesheets = {
+    <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
+}
 
 @app("Details Infosessie", stylesheets, scripts) {
 <div id="page-header-wrapper">

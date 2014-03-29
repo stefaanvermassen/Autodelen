@@ -1,3 +1,8 @@
+/* --- Map --- */
+#map {
+	width: 100%;
+}
+
 /* --- Top Menu --- */
 
 .navbar-top-links li .dropdown-toggle {
@@ -132,6 +137,10 @@
 }
 
 /* --- General styling --- */
+
+.inline-block{
+	display:inline-block;
+}
 
 html{
 	height: 100%;
