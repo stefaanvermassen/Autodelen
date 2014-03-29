@@ -18,12 +18,12 @@ import java.util.List;
 
 public class Messages extends Controller {
 
+
     /**
      * Class implementing a model wrapped in a form.
      * This model is used during the submission of a new message.
      */
     public static class MessageCreationModel {
-
         public String subject;
         public String body;
         public String useremail;
@@ -36,6 +36,7 @@ public class Messages extends Controller {
     }
 
     public static int AUTOCOMPLETE_MAX = 10;
+
 
     /**
      * Method: GET
@@ -54,16 +55,19 @@ public class Messages extends Controller {
         }
     }
 
+
     /**
      * Method: GET
      *
      * @return a new message form
      */
+
     @RoleSecured.RoleAuthenticated()
     public static Result newMessage() {
         Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
         return ok(addmessage.render(editForm));
     }
+
 
     /**
      * Method: POST
@@ -72,6 +76,7 @@ public class Messages extends Controller {
      *
      * @return the messages index list
      */
+
     @RoleSecured.RoleAuthenticated()
     public static Result createNewMessage() {
         Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
@@ -103,6 +108,7 @@ public class Messages extends Controller {
             }
         }
     }
+
 
     /**
      * Method: GET
