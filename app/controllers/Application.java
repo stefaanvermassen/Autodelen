@@ -11,7 +11,10 @@ public class Application extends Controller {
         return ok(index.render());
     }
 
-    // Javascript routes
+    /**
+     * Javascript routes allowing the calling of actions on the server from
+     * Javascript as if they were invoked directly in the script.
+     */
     public static Result javascriptRoutes() {
         response().setContentType("text/javascript");
         return ok(
@@ -22,7 +25,8 @@ public class Application extends Controller {
                         routes.javascript.Reserve.showCarsPage(),
                         routes.javascript.Users.showUsersPage(),
                         routes.javascript.UserRoles.showUsersPage(),
-                        routes.javascript.EmailTemplates.showExistingTemplatesPage()
+                        routes.javascript.EmailTemplates.showExistingTemplatesPage(),
+                        routes.javascript.InfoSessions.enrollSession()
                 )
         );
     }

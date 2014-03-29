@@ -23,13 +23,21 @@ public class JDBCTemplateDAOTest {
 	private TemplateDAO templateDAO;
 	private List<EmailTemplate> templates;
 
+    /**
+     * Initializes the DAOs so they can be used in the test methods.
+     * @throws Exception
+     */
 	@Before
     public void setUp() throws Exception {
         context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
         templateDAO = context.getTemplateDAO();
         templates = templateDAO.getAllTemplates();
     }
-	
+
+    /**
+     * Tests getting and updating (not creating!) of templates
+     * @throws Exception
+     */
 	@Test
 	public void testTemplateDAO() throws Exception {
         try {
@@ -40,7 +48,7 @@ public class JDBCTemplateDAOTest {
         }
 	}
 	
-	public void updateTemplateTest() throws Exception{
+	private void updateTemplateTest() throws Exception{
 		Iterator<EmailTemplate> it = templates.iterator();
 		Scanner sc = new Scanner(new File("test/database/random_text.txt"));
         sc.useDelimiter("\\t|\\r\\n");
@@ -48,8 +56,10 @@ public class JDBCTemplateDAOTest {
         while(sc.hasNext() && it.hasNext()) {
             String body = sc.next();
             EmailTemplate template = (EmailTemplate) it.next();
-            
-            templateDAO.updateTemplate(template.getId(), body);
+            String templateSubject = "";
+            boolean templateSendMail = false;
+
+            templateDAO.updateTemplate(template.getId(), body, templateSubject, templateSendMail);
             EmailTemplate template2 = templateDAO.getTemplate(template.getId());
             
             assertEquals(template2.getBody(), body);
@@ -58,7 +68,7 @@ public class JDBCTemplateDAOTest {
         sc.close();
 	}
 	
-	public void getTemplateTest(){
+	private void getTemplateTest(){
 		for(EmailTemplate template : templates){
 			int id = template.getId();
 			String body = template.getBody();

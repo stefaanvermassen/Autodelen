@@ -190,6 +190,7 @@ public class Cars extends Controller {
             } else {
                 User currentUser = DatabaseHelper.getUserProvider().getUser();
                 if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
@@ -249,6 +250,7 @@ public class Cars extends Controller {
 
                 User currentUser = DatabaseHelper.getUserProvider().getUser();
                 if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
@@ -337,6 +339,7 @@ public class Cars extends Controller {
                     //TODO: this is repeat code, unify with above controllers as extra check
                     User currentUser = DatabaseHelper.getUserProvider().getUser();
                     if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+
                         flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
                         return badRequest(carList());
                     }
