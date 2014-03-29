@@ -12,14 +12,23 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
 }
 
-@app("Gebruikersrollen", stylesheets, scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Library</a></li>
-            <li class="active">Gebruikersrollen</li>
-        </ol>
-    </div>
+
+@defining(Map(
+    UserRole.USER -> "label-user",
+    UserRole.CAR_USER -> "label-user_car",
+    UserRole.CAR_OWNER -> "label-user_owner",
+    UserRole.SUPER_USER -> "label-user_super",
+    UserRole.INFOSESSION_ADMIN -> "label-admin_info",
+    UserRole.MAIL_ADMIN -> "label-admin_mail",
+    UserRole.PROFILE_ADMIN -> "label-admin_profile",
+    UserRole.RESERVATION_ADMIN -> "label-admin_reserv")) { roles =>
+    @app("Gebruikersrollen", stylesheets, scripts) {
+        <div id="page-header-wrapper">
+            <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+                <li class="active">Gebruikersrollen</li>
+            </ol>
+        </div>
 
     <div id="page-wrapper">
         <div class="row">
@@ -60,6 +69,43 @@
                                 </div>
 
                             <!-- /.panel-heading -->
+<<<<<<< HEAD
+=======
+                        <div class="panel-body">
+                            <p><a class="btn btn-default" href="@routes.UserRoles.edit(DatabaseHelper.getUserProvider.getUser().getId)">
+                                Eigen rollen bewerken</a></p>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-overview">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Naam</th>
+                                            <th>Rollen</th>
+                                            <th>Acties</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @defining(DatabaseHelper.getUserRoleProvider) { provider =>
+                                        @for(user <- users) {
+                                            <tr>
+                                                <td>@user.getId</td>
+                                                <td>@user</td>
+                                                <td>
+                                                @for(role <- provider.getRoles(user.getId, false)) {
+                                                    <span class="label @roles.get(role)">@role.getDescription</span>
+                                                }
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-xs">
+                                                        <a href="@routes.UserRoles.edit(user.getId)" class="btn btn-primary">Bewerken</a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    </tbody>
+                                </table>
+>>>>>>> master
                             </div>
                         </div>
                     </div>

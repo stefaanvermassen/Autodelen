@@ -18,9 +18,12 @@ import java.util.List;
 
 public class Messages extends Controller {
 
-    public static class MessageCreationModel {
 
-        // Address fields
+    /**
+     * Class implementing a model wrapped in a form.
+     * This model is used during the submission of a new message.
+     */
+    public static class MessageCreationModel {
         public String subject;
         public String body;
         public String useremail;
@@ -34,6 +37,12 @@ public class Messages extends Controller {
 
     public static int AUTOCOMPLETE_MAX = 10;
 
+
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the received messages of a specific user
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result showMessages() {
         User user = DatabaseHelper.getUserProvider().getUser();
@@ -46,11 +55,27 @@ public class Messages extends Controller {
         }
     }
 
+
+    /**
+     * Method: GET
+     *
+     * @return a new message form
+     */
+
     @RoleSecured.RoleAuthenticated()
     public static Result newMessage() {
         Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
         return ok(addmessage.render(editForm));
     }
+
+
+    /**
+     * Method: POST
+     *
+     * Creates a new message based on submitted form data
+     *
+     * @return the messages index list
+     */
 
     @RoleSecured.RoleAuthenticated()
     public static Result createNewMessage() {
@@ -85,10 +110,16 @@ public class Messages extends Controller {
     }
 
 
+    /**
+     * Method: GET
+     *
+     * Interface with the client-sided autocomplete widget, here used as a user-picker.
+     * @param term user-entered text in the autocomplete input-box
+     * @return a list for the names that match the search term.
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result autocompleteLabelAndValue(final String term) {
         final List<AutocompleteValue> response = new ArrayList<>();
-        int index = 1;
         List<User> resultList = null;
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
@@ -105,7 +136,6 @@ public class Messages extends Controller {
             if (response.size() == AUTOCOMPLETE_MAX) {
                 break;
             }
-            index++;
         }
         return ok(Json.toJson(response));
     }

@@ -51,6 +51,7 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @return An infosession form
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
@@ -135,6 +136,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: POST
      * Edits the session for given ID, based on submitted form data
+     *
      * @param sessionId SessionID to edit
      * @return Redirect to edited session, or the form if errors occured
      */
@@ -187,6 +189,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      * Unenrolls the user for his subscribed infosession.
+     *
      * @return A redirect to the overview page with message if unenrollment was successfull.
      */
     @RoleSecured.RoleAuthenticated()
@@ -238,6 +241,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      * Returns the detail promise of the given sessionId. If enabled, this also fetches map location and enables the map view.
+     *
      * @param sessionId The sessionId to which the detail belongs to
      * @return A session detail page promise
      */
@@ -354,6 +358,7 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     *
      * @param sessionId The sessionId to enroll to
      * @return A redirect to the detail page to which the user has subscribed
      */
@@ -404,6 +409,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: POST
      * Creates a new infosession based on submitted form data
+     *
      * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
@@ -446,6 +452,7 @@ public class InfoSessions extends Controller {
     /**
      * Method: GET
      * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
+     *
      * @return
      */
     @RoleSecured.RoleAuthenticated()
@@ -498,10 +505,11 @@ public class InfoSessions extends Controller {
 
     /**
      * Gets the first page of the infosessions.
+     *
      * @return HTML table partial of infosession table
      */
     private static Html upcomingSessionsList() {
-        return upcomingSessionsList(1, FilterField.INFOSESSION_DATE, true, null);
+        return upcomingSessionsList(1, FilterField.DATE, true, null);
     }
 
     /**

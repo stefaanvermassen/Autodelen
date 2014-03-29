@@ -15,10 +15,15 @@ import java.util.Map;
 
 
 /**
- * Created by Stefaan Vermassen on 01/03/14.
+ * Controller responsible for showing and editing message templates
  */
 public class EmailTemplates extends Controller {
 
+    /**
+     * Method: GET
+     *
+     * @return all the templates that are available in the system
+     */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showExistingTemplates() {
        return ok(emailtemplates.render());
@@ -39,6 +44,12 @@ public class EmailTemplates extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     *
+     * @param templateId the id of the template of which the details are requested
+     * @return the detail page of specific template
+     */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showTemplate(int templateId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -55,6 +66,12 @@ public class EmailTemplates extends Controller {
 
     }
 
+    /**
+     * Method: POST
+     * Called when a template is edited
+     *
+     * @return templates index page
+     */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result editTemplate() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {

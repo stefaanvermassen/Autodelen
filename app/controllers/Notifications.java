@@ -18,6 +18,11 @@ import java.util.List;
  */
 public class Notifications extends Controller {
 
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the received notifications of a specific user
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result showNotifications() {
         User user = DatabaseHelper.getUserProvider().getUser();

@@ -14,8 +14,8 @@ import java.util.*;
 
 public class UserRoles extends Controller {
 
-
     private static final int PAGE_SIZE = 10;
+
     /**
      * Method: GET
      * Shows a list of all users and their roles
