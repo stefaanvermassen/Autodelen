@@ -15,6 +15,10 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
+ * Class providing an annotation to secure methods or types.
+ * A method or type secured using this annotation will restrict the entrance only to users
+ * having the required user role(s) to call this method or type.
+ *
  * Created by Benjamin on 26/02/14.
  */
 public class RoleSecured {
@@ -31,12 +35,18 @@ public class RoleSecured {
     }
 
     /**
-     * Action allowing authentication of user by role.
+     * Action allowing authentication of a user by role.
      * The username is retrieved from the session cookie and used to
      * determine the user role.
      */
     public static class RoleAuthorizationAction extends Action<RoleAuthenticated> {
 
+        /**
+         * Delegates the user to the given HTTP context if the user is authorized.
+         * The authorized roles are retrieved from the RoleAuthenticated annotation.
+         * @param ctx The given HTTP context
+         * @return The result, either the requested page or an unauthorized request page
+         */
         public F.Promise<SimpleResult> call(Context ctx) {
             try {
                 UserRole[] securedRoles = configuration.value();
