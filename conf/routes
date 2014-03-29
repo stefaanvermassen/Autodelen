@@ -16,6 +16,7 @@ POST        /userroles/edit                    controllers.UserRoles.editPost(us
 
 # Drives
 GET         /drives                            controllers.Drives.index()
+GET         /drives/details                    controllers.Drives.details(reservationId: Int)
 GET         /drives/approved                   controllers.Drives.approveReservation(reservationId: Int)
 POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int)
 GET         /drives/cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
@@ -29,9 +30,14 @@ POST        /reserve/reservation               controllers.Reserve.confirmReserv
 
 # User pages
 GET         /receipts                          controllers.Receipts.index()
-GET         /messages                          controllers.Messages.showMessages()
-GET         /notifications                     controllers.Notifications.showNotifications()
 GET         /settings                          controllers.Settings.index()
+
+# Notifiers
+GET         /messages                          controllers.Messages.showMessages()
+GET         /messages/new                      controllers.Messages.newMessage()
+POST        /messages/new                      controllers.Messages.createNewMessage()
+GET         /notifications                     controllers.Notifications.showNotifications()
+GET         /autocompleteSearch                controllers.Messages.autocompleteLabelAndValue(term: String ?= "")
 
 # Profile pages
 GET         /profile                           controllers.Profile.indexWithoutId()

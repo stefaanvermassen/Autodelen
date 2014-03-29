@@ -57,6 +57,13 @@ public class Maps extends Controller {
         }
     }
 
+    /**
+     * Returns a map tile for given longtitude, latitude and zoom.
+     * @param zoom
+     * @param x
+     * @param y
+     * @return An image for given tile
+     */
     @RoleSecured.RoleAuthenticated()
     public static Promise<Result> getMap(int zoom, int x, int y) {
         final Promise<Result> resultPromise = WS.url(String.format(TILE_URL, zoom, x, y)).get().map(
@@ -69,6 +76,12 @@ public class Maps extends Controller {
         return resultPromise;
     }
 
+    /**
+     * Resolves an address to a longtitude and latitude
+     * @param addressId
+     * @return
+     */
+    @Deprecated
     @RoleSecured.RoleAuthenticated()
     public static Promise<Result> getLatLong(int addressId) {
         try {
@@ -88,6 +101,11 @@ public class Maps extends Controller {
         }
     }
 
+    /**
+     * Resolves the longtitude and latitude for a given address ID
+     * @param addressId The address to resolve
+     * @return A promise with the longtitude and latitude
+     */
     public static Promise<F.Tuple<Double, Double>> getLatLongPromise(int addressId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
             AddressDAO dao = context.getAddressDAO();
@@ -116,8 +134,13 @@ public class Maps extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     * Renders a testmap
+     * @return A test map
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result showMap(){
-        return ok(simplemap.render(new MapDetails(51.1891253d, 4.2355338d, 13, "Afspraak 27/04/2014")));
+        return ok(simplemap.render(new MapDetails(51.1891253d, 4.2355338d, 13, "Some marker")));
     }
 }

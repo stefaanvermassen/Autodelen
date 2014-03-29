@@ -226,8 +226,8 @@ CREATE TABLE `Messages` ( # from user to user != Notifications
 	`message_from_user_id` INT NOT NULL,
 	`message_to_user_id` INT NOT NULL,
 	`message_read` BIT(1) NOT NULL DEFAULT 0,
-	`message_subject` VARCHAR(255),
-	`message_body` TEXT,
+	`message_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van een Dégage-gebruiker',
+	`message_body` TEXT NOT NULL,
 	`message_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`message_id`),
 	FOREIGN KEY (`message_from_user_id`) REFERENCES Users(`user_id`),
@@ -237,7 +237,7 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `Templates` (
-	`template_id` INT NOT NULL AUTO_INCREMENT,
+	`template_id` INT NOT NULL,
 	`template_title` VARCHAR(255) NOT NULL,
 	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
 	`template_body` TEXT NOT NULL,
