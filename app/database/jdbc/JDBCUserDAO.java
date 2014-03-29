@@ -59,7 +59,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getSearchUsersStatement() throws SQLException {
         if(searchUsersStatement == null){
-            searchUsersStatement = connection.prepareStatement(USER_QUERY + " WHERE users.user_firstname LIKE ?");
+            searchUsersStatement = connection.prepareStatement(USER_QUERY + " WHERE CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ? ORDER BY users.user_firstname, users.user_lastname LIMIT 10");
         }
         return searchUsersStatement;
     }
@@ -361,6 +361,7 @@ public class JDBCUserDAO implements UserDAO {
         try {
             PreparedStatement ps = getSearchUsersStatement();
             ps.setString(1, search + "%");
+            ps.setString(2, search + "%");
             List<User> users = new ArrayList<>();
             try(ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
