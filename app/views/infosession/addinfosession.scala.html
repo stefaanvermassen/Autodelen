@@ -38,9 +38,9 @@
 @app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Infosessies</a></li>
-            <li class="active">Nieuwe infosessies</li>
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
+            <li class="active">Nieuwe infosessie</li>
         </ol>
     </div>
 

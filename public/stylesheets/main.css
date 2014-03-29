@@ -138,6 +138,10 @@
 
 /* --- General styling --- */
 
+.inline-block{
+	display:inline-block;
+}
+
 html{
 	height: 100%;
 }
