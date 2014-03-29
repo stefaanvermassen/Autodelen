@@ -29,7 +29,7 @@ public class Reserve extends Controller {
 
     // Formatter to translate a string to a datetime
     private static final DateTimeFormatter DATEFORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
      * Class implementing a model wrapped in a form.
