@@ -207,6 +207,9 @@
                             <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
                         </li>
                         }
+                        <li @if(title == "Ritten (Admin)") {class="active"}>
+                            <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
+                        </li>
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
                         <li class="submenu">SUPERUSER</li>
