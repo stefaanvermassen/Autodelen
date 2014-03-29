@@ -509,7 +509,7 @@ public class InfoSessions extends Controller {
      * @return HTML table partial of infosession table
      */
     private static Html upcomingSessionsList() {
-        return upcomingSessionsList(1, FilterField.DATE, true, null);
+        return upcomingSessionsList(1, FilterField.INFOSESSION_DATE, true, null);
     }
 
     /**
