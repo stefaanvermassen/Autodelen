@@ -1,4 +1,4 @@
-package controllers;
+package controllers.util;
 
 import database.Filter;
 import database.FilterField;

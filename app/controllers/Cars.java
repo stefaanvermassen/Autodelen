@@ -1,8 +1,8 @@
 package controllers;
 
+import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
 

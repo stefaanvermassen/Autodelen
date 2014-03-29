@@ -14,6 +14,13 @@ public class JDBCFilter implements Filter {
     // EnumMap doesn't want F.class as a constructor-argument, so we use HashMap
     private Map<FilterField, String> contains = new HashMap<FilterField, String>();
 
+    private Map<FilterField, String> is = new HashMap<>();
+
+    @Override
+    public void fieldIs(FilterField field, String string) {
+        is.put(field, string);
+    }
+
     /**
      *
      * @param field The field you want to filter on
@@ -22,6 +29,17 @@ public class JDBCFilter implements Filter {
     @Override
     public void fieldContains(FilterField field, String string) {
         contains.put(field, string);
+    }
+
+    @Override
+    public String getFieldIs(FilterField field) {
+        String string;
+        if(is.containsKey(field))
+            string =  is.get(field);
+        else
+            string =  "";
+
+        return string;
     }
 
     /**

@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
 import models.User;
 import models.UserRole;

@@ -50,8 +50,22 @@ var loadingImage = 'assets/images/ajax-loader.gif';
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
 var buttonsAroundPage = 2;
 
+if(typeof beginPage == 'undefined') {
+    var beginPage = 1;
+}
+if(typeof beginAsc == 'undefined') {
+    var beginAsc = 1;
+}
+if(typeof beginOrder == 'undefined') {
+    var beginOrder = "";
+}
+if(typeof beginFilter == 'undefined') {
+    var beginFilter = "";
+}
+var pageLoaded = false;
+
 // Initially, we load the first page in ascending order, ordered by the default column, without filtering
-$(document).ready(loadPage(1, 1, "", ""));
+$(document).ready(loadPage(beginPage, beginAsc, beginOrder, beginFilter));
 
 /*
  * Filtering
@@ -77,6 +91,7 @@ if(searchButton != null) {
 
 // The function to load a new page
 function loadPage(page, asc, orderBy, search) {
+    pageLoaded = false;
     // Fill in loading image inside the table if the table is already rendered
     if(typeof $("#resultsTable").find('table').val() != 'undefined') {
         // Calculate the number of columns to create a td with the colspan set to that number
@@ -197,6 +212,7 @@ function loadPage(page, asc, orderBy, search) {
                     sortable.setAttribute("class", sortable.getAttribute("class") + " " + (asc == 1 ? "asc" : "desc"));
                 }
             }
+            pageLoaded = true;
         },
         error : function() {
             // TODO: make clearer
