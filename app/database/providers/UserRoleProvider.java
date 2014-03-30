@@ -41,6 +41,10 @@ public class UserRoleProvider {
         return hasRole(getRoles(id), role);
     }
 
+    public boolean hasRole(User user, UserRole role){
+        return hasRole(getRoles(user.getId()), role);
+    }
+
     public static boolean hasRole(Set<UserRole> roles, UserRole role){
         return roles.contains(role) || roles.contains(UserRole.SUPER_USER); // Superuser has all roles!!
     }

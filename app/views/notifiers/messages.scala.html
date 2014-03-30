@@ -7,8 +7,7 @@
 
 <div id="page-header-wrapper">
     <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Library</a></li>
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
         <li class="active">Berichten</li>
     </ol>
 </div>
@@ -28,23 +27,23 @@
                     <i class="fa fa-comments"></i> Berichten
                 </div>
                 <!-- /.panel-heading -->
-                <div class="panel-body noverticalpadding">
-                    <ul class="timeline noverticalmargin">
+                <div class="panel-body">
+                    <ul class="chat">
                     @for((message, index) <- messageList.zipWithIndex) {
-                        <li class="timeline-inverted">
-                            <div class="timeline-badge"><i class="fa fa-check"></i>
-                            </div>
-                            <div class="timeline-panel">
-                                <div class="timeline-heading">
-                                    <button type="button" class="close" aria-hidden="true">&times;</button>
-                                    <h4 class="timeline-title">@message.getSubject</h4>
-                                    <p>
-                                        <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</small>
-                                    </p>
+                        <li class="left clearfix">
+                            <span class="chat-img pull-left">
+                                <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle">
+                            </span>
+                            <div class="chat-body clearfix">
+                                <div class="header">
+                                    <strong class="primary-font">@message.getSubject</strong> 
+                                    <small class="pull-right text-muted">
+                                        <i class="fa fa-clock-o fa-fw"></i> @DateTimeFormat.forPattern("HH:mm dd/MM").print(message.getTimestamp)
+                                    </small>
                                 </div>
-                                <div class="timeline-body">
+                                <p>
                                     @Html(message.getBody)
-                                </div>
+                                </p>
                             </div>
                         </li>
                     }

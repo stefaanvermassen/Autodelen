@@ -5,7 +5,6 @@
     <script>
         var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
 
-
         // Show confirm message to subscribe to an infosession
         function confirmSubscription(id){
             if(confirm('U bent reeds ingeschreven voor een infosessie. Bent u zeker dat u deze wil wijzigen?')){
@@ -21,17 +20,17 @@
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
 
     <style>
         #map { height: 400px; width: 1000px; } /* TODO: make responsive */
     </style>
-    <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
 }
 
 @app("Infosessies", stylesheets, scripts) {
 <div id="page-header-wrapper">
     <ol class="breadcrumb">
-        <li><a href="@routes.Dashboard.index">Dasboard</a></li>
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
         <li class="active">Infosessies</li>
     </ol>
 </div>
@@ -47,7 +46,7 @@
                         <div class="panel-heading">
                             <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
                         </div>
-                            <!-- /.panel-heading -->
+                        <!-- /.panel-heading -->
                         <div class="panel-body">
                             <a class="btn btn-default btn-sm" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
                         </div>
@@ -58,7 +57,7 @@
                         <div class="panel-heading">
                             <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen infosessie
                         </div>
-                            <!-- /.panel-heading -->
+                        <!-- /.panel-heading -->
                         <div class="panel-body">
                             @detailPartial(enrolled, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
@@ -71,12 +70,12 @@
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies's zoeken
                     </div>
-                        <!-- /.panel-heading -->
+                    <!-- /.panel-heading -->
                     <div class="panel-body">
-                            <!-- TODO: layout, more fields to search on -->
-                            Hier komen zoekveldjes enzo!
+                        <!-- TODO: layout, more fields to search on -->
+                        Hier komen zoekveldjes enzo!
                     </div>
-                        <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                 </div>
 
                 <div class="panel panel-default">
@@ -86,16 +85,16 @@
                         <!-- /.panel-heading -->
                     <div class="panel-body">
                         <div id="resultsTable" class="table-responsive">
-                                <!-- Here comes the loaded table-->
+                            <!-- Here comes the loaded table-->
                         </div>
                     </div>
-                        <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                 </div>
-                    <!-- /.panel -->
+                <!-- /.panel -->
             </div>
-                <!-- /col-lg-12 -->
+            <!-- /col-lg-12 -->
         </div>
-    <!-- /row -->
+        <!-- /row -->
     }
 </div>
 <!-- /page-wrapper -->

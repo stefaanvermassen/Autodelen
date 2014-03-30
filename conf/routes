@@ -11,6 +11,7 @@ GET         /dashboard                         controllers.Dashboard.index()
 
 # UserRoles
 GET         /userroles                         controllers.UserRoles.index()
+GET         /userroles/page                    controllers.UserRoles.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /userroles/edit                    controllers.UserRoles.edit(userId: Int)
 POST        /userroles/edit                    controllers.UserRoles.editPost(userId: Int)
 
@@ -43,6 +44,10 @@ GET         /profile                           controllers.Profile.indexWithoutI
 GET         /profile/edit                      controllers.Profile.edit(userId: Int)
 POST        /profile/edit                      controllers.Profile.editPost(userId: Int)
 GET         /profile/byid                      controllers.Profile.index(userId: Int)
+
+# Users
+GET         /users                             controllers.Users.showUsers()
+GET         /users/page                        controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Login screen
 GET         /login                             controllers.Login.login(redirect ?= null)
@@ -80,6 +85,7 @@ GET         /settings/instantadmin             controllers.Settings.instantAdmin
 
 # Emailtemplates
 GET         /emailtemplate                     controllers.EmailTemplates.showExistingTemplates()
+GET         /emailtemplate/page                controllers.EmailTemplates.showExistingTemplatesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /emailtemplate/edit                controllers.EmailTemplates.showTemplate(id: Int)
 POST        /emailtemplate/edit                controllers.EmailTemplates.editTemplate()
 
