@@ -1,17 +1,16 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
-import models.Car;
-import models.Reservation;
-import models.ReservationStatus;
-import models.User;
+import models.*;
 import notifiers.Notifier;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import views.html.drives.driveDetails;
 import views.html.drives.drives;
+import views.html.drives.drivespage;
 
 import java.util.List;
 
@@ -21,6 +20,8 @@ import java.util.List;
  *
  */
 public class Drives extends Controller {
+
+    private static final int PAGE_SIZE = 5;
 
     /**
      * Class implementing a model wrapped in a form.
@@ -60,7 +61,7 @@ public class Drives extends Controller {
      * @return the html page of drives
      */
     public static Html showIndex() {
-        return showIndex(null, 0);
+        return showIndex(null, 0, 1, 1, "", "");
     }
 
     /**
@@ -68,14 +69,53 @@ public class Drives extends Controller {
      * @param errorIndex index refering to the drive that caused errors in the form
      * @return The html page of drives
      */
-    public static Html showIndex(Form<RefuseModel> form, int errorIndex) {
+    public static Html showIndex(Form<RefuseModel> form, int errorIndex, int page, int asc, String orderBy, String filter) {
+        if(form == null)
+            return drives.render(errorIndex, Form.form(RefuseModel.class), page, asc, orderBy, filter);
+        return drives.render(errorIndex, form, page, asc, orderBy, filter);
+
+    }
+
+    /**
+     *
+     * @param page The page in the drivelists
+     * @param ascInt An integer representing ascending (1) or descending (0)
+     * @param orderBy A field representing the field to order on
+     * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
+     * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result showDrivesPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        return ok(driveList(page, field, asc, filter, ascInt, orderBy, searchString));
+    }
+
+    /*
+     * I pass ascInt, orderByString and searchString again so I can use them in the drivespage (where I need them in refuseReservation)
+     */
+    private static Html driveList(int page, FilterField orderBy, boolean asc, Filter filter, int ascInt, String orderByString, String searchString) {
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
-            List<Reservation> reservations = dao.getReservationListForUser(user.getId());
-            if(form == null)
-                return drives.render(user.getId(), errorIndex, Form.form(RefuseModel.class),reservations);
-            return drives.render(user.getId(), errorIndex, form, reservations);
+
+            if(orderBy == null) {
+                orderBy = FilterField.FROM;
+            }
+
+            // We only want reservations from the current user (or his car(s))
+            filter.fieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
+
+            List<Reservation> listOfReservations = dao.getReservationListPage(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfReservations(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return drivespage.render(user.getId(), Form.form(RefuseModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderByString, searchString);
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -137,10 +177,10 @@ public class Drives extends Controller {
      * @return the drives index page
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result refuseReservation(int reservationId, int errorIndex) {
+    public static Result refuseReservation(int reservationId, int errorIndex, int page, int ascInt, String orderBy, String filter) {
         Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
         if(refuseForm.hasErrors())
-            return badRequest(showIndex(refuseForm, errorIndex));
+            return badRequest(showIndex(refuseForm, errorIndex, page, ascInt, orderBy, filter));
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.REFUSED);
         if(reservation == null) {
             return badRequest(showIndex());
