@@ -20,7 +20,7 @@
                 <tr>
                     <td>@car.getName</td>
                     <td>@car.getBrand</td>
-                    <td>@car.getOwner.getFirstName @car.getOwner.getLastName</td>
+                    <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a></td>
                     <td>
                         <div class="btn-group btn-group-xs">
                             <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">detail</a>

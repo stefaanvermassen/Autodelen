@@ -3,7 +3,7 @@
     <div class="col-lg-4">
         <div class="well">
             <p>
-                <strong>Host:</strong> @infoSession.getHost.getFirstName @infoSession.getHost.getLastName<br>
+                <strong>Host:</strong> <a href="@routes.Profile.index(infoSession.getHost.getId)">@infoSession.getHost.getFirstName @infoSession.getHost.getLastName</a><br>
                 <strong>Type:</strong> @infoSession.getType.name()<br>
                 <strong>Datum:</strong> @infoSession.getTime.toString("dd/MM/yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>

@@ -74,7 +74,7 @@
                                 <label class="h4">Contactverantwoordelijke</label>
                                 @defining(user.getContractManager) { manager =>
                                     @if(manager != null) {
-                                        <p class="form-control-static">@manager.getFirstName @manager.getLastName</p>
+                                        <p class="form-control-static"><a href="@routes.Profile.index(manager.getId)">@manager.getFirstName @manager.getLastName</a></p>
                                     } else {
                                         <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
                                     }

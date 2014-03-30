@@ -66,7 +66,7 @@
                         <div class="col-lg-4">
                             <div class="well">
                                 <p>
-                                    <strong>Eigenaar:</strong> @car.getOwner<br>
+                                    <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a><br>
                                     <strong>Naam:</strong> @car.getName<br>
                                     <strong>Merk:</strong> @car.getBrand<br>
                                     <strong>Type:</strong> @car.getType<br>
