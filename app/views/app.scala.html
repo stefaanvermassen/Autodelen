@@ -165,7 +165,7 @@
                             <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
-                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                            <a href="@routes.Drives.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         }
 
@@ -210,9 +210,11 @@
                         <li @if(title == "Ritten (Admin)") {class="active"}>
                             <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
                         </li>
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
                         <li @if(title == "Gebruikers") {class="active"}>
-                            <a href="/users"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
+                            <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
                         </li>
+                        }
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
                         <li class="submenu">SUPERUSER</li>
