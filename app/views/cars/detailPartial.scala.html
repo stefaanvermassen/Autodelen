@@ -3,20 +3,26 @@
     <div class="col-lg-4">
         <div class="well">
             <p>
+                <!-- TODO: mooie opmaak -->
                 <strong>Naam: </strong> @car.getName<br>
+<<<<<<< HEAD
                 <!-- TODO; Make owner clickable -->
+=======
+>>>>>>> master
                 <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a><br>
                 <strong>Adres: </strong> @car.getLocation<br>
                 <strong>Merk: </strong> @car.getBrand<br>
                 <strong>Type: </strong> @car.getType<br>
+                <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee }<br>
+                <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee }<br>
                 <strong>Aantal zitplaatsen: </strong> @car.getSeats<br>
                 <strong>Aantal deuren: </strong> @car.getDoors<br>
                 <strong>Bouwjaar: </strong> @car.getYear<br>
                 <strong>Gemiddeld verbruik (per 100 km): </strong> @car.getFuelEconomy<br>
                 <strong>Geschatte huidige waarde: </strong> @car.getEstimatedValue<br>
-                <strong>Gemiddeld aantal kilometers (per jaar): </strong> @car.getOwnerAnnualKm
-
-                    <!-- TODO: gps, hook, fuel, fuelEconomy, EstimatedValue, OwnerAnnualKm, Comments, (Laatste aanpassing?) -->
+                <strong>Gemiddeld aantal kilometers (per jaar): </strong> @car.getOwnerAnnualKm<br>
+                <strong>Commentaar: </strong> <br> @car.getComments
+                    <!-- TODO: fuel, Comments, (Laatste aanpassing?) -->
                 @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
             </p>
         </div>

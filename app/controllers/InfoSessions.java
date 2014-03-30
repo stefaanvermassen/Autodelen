@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.FormHelper;
+import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
 import models.*;
@@ -8,6 +10,7 @@ import notifiers.Notifier;
 import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -26,7 +29,7 @@ public class InfoSessions extends Controller {
 
     public static class InfoSessionCreationModel {
         public DateTime time;
-        public int max_enrollees;
+        public Integer max_enrollees;
         public InfoSessionType type;
 
         // Address fields
@@ -35,6 +38,10 @@ public class InfoSessions extends Controller {
         public String address_street;
         public String address_number;
         public String address_bus;
+
+        public static int getInt(Integer i) {
+            return i == null ? 0 : i;
+        }
 
         public String validate() {
             if (time == null) {
@@ -428,7 +435,7 @@ public class InfoSessions extends Controller {
                     Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     //TODO: read InfoSessionType from form
-                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time.withSecondOfMinute(0), createForm.get().max_enrollees); //TODO: allow other hosts, userpicker
+                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {

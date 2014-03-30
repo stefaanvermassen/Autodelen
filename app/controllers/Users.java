@@ -1,13 +1,12 @@
 package controllers;
 
+import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import controllers.Security.RoleSecured;
 
 import play.api.templates.Html;
-import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.users.*;
