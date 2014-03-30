@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Controller responsible to display and filter cars and to enable a user to reserve a car.
+ * Controller responsible to display and filter cars for reservation and to enable a user to reserve a car.
  *
  */
 public class Reserve extends Controller {
@@ -29,7 +29,7 @@ public class Reserve extends Controller {
 
     // Formatter to translate a string to a datetime
     private static final DateTimeFormatter DATEFORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     /**
      * Class implementing a model wrapped in a form.
