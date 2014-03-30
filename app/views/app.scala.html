@@ -210,6 +210,9 @@
                         <li @if(title == "Ritten (Admin)") {class="active"}>
                             <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
                         </li>
+                        <li @if(title == "Gebruikers") {class="active"}>
+                            <a href="/users"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
+                        </li>
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
                         <li class="submenu">SUPERUSER</li>
