@@ -108,36 +108,4 @@ public class Messages extends Controller {
             }
         }
     }
-
-
-    /**
-     * Method: GET
-     *
-     * Interface with the client-sided autocomplete widget, here used as a user-picker.
-     * @param term user-entered text in the autocomplete input-box
-     * @return a list for the names that match the search term.
-     */
-    @RoleSecured.RoleAuthenticated()
-    public static Result autocompleteLabelAndValue(final String term) {
-        final List<AutocompleteValue> response = new ArrayList<>();
-        List<User> resultList = null;
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            resultList = dao.getAllUsers();
-        } catch (DataAccessException ex) {
-            throw ex; //TODO: what if this fails?
-        }
-        for (User u : resultList) {
-            final String label = u.getFirstName();
-            final String value = u.getEmail();
-            if (label.toLowerCase().startsWith(term.toLowerCase())) {
-                response.add(new AutocompleteValue(value, label));
-            }
-            if (response.size() == AUTOCOMPLETE_MAX) {
-                break;
-            }
-        }
-        return ok(Json.toJson(response));
-    }
-
 }
