@@ -41,7 +41,7 @@
                             <div class="well">
                                 <strong>Eigenaar</strong><hr />
                                 <p>
-                                    <strong>Naam:</strong> @owner.getLastName, @owner.getFirstName<br />
+                                    <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
                                     <strong>E-mail:</strong> @owner.getEmail <br />
                                     <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />
                                     <strong>GSM:</strong> @if(owner.getCellphone != null && !owner.getCellphone.isEmpty){ @owner.getCellphone } else { onbekend }
@@ -52,7 +52,7 @@
                             <div class="well">
                                 <strong>Ontlener</strong><hr />
                                 <p>
-                                    <strong>Naam:</strong> @loaner.getLastName, @loaner.getFirstName<br />
+                                    <strong>Naam:</strong> <a href="@routes.Profile.index(loaner.getId)">@loaner.getLastName, @loaner.getFirstName</a><br />
                                     <strong>E-mail:</strong> @loaner.getEmail <br />
                                     <strong>Tel:</strong> @if(loaner.getPhone != null && !loaner.getPhone.isEmpty){ @loaner.getPhone } else { onbekend } <br />
                                     <strong>GSM:</strong> @if(loaner.getCellphone != null && !loaner.getCellphone.isEmpty){ @loaner.getCellphone } else {onbekend }

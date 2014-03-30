@@ -5,7 +5,7 @@
             <p>
                 <strong>Naam: </strong> @car.getName<br>
                 <!-- TODO; Make owner clickable -->
-                <strong>Eigenaar:</strong> @car.getOwner.getFirstName @car.getOwner.getLastName<br>
+                <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a><br>
                 <strong>Adres: </strong> @car.getLocation<br>
                 <strong>Merk: </strong> @car.getBrand<br>
                 <strong>Type: </strong> @car.getType<br>
