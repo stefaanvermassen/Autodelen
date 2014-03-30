@@ -141,7 +141,17 @@ public class Profile extends Controller {
 
             // Only a profile admin or
             if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
-                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+                if (!DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_USER)) {
+                    return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.CAR_USER}));
+                }
+
+                /** TODO: Verander naar FULL user i.p.v. userRole CAR_USER
+                 * if (currentUser.getStatus() != UserStatus.FULL) {
+                 *     return badRequest(views.html.unauthorized.render(new UserRole[]{}));
+                 * }
+                 */
+
+                return ok(profile.render(user));
             }
 
             return ok(index.render(user, getProfileCompleteness(user)));

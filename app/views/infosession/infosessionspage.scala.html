@@ -23,7 +23,7 @@
                 <td>@session.getEnrolleeCount</td>
             }
 
-            <td>@session.getHost</td>
+            <td><a href="@routes.Profile.index(session.getHost.getId)">@session.getHost</a></td>
             <td>@session.getAddress</td>
             <td>
                 <div class="btn-group btn-group-xs">
