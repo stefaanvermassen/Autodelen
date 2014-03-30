@@ -60,6 +60,7 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getGetUserListPageByNameAscStatement;
     private PreparedStatement getGetUserListPageByNameDescStatement;
     private PreparedStatement getGetAmountOfUsersStatement;
+    private PreparedStatement searchUsersStatement;
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
@@ -70,6 +71,13 @@ public class JDBCUserDAO implements UserDAO {
             getAllUsersStatement = connection.prepareStatement(USER_QUERY);
         }
         return getAllUsersStatement;
+    }
+
+    private PreparedStatement getSearchUsersStatement() throws SQLException {
+        if(searchUsersStatement == null){
+            searchUsersStatement = connection.prepareStatement(USER_QUERY + " WHERE CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ? ORDER BY users.user_firstname, users.user_lastname LIMIT 10");
+        }
+        return searchUsersStatement;
     }
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
@@ -441,6 +449,26 @@ public class JDBCUserDAO implements UserDAO {
             return users;
         } catch (SQLException ex) {
             throw new DataAccessException("Error reading users resultset", ex);
+        }
+    }
+
+    @Override
+    public List<User> searchUsers(String search) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSearchUsersStatement();
+            ps.setString(1, search + "%");
+            ps.setString(2, search + "%");
+            List<User> users = new ArrayList<>();
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    users.add(populateUser(rs, false, true));
+                }
+                return users;
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read user resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get user list.", ex);
         }
     }
 }
