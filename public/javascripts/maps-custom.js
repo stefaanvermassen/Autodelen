@@ -12,7 +12,10 @@ $(document).ready(function() {
         var map = L.map('map').setView([lat, lon], zoom);
 
         // add an OpenStreetMap tile layer
-        L.tileLayer('/maps/tile?zoom={z}&x={x}&y={y}', {
+        var url = myJsRoutes.controllers.Maps.getMap('z', 'x', 'y').url;
+        url = url.substr(0, url.indexOf("?")) + '?zoom={z}&x={x}&y={y}'; // Cut off the parameters, append template
+
+        L.tileLayer(url, {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> vrijwilligers'
         }).addTo(map);
 

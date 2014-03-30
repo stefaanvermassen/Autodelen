@@ -21,6 +21,10 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
+
+    <style>
+        #map { height: 400px; width: 1000px; } /* TODO: make responsive */
+    </style>
 }
 
 @app("Infosessies", stylesheets, scripts) {
