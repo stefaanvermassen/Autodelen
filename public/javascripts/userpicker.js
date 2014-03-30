@@ -1,7 +1,7 @@
 $(".userpicker > input[type=text]").on("input", function() {
     var userpicker = $(this).parent();
 
-    $.get("/userpicker?search=" + userpicker.find("input[type=text]").val(), function(data) {
+    $.get(userpicker.data("url") + "?search=" + userpicker.find("input[type=text]").val(), function(data) {
         userpicker.find(".dropdown-menu").html(data);
         userpicker.find("input[type=text]").dropdown("toggle");
     });
@@ -45,6 +45,7 @@ $(".userpicker > .dropdown-menu").on("click", "li", function() {
 
 $(".userpicker > .dropdown-menu").on("keydown", "li:first", function(e) {
     if (e.which == 38) {
+        e.preventDefault();
         e.stopPropagation();
         $(this).parent().parent().find("input[type=text]").trigger("focus");
     }
@@ -52,6 +53,7 @@ $(".userpicker > .dropdown-menu").on("keydown", "li:first", function(e) {
 
 $(".userpicker > .dropdown-menu").on("keydown", "li:last", function(e) {
     if (e.which == 40) {
+        e.preventDefault();
         e.stopPropagation();
         $(this).parent().parent().find("input[type=text]").trigger("focus");
     }
@@ -60,6 +62,7 @@ $(".userpicker > .dropdown-menu").on("keydown", "li:last", function(e) {
 $(".userpicker > input[type=text]").on("keydown", function(e) {
     if (e.which == 9) {
         e.preventDefault();
+        e.stopPropagation();
         $(this).blur();
         $(this).dropdown("toggle");
         if (e.shiftKey) {
@@ -68,6 +71,7 @@ $(".userpicker > input[type=text]").on("keydown", function(e) {
             $(":input:tabbable").eq($(":input:tabbable").index($(this)) + 1).focus();
         }
     } else if (e.which == 38) {
+        e.preventDefault();
         e.stopPropagation();
         $(this).parent().find(".dropdown-menu > li:last a").trigger("focus");
     }

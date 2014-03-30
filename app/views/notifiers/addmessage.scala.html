@@ -33,7 +33,7 @@
                     @helper.form(routes.Messages.createNewMessage , 'class -> "form-horizontal") {
                         <div class="form-group">
                             <label class="col-md-1 control-label" for="receiver">Ontvanger</label>
-                            <div class="userpicker col-md-12">
+                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                 <input type="text" data-toggle="dropdown" class="form-control input-md" />
                                 <input type="hidden" name="useremail" />
                                 <ul class="dropdown-menu" role="menu"></ul>
