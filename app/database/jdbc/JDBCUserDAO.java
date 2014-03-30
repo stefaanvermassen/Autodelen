@@ -451,4 +451,24 @@ public class JDBCUserDAO implements UserDAO {
             throw new DataAccessException("Error reading users resultset", ex);
         }
     }
+
+    @Override
+    public List<User> searchUsers(String search) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSearchUsersStatement();
+            ps.setString(1, search + "%");
+            ps.setString(2, search + "%");
+            List<User> users = new ArrayList<>();
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    users.add(populateUser(rs, false, true));
+                }
+                return users;
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read user resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get user list.", ex);
+        }
+    }
 }
