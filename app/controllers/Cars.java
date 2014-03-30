@@ -71,8 +71,9 @@ public class Cars extends Controller {
     }
 
     /**
-     * @return The cars index-page with all cars
+     * @return The cars index-page with all cars (only available to car_user+)
      */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result showCars() {
         return ok(cars.render());
     }
@@ -83,8 +84,9 @@ public class Cars extends Controller {
      * @param ascInt An integer representing ascending (1) or descending (0)
      * @param orderBy A field representing the field to order on
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
-     * @return A partial page with a table of cars of the corresponding page
+     * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
@@ -118,18 +120,18 @@ public class Cars extends Controller {
     }
 
     /**
-     * @return A form to create a new car
+     * @return A form to create a new car (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result newCar() {
         return ok(addcar.render(Form.form(CarModel.class), 0));
     }
 
     /**
      * Method: POST
-     * @return redirect to the CarForm you just filled in or to the cars-index page
+     * @return redirect to the CarForm you just filled in or to the cars-index page (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
@@ -174,9 +176,9 @@ public class Cars extends Controller {
 
     /**
      * @param carId The car to edit
-     * @return A form to edit the car
+     * @return A form to edit the car (only available to the corresponding car owner or administrator)
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result editCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -187,7 +189,7 @@ public class Cars extends Controller {
                 return badRequest(carList());
             } else {
                 User currentUser = DatabaseHelper.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
+                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
@@ -227,9 +229,10 @@ public class Cars extends Controller {
      * Method: POST
      *
      * @param carId The car to edit
-     * @return Redirect to the car-index page on error or the car detail-page on succes
+     * @return Redirect to the car-index page on error or the car detail-page on succes (only available to the corresponding car owner or administrator)
      */
-    @RoleSecured.RoleAuthenticated()
+
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result editCarPost(int carId) {
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
@@ -245,7 +248,7 @@ public class Cars extends Controller {
                 }
 
                 User currentUser = DatabaseHelper.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
+                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
@@ -295,9 +298,9 @@ public class Cars extends Controller {
     /**
      *
      * @param carId The car to show details of
-     * @return A detail page of the car
+     * @return A detail page of the car (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result detail(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -320,7 +323,7 @@ public class Cars extends Controller {
      * @param carId The car to be removed
      * @return redirect to the index carpage, with error-messages if there were any problems
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated(UserRole.RESERVATION_ADMIN)
     public static Result removeCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -333,7 +336,7 @@ public class Cars extends Controller {
 
                     //TODO: this is repeat code, unify with above controllers as extra check
                     User currentUser = DatabaseHelper.getUserProvider().getUser();
-                    if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(session("email"), UserRole.RESERVATION_ADMIN))){
+                    if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                         flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
                         return badRequest(carList());
                     }
