@@ -78,6 +78,7 @@ GET         /infosession/edit                  controllers.InfoSessions.editSess
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 GET         /infosession/delete                controllers.InfoSessions.removeSession(sessionId: Int)
+GET         /infosession/approval              controllers.InfoSessions.requestApproval()
 
 # Settings
 # TODO: REMOVE THIS!!!
