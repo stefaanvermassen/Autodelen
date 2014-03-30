@@ -451,6 +451,15 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     * A page to request full user approval
+     * @return The page to request approval
+     */
+    public static Result requestApproval(){
+        return badRequest("not implemented yet.");
+    }
+
+    /**
+     * Method: GET
      * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
      *
      * @return

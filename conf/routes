@@ -102,7 +102,6 @@ GET         /cars/delete                       controllers.Cars.removeCar(carId:
 
 # Maps
 GET         /maps/tile                         controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
-GET         /maps/coordinates                  controllers.Maps.getLatLong(addressId: Int)
 GET         /maps/test                         controllers.Maps.showMap()
 
 # Javascript routing

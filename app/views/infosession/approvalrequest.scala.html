@@ -1,0 +1,17 @@
+@(reasons: List[String] = null)
+
+@app("Verificatieaanvraag") {
+    <div id="page-wrapper">
+        @flashes()
+        @if(reasons == null || reasons.isEmpty){
+            <a class="btn btn-success" href="#">Bevestig mijn aanvraag.</a>
+        } else {
+            <p>U kan geen verificatieaanvraag indienen wegens volgende reden(en):</p>
+            <ul>
+                @for(reason <- reasons){
+                    <li>@reason</li>
+                }
+            </ul>
+        }
+    </div>
+}
