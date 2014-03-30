@@ -173,7 +173,7 @@ public class InfoSessions extends Controller {
                     adao.updateAddress(address);
 
                     // Now we update the time
-                    DateTime time = editForm.get().time;
+                    DateTime time = editForm.get().time.withSecondOfMinute(0);
                     if (!session.getTime().equals(time)) {
                         session.setTime(time);
                         dao.updateInfosessionTime(session);
@@ -435,7 +435,7 @@ public class InfoSessions extends Controller {
                     Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     //TODO: read InfoSessionType from form
-                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time, FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
+                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {
