@@ -48,8 +48,6 @@ public class InfoSessions extends Controller {
                 return "Gelieve het tijdsveld in te vullen";
             } else if (DateTime.now().isAfter(time)) {
                 return "Je kan enkel een infosessie plannen na de huidige datum.";
-            } else if(FormHelper.toInt(max_enrollees) < 1) {
-                return "test";
             }
             return null;
         }

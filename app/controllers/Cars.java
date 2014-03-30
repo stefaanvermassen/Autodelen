@@ -150,7 +150,7 @@ public class Cars extends Controller {
                     // TODO: also accept other users (only admin can do this)
                     // TODO: get boolean out (hook and gps) of form, enum fuel, comments
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                            model.year, false, false, CarFuel.DIESEL, model.fuelEconomy, model.estimatedValue,
+                            model.year, model.gps, model.hook, CarFuel.DIESEL, model.fuelEconomy, model.estimatedValue,
                             model.ownerAnnualKm, user, "");
                     context.commit();
 
@@ -260,6 +260,8 @@ public class Cars extends Controller {
                     car.setType(carModel.type);
                     car.setDoors(carModel.doors);
                     car.setSeats(carModel.seats);
+                    car.setGps(carModel.gps);
+                    car.setHook(carModel.hook);
                     car.setYear(carModel.year);
                     car.setFuelEconomy(carModel.fuelEconomy);
                     car.setEstimatedValue(carModel.estimatedValue);
