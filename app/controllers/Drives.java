@@ -9,6 +9,7 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import views.html.drives.driveDetails;
+import views.html.drives.drivesAdmin;
 import views.html.drives.drives;
 import views.html.drives.drivespage;
 
@@ -55,6 +56,10 @@ public class Drives extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result index() {
         return ok(showIndex());
+    }
+
+    public static Result drivesAdmin() {
+        return ok(drivesAdmin.render());
     }
 
     /**
