@@ -24,6 +24,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public CarRideDAO getCarRideDAO();
 
+    public ApprovalDAO getApprovalDAO();
+
     public void begin();
 
     public void commit();
