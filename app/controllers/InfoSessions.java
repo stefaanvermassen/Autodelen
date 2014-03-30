@@ -454,7 +454,15 @@ public class InfoSessions extends Controller {
      * A page to request full user approval
      * @return The page to request approval
      */
+    @RoleSecured.RoleAuthenticated()
     public static Result requestApproval(){
+        User user = DatabaseHelper.getUserProvider().getUser();
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            ApprovalDAO dao = context.getApprovalDAO();
+            Approval approval = dao.getApprovals()
+        } catch(DataAccessException ex){
+
+        }
         return badRequest("not implemented yet.");
     }
 

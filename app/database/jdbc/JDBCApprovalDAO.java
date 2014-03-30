@@ -22,9 +22,18 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     private PreparedStatement createApprovalStatement;
     private PreparedStatement getApprovalByIdStatement;
     private PreparedStatement getApprovalByUserStatement;
+    private PreparedStatement getPendingUserApprovalStatement;
+    private PreparedStatement getPendingApprovalStatement;
 
     public JDBCApprovalDAO(Connection connection){
         this.connection = connection;
+    }
+
+    private PreparedStatement getGetPendingApprovalStatement() throws SQLException {
+        if (getPendingApprovalStatement == null) {
+            getPendingApprovalStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_status = 'PENDING'");
+        }
+        return getPendingApprovalStatement;
     }
 
     private PreparedStatement getGetApprovalByUserStatement() throws SQLException {
@@ -32,6 +41,13 @@ public class JDBCApprovalDAO implements ApprovalDAO {
             getApprovalByUserStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_user = ?");
         }
         return getApprovalByUserStatement;
+    }
+
+    private PreparedStatement getGetPendingUserApprovalStatement() throws SQLException {
+        if(getPendingUserApprovalStatement == null){
+            getPendingUserApprovalStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'");
+        }
+        return getPendingUserApprovalStatement;
     }
 
     private PreparedStatement getGetApprovalByIdStatement() throws SQLException {
@@ -55,21 +71,46 @@ public class JDBCApprovalDAO implements ApprovalDAO {
                 null);
     }
 
+    private List<Approval> getApprovalList(PreparedStatement ps){
+        try(ResultSet rs = ps.executeQuery()) {
+            List<Approval> approvals = new ArrayList<>();
+            while(rs.next()){
+                approvals.add(populateApproval(rs));
+            }
+            return approvals;
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to read approval resultset.", ex);
+        }
+    }
+
     @Override
     public List<Approval> getApprovals(User user) throws DataAccessException {
         try {
             PreparedStatement ps = getGetApprovalByUserStatement();
             ps.setInt(1, user.getId());
+            return getApprovalList(ps);
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get approvals for user.", ex);
+        }
+    }
 
-            try(ResultSet rs = ps.executeQuery()) {
-                List<Approval> approvals = new ArrayList<>();
-                while(rs.next()){
-                    approvals.add(populateApproval(rs));
-                }
-                return approvals;
-            } catch(SQLException ex){
-                throw new DataAccessException("Failed to read approval resultset.", ex);
-            }
+    @Override
+    public List<Approval> getPendingApprovals(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetPendingUserApprovalStatement();
+            ps.setInt(1, user.getId());
+
+            return getApprovalList(ps);
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get pending approvals for user.", ex);
+        }
+    }
+
+    @Override
+    public List<Approval> getPendingApprovals() throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetPendingApprovalStatement();
+            return getApprovalList(ps);
         } catch(SQLException ex){
             throw new DataAccessException("Failed to get approvals for user.", ex);
         }
