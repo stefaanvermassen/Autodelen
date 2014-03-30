@@ -38,7 +38,6 @@ GET         /messages                          controllers.Messages.showMessages
 GET         /messages/new                      controllers.Messages.newMessage()
 POST        /messages/new                      controllers.Messages.createNewMessage()
 GET         /notifications                     controllers.Notifications.showNotifications()
-GET         /autocompleteSearch                controllers.Messages.autocompleteLabelAndValue(term: String ?= "")
 
 # Profile pages
 GET         /profile                           controllers.Profile.indexWithoutId()
@@ -103,6 +102,9 @@ GET         /cars/delete                       controllers.Cars.removeCar(carId:
 # Maps
 GET         /maps/tile                         controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                         controllers.Maps.showMap()
+
+# User Picker
+GET         /userpicker                        controllers.UserPicker.getList(search: String ?= "")
 
 # Javascript routing
 GET         /assets/javascripts/routes         controllers.Application.javascriptRoutes()
