@@ -1,59 +1,50 @@
 @scripts = {
-    <script type="text/javascript" src="@routes.Application.javascriptRoutes()"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
-    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
-    <script src="@routes.Assets.at("javascripts/app/reservations.js")"></script>
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script src="@routes.Assets.at("javascripts/app/reservation.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
 }
 @app("Reserveren", stylesheets, scripts) {
 
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
-        <li class="active">Reserveren</li>
-    </ol>
-</div>
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Reserveren</li>
+        </ol>
+    </div>
 
-<div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Reserveren</h1>
-            <!-- search panel -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i>
-                    <a style="color: #000000" data-toggle="collapse" href="#searchwell">Auto's zoeken (klik hier)</a>
-                </div>
-                <div id="searchwell" class="panel-body panel-collapse collapse">
-                    <div class="well">
-                        <label>Auto zoeken op:</label>
-                        <div class="row">
-                            <div class="col-sm-6">
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Reserveren</h1>
+                <!-- search panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Auto's zoeken
+                    </div>
+                    <div id="searchwell" class="panel-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label>Autonaam</label>
                                 <input id="name" class="searchTextField form-control" name="name" type="text" class="form-control" placeholder="Naam">
                             </div>
-                            <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Postcode</label>
                                 <input id="zipcode" class="searchTextField form-control" name="zipcode" type="number"  placeholder="Postcode">
                             </div>
-                        </div><hr />
-                        <label>Functionaliteit:</label>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Minimaal aantal zitplaatsen">
+                            <div class="form-group">
+                                <label>Aantal zitplaatsen</label>
+                                <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Min aantal plaatsen">
                             </div>
-                            <div class="col-sm-3">
+                            <div>
+                                <label for="">Extra</label>
                                 <div class="checkbox">
                                     <label>
-                                        <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">
-                                        Gps aanwezig
+                                        <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">Gps aanwezig
                                     </label>
                                 </div>
-                            </div>
-                            <div class="col-sm-3">
                                 <div id="hook" class="checkbox">
                                     <label>
                                         <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">
@@ -61,52 +52,43 @@
                                     </label>
                                 </div>
                             </div>
-                        </div><hr />
-                        <label>Beschikbaarheid:</label>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
-                                    <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            <div class="form-group inline-block">
+                                <div id="from" class="searchTextField inline-block" name="from" value="">
+                                    <label for="">Van</label>
+                                    <input id="dateFrom" type="date" class="form-control">
+                                    <input id="timeFrom" type="time" class="form-control" value="">
+                                </div>
+                                <div id="until" class="searchTextField inline-block" name="until" value="">
+                                    <label for="">Tot</label>
+                                    <input id="dateUntil" type="date" class="form-control" value="">
+                                    <input id="timeUntil" type="time" class="form-control" value="">
                                 </div>
                             </div>
-                            <div class="col-sm-6">
-                                <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_until">
-                                    <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                </div>
-                            </div>
-                        </div><hr />
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <div class="btn-group btn-group">
+                            <div class="form-group">
+                                <div class="btn-group btn-group-sm">
                                     <button id="searchButton" type="button" class="btn btn-success">Zoek</button>
                                     <button id="reset" type="button" class="btn btn-primary">Verwijder zoekterm</button>
                                 </div>
                             </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- /.panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Beschikbare auto's
+                    </div>
+                    <div class="panel-body">
+                        <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
                         </div>
                     </div>
                 </div>
+                <!-- panel -->
             </div>
-            <!-- /.search panel -->
-            <!-- table panel -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Beschikbare auto's
-                </div>
-                <div class="panel-body">
-                    <div id="resultsTable" class="table-responsive">
-                            <!-- Here comes the loaded table-->
-                    </div>
-                </div>
-            </div>
-            <!-- table panel -->
+            <!-- /col-lg-12 -->
         </div>
-        <!-- /col-lg-12 -->
+        <!-- /row -->
     </div>
-    <!-- /row -->
-</div>
-<!-- /page-wrapper -->
+    <!-- /page-wrapper -->
 }

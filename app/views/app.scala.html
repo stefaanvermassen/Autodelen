@@ -38,54 +38,10 @@
                 <ul class="nav navbar-top-links navbar-right">
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-bell fa-fw"></i>
-                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
-                              @if(unread_number>0){
-                                  <span class="number">@unread_number</span>
-                              }
-                            }
-                        </a>
-                        <ul class="dropdown-menu dropdown-messages">
-                            @defining(DatabaseHelper.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
-                                @for((notification, index) <- notifications.zipWithIndex) {
-                                    @if(index<3){
-                                        <li>
-                                            <a href="#">
-                                                <div>
-                                                    @if(!notification.getRead){
-                                                    <strong>Dégage [ongelezen]</strong>
-                                                        }else{
-                                                    <strong>Dégage</strong>
-                                                        }
-                                                    <span class="pull-right text-muted">
-                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
-                                                    </span>
-                                                </div>
-                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
-                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
-                                                }
-
-                                            </a>
-                                        </li>
-                                        <li class="divider"></li>
-                                    }
-                                }
-                            }
-                            <li>
-                                <a class="text-center" href="@routes.Notifications.showNotifications()">
-                                    <strong>Bekijk alle notificaties</strong>
-                                    <i class="fa fa-angle-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- /.dropdown-messages -->
-                    </li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-envelope fa-fw"></i>
                             @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
                                 @if(unread_number>0){
-                                    <span class="number">@unread_number</span>
+                                    <span class="topnumber">@unread_number</span>
                                 }
                             }
                         </a>
@@ -126,6 +82,50 @@
                     </li>
                     <!-- /.dropdown -->
                     <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-bell fa-fw"></i>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="topnumber">@unread_number</span>
+                              }
+                            }
+                        </a>
+                        <ul class="dropdown-menu dropdown-messages">
+                            @defining(DatabaseHelper.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
+                                @for((notification, index) <- notifications.zipWithIndex) {
+                                    @if(index<3){
+                                        <li>
+                                            <a href="#">
+                                                <div>
+                                                    @if(!notification.getRead){
+                                                    <strong>Dégage [ongelezen]</strong>
+                                                        }else{
+                                                    <strong>Dégage</strong>
+                                                        }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
+                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
+                            <li>
+                                <a class="text-center" href="@routes.Notifications.showNotifications()">
+                                    <strong>Bekijk alle notificaties</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-messages -->
+                    </li>
+                    <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString</span>
                             <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
@@ -165,7 +165,7 @@
                             <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
-                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                            <a href="@routes.Drives.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         }
 
@@ -178,10 +178,20 @@
 
                         <li class="submenu">ACCOUNT</li>
                         <li @if(title == "Berichten") {class="active"}>
-                            <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
+                            <a href="@routes.Messages.showMessages()"><i class="fa fa-comments fa-fw"></i> Berichten
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="sidenumber">@unread_number</span>
+                                }
+                            }</a>
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties</a>
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i>Notificaties
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="sidenumber">@unread_number</span>
+                              }
+                            }</a>
                         </li>
                         <li @if(title == "Profiel") {class="active"}>
                             <a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -195,6 +205,14 @@
                         <li class="submenu">ADMIN</li>
                         <li @if(title == "Emailtemplates") {class="active"}>
                             <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
+                        </li>
+                        }
+                        <li @if(title == "Ritten (Admin)") {class="active"}>
+                            <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
+                        </li>
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
+                        <li @if(title == "Gebruikers") {class="active"}>
+                            <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
                         </li>
                         }
 
