@@ -33,7 +33,7 @@ public class LoginControllerTest {
                 data.put("email", "nonexistent@something.com");
                 data.put("password", "thiswillnotwork");
                 Result result = callAction(
-                        controllers.routes.ref.Login.authenticate(),
+                        controllers.routes.ref.Login.authenticate("/"),
                         fakeRequest().withFormUrlEncodedBody(data)
                 );
                 assertEquals(BAD_REQUEST, status(result));
@@ -70,7 +70,7 @@ public class LoginControllerTest {
 
                 //TODO: this post always fails!??
                 Result result = callAction(
-                        controllers.routes.ref.Login.authenticate(),
+                        controllers.routes.ref.Login.authenticate("/"),
                         fakeRequest(POST, "/login").withFormUrlEncodedBody(data)
                 );
 

@@ -7,12 +7,26 @@ import database.*;
  */
 public class TestDataAccessContext implements DataAccessContext {
 
-    private TestUserDAO userDao;
-    private TestUserRoleDAO roleDao;
+    private UserDAO userDao;
+    private InfoSessionDAO infoSessionDAO;
+    private UserRoleDAO userRoleDao;
+    private ReservationDAO reservationDAO;
+    private CarDAO carDAO;
+    private TemplateDAO templateDAO;
+    private AddressDAO addressDAO;
+    private NotificationDAO notificationDAO;
+    private MessageDAO messageDAO;
 
     public TestDataAccessContext(){
         userDao = new TestUserDAO();
-        roleDao = new TestUserRoleDAO(userDao);
+        infoSessionDAO = new TestInfoSessionDAO();
+        userRoleDao = new TestUserRoleDAO(userDao);
+        reservationDAO = new TestReservationDAO();
+        carDAO = new TestCarDAO();
+        templateDAO = new TestTemplateDAO();
+        addressDAO = new TestAddressDAO();
+        notificationDAO = new TestNotificationDAO();
+        messageDAO = new TestMessageDAO();
     }
 
     @Override
@@ -22,32 +36,32 @@ public class TestDataAccessContext implements DataAccessContext {
 
     @Override
     public InfoSessionDAO getInfoSessionDAO() {
-        return null;
+        return infoSessionDAO;
     }
 
     @Override
     public TemplateDAO getTemplateDAO() {
-        return null;
+        return templateDAO;
     }
 
     @Override
     public AddressDAO getAddressDAO() {
-        return null;
+        return addressDAO;
     }
 
     @Override
     public CarDAO getCarDAO() {
-        return null;
+        return carDAO;
     }
 
     @Override
     public ReservationDAO getReservationDAO() {
-        return null;
+        return reservationDAO;
     }
 
     @Override
     public UserRoleDAO getUserRoleDAO() {
-        return roleDao;
+        return userRoleDao;
     }
 
     @Override
@@ -74,4 +88,14 @@ public class TestDataAccessContext implements DataAccessContext {
     public void close() {
 
     }
+
+	@Override
+	public NotificationDAO getNotificationDAO() {
+		return notificationDAO;
+	}
+
+	@Override
+	public MessageDAO getMessageDAO() {
+		return messageDAO;
+	}
 }

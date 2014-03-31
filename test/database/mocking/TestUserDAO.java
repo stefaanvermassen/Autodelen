@@ -1,6 +1,8 @@
 package database.mocking;
 
 import database.DataAccessException;
+import database.Filter;
+import database.FilterField;
 import database.UserDAO;
 import models.User;
 import models.UserStatus;
@@ -137,4 +139,20 @@ public class TestUserDAO implements UserDAO {
     public List<User> getAllUsers() throws DataAccessException {
         return null;
     }
+
+	@Override
+	public int getAmountOfUsers(Filter filter) throws DataAccessException {
+		return 0; // TODO: add filter methods
+	}
+
+	@Override
+	public List<User> getUserList(FilterField orderBy, boolean asc, int page,
+			int pageSize, Filter filter) throws DataAccessException {
+		return null; // TODO: add filter methods
+	}
+
+	@Override
+	public List<User> searchUsers(String search) throws DataAccessException {
+		return null; // TODO: add search methods
+	}
 }
