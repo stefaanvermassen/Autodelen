@@ -11,7 +11,9 @@ package models;
 public enum ReservationStatus {
     REQUEST("Wachten op goedkeuring"),
     ACCEPTED("Aanvraag goedgekeurd"),
-    REFUSED("Aanvraag geweigerd");
+    REFUSED("Aanvraag geweigerd"),
+    REQUEST_NEW("Wachten op nieuwe goedkeuring"),
+    CANCELLED("Aanvraag geannuleerd");
 
     // Enum definition
     private String description;

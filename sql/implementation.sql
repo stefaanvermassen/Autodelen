@@ -147,7 +147,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `CarReservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
+	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'REQUEST_NEW', 'CANCELLED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
 	`reservation_from` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
