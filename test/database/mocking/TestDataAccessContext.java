@@ -16,6 +16,7 @@ public class TestDataAccessContext implements DataAccessContext {
     private AddressDAO addressDAO;
     private NotificationDAO notificationDAO;
     private MessageDAO messageDAO;
+    private CarRideDAO carRidesDAO;
 
     public TestDataAccessContext(){
         userDao = new TestUserDAO();
@@ -27,6 +28,7 @@ public class TestDataAccessContext implements DataAccessContext {
         addressDAO = new TestAddressDAO();
         notificationDAO = new TestNotificationDAO();
         messageDAO = new TestMessageDAO();
+        carRidesDAO = new TestCarRidesDAO();
     }
 
     @Override
@@ -66,7 +68,7 @@ public class TestDataAccessContext implements DataAccessContext {
 
     @Override
     public CarRideDAO getCarRideDAO() {
-        return null;
+        return carRidesDAO;
     }
 
     @Override
