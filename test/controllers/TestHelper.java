@@ -12,23 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import database.*;
+import models.*;
 import org.joda.time.DateTime;
 import org.mindrot.jbcrypt.BCrypt;
 
-import database.AddressDAO;
-import database.DataAccessContext;
-import database.DataAccessProvider;
-import database.DatabaseHelper;
-import database.InfoSessionDAO;
-import database.UserDAO;
-import database.UserRoleDAO;
 import database.mocking.TestDataAccessProvider;
-import models.Address;
-import models.InfoSession;
-import models.InfoSessionType;
-import models.User;
-import models.UserRole;
-import models.UserStatus;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 
@@ -67,6 +56,25 @@ public class TestHelper {
         }        
         userDAO.updateUser(user, true);
         return userDAO.getUser(user.getId(), false);
+    }
+
+    public  void addUserRole(User user, UserRole role) {
+        UserRoleDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
+        dao.addUserRole(user.getId(), role);
+    }
+
+    public  void removeUserRole(User user, UserRole role) {
+        UserRoleDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
+        dao.removeUserRole(user.getId(), role);
+    }
+
+    public Car createCar(String name, String brand, String type,
+                                Address location, int seats, int doors, int year, boolean gps,
+                                boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue,
+                                int ownerAnnualKm, User owner, String comments) {
+        CarDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getCarDAO();
+        Car car = dao.createCar(name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments);
+        return car;
     }
 	
 	public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int max){

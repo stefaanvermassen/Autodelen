@@ -1,18 +1,17 @@
 package controllers;
 
 import database.DatabaseHelper;
-import database.UserDAO;
 import database.mocking.TestDataAccessProvider;
 import models.User;
 import models.UserStatus;
 import org.junit.*;
-import org.mindrot.jbcrypt.BCrypt;
 import play.mvc.Result;
 import play.mvc.Http.Cookie;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static controllers.util.FakeDatabase.*;
 import static play.test.Helpers.*;
 import static org.junit.Assert.*;
 
@@ -41,18 +40,6 @@ public class LoginControllerTest {
         });
     }
 
-    private static String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt(12));
-    }
-
-    private User createRegisteredUser(String email, String password, String firstName, String lastName){
-        UserDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserDAO();
-        User user = dao.createUser(email, hashPassword(password), firstName, lastName);
-        user.setStatus(UserStatus.REGISTERED);
-        dao.updateUser(user, true);
-        return dao.getUser(user.getId(), false);
-    }
-
     // TODO: Can we really have a dependency on our models in controller testing??
     @Test
     public void testGoodLogin(){
@@ -62,13 +49,12 @@ public class LoginControllerTest {
             public void run() {
                 DatabaseHelper.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
 
-                User user = createRegisteredUser("test@testing.com", "1234piano", "Joske", "Vermeulen");
+                User user = createRegisteredUser("test@testing.com", "1234piano", "Joske", "Vermeulen", UserStatus.REGISTERED);
 
                 Map<String,String> data = new HashMap<>();
                 data.put("email", user.getEmail());
                 data.put("password", "1234piano");
 
-                //TODO: this post always fails!??
                 Result result = callAction(
                         controllers.routes.ref.Login.authenticate("/"),
                         fakeRequest(POST, "/login").withFormUrlEncodedBody(data)
