@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class Drives extends Controller {
 
-    private static final int PAGE_SIZE = 5;
+    private static final int PAGE_SIZE = 10;
 
     /**
      * Class implementing a model wrapped in a form.
@@ -245,7 +245,8 @@ public class Drives extends Controller {
                 flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
                 return badRequest(showIndex());
             }
-            dao.deleteReservation(reservation);
+            reservation.setStatus(ReservationStatus.CANCELLED);
+            dao.updateReservation(reservation);
             context.commit();
             return index();
         } catch(DataAccessException ex) {
