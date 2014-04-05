@@ -4,6 +4,7 @@ import controllers.util.TestHelper;
 import database.DatabaseHelper;
 import database.mocking.TestDataAccessProvider;
 import models.User;
+import models.UserRole;
 import org.junit.*;
 import play.mvc.Result;
 import play.mvc.Http.Cookie;
@@ -19,12 +20,15 @@ import static org.junit.Assert.*;
  */
 public class LoginControllerTest {
 
-    TestHelper helper;
+    private User user;
+    private TestHelper helper;
+    private Cookie loginCookie;
 
     @Before
     public void setUp(){
         helper = new TestHelper();
         helper.setTestProvider();
+        user = helper.createRegisteredUser("test@test.com", "1234piano", "Pol", "Thijs",new UserRole[]{});
     }
 
     @Test
@@ -54,22 +58,8 @@ public class LoginControllerTest {
 
             @Override
             public void run() {
-                DatabaseHelper.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
-
-                User user = helper.createRegisteredUser("test@testing.com", "1234piano", "Joske", "Vermeulen");
-
-                Map<String,String> data = new HashMap<>();
-                data.put("email", user.getEmail());
-                data.put("password", "1234piano");
-
-                Result result = callAction(
-                        controllers.routes.ref.Login.authenticate("/"),
-                        fakeRequest(POST, "/login").withFormUrlEncodedBody(data)
-                );
-
-                assertEquals("Valid login", 303, status(result));
-
-                Cookie loginCookie = cookie("PLAY_SESSION", result); //TODO: fix, this is the most ugly hack I've ever seen x)
+                helper.setTestProvider();
+                loginCookie = helper.login(user,"1234piano");
 
                 // Test if we can access dashboard now
                 Result result2 = callAction(
@@ -78,12 +68,7 @@ public class LoginControllerTest {
                 );
                 assertEquals("Requesting dashboard when logged in", OK, status(result2));
 
-                // Test if we can logout
-                Result result3 = callAction(
-                        controllers.routes.ref.Login.logout(),
-                        fakeRequest().withCookies(loginCookie)
-                );
-                assertEquals("Requesting logout", 303, status(result3));
+                helper.logout();
 
                 // Test if we cannot access dashboard now
                 Result result4 = callAction(

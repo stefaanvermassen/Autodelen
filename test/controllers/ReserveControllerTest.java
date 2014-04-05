@@ -30,7 +30,6 @@ public class ReserveControllerTest {
     public void setUp(){
         helper = new TestHelper();
         helper.setTestProvider();
-        DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
         user = helper.createRegisteredUser("test@test.com", "1234piano", "Pol", "Thijs",new UserRole[]{UserRole.CAR_USER});
     }
 

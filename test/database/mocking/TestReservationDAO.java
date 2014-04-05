@@ -13,6 +13,7 @@ import database.DataAccessException;
 import database.Filter;
 import database.FilterField;
 import database.ReservationDAO;
+import utility.Cloner;
 
 public class TestReservationDAO implements ReservationDAO{
 	
@@ -33,15 +34,20 @@ public class TestReservationDAO implements ReservationDAO{
 
 	@Override
 	public void updateReservation(Reservation reservation) throws DataAccessException {
-		// ok
+		for(int i = 0; i < reservations.size(); i++) {
+            if(reservation.getId() == reservations.get(i).getId()) {
+                reservations.set(i, reservation);
+            }
+        }
 	}
 
 	@Override
 	public Reservation getReservation(int id) throws DataAccessException {
 		for(Reservation reservation : reservations){
 			if(reservation.getId()==id){
-				return new Reservation(reservation.getId(), reservation.getCar(), 
-						reservation.getUser(), reservation.getFrom(), reservation.getTo());
+                Reservation r = new Reservation(reservation.getId(), reservation.getCar(), reservation.getUser(), reservation.getFrom(), reservation.getTo());
+                r.setStatus(reservation.getStatus());
+                return r;
 			}
 		}
 		return null;
@@ -79,6 +85,16 @@ public class TestReservationDAO implements ReservationDAO{
 	@Override
 	public int getAmountOfReservations(Filter filter)
 			throws DataAccessException {
+        if(!filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
+            int id = Integer.parseInt(filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
+            List<Reservation> list = new ArrayList<>();
+            for(Reservation res : reservations){
+                if(res.getCar().getOwner().getId()==id || res.getUser().getId()== id){
+                    list.add(res);
+                }
+            }
+            return list.size();
+        }
 		return 0; // TODO: add filter methods
 	}
 
@@ -86,7 +102,18 @@ public class TestReservationDAO implements ReservationDAO{
 	public List<Reservation> getReservationListPage(FilterField orderBy,
 			boolean asc, int page, int pageSize, Filter filter)
 			throws DataAccessException {
-		return null; // TODO: add filter methods
+        if(!filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
+            int id = Integer.parseInt(filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
+            List<Reservation> list = new ArrayList<>();
+            for(Reservation res : reservations){
+                if(res.getCar().getOwner().getId()==id || res.getUser().getId()== id){
+                    list.add(res);
+                }
+            }
+            return list.subList((page-1)*pageSize, page*pageSize > reservations.size() ? reservations.size() : page*pageSize);
+        }
+
+		return null; // TODO: add other filter methods
 	}
 	
 }

@@ -79,6 +79,17 @@ public class TestHelper {
         Car car = dao.createCar(name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments);
         return car;
     }
+
+    public Reservation createReservation(DateTime from, DateTime to, Car car, User user) {
+        ReservationDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getReservationDAO();
+        Reservation reservation = dao.createReservation(from, to, car, user);
+        return reservation;
+    }
+
+    public void updateReservation(Reservation r) {
+        ReservationDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getReservationDAO();
+        dao.updateReservation(r);
+    }
 	
 	public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int max){
 		InfoSessionDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getInfoSessionDAO();
