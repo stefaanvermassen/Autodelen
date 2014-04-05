@@ -129,7 +129,8 @@ public class Reserve extends Controller {
             while(it.hasNext())
             {
                 Reservation reservation = it.next();
-                if(reservation.getStatus() == ReservationStatus.REFUSED)
+                if(reservation.getStatus() == ReservationStatus.REFUSED
+                        || reservation.getStatus() == ReservationStatus.CANCELLED)
                     it.remove();
             }
 
