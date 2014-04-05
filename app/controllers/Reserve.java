@@ -68,8 +68,17 @@ public class Reserve extends Controller {
          */
         public String validate() {
             DateTime now = DateTime.now();
-            DateTime dateFrom = getTimeFrom();
-            DateTime dateUntil = getTimeUntil();
+            DateTime dateFrom = null;
+            DateTime dateUntil = null;
+            try {
+                dateFrom = getTimeFrom();
+                dateUntil = getTimeUntil();
+            } catch(IllegalArgumentException ex) {
+                if(dateFrom == null)
+                    return "Ongeldig datum: van = " + from;
+                else
+                    return "Ongeldig datum: tot = " + until;
+            }
             if("".equals(dateFrom) || "".equals(dateUntil)) {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
             } else if(dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
