@@ -14,6 +14,15 @@ public class TestTemplateDAO implements TemplateDAO{
 	
 	public TestTemplateDAO(){
 		list = new ArrayList<>();
+        //VERIFICATION(1), WELCOME(2), INFOSESSION_ENROLLED(3), RESERVATION_APPROVE_REQUEST(4), RESERVATION_APPROVED_BY_OWNER(5), RESERVATION_REFUSED_BY_OWNER(6), PASSWORD_RESET(7);
+
+        list.add(new EmailTemplate(1, "VERIFICATION", "", new ArrayList<String>(), "VERIFICATION", false, false));
+        list.add(new EmailTemplate(2, "WELCOME", "", new ArrayList<String>(), "WELCOME", false, false));
+        list.add(new EmailTemplate(3, "INFOSESSION_ENROLLED", "", new ArrayList<String>(), "INFOSESSION_ENROLLED", false, false));
+        list.add(new EmailTemplate(4, "RESERVATION_APPROVE_REQUEST", "", new ArrayList<String>(), "RESERVATION_APPROVE_REQUEST", false, false));
+        list.add(new EmailTemplate(5, "RESERVATION_APPROVED_BY_OWNER", "", new ArrayList<String>(), "RESERVATION_APPROVED_BY_OWNER", false, false));
+        list.add(new EmailTemplate(6, "RESERVATION_REFUSED_BY_OWNER", "", new ArrayList<String>(), "RESERVATION_REFUSED_BY_OWNER", false, false));
+        list.add(new EmailTemplate(7, "PASSWORD_RESET", "", new ArrayList<String>(), "PASSWORD_RESET", false, false));
 	}
 
 	@Override

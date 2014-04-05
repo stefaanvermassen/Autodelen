@@ -70,7 +70,7 @@ public class TestCarDAO implements CarDAO{
 
 	@Override
 	public int getAmountOfCars(Filter filter) throws DataAccessException {
-		return 0; // TODO: implement Filter methods
+		return getCarList().size(); // TODO: implement Filter methods
 	}
 
 	@Override
@@ -80,12 +80,12 @@ public class TestCarDAO implements CarDAO{
 
 	@Override
 	public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
-		return cars.subList(page*pageSize, (page+1)*pageSize);
+		return cars.subList((page-1)*pageSize, page*pageSize > cars.size() ? cars.size() : page*pageSize );
 	}
 
 	@Override
 	public List<Car> getCarList(FilterField orderBy, boolean asc, int page,	int pageSize, Filter filter) throws DataAccessException {
-        return null; // TODO: implement Filter methods
+        return getCarList(page, pageSize); // TODO: implement Filter methods
 	}
 
 	@Override
