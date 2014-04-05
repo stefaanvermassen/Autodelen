@@ -1,4 +1,4 @@
-package controllers;
+package controllers.util;
 
 import static org.junit.Assert.assertEquals;
 import static play.mvc.Http.Status.OK;
@@ -47,7 +47,10 @@ public class TestHelper {
 	private static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
-	
+
+    public User createRegisteredUser(String email, String password, String firstName, String lastName) {
+        return createRegisteredUser(email, password, firstName, lastName, new UserRole[] {});
+    }
 	public User createRegisteredUser(String email, String password, String firstName, String lastName, UserRole[] roles){
         User user = userDAO.createUser(email, hashPassword(password), firstName, lastName);
         user.setStatus(UserStatus.FULL);

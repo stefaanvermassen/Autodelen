@@ -14,6 +14,7 @@ import static play.test.Helpers.status;
 import java.util.HashMap;
 import java.util.Map;
 
+import controllers.util.TestHelper;
 import models.Address;
 import models.User;
 import models.UserRole;

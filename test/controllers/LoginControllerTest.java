@@ -1,9 +1,9 @@
 package controllers;
 
+import controllers.util.TestHelper;
 import database.DatabaseHelper;
 import database.mocking.TestDataAccessProvider;
 import models.User;
-import models.UserStatus;
 import org.junit.*;
 import play.mvc.Result;
 import play.mvc.Http.Cookie;
@@ -11,7 +11,6 @@ import play.mvc.Http.Cookie;
 import java.util.HashMap;
 import java.util.Map;
 
-import static controllers.util.FakeDatabase.*;
 import static play.test.Helpers.*;
 import static org.junit.Assert.*;
 
@@ -19,6 +18,14 @@ import static org.junit.Assert.*;
  * Created by Cedric on 3/7/14.
  */
 public class LoginControllerTest {
+
+    TestHelper helper;
+
+    @Before
+    public void setUp(){
+        helper = new TestHelper();
+        helper.setTestProvider();
+    }
 
     @Test
     public void testBadLogin(){
@@ -49,7 +56,7 @@ public class LoginControllerTest {
             public void run() {
                 DatabaseHelper.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
 
-                User user = createRegisteredUser("test@testing.com", "1234piano", "Joske", "Vermeulen", UserStatus.REGISTERED);
+                User user = helper.createRegisteredUser("test@testing.com", "1234piano", "Joske", "Vermeulen");
 
                 Map<String,String> data = new HashMap<>();
                 data.put("email", user.getEmail());

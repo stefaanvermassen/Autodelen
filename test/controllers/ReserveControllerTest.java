@@ -1,10 +1,8 @@
 package controllers;
 
-import database.CarDAO;
+import controllers.util.TestHelper;
 import database.DataAccessContext;
 import database.DatabaseHelper;
-import database.TemplateDAO;
-import database.mocking.TestDataAccessProvider;
 import models.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,9 +10,7 @@ import org.junit.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -53,7 +49,7 @@ public class ReserveControllerTest {
 
                 // Test if we can see a reservation-screen of a car
                 // First create a car
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1,1,1,user, "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 Result result2 = callAction(
                         controllers.routes.ref.Reserve.reserve(car.getId()),
                         fakeRequest().withCookies(loginCookie)
@@ -82,7 +78,7 @@ public class ReserveControllerTest {
 
                 // Test if we can make a reservation of a car
                 // First create a car
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1,1,1,user, "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 Map<String,String> reserveData = new HashMap<>();
                 reserveData.put("from", "2015-01-01 00:00");
                 reserveData.put("until", "2015-01-02 00:00");
@@ -154,7 +150,7 @@ public class ReserveControllerTest {
 
                 for(int i = 0; i < userRoles.length; i++) {
                     if(i != 0) {
-                        helper.removeUserRole(user, userRoles[i-1]);
+                        helper.removeUserRole(user, userRoles[i - 1]);
                     }
                     helper.addUserRole(user, userRoles[i]);
 
@@ -162,7 +158,7 @@ public class ReserveControllerTest {
 
                     // Test if we can see a reservation-screen of a car
                     // First create a car
-                    Car car = helper.createCar("MijnenAuto" + i, "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1,1,1,user, "");
+                    Car car = helper.createCar("MijnenAuto" + i, "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                     Result result2 = callAction(
                             controllers.routes.ref.Reserve.reserve(car.getId()),
                             fakeRequest().withCookies(loginCookie)
