@@ -170,10 +170,14 @@ public class Drives extends Controller {
             UserDAO udao = context.getUserDAO();
             CarDAO cdao = context.getCarDAO();
             Reservation reservation = rdao.getReservation(reservationId);
+            if(reservation == null)
+                return showIndex();
             User loaner = udao.getUser(reservation.getUser().getId(), true);
             Car car = cdao.getCar(reservation.getCar().getId());
+            if(car == null || loaner == null)
+                return showIndex();
             User owner = udao.getUser(car.getOwner().getId(), true);
-            if(reservation == null || car == null || loaner == null || owner == null)
+            if(owner == null)
                 return showIndex();
             if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation))
                 return showIndex();
@@ -238,8 +242,7 @@ public class Drives extends Controller {
                 flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
                 return null;
             }
-            if(!isOwnerOfReservedCar(context, user, reservation) ||
-                (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.REQUEST_NEW)) {
+            if((!isOwnerOfReservedCar(context, user, reservation) && status != ReservationStatus.CANCELLED) || (!isLoaner(reservation, user) && status == ReservationStatus.CANCELLED) || (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.REQUEST_NEW)) {
                 flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
                 return null;
             }
@@ -262,25 +265,10 @@ public class Drives extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     public static Result cancelReservation(int reservationId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            ReservationDAO dao = context.getReservationDAO();
-            Reservation reservation = dao.getReservation(reservationId);
-            if(reservation == null) {
-                flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
-                return badRequest(showIndex());
-            }
-            if(!isLoaner(reservation, user)) {
-                flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
-                return badRequest(showIndex());
-            }
-            reservation.setStatus(ReservationStatus.CANCELLED);
-            dao.updateReservation(reservation);
-            context.commit();
-            return index();
-        } catch(DataAccessException ex) {
-            throw ex;
-        }
+        Reservation reservation = adjustStatus(reservationId, ReservationStatus.CANCELLED);
+        if(reservation == null)
+            return badRequest(showIndex());
+        return index();
     }
 
     // PRIVATE METHODS
