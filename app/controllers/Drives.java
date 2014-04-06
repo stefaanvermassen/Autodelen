@@ -178,8 +178,8 @@ public class Drives extends Controller {
                 adjustForm.reject("Het is niet toegestaan de reservatie te verlengen.");
                 return badRequest(detailsPage(reservationId, adjustForm, Form.form(RefuseModel.class)));
             }
-            if(reservation.getStatus() == ReservationStatus.REFUSED) {
-                adjustForm.reject("U kan een geweigerde reservatie niet aanpassen.");
+            if(reservation.getStatus() == ReservationStatus.REFUSED || reservation.getStatus() == ReservationStatus.CANCELLED) {
+                adjustForm.reject("U kan deze reservatie niet aanpassen.");
                 return badRequest(detailsPage(reservationId, adjustForm, Form.form(RefuseModel.class)));
             }
             reservation.setFrom(from);
@@ -251,11 +251,27 @@ public class Drives extends Controller {
                 flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
                 return null;
             }
-            if((!isOwnerOfReservedCar(context, user, reservation) && status != ReservationStatus.CANCELLED) 
-				|| (!isLoaner(reservation, user) && status == ReservationStatus.CANCELLED) 
-				|| (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.REQUEST_NEW)) {
-                flash("danger", "U bent niet geauthoriseerd voor het uitvoeren van deze actie");
-                return null;
+            // Both super user and reservation admin are allowed to adjust the status of a reservation
+            if(!(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER))
+                    && !((DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.RESERVATION_ADMIN)))) {
+                switch (status) {
+                    // Only the loaner is allowed to cancel a reservation at any time
+                    case CANCELLED:
+                        if (!isLoaner(reservation, user)) {
+                            flash("Error", "Alleen de ontlener mag een reservatie annuleren!");
+                            return null;
+                        }
+                        break;
+                    // The owner is allowed to approve or refuse a reservation if that reservation
+                    // has the request or request_new status
+                    default:
+                        if (!isOwnerOfReservedCar(context, user, reservation)
+                                || (reservation.getStatus() != ReservationStatus.REQUEST
+                                && reservation.getStatus() != ReservationStatus.REQUEST_NEW)) {
+                            flash("Error", "Alleen de eigenaar kan de status van een reservatie aanpassen");
+                            return null;
+                        }
+                }
             }
             reservation.setStatus(status);
             dao.updateReservation(reservation);

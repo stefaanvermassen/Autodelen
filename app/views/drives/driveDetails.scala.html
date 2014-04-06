@@ -147,13 +147,15 @@
                                             </div>
                                         </div>
                                     </div><br />
-                                    <div class="row">
-                                        <div id="buttons" class="form-group col-sm-12">
-                                            <br />
-                                            <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
-                                            <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
+                                    @if(reservation.getStatus != ReservationStatus.CANCELLED && reservation.getStatus != ReservationStatus.REFUSED) {
+                                        <div class="row">
+                                            <div id="buttons" class="form-group col-sm-12">
+                                                <br />
+                                                <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
+                                                <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    }
                                 }
                             <!-- owner specific content -->
                             } else {
