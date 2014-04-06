@@ -7,6 +7,7 @@ import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
+import org.joda.time.IllegalFieldValueException;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
@@ -96,7 +97,7 @@ public class Reserve extends Controller {
      *
      * @return the reservation index page containing all cars
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result index() {
         return ok(showIndex());
     }
@@ -117,11 +118,15 @@ public class Reserve extends Controller {
      * @param carId the id of the car for which the reservationsdetails ought to be rendered
      * @return the details page of a future reservation for a car
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result reserve(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
+            if (car == null) {
+                flash("danger", "De reservatie van deze auto is onmogelijk: auto onbestaand!");
+                return badRequest(showIndex());
+            }
 
             ReservationDAO rdao = context.getReservationDAO();
             List<Reservation> reservations = rdao.getReservationListForCar(carId);
@@ -150,7 +155,7 @@ public class Reserve extends Controller {
      * @param carId The id of the car for which the reservation is being confirmed
      * @return the user is redirected to the drives page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result confirmReservation(int carId) {
         // Get the car object to test whether the operation is legal
         Car car;
@@ -223,6 +228,7 @@ public class Reserve extends Controller {
      * @param searchString the string containing all search information
      * @return the requested page of cars for reservation
      */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result showCarsPage(int page, int asc, String orderBy, String searchString) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
