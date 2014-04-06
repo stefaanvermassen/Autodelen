@@ -145,15 +145,20 @@
 	margin-bottom: 0px;
 }
 
-/* --- Tables --- */
-.pagination>li:first-child>a, .pagination>li:last-child>a{
-	border-radius: 0px;
+/* --- Pagination --- */
+
+#pagination > button {
+	padding: 4px 12px;
+	background-color: transparent;
+	border: 1px solid #dddddd;
 }
 
-.pagination>li>a, .pagination>li>span {
-	padding: 4px 8px;
+.table {
+	margin-bottom:5px;
 }
-
+#pagination > p {
+	margin-top: 5px;
+}
 /* --- Forms fix --- */
 
 .form-horizontal .form-group {
