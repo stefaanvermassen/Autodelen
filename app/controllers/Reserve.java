@@ -82,6 +82,23 @@ public class Reserve extends Controller {
 
     }
 
+    @RoleSecured.RoleAuthenticated()
+    public static Result getCarModal(int id){
+        // TODO: hide from other users (badRequest)
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(id);
+            if(car == null){
+                return badRequest("Fail."); //TODO: error in flashes?
+            } else {
+                return ok(reservationDetailsPartial.render(car));
+            }
+        } catch(DataAccessException ex){
+            throw ex; //log?
+        }
+    }
+
     /**
      * Method: GET
      *

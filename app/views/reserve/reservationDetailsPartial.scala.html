@@ -1,5 +1,6 @@
 @(car: Car)
 <!-- Large modal -->
+
 <div id="detailsModal"class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
   <div id=" "class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -8,11 +9,19 @@
         <h4 class="modal-title" id="myModalLabel">Modal title</h4>
       </div>
       <div id="modalBody" class="modal-body">
-        ...
+        <p>
+            <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a><br>
+            <strong>Naam:</strong> @car.getName<br>
+            <strong>Merk:</strong> @car.getBrand<br>
+            <strong>Type:</strong> @car.getType<br>
+            <strong>Standplaats:</strong> @car.getLocation <br>
+            <strong>Van:</strong> 07:00 <br>
+            <strong>Tot:</strong> 10:00 <br>
+        </p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+        <button type="button" class="btn btn-success">Reserveren</button>
       </div>
     </div>
   </div>

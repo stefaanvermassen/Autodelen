@@ -34,7 +34,7 @@
                         <div class="btn-group btn-group-xs">
                             <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">details</a>
                             <a class="btn btn-success" href="@routes.Reserve.reserve(car.getId)">reserveer</a>
-                            <button class="btn btn-primary" onclick="showModal(@car.getId)">Large modal</button>
+                            <button class="btn btn-primary" onclick="loadModal(@car.getId)">Large modal</button>
                         </div>
                     </td>
                 </tr>
@@ -43,23 +43,3 @@
     </tbody>
 </table>
 <p id="buttons" name="@amountOfCars,@amountOfPages"></p>
-
-
-<!-- Large modal -->
-<div id="detailsModal"class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-  <div id=" "class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-      </div>
-      <div id="modalBody" class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
