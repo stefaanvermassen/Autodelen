@@ -27,7 +27,9 @@
         this.stepToken;
         this._attachEvents();
 
-        this.resetDatetimeinput();
+        // An inputfield value can already be set before calling constructing the datetimeinput
+        if(!this.inputIsValidDate())
+            this.resetDatetimeinput();
     };
 
     // Date time prototype
