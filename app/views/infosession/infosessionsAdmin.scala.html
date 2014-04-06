@@ -1,0 +1,88 @@
+@import database.DatabaseHelper;
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script src="@routes.Assets.at("javascripts/app/reservations.js")"></script> <!-- TODO: don't use reservations.js -->
+    <script>
+        var route = myJsRoutes.controllers.InfoSessions.showSessionsPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
+    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
+}
+
+@app("Infosessies", stylesheets, scripts) {
+<div id="page-header-wrapper">
+   <ol class="breadcrumb">
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        <li class="active">Infosessies</li>
+   </ol>
+</div>
+
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Infosessies</h1>
+            @flashes()
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                        <a class="btn btn-default btn-sm" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies's zoeken
+        </div>
+            <!-- /.panel-heading -->
+        <div class="panel-body">
+            <!-- TODO: layout, more fields to search on -->
+            <div id="searchwell" class="panel-body">
+                <form role="form">
+                    <!-- TODO: Use normal datetime picker that actually works -->
+                    <div class="form-group inline-block">
+                        <div id="from" class="inline-block">
+                            <label for="">Vanaf</label>
+                            <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
+                                <input id="input_from" name="infosession_date" class="form-control searchTextField" size="16" value="">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="btn-group btn-group-sm">
+                                <button id="searchButton" type="button" class="btn btn-success">Zoek</button>
+                                <button id="reset" type="button" class="btn btn-primary">Verwijder zoekterm</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+            <!-- /.panel-body -->
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies
+        </div>
+        <!-- /.panel-heading -->
+        <div class="panel-body">
+            <div id="resultsTable" class="table-responsive">
+                <!-- Here comes the loaded table-->
+            </div>
+        </div>
+        <!-- /.panel-body -->
+    </div>
+</div>
+}

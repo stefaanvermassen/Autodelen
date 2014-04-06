@@ -46,7 +46,7 @@ var nextBtnTxt = "Volgende";
 var firstBtnTxt = "<<";
 var lastBtnTxt = ">>";
 var loadingImage = 'assets/images/ajax-loader.gif';
-var errorMessageFilter = "Zoekvelden mogen geen komma's (,) of dubbele punten bevatten (:)!";
+var errorMessageFilter = "Zoekvelden mogen geen komma's (,) of gelijk-aan-tekens (=) bevatten!";
 
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
 var buttonsAroundPage = 2;
@@ -84,7 +84,7 @@ if(searchButton != null) {
             var searchField = searchFields[i];
             fields[i] = searchField.getAttribute('name');
             values[i] = searchField.value;
-            if(fields[i].indexOf(':') != -1 || values[i].indexOf(':') != -1 ||
+            if(fields[i].indexOf('=') != -1 || values[i].indexOf('=') != -1 ||
                 fields[i].indexOf(',') != -1 || values[i].indexOf(',') != 1) {
                 alert(errorMessageFilter);
                 return;

@@ -10,7 +10,6 @@ import notifiers.Notifier;
 import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
-import play.data.validation.Constraints;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -91,7 +90,7 @@ public class InfoSessions extends Controller {
             InfoSession is = dao.getInfoSession(sessionId, false);
             if (is == null) {
                 flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
-                return badRequest(upcomingSessionsList());
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
                 model.type = is.getType();
@@ -493,12 +492,24 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
+     *
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    public static Result showSessions() {
+        return ok(infosessionsAdmin.render());
+
+    }
+
+    /**
+     * Method: GET
      *
      * @param page         The page number to fetch
      * @param ascInt
      * @param orderBy      The orderby type, ASC or DESC
      * @param searchString The string to search for
-     * @return A partial view of the table containing the filtered sessions
+     * @return A partial view of the table containing the filtered upcomming sessions
      */
     @RoleSecured.RoleAuthenticated()
     public static Result showUpcomingSessionsPage(int page, int ascInt, String orderBy, String searchString) {
@@ -507,20 +518,36 @@ public class InfoSessions extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(upcomingSessionsList(page, filterField, asc, filter));
+
+        filter.fieldContains(FilterField.INFOSESSION_DATE, DateTime.now().getMillis() + "");
+        return ok(sessionsList(page, filterField, asc, filter, false));
     }
 
     /**
-     * Gets the first page of the infosessions.
+     * Method: GET
      *
-     * @return HTML table partial of infosession table
+     * @param page         The page number to fetch
+     * @param ascInt
+     * @param orderBy      The orderby type, ASC or DESC
+     * @param searchString The string to search for
+     * @return A partial view of the table containing the filtered sessions
      */
-    private static Html upcomingSessionsList() {
-        return upcomingSessionsList(1, FilterField.INFOSESSION_DATE, true, null);
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    public static Result showSessionsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField filterField = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+        if(filter.getFieldContains(FilterField.INFOSESSION_DATE, true).equals("")) {
+            filter.fieldContains(FilterField.INFOSESSION_DATE, "0");
+        }
+
+        return ok(sessionsList(page, filterField, asc, filter, true));
     }
 
     /**
-     * Gets the upcomming infosession html block filtered
+     * Gets the infosessions html block filtered
      *
      * @param page
      * @param orderBy Orderby type ASC or DESC
@@ -528,7 +555,8 @@ public class InfoSessions extends Controller {
      * @param filter  The filter to apply to
      * @return The html patial table of upcoming sessions for this filter
      */
-    private static Html upcomingSessionsList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html sessionsList(int page, FilterField orderBy, boolean asc, Filter filter, boolean admin) {
+        // TODO: not use boolean admin
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -536,7 +564,8 @@ public class InfoSessions extends Controller {
             if(orderBy == null) {
                 orderBy = FilterField.INFOSESSION_DATE;
             }
-            List<InfoSession> sessions = dao.getInfoSessionsAfter(DateTime.now(), orderBy, asc, page, PAGE_SIZE, filter);
+
+            List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, PAGE_SIZE, filter);
             if (enrolled != null) {
                 //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
                 // Hack herpedy derp!!
@@ -551,8 +580,10 @@ public class InfoSessions extends Controller {
 
             int amountOfResults = dao.getAmountOfInfoSessions(filter);
             int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
-
-            return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
+            if(admin)
+                return infosessionsAdminPage.render(sessions, page, amountOfResults, amountOfPages);
+            else
+                return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }

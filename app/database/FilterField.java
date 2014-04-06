@@ -11,7 +11,7 @@ public enum FilterField {
     CAR_NAME, CAR_BRAND, CAR_SEATS, CAR_GPS, CAR_HOOK,
     USER_NAME, USER_FIRSTNAME, USER_LASTNAME,
     ZIPCODE,
-    INFOSESSION_DATE,
+    INFOSESSION_DATE, INFOSESSION_TYPE,
     RESERVATION_USER_OR_OWNER_ID,
     FROM, UNTIL,
     UNKNOWN;
@@ -50,6 +50,9 @@ public enum FilterField {
                 break;
             case "date" :
                 field = INFOSESSION_DATE;
+                break;
+            case "infosession_type" :
+                field = INFOSESSION_TYPE;
                 break;
             case "user_name":
                 field = USER_NAME;

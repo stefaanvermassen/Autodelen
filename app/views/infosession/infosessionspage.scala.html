@@ -2,6 +2,7 @@
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
     <thead>
         <tr role="row">
+            <th>Type</th>
             <th name="date" class="sortable">Tijdstip</th>
             <th>Inschrijvingen</th>
             <th>Host</th>
@@ -12,6 +13,7 @@
     <tbody>
         @for(session <- sessions) {
             <tr @if(enrolled != null && session.getId == enrolled.getId) {class="info"}>
+            <td>@session.getType.getDescription</td> <!-- TODO: mooi weergeven met icoontje ofzo -->
             <td>@session.getTime.toString("dd-MM HH:mm")</td>
             @if(session.getMaxEnrollees != 0) {
                 @if(session.getEnrolleeCount == session.getMaxEnrollees) {

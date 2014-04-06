@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
 import database.jdbc.JDBCFilter;
@@ -218,31 +219,25 @@ public class Reserve extends Controller {
      * - the page that's being rendered
      *
      * @param page the page to be rendered
-     * @param asc boolean int, if 1 the records are ordered ascending
+     * @param ascInt boolean int, if 1 the records are ordered ascending
      * @param orderBy the string designating the filterfield on which to order
      * @param searchString the string containing all search information
      * @return the requested page of cars for reservation
      */
-    public static Result showCarsPage(int page, int asc, String orderBy, String searchString) {
+    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
-            FilterField orderby = FilterField.stringToField(orderBy);
-            orderby = (orderby == null) ? FilterField.CAR_NAME : orderby;
+            FilterField field = FilterField.stringToField(orderBy);
 
-            Filter filter = new JDBCFilter();
-            if(searchString != "") {
-                String[] searchStrings = searchString.split(",");
-                for(String s : searchStrings) {
-                    String[] s2 = s.split("=");
-                    if(s2.length == 2) {
-                        String field = s2[0];
-                        String value = s2[1];
-                        filter.fieldContains(FilterField.stringToField(field), value);
-                    }
-                }
+            boolean asc = Pagination.parseBoolean(ascInt);
+            Filter filter = Pagination.parseFilter(searchString);
+
+            if(field == null) {
+                field = FilterField.CAR_NAME;
             }
-            List<Car> listOfCars = dao.getCarList(orderby, (asc == 1), page, PAGE_SIZE, filter);
+
+            List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
 
             int amountOfResults = dao.getAmountOfCars(filter);
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
