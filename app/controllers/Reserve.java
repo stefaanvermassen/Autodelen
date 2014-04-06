@@ -69,13 +69,16 @@ public class Reserve extends Controller {
          */
         public String validate() {
             DateTime now = DateTime.now();
-            DateTime dateFrom;
-            DateTime dateUntil;
+            DateTime dateFrom = null;
+            DateTime dateUntil = null;
             try {
                 dateFrom = getTimeFrom();
                 dateUntil = getTimeUntil();
-            } catch(IllegalFieldValueException e) {
-                return "Gelieve een geldige datum in te geven";
+            } catch(IllegalArgumentException ex) {
+                if(dateFrom == null)
+                    return "Ongeldig datum: van = " + from;
+                else
+                    return "Ongeldig datum: tot = " + until;
             }
             if("".equals(dateFrom) || "".equals(dateUntil)) {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
@@ -131,7 +134,8 @@ public class Reserve extends Controller {
             while(it.hasNext())
             {
                 Reservation reservation = it.next();
-                if(reservation.getStatus() == ReservationStatus.REFUSED || reservation.getStatus() == ReservationStatus.CANCELLED)
+                if(reservation.getStatus() == ReservationStatus.REFUSED
+                        || reservation.getStatus() == ReservationStatus.CANCELLED)
                     it.remove();
             }
 

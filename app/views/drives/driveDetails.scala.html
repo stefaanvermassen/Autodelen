@@ -1,6 +1,71 @@
-@(reservation: Reservation, car: Car, owner: User, loaner: User)
+@(form: play.data.Form[Reserve.ReservationModel], reservation: Reservation, car: Car, owner: User, loaner: User)
+@import database.DatabaseHelper
 
-@app("Rit details") {
+@scripts = {
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/app/driveDetails.js")"></script>
+    <script src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")' type="text/javascript"></script>
+    <script src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")' type="text/javascript"></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+    <script>
+        $(document ).ready(function(){
+            // Determine the dates of the reservation
+            var from = new Date("@reservation.getFrom.toString("yyyy-MM-dd HH:mm")");
+            var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
+                from.getMinutes(), 0);
+            var adjustedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
+                from.getMinutes(), 0);
+            adjustedFrom.setMinutes(adjustedFrom.getMinutes() + 5);
+
+            var until = new Date("@reservation.getTo.toString("yyyy-MM-dd HH:mm")");
+            var correctedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
+                until.getMinutes(), 0);
+            var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
+                until.getMinutes(), 0);
+            adjustedUntil.setMinutes(adjustedUntil.getMinutes() - 5);
+            // Disable all dates excepted those within the reservation dates
+            $('#datetimepickerfrom').datetimepicker('setStartDate', correctedFrom);
+            $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
+
+            $('#datetimepickeruntil').datetimepicker('setEndDate', correctedUntil);
+            $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
+
+            // When datetimepicker from is changed, make sure the user can't select a date before from
+            // in datetimepicker until
+            $('#datetimepickerfrom').datetimepicker().on('changeDate', function(evt) {
+                if(evt.date != null) {
+                    var date = new Date(evt.date);
+                    var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
+                        date.getMinutes(), 0);
+                    correctedDate.setHours(correctedDate.getHours() - 2);
+                    correctedDate.setMinutes(correctedDate.getMinutes() + 5);
+                    $('#datetimepickeruntil').datetimepicker('setStartDate', correctedDate);
+                } else {
+                    $("#input_from").val('@reservation.getFrom.toString("yyyy-MM-dd HH:mm")');
+                    $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
+                }
+            });
+            // When datetimepicker until is changed, make sure the user can't select a date after until
+            // in datetimepicker until
+            $('#datetimepickeruntil').datetimepicker().on('changeDate', function(evt) {
+                if(evt.date != null) {
+                    var date = new Date(evt.date);
+                    var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
+                        date.getMinutes(), 0);
+                    correctedDate.setHours(correctedDate.getHours() - 2);
+                    correctedDate.setMinutes(correctedDate.getMinutes() - 5);
+                    $('#datetimepickerfrom').datetimepicker('setEndDate', correctedDate);
+                } else {
+                    $("#input_until").val('@reservation.getTo.toString("yyyy-MM-dd HH:mm")');
+                    $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
+                }
+            });
+        });
+    </script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+}
+@app("Rit details", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -19,32 +84,82 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
+                        @if(form.hasGlobalErrors) {
+                            <div class="alert alert-danger alert-dismissable">
+                                <strong>Error!</strong> @form.globalError.message
+                            </div>
+                        }
                         <div class="well">
-                            <div class="col-sm-4">
-                                <strong>Autonaam:</strong> @car.getName
-                            </div>
-                            <div class="col-sm-4">
-                                <strong>Merk:</strong> @car.getBrand
-                            </div>
-                            <div class="col-sm-4">
-                                <strong>Type:</strong> @car.getType
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Autonaam:</strong> @car.getName
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Merk:</strong> @car.getBrand
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Type:</strong> @car.getType
+                                </div>
                             </div><br />
-                            <br />
-                            <div class="col-sm-4">
-                                <strong>Reservatie van:</strong> @reservation.getFrom.toString("dd/MM/yyyy HH:mm")
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Status:</strong> @reservation.getStatus.getDescription
+                                </div>
+                                @if(loaner.getId == DatabaseHelper.getUserProvider.getUser.getId) {
+                                    @helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
+                                        <div id="fromdetails" class="col-sm-4">
+                                            <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
+                                        </div>
+                                        <div id="fromadjust" class="form-group hidden col-sm-10">
+                                            <br />
+                                            <strong>Reservatie van:</strong>
+                                            <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_from">
+                                                <input id="input_from" name="from" class="form-control searchTextField" size="16" value="@reservation.getFrom.toString("yyyy-MM-dd HH:mm")">
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                            </div><br />
+                                        </div>
+                                        <div id="untildetails" class="col-sm-4">
+                                            <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
+                                        </div>
+                                        <div id="untiladjust" class="form-group hidden col-sm-10">
+                                            <strong>Reservatie tot:</strong>
+                                            <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_until">
+                                                <input id="input_until" name="until" class="form-control searchTextField" size="16" value="@reservation.getTo.toString("yyyy-MM-dd HH:mm")">
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                            </div>
+                                        </div>
+                                        <div id="buttons" class="form-group col-sm-12">
+                                            <br />
+                                            <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
+                                            <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
+                                        </div>
+                                    }
+                                } else {
+                                    <div class="col-sm-4">
+                                        <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
+                                    </div>
+                                }
                             </div>
-                            <div class="col-sm-4">
-                                <strong>Reservatie tot:</strong> @reservation.getTo.toString("dd/MM/yyyy HH:mm")
-                            </div><br />
                         </div>
                         <div class="col-lg-6">
                             <div class="well">
                                 <strong>Eigenaar</strong><hr />
                                 <p>
-                                    <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
-                                    <strong>E-mail:</strong> @owner.getEmail <br />
-                                    <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />
-                                    <strong>GSM:</strong> @if(owner.getCellphone != null && !owner.getCellphone.isEmpty){ @owner.getCellphone } else { onbekend }
+                                    @if(DatabaseHelper.getUserProvider.getUser.getId == owner.getId ||
+                                            reservation.getStatus == ReservationStatus.ACCEPTED ||
+                                            reservation.getStatus == ReservationStatus.REQUEST_NEW) {
+                                        <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
+                                        <strong>E-mail:</strong> @owner.getEmail <br />
+                                        <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />
+                                        <strong>GSM:</strong> @if(owner.getCellphone != null && !owner.getCellphone.isEmpty){ @owner.getCellphone } else { onbekend }
+                                    } else {
+                                        <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
+                                    }
                                 </p>
                             </div>
                         </div>
