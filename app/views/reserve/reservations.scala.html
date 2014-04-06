@@ -61,16 +61,22 @@
                         </div>
                         <div class="panel-body">
                             <form role="form">
-                                <div class="form-group inline-block">
-                                    <div id="from" class="searchTextField inline-block" name="from" value="">
+                                <div class="form-group">
+                                    <div id="from" class="inline-block">
                                         <label for="">Van</label>
-                                        <input id="dateFrom" type="date" class="form-control">
-                                        <input id="timeFrom" type="time" class="form-control" value="">
+                                        <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
+                                            <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                        </div>
                                     </div>
-                                    <div id="until" class="searchTextField inline-block" name="until" value="">
+                                    <div id="until" class="inline-block">
                                         <label for="">Tot</label>
-                                        <input id="dateUntil" type="date" class="form-control" value="">
-                                        <input id="timeUntil" type="time" class="form-control" value="">
+                                        <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_until">
+                                            <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -85,7 +91,7 @@
                                     <label>Aantal zitplaatsen</label>
                                     <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Min aantal plaatsen">
                                 </div>
-                                <div>
+                                <div class="form-group">
                                     <label for="">Extra</label>
                                     <div class="checkbox">
                                         <label>
@@ -102,22 +108,6 @@
                                         <label>
                                             <input id="lent" class="searchTextField" name="lent" type="checkbox" value="0">Reeds geleend
                                         </label>
-                            </div>
-                            <div class="form-group inline-block">
-                                <div id="from" class="inline-block">
-                                    <label for="">Van</label>
-                                    <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
-                                        <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                    </div>
-                                </div>
-                                <div id="until" class="inline-block">
-                                    <label for="">Tot</label>
-                                    <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_until">
-                                        <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
