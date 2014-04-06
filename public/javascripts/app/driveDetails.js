@@ -30,6 +30,15 @@ $(document).ready(function() {
         }
     });
 
+    $('#reject').on('click', function() {
+        $('#actions1').addClass('hidden');
+        $('#actions2').removeClass('hidden');
+    });
+    $('#annulate').on('click', function() {
+        $('#actions2').addClass('hidden');
+        $('#actions1').removeClass('hidden');
+    });
+
     $('#datetimepickerfrom').datetimepicker({
         weekStart: 1,
         language: 'nl',
