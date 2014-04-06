@@ -56,7 +56,7 @@
                 </td>
             } else {
                 <td>
-                @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                @if(reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.REQUEST_NEW) {
                     <div id="hidden1_@index" class="btn-group btn-group-xs">
                         <a class="btn btn-success" href="@routes.Drives.approveReservation(reservation.getId)">goedkeuren</a>
                         <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
