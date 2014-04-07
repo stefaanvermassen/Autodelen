@@ -85,7 +85,7 @@ if(searchButton != null) {
             fields[i] = searchField.getAttribute('name');
             values[i] = searchField.value;
             if(fields[i].indexOf('=') != -1 || values[i].indexOf('=') != -1 ||
-                fields[i].indexOf(',') != -1 || values[i].indexOf(',') != 1) {
+                fields[i].indexOf(',') != -1 || values[i].indexOf(',') != -1) {
                 alert(errorMessageFilter);
                 return;
             }

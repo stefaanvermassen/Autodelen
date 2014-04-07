@@ -1,10 +1,7 @@
 @import database.DatabaseHelper;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-    <script src="@routes.Assets.at("javascripts/app/reservations.js")"></script> <!-- TODO: don't use reservations.js -->
-    <script>
-        var route = myJsRoutes.controllers.InfoSessions.showSessionsPage;
-    </script>
+    <script src="@routes.Assets.at("javascripts/app/infosessionsAdmin.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
 @stylesheets = {
@@ -49,7 +46,7 @@
             <!-- TODO: layout, more fields to search on -->
             <div id="searchwell" class="panel-body">
                 <form role="form">
-                    <!-- TODO: Use normal datetime picker that actually works -->
+                    <!-- TODO: Use normal datetime picker that actually works... It does work -->
                     <div class="form-group inline-block">
                         <div id="from" class="inline-block">
                             <label for="">Vanaf</label>
