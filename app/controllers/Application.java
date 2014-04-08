@@ -28,7 +28,8 @@ public class Application extends Controller {
                         routes.javascript.EmailTemplates.showExistingTemplatesPage(),
                         routes.javascript.InfoSessions.enrollSession(),
                         routes.javascript.Drives.showDrivesPage(),
-                        routes.javascript.Maps.getMap()
+                        routes.javascript.Maps.getMap(),
+                        routes.javascript.Reserve.getCarModal()
                 )
         );
     }

@@ -59,30 +59,55 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Ritten</h1>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Ritten
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        @if(form.hasGlobalErrors) {
-                            <div class="alert alert-danger alert-dismissable">
-                                <strong>Error!</strong> @form.globalError.message
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs">
+                  <li class="active"><a href="#planned" data-toggle="tab">Gepland</a></li>
+                  <li><a href="#passed" data-toggle="tab">Voorbij</a></li>
+                  <li><a href="#requests" data-toggle="tab">Aanvragen</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div class="tab-pane active" id="planned">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                @if(form.hasGlobalErrors) {
+                                    <div class="alert alert-danger alert-dismissable">
+                                        <strong>Error!</strong> @form.globalError.message
+                                    </div>
+                                }
+                                <div id="resultsTable" class="table-responsive">
+                                    <!-- Here comes the loaded table-->
+                                </div>
                             </div>
-                        }
-
-                        <div id="resultsTable" class="table-responsive">
-
-                                <!-- Here comes the loaded table-->
+                            <!-- /.panel-body -->
                         </div>
+                        <!-- /.panel -->
                     </div>
-                        <!-- /.panel-body -->
+
+                    <div class="tab-pane" id="passed">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                Yarr, booty!
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    </div>
+
+                    <div class="tab-pane" id="requests">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                Yarr, more booty!
+                            </div>
+                        </div>
+                        <!-- /.panel -->
+                    </div>
                 </div>
-                    <!-- /.panel -->
             </div>
-                <!-- /col-lg-12 -->
+            <!-- /col-lg-12 -->
         </div>
-            <!-- /row -->
+        <!-- /row -->
     </div>
     <!-- /page-wrapper -->
 }
