@@ -1,4 +1,4 @@
-@(form: play.data.Form[Reserve.ReservationModel], reservation: Reservation, car: Car, owner: User, loaner: User)
+@(form: play.data.Form[Reserve.ReservationModel], refuseform: play.data.Form[Drives.RefuseModel], reservation: Reservation, car: Car, owner: User, loaner: User)
 @import database.DatabaseHelper
 
 @scripts = {
@@ -74,22 +74,36 @@
         </ol>
     </div>
 
+    <!-- page wrapper -->
     <div id="page-wrapper">
+        <!-- row -->
         <div class="row">
+            <!-- col-lg-12 -->
             <div class="col-lg-12">
                 <h1 class="page-header">Rit details</h1>
                 <div class="panel panel-default">
+                    <!-- panel-heading -->
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart-o fa-fw"></i> Geselecteerde rit
+                    <!-- /panel-heading -->
                     </div>
-                        <!-- /.panel-heading -->
+                    <!-- panel-body -->
                     <div class="panel-body">
+                        <!-- error while adjusting the reservation -->
                         @if(form.hasGlobalErrors) {
                             <div class="alert alert-danger alert-dismissable">
                                 <strong>Error!</strong> @form.globalError.message
                             </div>
                         }
+                        <!-- error while refusing the reservation -->
+                        @if(refuseform.hasGlobalErrors) {
+                            <div class="alert alert-danger alert-dismissable">
+                                <strong>Error!</strong> @refuseform.globalError.message
+                            </div>
+                        }
+                        <!-- well -->
                         <div class="well">
+                            <!-- row -->
                             <div class="row">
                                 <div class="col-sm-4">
                                     <strong>Autonaam:</strong> @car.getName
@@ -100,13 +114,15 @@
                                 <div class="col-sm-4">
                                     <strong>Type:</strong> @car.getType
                                 </div>
+                            <!-- /row -->
                             </div><br />
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <strong>Status:</strong> @reservation.getStatus.getDescription
-                                </div>
-                                @if(loaner.getId == DatabaseHelper.getUserProvider.getUser.getId) {
-                                    @helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
+                            <!-- loaner specific content -->
+                            @if(loaner.getId == DatabaseHelper.getUserProvider.getUser.getId) {
+                                @helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <strong>Status:</strong> @reservation.getStatus.getDescription
+                                        </div>
                                         <div id="fromdetails" class="col-sm-4">
                                             <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
                                         </div>
@@ -130,23 +146,55 @@
                                                 <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                             </div>
                                         </div>
-                                        <div id="buttons" class="form-group col-sm-12">
-                                            <br />
-                                            <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
-                                            <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
+                                    </div><br />
+                                    @if(reservation.getStatus != ReservationStatus.CANCELLED && reservation.getStatus != ReservationStatus.REFUSED) {
+                                        <div class="row">
+                                            <div id="buttons" class="form-group col-sm-12">
+                                                <br />
+                                                <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
+                                                <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
+                                            </div>
                                         </div>
                                     }
-                                } else {
+                                }
+                            <!-- owner specific content -->
+                            } else {
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Status:</strong> @reservation.getStatus.getDescription
+                                    </div>
                                     <div class="col-sm-4">
                                         <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
                                     </div>
+                                </div><br />
+                                @if(reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.REQUEST_NEW) {
+                                    @helper.form(routes.Drives.refuseReservation(reservation.getId), 'class -> "form-horizontal") {
+                                        <div class="row">
+                                            <div id="actions1" class="btn-group btn-group-xs form-group col-sm-12">
+                                                <a type="button" class="btn btn-xs btn-success" href="@routes.Drives.approveReservation(reservation.getId)">Goedkeuren</a>
+                                                <button id="reject" type="button" class="btn btn-xs btn-warning">
+                                                    Afkeuren</button>
+                                            </div>
+                                            <div id="actions2" class="hidden">
+                                                <div class="btn-group btn-group-xs form-group col-sm-12">
+                                                    <button type="submit" class="btn btn-xs btn-success">Afkeuren</button>
+                                                    <button id="annulate" type="button" class="btn btn-xs btn-warning">
+                                                        Annuleren</button>
+                                                </div>
+                                                <textarea name="reason" class="form-control" rows="3" placeholder="Reden voor de weigering"></textarea>
+                                            </div>
+                                        </div>
+                                    }
                                 }
-                            </div>
+                            }
+                        <!-- /well -->
                         </div>
+                        <!-- col-lg-6 -->
                         <div class="col-lg-6">
+                            <!-- well -->
                             <div class="well">
                                 <strong>Eigenaar</strong><hr />
                                 <p>
@@ -161,9 +209,13 @@
                                         <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
                                     }
                                 </p>
+                            <!-- /well -->
                             </div>
+                        <!-- /col-lg-6 -->
                         </div>
+                        <!-- col-lg-6 -->
                         <div class="col-lg-6">
+                            <!-- well -->
                             <div class="well">
                                 <strong>Ontlener</strong><hr />
                                 <p>
@@ -172,16 +224,18 @@
                                     <strong>Tel:</strong> @if(loaner.getPhone != null && !loaner.getPhone.isEmpty){ @loaner.getPhone } else { onbekend } <br />
                                     <strong>GSM:</strong> @if(loaner.getCellphone != null && !loaner.getCellphone.isEmpty){ @loaner.getCellphone } else {onbekend }
                                 </p>
+                            <!-- /well -->
                             </div>
+                        <!-- /col-lg-6 -->
                         </div>
-                    </div>
                     <!-- /panel-body -->
-                </div>
+                    </div>
                 <!-- /panel -->
-            </div>
+                </div>
             <!-- /col-lg-12 -->
-        </div>
+            </div>
         <!-- /row -->
-    </div>
+        </div>
     <!-- /page wrapper -->
+    </div>
 }
