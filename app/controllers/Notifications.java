@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class Notifications extends Controller {
 
-    private static final int PAGE_SIZE = 4;
+    private static final int PAGE_SIZE = 10;
 
     /**
      * Method: GET
@@ -31,7 +31,6 @@ public class Notifications extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showNotificationsPage(int page, int ascInt, String orderBy, String searchString) {
-        System.out.println("test: " + searchString);
         User user = DatabaseHelper.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 

@@ -51,6 +51,9 @@ var errorMessageFilter = "Zoekvelden mogen geen komma's (,) of gelijk-aan-tekens
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
 var buttonsAroundPage = 2;
 
+if(typeof autoLoad == 'undefined') {
+    autoLoad = 0;
+}
 if(typeof beginPage == 'undefined') {
     var beginPage = 1;
 }
@@ -103,7 +106,7 @@ function loadPage(page, asc, orderBy, search) {
         // Calculate the number of columns to create a td with the colspan set to that number
         var cols = $("#resultsTable").find('table').find('tr')[0].cells.length;
         $("#resultsTable").find('table').find('tbody').html($('<tr>')
-                .append($('<td>')
+                .append($('<td class="loading">')
                     .attr('colspan', cols)
                     .attr('style', 'text-align: center; background-color: #FFFFFF; padding: 8px;')
                     .append($('<img>')
@@ -114,7 +117,7 @@ function loadPage(page, asc, orderBy, search) {
         );
     // Fill in loading image if the table is not yet rendered
     } else {
-        $("#resultsTable").append($('<div>')
+        $("#resultsTable").append($('<div class="loading">')
             .attr('style', 'text-align: center;')
             .append($('<img>')
                 .attr('alt', 'Loading...')
@@ -127,67 +130,75 @@ function loadPage(page, asc, orderBy, search) {
 
     route(page, asc, orderBy, search).ajax({
         success : function(html) {
-            $("#resultsTable").html(html);
+            if(autoLoad != 1)
+                $("#resultsTable").html(html);
+            else {
+                $(".loading").hide();
+                $("#buttons").hide();
+                $("#resultsTable").append(html);
+            }
             // TODO: better way to pass amountOfResults and amountOfPages to javascript?
             var amountOfResultsAndPages = $('#buttons').attr('name').split(",");
             var amountOfResults = amountOfResultsAndPages[0];
             var amountOfPages = amountOfResultsAndPages[1];
 
-            /*
-             * Navigation buttons
-             *
-             * These will come in the element with id="buttons"
-             */
-            // Button to go to first page and to previous page
-            var buttonString = "Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).<br>";
-            if(amountOfPages > 1) {
-                if(page != 1) {
-                    buttonString += "<button class='buttons btn' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
-                        "<button class='buttons btn' id='previousPage' name='" + (page - 1)  + "' type='button'>" + previousBtnTxt + "</button> ";
-                }
-
-                // Calculate how many previous pages we create buttons to (standard 2, but less if we can't go back more, or more when we can't go further more -> max 4)
-                var previousPages = buttonsAroundPage;
-                var amountOfPreviousPages = 0;
-                if(amountOfPages - page < buttonsAroundPage) {
-                    previousPages += buttonsAroundPage - (amountOfPages - page);
-                }
-                while(previousPages >= 1) {
-                    if(page - previousPages >= 1) {
-                        buttonString += "<button class='buttons btn' id='previousPage" +  previousPages + "' name='" + (page - previousPages) + "' type='button'>" + (page - previousPages) + "</button> ";
-                        amountOfPreviousPages++;
+            if(autoLoad != 1) {
+                /*
+                 * Navigation buttons
+                 *
+                 * These will come in the element with id="buttons"
+                 */
+                // Button to go to first page and to previous page
+                var buttonString = "Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).<br>";
+                if(amountOfPages > 1) {
+                    if(page != 1) {
+                        buttonString += "<button class='buttons btn' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
+                            "<button class='buttons btn' id='previousPage' name='" + (page - 1)  + "' type='button'>" + previousBtnTxt + "</button> ";
                     }
-                    previousPages--;
-                }
-                // Button for current page. Disabled ofcourse.
-                buttonString += "<button class='buttons btn' id='currentPage' name='" + page + "' type='button'>" + page + "</button> ";
 
-                // Calculate how many next pages we create buttons to (standard 2, but less if we can't go further more, or more when we can't go back more -> max 4)
-                var nextPages = 1;
-                while(page + nextPages <= amountOfPages && nextPages <= buttonsAroundPage + (buttonsAroundPage - amountOfPreviousPages)) {
-                    buttonString += "<button class='buttons btn' id='nextPage" +  nextPages + "' name='" + (page + nextPages) + "' type='button'>" + (page + nextPages) + "</button> ";
-                    nextPages++;
-                }
+                    // Calculate how many previous pages we create buttons to (standard 2, but less if we can't go back more, or more when we can't go further more -> max 4)
+                    var previousPages = buttonsAroundPage;
+                    var amountOfPreviousPages = 0;
+                    if(amountOfPages - page < buttonsAroundPage) {
+                        previousPages += buttonsAroundPage - (amountOfPages - page);
+                    }
+                    while(previousPages >= 1) {
+                        if(page - previousPages >= 1) {
+                            buttonString += "<button class='buttons btn' id='previousPage" +  previousPages + "' name='" + (page - previousPages) + "' type='button'>" + (page - previousPages) + "</button> ";
+                            amountOfPreviousPages++;
+                        }
+                        previousPages--;
+                    }
+                    // Button for current page. Disabled ofcourse.
+                    buttonString += "<button class='buttons btn' id='currentPage' name='" + page + "' type='button'>" + page + "</button> ";
 
-                if(page != amountOfPages) {
-                    // Button to go to last page and next page
-                    buttonString += "<button class='buttons btn' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
-                        "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
-                }
-            }
-            // Add the buttons to the html-file
-            $("#buttons").html(buttonString);
+                    // Calculate how many next pages we create buttons to (standard 2, but less if we can't go further more, or more when we can't go back more -> max 4)
+                    var nextPages = 1;
+                    while(page + nextPages <= amountOfPages && nextPages <= buttonsAroundPage + (buttonsAroundPage - amountOfPreviousPages)) {
+                        buttonString += "<button class='buttons btn' id='nextPage" +  nextPages + "' name='" + (page + nextPages) + "' type='button'>" + (page + nextPages) + "</button> ";
+                        nextPages++;
+                    }
 
-            // Now let's add the appropriote onclick-functions to the buttons and disable them if needed
-            var buttons = document.getElementsByClassName('buttons');
-            for(var i = 0; i < buttons.length; i++) {
-                var p = parseInt(buttons[i].getAttribute("name"));
-                if(p < 1 || p > amountOfPages || p == page) {
-                    buttons[i].setAttribute("disabled", "disabled");
-                } else {
-                    buttons[i].onclick = function() {
-                        var p = parseInt(this.getAttribute("name"));
-                        loadPage(p, asc, orderBy, search);
+                    if(page != amountOfPages) {
+                        // Button to go to last page and next page
+                        buttonString += "<button class='buttons btn' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
+                            "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
+                    }
+                }
+                // Add the buttons to the html-file
+                $("#buttons").html(buttonString);
+
+                // Now let's add the appropriote onclick-functions to the buttons and disable them if needed
+                var buttons = document.getElementsByClassName('buttons');
+                for(var i = 0; i < buttons.length; i++) {
+                    var p = parseInt(buttons[i].getAttribute("name"));
+                    if(p < 1 || p > amountOfPages || p == page) {
+                        buttons[i].setAttribute("disabled", "disabled");
+                    } else {
+                        buttons[i].onclick = function() {
+                            var p = parseInt(this.getAttribute("name"));
+                            loadPage(p, asc, orderBy, search);
+                        }
                     }
                 }
             }
@@ -218,6 +229,19 @@ function loadPage(page, asc, orderBy, search) {
                     sortable.setAttribute("class", sortable.getAttribute("class") + " " + (asc == 1 ? "asc" : "desc"));
                 }
             }
+
+            // For auto-loading on reaching bottom of document
+            if(autoLoad == 1) {
+                $(window).scroll(function() {
+                    if($(window).scrollTop() == $(document).height() - $(window).height()) {
+                        if(page < amountOfPages) {
+                            page++;
+                            loadPage(page, asc, orderBy, search);
+                        }
+                    }
+                });
+            }
+
             pageLoaded = true;
         },
         error : function() {
