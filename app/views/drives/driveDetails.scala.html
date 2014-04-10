@@ -7,7 +7,6 @@
     <script src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")' type="text/javascript"></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
     <script>
-        $(document ).ready(function(){
             // Determine the dates of the reservation
             var from = new Date("@reservation.getFrom.toString("yyyy-MM-dd HH:mm")");
             var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
@@ -22,44 +21,6 @@
             var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
                 until.getMinutes(), 0);
             adjustedUntil.setMinutes(adjustedUntil.getMinutes() - 5);
-            // Disable all dates excepted those within the reservation dates
-            $('#datetimepickerfrom').datetimepicker('setStartDate', correctedFrom);
-            $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
-
-            $('#datetimepickeruntil').datetimepicker('setEndDate', correctedUntil);
-            $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
-
-            // When datetimepicker from is changed, make sure the user can't select a date before from
-            // in datetimepicker until
-            $('#datetimepickerfrom').datetimepicker().on('changeDate', function(evt) {
-                if(evt.date != null) {
-                    var date = new Date(evt.date);
-                    var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
-                        date.getMinutes(), 0);
-                    correctedDate.setHours(correctedDate.getHours() - 2);
-                    correctedDate.setMinutes(correctedDate.getMinutes() + 5);
-                    $('#datetimepickeruntil').datetimepicker('setStartDate', correctedDate);
-                } else {
-                    $("#input_from").val('@reservation.getFrom.toString("yyyy-MM-dd HH:mm")');
-                    $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
-                }
-            });
-            // When datetimepicker until is changed, make sure the user can't select a date after until
-            // in datetimepicker until
-            $('#datetimepickeruntil').datetimepicker().on('changeDate', function(evt) {
-                if(evt.date != null) {
-                    var date = new Date(evt.date);
-                    var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
-                        date.getMinutes(), 0);
-                    correctedDate.setHours(correctedDate.getHours() - 2);
-                    correctedDate.setMinutes(correctedDate.getMinutes() - 5);
-                    $('#datetimepickerfrom').datetimepicker('setEndDate', correctedDate);
-                } else {
-                    $("#input_until").val('@reservation.getTo.toString("yyyy-MM-dd HH:mm")');
-                    $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
-                }
-            });
-        });
     </script>
 }
 @stylesheets = {
@@ -118,77 +79,10 @@
                             </div><br />
                             <!-- loaner specific content -->
                             @if(loaner.getId == DatabaseHelper.getUserProvider.getUser.getId) {
-                                @helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <strong>Status:</strong> @reservation.getStatus.getDescription
-                                        </div>
-                                        <div id="fromdetails" class="col-sm-4">
-                                            <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
-                                        </div>
-                                        <div id="fromadjust" class="form-group hidden col-sm-10">
-                                            <br />
-                                            <strong>Reservatie van:</strong>
-                                            <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_from">
-                                                <input id="input_from" name="from" class="form-control searchTextField" size="16" value="@reservation.getFrom.toString("yyyy-MM-dd HH:mm")">
-                                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                            </div><br />
-                                        </div>
-                                        <div id="untildetails" class="col-sm-4">
-                                            <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
-                                        </div>
-                                        <div id="untiladjust" class="form-group hidden col-sm-10">
-                                            <strong>Reservatie tot:</strong>
-                                            <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_until">
-                                                <input id="input_until" name="until" class="form-control searchTextField" size="16" value="@reservation.getTo.toString("yyyy-MM-dd HH:mm")">
-                                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                            </div>
-                                        </div>
-                                    </div><br />
-                                    @if(reservation.getStatus != ReservationStatus.CANCELLED && reservation.getStatus != ReservationStatus.REFUSED) {
-                                        <div class="row">
-                                            <div id="buttons" class="form-group col-sm-12">
-                                                <br />
-                                                <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
-                                                <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
-                                            </div>
-                                        </div>
-                                    }
-                                }
+                                @views.html.drives.driveDetailsLoaner(form, reservation)
                             <!-- owner specific content -->
                             } else {
-                                <div class="row">
-                                    <div class="col-sm-4">
-                                        <strong>Status:</strong> @reservation.getStatus.getDescription
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
-                                    </div>
-                                </div><br />
-                                @if(reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.REQUEST_NEW) {
-                                    @helper.form(routes.Drives.refuseReservation(reservation.getId), 'class -> "form-horizontal") {
-                                        <div class="row">
-                                            <div id="actions1" class="btn-group btn-group-xs form-group col-sm-12">
-                                                <a type="button" class="btn btn-xs btn-success" href="@routes.Drives.approveReservation(reservation.getId)">Goedkeuren</a>
-                                                <button id="reject" type="button" class="btn btn-xs btn-warning">
-                                                    Afkeuren</button>
-                                            </div>
-                                            <div id="actions2" class="hidden">
-                                                <div class="btn-group btn-group-xs form-group col-sm-12">
-                                                    <button type="submit" class="btn btn-xs btn-success">Afkeuren</button>
-                                                    <button id="annulate" type="button" class="btn btn-xs btn-warning">
-                                                        Annuleren</button>
-                                                </div>
-                                                <textarea name="reason" class="form-control" rows="3" placeholder="Reden voor de weigering"></textarea>
-                                            </div>
-                                        </div>
-                                    }
-                                }
+                                @views.html.drives.driveDetailsOwner(refuseform, reservation)
                             }
                         <!-- /well -->
                         </div>
@@ -200,7 +94,7 @@
                                 <p>
                                     @if(DatabaseHelper.getUserProvider.getUser.getId == owner.getId ||
                                             reservation.getStatus == ReservationStatus.ACCEPTED ||
-                                            reservation.getStatus == ReservationStatus.REQUEST_NEW) {
+                                            reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
                                         <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
                                         <strong>E-mail:</strong> @owner.getEmail <br />
                                         <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />

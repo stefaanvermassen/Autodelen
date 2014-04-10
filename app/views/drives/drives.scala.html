@@ -2,6 +2,7 @@
 
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
     <script>
         var route = myJsRoutes.controllers.Drives.showDrivesPage;
         // To go to the correct page
@@ -31,14 +32,34 @@
                 <h1 class="page-header">Ritten</h1>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs">
-                  <li class="active"><a href="#planned" data-toggle="tab">Gepland</a></li>
-                  <li><a href="#passed" data-toggle="tab">Voorbij</a></li>
-                  <li><a href="#requests" data-toggle="tab">Aanvragen</a></li>
+                  <li id="tab_planned" class="active"><a href="#resultpanel" data-toggle="tab">
+                      Gepland</a>
+                      <input name="status" value="@ReservationStatus.ACCEPTED.toString" class="searchTextField hidden">
+                  </li>
+                  <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
+                      Voorbij</a>
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS)) { amount =>
+                          @if(amount > 0) {
+                              <span class="topnumber">1</span>
+                          }
+                      }
+                      <input name="status" value="PASSED" class="hidden">
+                  </li>
+                  <li id="tab_request"><a href="#resultpanel" data-toggle="tab">
+                      Aanvragen</a>
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST)) { amount =>
+                          @if(amount > 0) {
+                              <span class="topnumber">1</span>
+                          }
+                      }
+                      <input name="status" value="@ReservationStatus.REQUEST.toString" class="hidden">
+                  </li>
+                  <li class="hidden"><button id="searchButton"></button></li>
                 </ul>
 
                 <!-- Tab panes -->
                 <div class="tab-content">
-                    <div class="tab-pane active" id="planned">
+                    <div id="resultpanel" class="tab-pane active">
                         <div class="panel panel-default tabpanel">
                             <div class="panel-body">
                                 <div id="resultsTable" class="table-responsive">
@@ -46,25 +67,6 @@
                                 </div>
                             </div>
                             <!-- /.panel-body -->
-                        </div>
-                        <!-- /.panel -->
-                    </div>
-
-                    <div class="tab-pane" id="passed">
-                        <div class="panel panel-default tabpanel">
-                            <div class="panel-body">
-                                Yarr, booty!
-                            </div>
-                            <!-- /.panel-body -->
-                        </div>
-                        <!-- /.panel -->
-                    </div>
-
-                    <div class="tab-pane" id="requests">
-                        <div class="panel panel-default tabpanel">
-                            <div class="panel-body">
-                                Yarr, more booty!
-                            </div>
                         </div>
                         <!-- /.panel -->
                     </div>

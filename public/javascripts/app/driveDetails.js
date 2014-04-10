@@ -63,4 +63,42 @@ $(document).ready(function() {
     });
     $("#input_from").datetimeinput();
     $("#input_until").datetimeinput();
+
+    // Disable all dates excepted those within the reservation dates
+    $('#datetimepickerfrom').datetimepicker('setStartDate', correctedFrom);
+    $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
+
+    $('#datetimepickeruntil').datetimepicker('setEndDate', correctedUntil);
+    $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
+
+    // When datetimepicker from is changed, make sure the user can't select a date before from
+    // in datetimepicker until
+    $('#datetimepickerfrom').datetimepicker().on('changeDate', function(evt) {
+        if(evt.date != null) {
+            var date = new Date(evt.date);
+            var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
+                date.getMinutes(), 0);
+            correctedDate.setHours(correctedDate.getHours() - 2);
+            correctedDate.setMinutes(correctedDate.getMinutes() + 5);
+            $('#datetimepickeruntil').datetimepicker('setStartDate', correctedDate);
+        } else {
+            $("#input_from").val('@reservation.getFrom.toString("yyyy-MM-dd HH:mm")');
+            $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
+        }
+    });
+    // When datetimepicker until is changed, make sure the user can't select a date after until
+    // in datetimepicker until
+    $('#datetimepickeruntil').datetimepicker().on('changeDate', function(evt) {
+        if(evt.date != null) {
+            var date = new Date(evt.date);
+            var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
+                date.getMinutes(), 0);
+            correctedDate.setHours(correctedDate.getHours() - 2);
+            correctedDate.setMinutes(correctedDate.getMinutes() - 5);
+            $('#datetimepickerfrom').datetimepicker('setEndDate', correctedDate);
+        } else {
+            $("#input_until").val('@reservation.getTo.toString("yyyy-MM-dd HH:mm")');
+            $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
+        }
+    });
 });

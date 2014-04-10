@@ -7,7 +7,7 @@ import org.joda.time.DateTime;
  */
 public class CarRide {
     private Reservation reservation; // reservation.getId() is CarRide-id
-    private boolean status;
+    private CarRideStatus status;
     private int startMileage;
     private int endMileage;
 
@@ -39,11 +39,11 @@ public class CarRide {
         this.endMileage = endMileage;
     }
 
-    public boolean isStatus() {
+    public CarRideStatus getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(CarRideStatus status) {
         this.status = status;
     }
 }

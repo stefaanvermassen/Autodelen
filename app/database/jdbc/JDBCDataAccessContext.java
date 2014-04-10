@@ -133,6 +133,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
 		if(reservationDAO == null){
             reservationDAO = new JDBCReservationDAO(connection);
         }
+        reservationDAO.updateTable();
         return reservationDAO;
 	}
 

@@ -3,6 +3,7 @@ package database.jdbc;
 import database.CarRideDAO;
 import database.DataAccessException;
 import models.CarRide;
+import models.CarRideStatus;
 import models.Reservation;
 
 import java.sql.*;
@@ -25,7 +26,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
     public static CarRide populateCarRide(ResultSet rs) throws SQLException {
         CarRide carRide = new CarRide(JDBCReservationDAO.populateReservation(rs));
-        carRide.setStatus(rs.getBoolean("car_ride_status"));
+        carRide.setStatus(CarRideStatus.valueOf(rs.getString("car_ride_status")));
         carRide.setStartMileage(rs.getInt("car_ride_start_mileage"));
         carRide.setEndMileage(rs.getInt("car_ride_end_mileage"));
 
@@ -93,7 +94,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
     public void updateCarRide(CarRide carRide) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateCarRideStatement();
-            ps.setBoolean(1, carRide.isStatus());
+            ps.setString(1, carRide.getStatus().toString());
             ps.setInt(2, carRide.getStartMileage());
             ps.setInt(3, carRide.getEndMileage());
 

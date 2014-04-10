@@ -12,7 +12,7 @@ public enum FilterField {
     USER_NAME, USER_FIRSTNAME, USER_LASTNAME,
     ZIPCODE,
     INFOSESSION_DATE,
-    RESERVATION_USER_OR_OWNER_ID,
+    RESERVATION_USER_OR_OWNER_ID, RESERVATION_STATUS,
     FROM, UNTIL,
     UNKNOWN;
 
@@ -59,6 +59,9 @@ public enum FilterField {
                 break;
             case "user_lastname":
                 field = USER_LASTNAME;
+                break;
+            case "status":
+                field = RESERVATION_STATUS;
                 break;
         }
         return field;

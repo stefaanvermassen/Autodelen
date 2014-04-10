@@ -3,11 +3,10 @@ package controllers;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
+import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
@@ -184,8 +183,6 @@ public class Drives extends Controller {
             }
             reservation.setFrom(from);
             reservation.setTo(until);
-            if(reservation.getStatus() == ReservationStatus.ACCEPTED && !isOwnerOfReservedCar(context, user, reservation))
-                reservation.setStatus(ReservationStatus.REQUEST_NEW);
             rdao.updateReservation(reservation);
             context.commit();
             return ok(detailsPage(reservationId, adjustForm, Form.form(RefuseModel.class)));
@@ -218,7 +215,6 @@ public class Drives extends Controller {
      * Called when a reservation of a car is refused by the owner.
      *
      * @param reservationId the id of the reservation being refused
-     * @param errorIndex index indicating index of the reservation being refused
      * @return the drives index page
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
@@ -266,8 +262,7 @@ public class Drives extends Controller {
                     // has the request or request_new status
                     default:
                         if (!isOwnerOfReservedCar(context, user, reservation)
-                                || (reservation.getStatus() != ReservationStatus.REQUEST
-                                && reservation.getStatus() != ReservationStatus.REQUEST_NEW)) {
+                                || reservation.getStatus() != ReservationStatus.REQUEST) {
                             flash("Error", "Alleen de eigenaar kan de status van een reservatie aanpassen");
                             return null;
                         }
@@ -298,7 +293,19 @@ public class Drives extends Controller {
         return index();
     }
 
-    // PRIVATE METHODS
+    /**
+     * Get the number of reservations having the provided status
+     * @param status The statuses
+     * @return The number of reservations
+     */
+    public static int reservationsWithStatus(ReservationStatus status) {
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            ReservationDAO dao = context.getReservationDAO();
+            return dao.numberOfReservationsWithStatus(status);
+        } catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
 
     /**
      * Private method to determine whether the user is owner of the car belonging to a reservation.
@@ -345,7 +352,18 @@ public class Drives extends Controller {
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
+        Filter filter = new JDBCFilter();
+        if(searchString != "") {
+            String[] searchStrings = searchString.split(",");
+            for(String s : searchStrings) {
+                String[] s2 = s.split("=");
+                if(s2.length == 2) {
+                    String f = s2[0];
+                    String v = s2[1];
+                    filter.fieldIs(FilterField.stringToField(f), v);
+                }
+            }
+        }
 
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {

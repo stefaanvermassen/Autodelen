@@ -12,8 +12,9 @@ public enum ReservationStatus {
     REQUEST("Wachten op goedkeuring"),
     ACCEPTED("Aanvraag goedgekeurd"),
     REFUSED("Aanvraag geweigerd"),
-    REQUEST_NEW("Wachten op nieuwe goedkeuring"),
-    CANCELLED("Aanvraag geannuleerd");
+    CANCELLED("Aanvraag geannuleerd"),
+    REQUEST_DETAILS("Wachten op informatie rit"),
+    FINISHED("Rit beëindigd");
 
     // Enum definition
     private String description;

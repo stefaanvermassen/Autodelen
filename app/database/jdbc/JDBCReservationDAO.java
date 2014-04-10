@@ -34,13 +34,19 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     public static final String FILTER_FRAGMENT = " WHERE (car_owner_user_id=? OR reservation_user_id=? ) ";
 
-    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+    public static final String MATCH_PASSED = " reservation_status != 'ACCEPTED' AND reservation_status != 'REQUEST' ";
+
+    public static final String MATCH_STATUS = " reservation_status = ? ";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start, boolean matchStatus) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
         ps.setString(start, filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
         ps.setString(start+1, filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
+        if(matchStatus)
+            ps.setString(start+2, filter.getFieldIs(FilterField.RESERVATION_STATUS));
     }
 
     private Connection connection;
@@ -48,9 +54,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement updateReservationStatement;
     private PreparedStatement getReservationStatement;
     private PreparedStatement deleteReservationStatement;
-    private PreparedStatement getReservationListByUseridStatement;
     private PreparedStatement getReservationListByCaridStatement;
-    private PreparedStatement carIsUnavailableStatement;
     private PreparedStatement getGetReservationListPageByFromAscStatement;
     private PreparedStatement getGetReservationListPageByFromDescStatement;
     private PreparedStatement getGetAmountOfReservationsStatement;
@@ -60,7 +64,6 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
-
         Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs, false, false), JDBCUserDAO.populateUser(rs, false, false), new DateTime(rs.getTimestamp("reservation_from")), new DateTime(rs.getTimestamp("reservation_to")));
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         return reservation;
@@ -96,15 +99,6 @@ public class JDBCReservationDAO implements ReservationDAO{
         return getReservationStatement;
     }
 
-    // TODO: delete this
-    private PreparedStatement getGetReservationListByUseridStatement() throws SQLException {
-        if (getReservationListByUseridStatement == null) {
-            // Only request the reservations for which the current user is the loaner or the owner
-            getReservationListByUseridStatement = connection.prepareStatement(RESERVATION_QUERY + FILTER_FRAGMENT);
-        }
-        return getReservationListByUseridStatement;
-    }
-
     private PreparedStatement getGetReservationListPageByFromAscStatement() throws SQLException {
         if(getGetReservationListPageByFromAscStatement == null) {
             getGetReservationListPageByFromAscStatement = connection.prepareStatement(RESERVATION_QUERY + FILTER_FRAGMENT + "ORDER BY reservation_from asc LIMIT ?, ?");
@@ -134,17 +128,6 @@ public class JDBCReservationDAO implements ReservationDAO{
                     "INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfReservationsStatement;
-    }
-
-
-    private PreparedStatement getCarIsUnavailableStatement() throws SQLException {
-        if (carIsUnavailableStatement == null) {
-            // Only request the reservations for which the current user is the loaner or the owner
-            carIsUnavailableStatement = connection.prepareStatement("SELECT count(*) AS unavailable FROM CarReservations " +
-                    "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id WHERE car_id = ? " +
-                    "AND ? < CarReservations.reservation_to AND ? >  CarReservations.reservation_from");
-        }
-        return carIsUnavailableStatement;
     }
 
     @Override
@@ -223,7 +206,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     public int getAmountOfReservations(Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = getGetAmountOfReservationsStatement();
-            fillFragment(ps, filter, 1);
+            fillFragment(ps, filter, 1, false);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
@@ -238,38 +221,50 @@ public class JDBCReservationDAO implements ReservationDAO{
         }
     }
 
-    // TODO: delete this
     @Override
-    public List<Reservation> getReservationListForUser(int userId) throws DataAccessException {
+    public int numberOfReservationsWithStatus(ReservationStatus status) {
         try {
-            PreparedStatement ps = getGetReservationListByUseridStatement();
-            ps.setInt(1, userId);
-            ps.setInt(2, userId);
-            return getReservationList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of reservations", e);
+            String statement = "SELECT COUNT(*) as result FROM CarReservations " +
+                    "WHERE CarReservations.reservation_status = '" + status + "'";
+            PreparedStatement ps = connection.prepareStatement(statement);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("result");
+                else return 0;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of reservations", ex);
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Could not count number of reservations");
         }
     }
-
 
     @Override
     public List<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = null;
+            boolean matchStatus = true;
+            String statement = RESERVATION_QUERY + FILTER_FRAGMENT + "AND";
+            if("PASSED".equals(filter.getFieldIs(FilterField.RESERVATION_STATUS))) {
+                statement += MATCH_PASSED;
+                matchStatus = false;
+            }
+            else
+                statement += MATCH_STATUS;
+            if("".equals(filter.getFieldIs(FilterField.RESERVATION_STATUS)))
+                filter.fieldIs(FilterField.RESERVATION_STATUS, ReservationStatus.ACCEPTED.toString());
             switch(orderBy) {
                 // TODO: get some other things to sort on
                 default:
-                    ps = asc ? getGetReservationListPageByFromAscStatement() : getGetReservationListPageByFromDescStatement();
+                    statement += asc ? "ORDER BY reservation_from asc" : "ORDER BY reservation_from desc";
                     break;
             }
+            int first = (page-1)*pageSize;
+            PreparedStatement ps = connection.prepareStatement(statement + " LIMIT " + first + ", " + pageSize);
             if(ps == null) {
                 throw new DataAccessException("Could not create getReservationList statement");
             }
 
-            fillFragment(ps, filter, 1);
-            int first = (page-1)*pageSize;
-            ps.setInt(3, first);
-            ps.setInt(4, pageSize);
+            fillFragment(ps, filter, 1, matchStatus);
             return getReservationList(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
@@ -296,6 +291,31 @@ public class JDBCReservationDAO implements ReservationDAO{
             return list;
         }catch (SQLException e){
             throw new DataAccessException("Error while reading reservation resultset", e);
+        }
+    }
+
+    @Override
+    public void updateTable() {
+        try {
+            String statement = "SELECT reservation_id, reservation_status FROM CarReservations WHERE CarReservations.reservation_to < NOW() " +
+                    "AND CarReservations.reservation_status = 'ACCEPTED'";
+            PreparedStatement ps = connection.prepareStatement(statement);
+            try (ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    ReservationStatus status = ReservationStatus.valueOf(rs.getString("reservation_status"));
+                    System.out.println(status);
+                    PreparedStatement update =
+                             connection.prepareStatement("UPDATE CarReservations SET reservation_status = ? WHERE reservation_id = ? ");
+                    update.setString(1, ReservationStatus.REQUEST_DETAILS.toString());
+                    update.setInt(2, rs.getInt("reservation_id"));
+                    if(update.executeUpdate() == 0)
+                        throw new DataAccessException("Error while updating the reservations table");
+                }
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error while updating the reservations table", ex);
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while updating the reservations table");
         }
     }
 }
