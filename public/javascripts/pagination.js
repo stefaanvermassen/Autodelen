@@ -11,7 +11,7 @@
  * In the partial list page give the th-elements class="sortable"
  * Give these th-elements a name that the route-function takes as an argument and stands for the column to sort on
  *
- * In the element with id="buttons" all the navigation buttons will come
+ * In the element with id="pagination" all the navigation buttons will come
  * This element has to have a name-attribute with in it the total amount of pages the list has
  *
  * To filter, you create input-textfields with class="searchTextField"
@@ -37,12 +37,12 @@
  *  <th name="name" class="sortable">Naam</th>
  *  <th name="brand" id= class="sortable">Merk</th>
  * ...
- *  <p id="buttons" name="@amountOfPages"></p>
+ *  <p id="pagination" name="@amountOfResults, @amountOfPages"></p>
  */
 
 /* Variables we can overwrite after we included the script */
-var previousBtnTxt = "Vorige";
-var nextBtnTxt = "Volgende";
+var previousBtnTxt = "<";
+var nextBtnTxt = ">";
 var firstBtnTxt = "<<";
 var lastBtnTxt = ">>";
 var loadingImage = 'assets/images/ajax-loader.gif';
@@ -138,7 +138,7 @@ function loadPage(page, asc, orderBy, search) {
                 $("#resultsTable").append(html);
             }
             // TODO: better way to pass amountOfResults and amountOfPages to javascript?
-            var amountOfResultsAndPages = $('#buttons').attr('name').split(",");
+            var amountOfResultsAndPages = $('#pagination').attr('name').split(",");
             var amountOfResults = amountOfResultsAndPages[0];
             var amountOfPages = amountOfResultsAndPages[1];
 
@@ -146,10 +146,10 @@ function loadPage(page, asc, orderBy, search) {
                 /*
                  * Navigation buttons
                  *
-                 * These will come in the element with id="buttons"
+                 * These will come in the element with id="pagination"
                  */
                 // Button to go to first page and to previous page
-                var buttonString = "Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).<br>";
+                var buttonString = "";
                 if(amountOfPages > 1) {
                     if(page != 1) {
                         buttonString += "<button class='buttons btn' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
@@ -182,11 +182,12 @@ function loadPage(page, asc, orderBy, search) {
                     if(page != amountOfPages) {
                         // Button to go to last page and next page
                         buttonString += "<button class='buttons btn' id='nextPage' name='" + (page + 1)  + "' type='button'>" + nextBtnTxt + "</button> " +
-                            "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button>";
+                            "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button><br>";
                     }
                 }
+                buttonString += "<p>Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).</p>";
                 // Add the buttons to the html-file
-                $("#buttons").html(buttonString);
+                $("#pagination").html(buttonString);
 
                 // Now let's add the appropriote onclick-functions to the buttons and disable them if needed
                 var buttons = document.getElementsByClassName('buttons');

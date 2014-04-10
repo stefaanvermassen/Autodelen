@@ -15,7 +15,7 @@ public class Pagination {
 
     public static Filter parseFilter(String searchString) {
         Filter filter = new JDBCFilter();
-        if(searchString != "") {
+        if(!"".equals(searchString)) {
             String[] searchStrings = searchString.split(",");
             for(String s : searchStrings) {
                 String[] s2 = s.split("=");

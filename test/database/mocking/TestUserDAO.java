@@ -1,6 +1,8 @@
 package database.mocking;
 
 import database.DataAccessException;
+import database.Filter;
+import database.FilterField;
 import database.UserDAO;
 import models.User;
 import models.UserStatus;
@@ -52,27 +54,18 @@ public class TestUserDAO implements UserDAO {
 
     @Override
     public User getUser(String email) throws DataAccessException {
-        //TODO: this should return a cloned object!!!!!!!!!!!
-        // URGENT
         for (User user : userList) {
             if (user.getEmail().equals(email))
                 return (User) Cloner.clone(user);
-               // return user;
-
         }
         return null;
     }
 
     @Override
     public User getUser(int userId, boolean withRest) throws DataAccessException {
-        //TODO: this should return a cloned object!!!!!!!!!!!
-        // URGENT
         for (User user : userList) {
             if (user.getId() == userId)
                 return (User)Cloner.clone(user);
-               // return user;
-
-
         }
         return null;
     }
@@ -135,6 +128,22 @@ public class TestUserDAO implements UserDAO {
 
     @Override
     public List<User> getAllUsers() throws DataAccessException {
-        return null;
+        return userList;
     }
+
+	@Override
+	public int getAmountOfUsers(Filter filter) throws DataAccessException {
+		return getAllUsers().size(); // TODO: add filter methods
+	}
+
+	@Override
+	public List<User> getUserList(FilterField orderBy, boolean asc, int page,
+			int pageSize, Filter filter) throws DataAccessException {
+		return getAllUsers(); // TODO: add filter methods
+	}
+
+	@Override
+	public List<User> searchUsers(String search) throws DataAccessException {
+		return getAllUsers(); // TODO: add search methods
+	}
 }

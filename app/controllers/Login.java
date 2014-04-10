@@ -413,11 +413,12 @@ public class Login extends Controller {
      *
      * @return Redirect to index page
      */
-    @RoleSecured.RoleAuthenticated()
     public static Result logout() {
         User user = DatabaseHelper.getUserProvider().getUser();
-        DatabaseHelper.getUserProvider().invalidateUser(user);
-        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
+        if(user != null) {
+            DatabaseHelper.getUserProvider().invalidateUser(user);
+            DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
+        }
 
         session().clear();
         return redirect(

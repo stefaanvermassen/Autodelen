@@ -19,9 +19,9 @@ POST        /userroles/edit                    controllers.UserRoles.editPost(us
 GET         /drives                            controllers.Drives.index()
 GET         /drives/page                       controllers.Drives.showDrivesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drive_details                     controllers.Drives.details(reservationId: Int)
-POST        /drive_details                     controllers.Drives.adjustDetails(reservationId: Int)
-GET         /drives-approved                   controllers.Drives.approveReservation(reservationId: Int)
-POST        /drives-refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int, page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+POST        /drive_details/adjusted            controllers.Drives.adjustDetails(reservationId: Int)
+GET         /drive_detais/approved             controllers.Drives.approveReservation(reservationId: Int)
+POST        /drive_details/refused             controllers.Drives.refuseReservation(reservationId: Int)
 GET         /drives-cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
 GET         /drivesAdmin                       controllers.Drives.drivesAdmin()
 
@@ -30,6 +30,7 @@ GET         /reserve                           controllers.Reserve.index()
 GET         /reserve/cars                      controllers.Reserve.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation               controllers.Reserve.reserve(carId: Int)
 POST        /reserve/reservation               controllers.Reserve.confirmReservation(cardId: Int)
+GET         /reserve/modal/car                 controllers.Reserve.getCarModal(carId: Int)
 
 
 # User pages
@@ -52,6 +53,7 @@ GET         /profile/byid                      controllers.Profile.index(userId:
 # Users
 GET         /users                             controllers.Users.showUsers()
 GET         /users/page                        controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /users/impersonate                 controllers.Users.impersonate(userId: Int)
 
 # Login screen
 GET         /login                             controllers.Login.login(redirect ?= null)
@@ -84,6 +86,7 @@ GET         /infosession/edit                  controllers.InfoSessions.editSess
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 GET         /infosession/delete                controllers.InfoSessions.removeSession(sessionId: Int)
+GET         /infosession/approval              controllers.InfoSessions.requestApproval()
 
 # Settings
 # TODO: REMOVE THIS!!!
@@ -107,7 +110,6 @@ GET         /cars/delete                       controllers.Cars.removeCar(carId:
 
 # Maps
 GET         /maps/tile                         controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
-GET         /maps/coordinates                  controllers.Maps.getLatLong(addressId: Int)
 GET         /maps/test                         controllers.Maps.showMap()
 
 # User Picker

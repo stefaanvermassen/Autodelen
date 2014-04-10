@@ -63,4 +63,22 @@ public class Users extends Controller {
             throw ex;
         }
     }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result impersonate(int userId){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, false);
+            if(user != null){
+                DatabaseHelper.getUserProvider().createUserSession(user);
+                session("impersonated", "y");
+                return redirect(routes.Dashboard.index());
+            } else {
+                flash("danger", "Deze gebruikersID bestaat niet.");
+                return redirect(routes.Users.showUsers());
+            }
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+    }
 }
