@@ -14,7 +14,7 @@
     @for(session <- sessions) {
     <tr>
         <td>@session.getType.getDescription</td> <!-- TODO: mooi weergeven met icoontje ofzo -->
-        <td>@session.getTime.toString("dd-MM HH:mm")</td>
+        <td>@session.getTime.toString("dd-MM-YYYY HH:mm")</td>
         @if(session.getMaxEnrollees != 0) {
         @if(session.getEnrolleeCount == session.getMaxEnrollees) {
         <td><strong>Volzet</strong></td>
@@ -29,7 +29,8 @@
         <td>@session.getAddress</td>
         <td>
             <div class="btn-group btn-group-xs">
-                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">details</a>
+                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">Details</a>
+                <a href="@routes.InfoSessions.editSession(session.getId)" class="btn btn-success">Bewerken</a>
             </div>
         </td>
     </tr>

@@ -543,10 +543,11 @@ public class InfoSessions extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
         // If no from and until is specified: show infosessions from now until 100 years from now
-        if(filter.getFieldContains(FilterField.FROM, true).equals("")) {
+        // TODO: find better solution for ugly equals YYYY-MM-DD hh:mm
+        if(filter.getFieldContains(FilterField.FROM, true).equals("") || filter.getFieldContains(FilterField.FROM, true).equals("YYYY-MM-DD hh:mm")) {
             filter.fieldContains(FilterField.FROM, DateTime.now().toString());
         }
-        if(filter.getFieldContains(FilterField.UNTIL, true).equals("")) {
+        if(filter.getFieldContains(FilterField.UNTIL, true).equals("") || filter.getFieldContains(FilterField.UNTIL, true).equals("YYYY-MM-DD hh:mm")) {
             filter.fieldContains(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
         }
 
