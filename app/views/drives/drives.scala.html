@@ -1,50 +1,20 @@
-@(errorIndex: Int, form: play.data.Form[Drives.RefuseModel], beginPage : Int, beginAsc : Int, beginOrder : String, beginFilter : String)
-    @scripts = {
-        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-        <script>
-            var route = myJsRoutes.controllers.Drives.showDrivesPage;
-            // To go to the correct page
-            var beginPage = @beginPage;
-            var beginAsc = @beginAsc;
-            var beginOrder = "@beginOrder";
-            var beginFilter = "@beginFilter";
-        </script>
-        <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
-        <script>
-            var index = @errorIndex;
+@(beginPage : Int, beginAsc : Int, beginOrder : String, beginFilter : String)
 
-            @if(form.hasGlobalErrors) {
-                // Pretty ugly hack to make the correct refuse textfield visible
-                $(document).ready(function() {
-                    checkLoaded();
-                });
-            }
-
-            function checkLoaded() {
-                if(pageLoaded) {
-                    flipHidden(index);
-                } else {
-                    setTimeout("checkLoaded()",50);
-                }
-            }
-
-            function flipHidden(index) {
-                var hid1 = $("#hidden1_" + index);
-                var hid2 = $("#hidden2_" + index);
-                if(hid1.is(":visible")) {
-                    hid1.addClass("hidden");
-                    hid2.removeClass("hidden");
-                } else {
-                    hid1.removeClass("hidden");
-                    hid2.addClass("hidden");
-                }
-            }
-        </script>
-    }
-    @stylesheets = {
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    }
-
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+        var route = myJsRoutes.controllers.Drives.showDrivesPage;
+        // To go to the correct page
+        var beginPage = @beginPage;
+        var beginAsc = @beginAsc;
+        var beginOrder = "@beginOrder";
+        var beginFilter = "@beginFilter";
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
 
 @app("Ritten", stylesheets, scripts) {
 
@@ -71,11 +41,6 @@
                     <div class="tab-pane active" id="planned">
                         <div class="panel panel-default tabpanel">
                             <div class="panel-body">
-                                @if(form.hasGlobalErrors) {
-                                    <div class="alert alert-danger alert-dismissable">
-                                        <strong>Error!</strong> @form.globalError.message
-                                    </div>
-                                }
                                 <div id="resultsTable" class="table-responsive">
                                     <!-- Here comes the loaded table-->
                                 </div>
