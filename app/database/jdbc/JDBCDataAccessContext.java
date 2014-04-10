@@ -29,6 +29,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private CarRideDAO carRideDAO;
     private NotificationDAO notificationDAO;
     private MessageDAO messageDAO;
+    private ApprovalDAO approvalDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -150,5 +151,13 @@ public class JDBCDataAccessContext implements DataAccessContext {
             carRideDAO = new JDBCCarRideDAO(connection);
         }
         return carRideDAO;
+    }
+
+    @Override
+    public ApprovalDAO getApprovalDAO() {
+        if(approvalDAO == null){
+            approvalDAO = new JDBCApprovalDAO(connection);
+        }
+        return approvalDAO;
     }
 }

@@ -16,6 +16,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.infosession.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -454,6 +455,46 @@ public class InfoSessions extends Controller {
                 throw ex; //TODO: show gracefully
             }
         }
+    }
+
+    /**
+     * Method: GET
+     * A page to request full user approval
+     * @return The page to request approval
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result requestApproval(){
+        User user = DatabaseHelper.getUserProvider().getUser();
+        List<String> errors = new ArrayList<>();
+        if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
+            errors.add("U bent reeds een geaccepteerd lid als deler en gebruiker.");
+        } else {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                UserDAO udao = context.getUserDAO();
+                user = udao.getUser(user.getId(), true); // gets the full user instead of small cached one
+
+                ApprovalDAO dao = context.getApprovalDAO();
+                List<Approval> approvals = dao.getPendingApprovals(user);//TODO: just request a COUNT instead of fetching the list
+
+                if (!approvals.isEmpty()) {
+                    errors.add("Er is reeds een toelatingsprocedure in aanvraag.");
+                } else {
+                    if(user.getAddressDomicile() == null)
+                        errors.add("Domicilieadres ontbreekt.");
+                    if(user.getAddressResidence() == null)
+                        errors.add("Verblijfsadres ontbreekt.");
+                    if(user.getIdentityCard() == null)
+                        errors.add("Identiteitskaart ontbreekt.");
+                    if(user.getCellphone() == null && user.getPhone() == null)
+                        errors.add("Telefoon/GSM ontbreekt.");
+
+                    //TODO: check if attended infosession last month and status was 'Attended'
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        }
+        return errors.isEmpty() ? ok(approvalrequest.render(user, null)) : badRequest(approvalrequest.render(user, errors));
     }
 
     /**

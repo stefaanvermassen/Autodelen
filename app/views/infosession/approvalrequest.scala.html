@@ -1,0 +1,32 @@
+@(user: User, reasons: List[String] = null)
+
+@app("Goedkeuringsaanvraag") {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
+            <li class="active">Goedkeuring aanvragen</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="well">
+            @flashes()
+            @if(reasons == null || reasons.isEmpty){
+                <p>U voldoet aan de voorwaarden om een een volwaardig lid te worden.</p>
+                <a class="btn btn-success" href="#">Bevestig mijn aanvraag.</a>
+            } else {
+                <p>U kan geen verificatieaanvraag indienen wegens volgende reden(en):</p>
+                <ul>
+                @for(reason <- reasons){
+                    <li>@reason</li>
+                }
+                </ul>
+
+                <div class="btn-group">
+                    <a class="btn btn-default" href="@routes.Profile.edit(user.getId)">Profiel aanvullen</a>
+                    <a class="btn btn-default" href="@routes.InfoSessions.showUpcomingSessions">Infosessie bijwonen</a>
+                </div>
+            }
+        </div>
+    </div>
+}

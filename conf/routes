@@ -52,6 +52,7 @@ GET         /profile/byid                      controllers.Profile.index(userId:
 # Users
 GET         /users                             controllers.Users.showUsers()
 GET         /users/page                        controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /users/impersonate                 controllers.Users.impersonate(userId: Int)
 
 # Login screen
 GET         /login                             controllers.Login.login(redirect ?= null)
@@ -82,6 +83,7 @@ GET         /infosession/edit                  controllers.InfoSessions.editSess
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 GET         /infosession/delete                controllers.InfoSessions.removeSession(sessionId: Int)
+GET         /infosession/approval              controllers.InfoSessions.requestApproval()
 
 # Settings
 # TODO: REMOVE THIS!!!
@@ -105,7 +107,6 @@ GET         /cars/delete                       controllers.Cars.removeCar(carId:
 
 # Maps
 GET         /maps/tile                         controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
-GET         /maps/coordinates                  controllers.Maps.getLatLong(addressId: Int)
 GET         /maps/test                         controllers.Maps.showMap()
 
 # User Picker
