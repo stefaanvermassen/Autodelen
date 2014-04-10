@@ -127,13 +127,17 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>@user.toString</span>
+                            <span>@user.toString
+                                @if("y".equals(session.get("impersonated"))){
+                                    <span class="badge badge-warning">I</span>
+                                }
+                            </span>
                             <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
                         </a>
                         <ul class="dropdown-menu dropdown-user">
-                            <li><a href="#"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                            <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
                             </li>
-                            <li><a href="#"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
+                            <li><a href="@routes.Settings.index"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
                             </li>
                             <li class="divider"></li>
                             <li><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>

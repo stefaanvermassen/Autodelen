@@ -52,6 +52,7 @@ GET         /profile/byid                      controllers.Profile.index(userId:
 # Users
 GET         /users                             controllers.Users.showUsers()
 GET         /users/page                        controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /users/impersonate                 controllers.Users.impersonate(userId: Int)
 
 # Login screen
 GET         /login                             controllers.Login.login(redirect ?= null)
