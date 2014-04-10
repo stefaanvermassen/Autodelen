@@ -48,7 +48,7 @@ public enum FilterField {
             case "until":
                 field = UNTIL;
                 break;
-            case "date" :
+            case "infosession_date" :
                 field = INFOSESSION_DATE;
                 break;
             case "infosession_type" :

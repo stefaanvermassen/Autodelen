@@ -1,15 +1,17 @@
 @import database.DatabaseHelper;
 @scripts = {
+
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
+    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script src="@routes.Assets.at("javascripts/app/infosessionsAdmin.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
-    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
 }
 
 @app("Infosessies", stylesheets, scripts) {
@@ -46,12 +48,19 @@
             <!-- TODO: layout, more fields to search on -->
             <div id="searchwell" class="panel-body">
                 <form role="form">
-                    <!-- TODO: Use normal datetime picker that actually works... It does work -->
                     <div class="form-group inline-block">
                         <div id="from" class="inline-block">
                             <label for="">Vanaf</label>
                             <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
-                                <input id="input_from" name="infosession_date" class="form-control searchTextField" size="16" value="">
+                                <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                            </div>
+                        </div>
+                        <div id="until" class="inline-block">
+                            <label for="">Tot</label>
+                            <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_until">
+                                <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                             </div>

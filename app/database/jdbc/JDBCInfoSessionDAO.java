@@ -36,7 +36,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             "JOIN addresses ON infosession_address_id = address_id " +
             "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees GROUP BY infosession_id) sub ON (ses.infosession_id = sub.infosession_id) ";
 
-    private static String FILTER_FRAGMENT = "WHERE ses.infosession_timestamp > ? "; // TODO: get something to filter on
+    private static String FILTER_FRAGMENT = "WHERE ses.infosession_timestamp > ? AND ses.infosession_timestamp < ?"; // TODO: get something to filter on
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -44,7 +44,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             filter = createInfoSessionFilter();
         }
 
-        ps.setTimestamp(start, new Timestamp(Long.parseLong(filter.getFieldContains(FilterField.INFOSESSION_DATE, true))));
+        ps.setString(start, filter.getFieldContains(FilterField.FROM, true));
+        ps.setString(start+1, filter.getFieldContains(FilterField.UNTIL, true));
         // TODO get something to filter on
     }
 
@@ -335,8 +336,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(2, first);
-            ps.setInt(3, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getInfoSessions(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of infosessions", ex);
@@ -461,7 +462,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             }
             return infosessions;
         } catch (SQLException ex) {
-            throw new DataAccessException("Error reading cars resultset", ex);
+            throw new DataAccessException("Error reading infosession resultset", ex);
         }
     }
 }

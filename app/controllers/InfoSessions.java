@@ -15,6 +15,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.infosession.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -535,12 +536,17 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
     public static Result showSessionsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
+        System.out.println(searchString);
         FilterField filterField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        if(filter.getFieldContains(FilterField.INFOSESSION_DATE, true).equals("")) {
-            filter.fieldContains(FilterField.INFOSESSION_DATE, "0");
+        // If no from and until is specified: show infosessions from now until 100 years from now
+        if(filter.getFieldContains(FilterField.FROM, true).equals("")) {
+            filter.fieldContains(FilterField.FROM, DateTime.now().toString());
+        }
+        if(filter.getFieldContains(FilterField.UNTIL, true).equals("")) {
+            filter.fieldContains(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
         }
 
         return ok(sessionsList(page, filterField, asc, filter, true));
