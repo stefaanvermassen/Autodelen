@@ -41,6 +41,7 @@ GET         /messages                          controllers.Messages.showMessages
 GET         /messages/new                      controllers.Messages.newMessage()
 POST        /messages/new                      controllers.Messages.createNewMessage()
 GET         /notifications                     controllers.Notifications.showNotifications()
+GET         /notifications/page                controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
 GET         /profile                           controllers.Profile.indexWithoutId()

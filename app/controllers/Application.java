@@ -27,6 +27,7 @@ public class Application extends Controller {
                         routes.javascript.Users.showUsersPage(),
                         routes.javascript.UserRoles.showUsersPage(),
                         routes.javascript.EmailTemplates.showExistingTemplatesPage(),
+                        routes.javascript.Notifications.showNotificationsPage(),
                         routes.javascript.InfoSessions.enrollSession(),
                         routes.javascript.Drives.showDrivesPage(),
                         routes.javascript.Maps.getMap()

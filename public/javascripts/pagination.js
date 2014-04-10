@@ -14,7 +14,7 @@
  * In the element with id="buttons" all the navigation buttons will come
  * This element has to have a name-attribute with in it the total amount of pages the list has
  *
- * To sort, you create input-textfields with class="searchTextField"
+ * To filter, you create input-textfields with class="searchTextField"
  * Give these input-elements a name that stands for the column to search in
  * The search-button has to have the id="searchButton"
  *
@@ -24,15 +24,15 @@
  * ...
  * var route = myJsRoutes.controllers.Cars.showCarsPage;
  * ...
+ * <input class="searchTextField" name="name" value="Naam" type="text">
+ * <input class="searchTextField" name="brand" value="Merk" type="text">
+ * <button id="searchButton">Zoek!</button>
+ *  ...
  * <div id="resultsTable">
  *      <!-- Here comes the loaded table-->
  * </div>
  *
  * In the partial file:
- *  ...
- *  <input class="searchTextField" name="name" value="Naam" type="text">
- *  <input class="searchTextField" name="brand" value="Merk" type="text">
- *  <button id="searchButton">Zoek!</button>
  *  ...
  *  <th name="name" class="sortable">Naam</th>
  *  <th name="brand" id= class="sortable">Merk</th>
