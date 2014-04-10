@@ -519,8 +519,9 @@ public class InfoSessions extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
+        filter.fieldContains(FilterField.FROM, DateTime.now().toString());
+        filter.fieldContains(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
 
-        filter.fieldContains(FilterField.INFOSESSION_DATE, DateTime.now().getMillis() + "");
         return ok(sessionsList(page, filterField, asc, filter, false));
     }
 
