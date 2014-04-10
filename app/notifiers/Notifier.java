@@ -79,12 +79,12 @@ public class Notifier extends Mailer {
 
     public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
         String mail = "";
-        // TODO: add url of detail page drives to notification
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
+            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
             NotificationDAO notificationDAO = context.getNotificationDAO();
             notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){
@@ -103,12 +103,13 @@ public class Notifier extends Mailer {
         String mail = "";
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
+            CarDAO cdao = context.getCarDAO();
+            Car car = cdao.getCar(carReservation.getCar().getId());
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
-            //TODO Right address??
-            //TODO : uncomment when nullpointer (getLocation() == null) resolved!
-            //mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
+            mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
+            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
             NotificationDAO notificationDAO = context.getNotificationDAO();
             notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
             if(template.getSendMail()){

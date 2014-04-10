@@ -29,7 +29,7 @@
                     UserRole.RESERVATION_ADMIN -> "label-admin_reserv")) { roles =>
                     @for(user <- users) {
                         <tr>
-                            <td>@user.getFirstName @user.getLastName</td>
+                            <td><a href="@routes.Profile.index(user.getId)">@user.getFirstName @user.getLastName</a></td>
                             <td>
                             @for(role <- provider.getRoles(user.getId, false)) {
                                 <span class="label @roles.get(role)">@role.getDescription</span>
@@ -47,4 +47,4 @@
         }
     </tbody>
 </table>
-<p id="buttons" name="@amountOfResults,@amountOfPages"></p>
+<p id="pagination" name="@amountOfResults,@amountOfPages"></p>

@@ -1,147 +1,113 @@
-@(userId: Int, errorIndex: Int, form: play.data.Form[Drives.RefuseModel], reservations: List[Reservation])
-@scripts = {
-    <script>
-        var index = @errorIndex;
+@(errorIndex: Int, form: play.data.Form[Drives.RefuseModel], beginPage : Int, beginAsc : Int, beginOrder : String, beginFilter : String)
+    @scripts = {
+        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+        <script>
+            var route = myJsRoutes.controllers.Drives.showDrivesPage;
+            // To go to the correct page
+            var beginPage = @beginPage;
+            var beginAsc = @beginAsc;
+            var beginOrder = "@beginOrder";
+            var beginFilter = "@beginFilter";
+        </script>
+        <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+        <script>
+            var index = @errorIndex;
 
-        @if(form.hasGlobalErrors) {
-                flipHidden(index);
-        };
-
-        function flipHidden(index) {
-            var hid1 = $("#hidden1_" + index);
-            var hid2 = $("#hidden2_" + index);
-            if(hid1.is(":visible")) {
-                hid1.addClass("hidden");
-                hid2.removeClass("hidden");
+            @if(form.hasGlobalErrors) {
+                // Pretty ugly hack to make the correct refuse textfield visible
+                $(document).ready(function() {
+                    checkLoaded();
+                });
             }
-            else {
-                hid1.removeClass("hidden");
-                hid2.addClass("hidden");
-            }
-        }
 
-    </script>
-}
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-}
+            function checkLoaded() {
+                if(pageLoaded) {
+                    flipHidden(index);
+                } else {
+                    setTimeout("checkLoaded()",50);
+                }
+            }
+
+            function flipHidden(index) {
+                var hid1 = $("#hidden1_" + index);
+                var hid2 = $("#hidden2_" + index);
+                if(hid1.is(":visible")) {
+                    hid1.addClass("hidden");
+                    hid2.removeClass("hidden");
+                } else {
+                    hid1.removeClass("hidden");
+                    hid2.addClass("hidden");
+                }
+            }
+        </script>
+    }
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    }
+
+
 @app("Ritten", stylesheets, scripts) {
 
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
-        <li class="active">Ritten</li>
-    </ol>
-</div>
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Ritten</li>
+        </ol>
+    </div>
 
-<div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Ritten</h1>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Ritten
-                </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        @if(form.hasGlobalErrors) {
-                            <div class="alert alert-danger alert-dismissable">
-                                <strong>Error!</strong> @form.globalError.message
-                            </div>
-                        }
-                        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-drives">
-                            <thead>
-                                <tr role="row">
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">#</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Automerk</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Type</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Van</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Tot</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Ontlener</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="1">Status</th>
-                                    <th class="sorting" tabindex="0" rowspan="1" colspan="2">Acties</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for((reservation, index) <- reservations.zipWithIndex) {
-                                    <tr>
-                                        <td>@{index+1}</td>
-                                        <td>@reservation.getCar.getBrand</td>
-                                        <td>@reservation.getCar.getType</td>
-                                        <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
-                                        <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
-                                        @if(reservation.getUser.getId == userId) {
-                                            <td>Jij</td>
-                                        } else {
-                                            <td>@reservation.getUser</td>
-                                        }
-                                        <td>
-                                            @reservation.getStatus match {
-                                                case ReservationStatus.ACCEPTED => {
-                                                    <span class="fa fa-check-circle"></span>
-                                                }
-                                                case ReservationStatus.REFUSED => {
-                                                    <span class="fa fa-minus-circle"></span>
-                                                }
-                                                case ReservationStatus.REQUEST => {
-                                                    <span class="fa fa-question-circle"></span>
-                                                }
-                                            }
-                                            @reservation.getStatus.getDescription
-                                        </td>
-                                        <!-- TODO: temporary give action cancel for both accepted as refused -->
-                                        @if(reservation.getUser.getId == userId) {
-                                            <td>
-                                                <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
-                                                    <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">annuleer</a>
-                                                </div>
-                                            </td>
-                                        } else {
-                                            <td>
-                                            @if(reservation.getStatus == ReservationStatus.REQUEST) {
-                                                    <div id="hidden1_@index" class="btn-group btn-group-xs">
-                                                        <a class="btn btn-success" href="@routes.Drives.approveReservation(reservation.getId)">goedkeuren</a>
-                                                        <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
-                                                        <a class="btn btn-warning" onclick="flipHidden(@index)">afkeuren</a>
-                                                    </div>
-                                                    <div id="hidden2_@index" class="hidden">
-                                                        @helper.form(routes.Drives.refuseReservation(reservation.getId, index), 'class -> "form-horizontal") {
-                                                            <fieldset>
-                                                                <div class="form-group">
-                                                                    <label class="col-md-1 control-label" for="reason"></label>
-                                                                    <textarea rows="8" id="reason" name="reason" type="text" placeholder="Reden voor weigering" class="form-control input-md" value="@form("reason").value"></textarea>
-                                                                </div>
-                                                                <div class="btn-group btn-group-xs">
-                                                                    <button id="submit" name="submit" class="btn btn-success btn-xs">
-                                                                        afkeuren</button>
-                                                                    <a class="btn btn-warning" onclick="var index = @index; flipHidden(index);">
-                                                                        annuleer</a>
-                                                                </div>
-                                                            </fieldset>
-                                                        }
-                                                    </div>
-                                            } else {
-                                                <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">details</a>
-                                                </div>
-                                            }
-                                            </td>
-                                        }
-                                    </tr>
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Ritten</h1>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs">
+                  <li class="active"><a href="#planned" data-toggle="tab">Gepland</a></li>
+                  <li><a href="#passed" data-toggle="tab">Voorbij</a></li>
+                  <li><a href="#requests" data-toggle="tab">Aanvragen</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div class="tab-pane active" id="planned">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                @if(form.hasGlobalErrors) {
+                                    <div class="alert alert-danger alert-dismissable">
+                                        <strong>Error!</strong> @form.globalError.message
+                                    </div>
                                 }
-                            </tbody>
-                        </table>
+                                <div id="resultsTable" class="table-responsive">
+                                    <!-- Here comes the loaded table-->
+                                </div>
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    </div>
+
+                    <div class="tab-pane" id="passed">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                Yarr, booty!
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    </div>
+
+                    <div class="tab-pane" id="requests">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                Yarr, more booty!
+                            </div>
+                        </div>
+                        <!-- /.panel -->
                     </div>
                 </div>
-                <!-- /.panel-body -->
             </div>
-            <!-- /.panel -->
+            <!-- /col-lg-12 -->
         </div>
-        <!-- /col-lg-12 -->
+        <!-- /row -->
     </div>
-    <!-- /row -->
-</div>
-<!-- /page-wrapper -->
+    <!-- /page-wrapper -->
 }

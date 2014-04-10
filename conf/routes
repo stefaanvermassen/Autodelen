@@ -17,16 +17,20 @@ POST        /userroles/edit                    controllers.UserRoles.editPost(us
 
 # Drives
 GET         /drives                            controllers.Drives.index()
-GET         /drives/details                    controllers.Drives.details(reservationId: Int)
-GET         /drives/approved                   controllers.Drives.approveReservation(reservationId: Int)
-POST        /drives/refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int)
-GET         /drives/cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
+GET         /drives/page                       controllers.Drives.showDrivesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /drive_details                     controllers.Drives.details(reservationId: Int)
+POST        /drive_details                     controllers.Drives.adjustDetails(reservationId: Int)
+GET         /drives-approved                   controllers.Drives.approveReservation(reservationId: Int)
+POST        /drives-refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int, page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /drives-cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
+GET         /drivesAdmin                       controllers.Drives.drivesAdmin()
 
 # Reservations
 GET         /reserve                           controllers.Reserve.index()
 GET         /reserve/cars                      controllers.Reserve.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation               controllers.Reserve.reserve(carId: Int)
 POST        /reserve/reservation               controllers.Reserve.confirmReservation(cardId: Int)
+GET         /reserve/modal/car                 controllers.Reserve.getCarModal(carId: Int)
 
 
 # User pages

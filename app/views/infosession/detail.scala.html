@@ -98,7 +98,7 @@
                                 @for((enrollee, index) <- infoSession.getEnrolled.zipWithIndex) {
                                     <tr>
                                         <td>@(index + 1)</td>
-                                        <td>@enrollee.getUser</td>
+                                        <td><a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser</a></td>
                                         @if(isAdmin) {
                                             <td>
                                                 <div class="btn-group btn-group-xs">

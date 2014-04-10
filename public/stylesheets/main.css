@@ -1,6 +1,20 @@
+/* --- Tabs --- */
+.tabpanel {
+	border-top:0px;
+}
+
+.nav-tabs>li>a {
+	border-radius: 0px;
+}
+
 /* --- Map --- */
 #map {
 	width: 100%;
+	height: 300px;
+}
+
+.map {
+	padding:0px;
 }
 
 /* --- Top Menu --- */
@@ -15,7 +29,16 @@
 	background: #63943d; /* Fall-back for browsers that don't support rgba */
     background: rgba(0, 0, 0, .2);
 }
+
+.navbar-top-links .open>a:focus {
+	background: #63943d; /* Fall-back for browsers that don't support rgba */
+    background: rgba(0, 0, 0, .2);
+}
+
 .navbar-top-links:hover li:hover .avatar:hover {
+	background: transparent;
+}
+.nav .open>.avatar:focus {
 	background: transparent;
 }
 
@@ -62,7 +85,7 @@
 	padding-right: 15px;
 }
 
-.number {
+.topnumber {
 	padding:0px 2px;
 	position: absolute;
 	font-size: 9px;
@@ -76,6 +99,12 @@
 .navbar-static-side {
 	border-right: 1px solid #d6d6d6;
 	background-color: #f8f8f8;
+}
+
+.sidenumber {
+	position:absolute;
+	right:10px;
+	color:grey;
 }
 
 .sidebar-collapse>.nav>li>a:hover, .sidebar-collapse>.nav>li>a:focus, .sidebar-collapse>.nav>.active {
@@ -93,10 +122,6 @@
 
 .nav > li > a {
 	color: #444;
-}
-
-.nav>li>a {
-	padding-left: 20px;
 }
 
 /* --- Timeline --- */
@@ -120,15 +145,20 @@
 	margin-bottom: 0px;
 }
 
-/* --- Tables --- */
-.pagination>li:first-child>a, .pagination>li:last-child>a{
-	border-radius: 0px;
+/* --- Pagination --- */
+
+#pagination > button {
+	padding: 4px 12px;
+	background-color: transparent;
+	border: 1px solid #dddddd;
 }
 
-.pagination>li>a, .pagination>li>span {
-	padding: 4px 8px;
+.table {
+	margin-bottom:5px;
 }
-
+#pagination > p {
+	margin-top: 5px;
+}
 /* --- Forms fix --- */
 
 .form-horizontal .form-group {
