@@ -11,9 +11,11 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `Files` (
-	`file_id` INT NOT NULL AUTO_INCREMENT,
-	`file_url` VARCHAR(255) NOT NULL,
-	`file_file_group_id` INT,
+  `file_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `file_path` VARCHAR(255) NOT NULL,
+  `file_name` VARCHAR(128) NULL,
+  `file_content_type` VARCHAR(64) NULL,
+  `file_file_group_id` INT(11) NULL DEFAULT NULL,
 	PRIMARY KEY (`file_id`),
 	FOREIGN KEY (`file_file_group_id`) REFERENCES FileGroups(`file_group_id`)
 )

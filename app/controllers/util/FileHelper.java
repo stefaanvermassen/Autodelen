@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Cedric on 4/11/2014.
@@ -21,36 +21,56 @@ public class FileHelper {
 
     private static final boolean MOVE_INSTEAD_OF_COPY = true;
 
+    public static final Set<String> IMAGE_CONTENT_TYPES = new HashSet<>(Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png"}));
+
     private static String uploadFolder;
 
     // Initialize path to save uploads to
     static {
-        String property = Play.current().configuration().getStringList("uploads.path").get().get(0); //TODO: Fix this uuuugly hack with a normal getString??
+        String property = ConfigurationHelper.getConfigurationString("uploads.path"); //TODO: Fix this uuuugly hack with a normal getString??
         if (property.startsWith("./")) {
-            uploadFolder = Play.current().path().getAbsolutePath() + property.substring(2);
+            uploadFolder = Play.current().path().getAbsolutePath() + property.substring(2); // Get relative path to Play
         } else uploadFolder = property;
     }
 
-    public static File saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {
+    public static String saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {
         File file = filePart.getFile();
         String fileName = filePart.getFilename();
         if (fileName.contains("/") || fileName.contains("\\"))
             throw new RuntimeException("Filename contains slashes.");
 
         String uuid = UUID.randomUUID().toString();
+        String newFileName = uuid + "-" + fileName;
 
-        Path path = Paths.get(uploadFolder, subfolder, uuid + "-" + fileName);
+        Path path = Paths.get(uploadFolder, subfolder, newFileName);
 
         // Create subdirectories if not exist
         Files.createDirectories(path.getParent());
 
         // Copy or move upload data to our upload folder
         File toFile = new File(path.toAbsolutePath().toString());
-        if(MOVE_INSTEAD_OF_COPY)
+        if (MOVE_INSTEAD_OF_COPY)
             moveFile(file, toFile);
         else
             copyFile(file, toFile);
-        return toFile;
+
+        return Paths.get(subfolder, newFileName).toString();
+    }
+
+    /**
+     * Deletes a file relative to the upload path
+     *
+     * @param path The file path to delete
+     * @returns Whether the delete operation was successfull
+     */
+    public static boolean deleteFile(String path) throws IOException {
+        try {
+            Path absPath = Paths.get(uploadFolder, path);
+            Files.delete(absPath);
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
     }
 
     private static void moveFile(File sourceFile, File destFile) throws IOException {

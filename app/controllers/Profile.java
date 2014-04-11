@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.ConfigurationHelper;
+import controllers.util.FileHelper;
 import database.*;
 import models.Address;
 import models.User;
@@ -9,6 +11,7 @@ import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -107,6 +110,65 @@ public class Profile extends Controller {
             Collections.sort(COUNTRIES);
         }
         return COUNTRIES;
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUpload(int userId) {
+        // First we check if the user is allowed to upload to this userId
+        User currentUser = DatabaseHelper.getUserProvider().getUser();
+        User user;
+
+        // We load the other user(by id)
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            user = dao.getUser(userId, true);
+
+            // Check if the userId exists
+            if (user == null || currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart picture = body.getFile("picture");
+        if (picture != null) {
+            String contentType = picture.getContentType();
+            if (!FileHelper.IMAGE_CONTENT_TYPES.contains(contentType)) {
+                return badRequest("Wrong type of file uploaded. Expected image.");
+            } else {
+                try {
+                    // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
+                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile"));
+
+                    // Save the file reference in the database
+                    try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                        FileDAO dao = context.getFileDAO();
+                        try {
+                            models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
+                            //TODO now set user image ID (and delete the old one?)
+
+                            context.commit();
+
+                            return ok("File upload successfully.");
+                        } catch (DataAccessException ex) {
+                            context.rollback();
+                            FileHelper.deleteFile(relativePath);
+                            throw ex;
+                        }
+                    } catch (DataAccessException ex) {
+                        FileHelper.deleteFile(relativePath);
+                        throw ex;
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        } else {
+            flash("error", "Missing file");
+            return redirect(routes.Application.index());
+        }
     }
 
     /**
