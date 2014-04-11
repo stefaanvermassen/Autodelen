@@ -51,6 +51,7 @@ POST        /profile/edit                      controllers.Profile.editPost(user
 GET         /profile/byid                      controllers.Profile.index(userId: Int)
 GET         /profile/changepicture             controllers.Profile.profilePictureUpload(userId: Int)
 POST        /profile/changepicture             controllers.Profile.profilePictureUploadPost(userId: Int)
+GET         /profile/picture                   controllers.Profile.getProfilePicture(userId: Int)
 
 # Users
 GET         /users                             controllers.Users.showUsers()

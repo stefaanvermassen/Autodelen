@@ -122,6 +122,16 @@ public class Profile extends Controller {
         return ok(uploadPicture.render(userId));
     }
 
+    @RoleSecured.RoleAuthenticated()
+    public static Result getProfilePicture(int userId){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            FileDAO dao = context.getFileDAO();
+            return FileHelper.getFileStreamResult(dao, 3);
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+    }
+
     /**
      * Processes a profile picture upload request
      * @param userId

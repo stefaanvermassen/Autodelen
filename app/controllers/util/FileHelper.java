@@ -1,14 +1,15 @@
 package controllers.util;
 
+import database.DataAccessContext;
+import database.FileDAO;
 import play.Logger;
 import play.api.Play;
 import play.api.mvc.MultipartFormData;
+import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Result;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,6 +59,18 @@ public class FileHelper {
 
         Logger.debug("File (" + filePart.getContentType() + ") upload to " + path);
         return Paths.get(subfolder, newFileName).toString();
+    }
+
+    public static Result getFileStreamResult(FileDAO dao, int fileId){
+        models.File file = dao.getFile(fileId);
+        if(file != null){
+            try {
+                FileInputStream is = new FileInputStream(Paths.get(uploadFolder, file.getPath()).toFile()); //TODO: this cannot be sent with a Try-with-resources (stream already closed), check if Play disposes properly
+                return file.getContentType() != null && !file.getContentType().isEmpty() ? Controller.ok(is).as(file.getContentType()) : Controller.ok(is);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else return Controller.notFound();
     }
 
     /**
