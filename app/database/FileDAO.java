@@ -1,6 +1,7 @@
 package database;
 
 import models.File;
+import models.FileGroup;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface FileDAO {
     public File getFile(int id) throws DataAccessException;
-    public List<File> getFiles(int fileGroup) throws DataAccessException;
+    public FileGroup getFiles(int fileGroup) throws DataAccessException;
     public File createFile(String path, int fileGroup) throws DataAccessException;
     public File createFile(String path) throws DataAccessException;
 }
