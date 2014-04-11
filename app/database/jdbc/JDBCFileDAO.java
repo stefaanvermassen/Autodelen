@@ -115,6 +115,6 @@ public class JDBCFileDAO implements FileDAO {
 
     @Override
     public File createFile(String path, String fileName, String contentType) throws DataAccessException {
-        return createFile(path, null, null, -1);
+        return createFile(path, fileName, contentType, -1);
     }
 }

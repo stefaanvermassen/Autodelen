@@ -33,8 +33,6 @@ public class FileHelper {
         if (property.startsWith("./")) {
             uploadFolder = Paths.get(Play.current().path().getAbsolutePath(), property.substring(2)).toString(); // Get relative path to Play
         } else uploadFolder = property;
-
-        Logger.info("File upload path: " + uploadFolder);
     }
 
     public static String saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {
@@ -58,6 +56,7 @@ public class FileHelper {
         else
             copyFile(file, toFile);
 
+        Logger.debug("File (" + filePart.getContentType() + ") upload to " + path);
         return Paths.get(subfolder, newFileName).toString();
     }
 
