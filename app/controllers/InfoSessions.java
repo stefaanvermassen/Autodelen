@@ -579,19 +579,10 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
     public static Result showSessionsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        System.out.println(searchString);
         FilterField filterField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        // If no from and until is specified: show infosessions from now until 100 years from now
-        // TODO: find better solution for ugly equals YYYY-MM-DD hh:mm
-        if(filter.getFieldContains(FilterField.FROM, true).equals("") || filter.getFieldContains(FilterField.FROM, true).equals("YYYY-MM-DD hh:mm")) {
-            filter.fieldContains(FilterField.FROM, DateTime.now().toString());
-        }
-        if(filter.getFieldContains(FilterField.UNTIL, true).equals("") || filter.getFieldContains(FilterField.UNTIL, true).equals("YYYY-MM-DD hh:mm")) {
-            filter.fieldContains(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
-        }
 
         return ok(sessionsList(page, filterField, asc, filter, true));
     }
