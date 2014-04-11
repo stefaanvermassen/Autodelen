@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.ConfigurationHelper;
+import controllers.util.FileHelper;
 import database.*;
 import models.Address;
 import models.User;
@@ -9,6 +11,8 @@ import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -107,6 +111,107 @@ public class Profile extends Controller {
             Collections.sort(COUNTRIES);
         }
         return COUNTRIES;
+    }
+
+    /**
+     * The page to upload a new profile picture
+     * @param userId The userId for which the picture is uploaded
+     * @return The page to upload
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUpload(int userId){
+        return ok(uploadPicture.render(userId));
+    }
+
+    /**
+     * Gets the profile picture for given user Id, or default one if missing
+     * @param userId The user for which the image is requested
+     * @return The image with correct content type
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result getProfilePicture(int userId){
+        //TODO: checks on whether other person can see this
+        //TODO: Rely on heavy caching of the image ID or views since each app page includes this
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if(user != null && user.getProfilePictureId() >= 0){
+                return FileHelper.getFileStreamResult(context.getFileDAO(), user.getProfilePictureId());
+            } else {
+                return FileHelper.getPublicFile(Paths.get("images", "no_profile.png").toString(), "image/png");
+            }
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+    }
+
+    /**
+     * Processes a profile picture upload request
+     * @param userId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUploadPost(int userId) {
+        // First we check if the user is allowed to upload to this userId
+        User currentUser = DatabaseHelper.getUserProvider().getUser();
+        User user;
+
+        // We load the other user(by id)
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            user = dao.getUser(userId, true);
+
+            // Check if the userId exists
+            if (user == null || currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart picture = body.getFile("picture"); //TODO: define that this is always in "file" somewhere, generalize
+        if (picture != null) {
+
+            // Check the content type
+            String contentType = picture.getContentType();
+            if (!FileHelper.IMAGE_CONTENT_TYPES.contains(contentType)) {
+                flash("danger", "Verkeerde bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType+ ")");
+                return badRequest(uploadPicture.render(userId));
+            } else {
+                try {
+                    // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
+                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile"));
+
+                    // Save the file reference in the database
+                    try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                        FileDAO dao = context.getFileDAO();
+                        UserDAO udao = context.getUserDAO();
+                        try {
+                            models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
+                            //TODO: delete old profile picture!!!!
+                            user.setProfilePictureId(file.getId());
+                            udao.updateUser(user, true);
+                            context.commit();
+                            flash("success", "De profielfoto werd succesvol aangepast.");
+                            return redirect(routes.Profile.index(userId));
+                        } catch (DataAccessException ex) {
+                            context.rollback();
+                            FileHelper.deleteFile(relativePath);
+                            throw ex;
+                        }
+                    } catch (DataAccessException ex) {
+                        FileHelper.deleteFile(relativePath);
+                        throw ex;
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        } else {
+            flash("error", "Missing file");
+            return redirect(routes.Application.index());
+        }
     }
 
     /**

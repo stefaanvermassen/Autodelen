@@ -2,7 +2,7 @@
 <!-- TODO: These are no form groups! -->
 <div class="form-group">
     @* TODO: profile pictures *@
-<img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
+<img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
 </div>
 <div class="form-group">
     <p class="form-control-static h2">@user.getFirstName @user.getLastName</p>
