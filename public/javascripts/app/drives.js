@@ -3,9 +3,6 @@
  */
 
 $(document).ready(function() {
-
-
-
     $('li[id^="tab"]').on('click', function() {
         $('li[id^="tab"]').each(function () {
             $(this).find('input').removeClass('searchTextField');

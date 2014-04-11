@@ -4,10 +4,7 @@
  */
 package database.jdbc;
 
-import database.DataAccessException;
-import database.Filter;
-import database.FilterField;
-import database.ReservationDAO;
+import database.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -222,10 +219,18 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     @Override
-    public int numberOfReservationsWithStatus(ReservationStatus status) {
+    public int numberOfReservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
         try {
-            String statement = "SELECT COUNT(*) as result FROM CarReservations " +
+            User user = DatabaseHelper.getUserProvider().getUser();
+            String statement = "SELECT COUNT(*) as result FROM CarReservations INNER JOIN Cars " +
+                    "ON CarReservations.reservation_car_id = Cars.car_id " +
                     "WHERE CarReservations.reservation_status = '" + status + "'";
+            if(userIsOwner && user != null) {
+                statement += " AND car_owner_user_id=" +  user.getId();
+            }
+            if(userIsLoaner && user != null) {
+                statement += " AND reservation_user_id=" +  user.getId();
+            }
             PreparedStatement ps = connection.prepareStatement(statement);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())

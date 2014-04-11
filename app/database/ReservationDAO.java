@@ -25,7 +25,7 @@ public interface ReservationDAO {
     public int getAmountOfReservations(Filter filter) throws DataAccessException;
     public List<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public List<Reservation> getReservationListForCar(int carID) throws DataAccessException;
-    public int numberOfReservationsWithStatus(ReservationStatus status);
+    public int numberOfReservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner);
 
     public void updateTable();
 }

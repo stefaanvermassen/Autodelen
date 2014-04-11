@@ -295,13 +295,15 @@ public class Drives extends Controller {
 
     /**
      * Get the number of reservations having the provided status
-     * @param status The statuses
+     * @param status The status
+     * @param userIsOwner Extra filtering specifying the user has to be owner
+     * @param userIsLoaner Extra filtering specifying the user has to be loaner
      * @return The number of reservations
      */
-    public static int reservationsWithStatus(ReservationStatus status) {
+    public static int reservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
-            return dao.numberOfReservationsWithStatus(status);
+            return dao.numberOfReservationsWithStatus(status, userIsOwner, userIsLoaner);
         } catch(DataAccessException ex) {
             throw ex;
         }

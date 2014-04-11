@@ -162,7 +162,15 @@
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li @if(title == "Ritten") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
+                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i>
+                                Ritten
+                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
+                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false, true)) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Drives.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
