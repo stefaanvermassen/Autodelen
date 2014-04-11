@@ -1,5 +1,6 @@
 package controllers.util;
 
+import play.Logger;
 import play.api.Play;
 import play.api.mvc.MultipartFormData;
 import play.mvc.Http;
@@ -21,6 +22,7 @@ public class FileHelper {
 
     private static final boolean MOVE_INSTEAD_OF_COPY = true;
 
+    //Source: http://www.cs.helsinki.fi/u/hahonen/uusmedia/sisalto/cgi_perl_ssi/mime.html
     public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png"}); // array is too small to allocate a Set
 
     private static String uploadFolder;
@@ -29,8 +31,10 @@ public class FileHelper {
     static {
         String property = ConfigurationHelper.getConfigurationString("uploads.path"); //TODO: Fix this uuuugly hack with a normal getString??
         if (property.startsWith("./")) {
-            uploadFolder = Play.current().path().getAbsolutePath() + property.substring(2); // Get relative path to Play
+            uploadFolder = Paths.get(Play.current().path().getAbsolutePath(), property.substring(2)).toString(); // Get relative path to Play
         } else uploadFolder = property;
+
+        Logger.info("File upload path: " + uploadFolder);
     }
 
     public static String saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {

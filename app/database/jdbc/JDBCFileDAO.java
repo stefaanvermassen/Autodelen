@@ -30,7 +30,7 @@ public class JDBCFileDAO implements FileDAO {
 
     private PreparedStatement getCreateFileStatement() throws SQLException {
         if (createFileStatement == null) {
-            createFileStatement = connection.prepareStatement("INSERT INTO files(file_path, file_name, file_content_type, file_file_group_id) VALUES(?,?)", new String[]{"file_id"});
+            createFileStatement = connection.prepareStatement("INSERT INTO files(file_path, file_name, file_content_type, file_file_group_id) VALUES(?,?,?,?)", new String[]{"file_id"});
         }
         return createFileStatement;
     }
