@@ -22,9 +22,7 @@ public interface InfoSessionDAO {
     public boolean deleteInfoSession(int id) throws DataAccessException;
 
     public int getAmountOfInfoSessions(Filter filter) throws DataAccessException;
-    public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException; // TODO: delete this method, use with pages
-    public List<InfoSession> getInfoSessionsAfter(DateTime since, FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
-    // TODO: above method: get DateTime since in filter-argument
+    public List<InfoSession> getInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     public void updateInfosessionTime(InfoSession session) throws DataAccessException;
     public void updateInfoSessionAddress(InfoSession session) throws DataAccessException;

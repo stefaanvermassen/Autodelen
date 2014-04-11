@@ -42,6 +42,7 @@ GET         /messages                          controllers.Messages.showMessages
 GET         /messages/new                      controllers.Messages.newMessage()
 POST        /messages/new                      controllers.Messages.createNewMessage()
 GET         /notifications                     controllers.Notifications.showNotifications()
+GET         /notifications/page                controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
 GET         /profile                           controllers.Profile.indexWithoutId()
@@ -75,6 +76,8 @@ GET         /infosession/new                   controllers.InfoSessions.newSessi
 POST        /infosession/new                   controllers.InfoSessions.createNewSession()
 GET         /infosession                       controllers.InfoSessions.showUpcomingSessions()
 GET         /infosession/page                  controllers.InfoSessions.showUpcomingSessionsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /infosession/admin                 controllers.InfoSessions.showSessions()
+GET         /infosession/admin/page            controllers.InfoSessions.showSessionsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /infosession/enroll                controllers.InfoSessions.enrollSession(id: Int)
 GET         /infosession/unenroll              controllers.InfoSessions.unenrollSession()
 GET         /infosession/view                  controllers.InfoSessions.detail(id: Int)
