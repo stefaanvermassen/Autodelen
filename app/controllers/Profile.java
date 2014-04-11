@@ -123,9 +123,15 @@ public class Profile extends Controller {
         return ok(uploadPicture.render(userId));
     }
 
+    /**
+     * Gets the profile picture for given user Id, or default one if missing
+     * @param userId The user for which the image is requested
+     * @return The image with correct content type
+     */
     @RoleSecured.RoleAuthenticated()
     public static Result getProfilePicture(int userId){
         //TODO: checks on whether other person can see this
+        //TODO: Rely on heavy caching of the image ID or views since each app page includes this
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
             User user = udao.getUser(userId, true);
@@ -187,7 +193,8 @@ public class Profile extends Controller {
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user, true);
                             context.commit();
-                            return ok("File upload successfully to " + relativePath);
+                            flash("success", "De profielfoto werd succesvol aangepast.");
+                            return redirect(routes.Profile.index(userId));
                         } catch (DataAccessException ex) {
                             context.rollback();
                             FileHelper.deleteFile(relativePath);
