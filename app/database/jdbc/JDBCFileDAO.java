@@ -23,27 +23,27 @@ public class JDBCFileDAO implements FileDAO {
 
     private PreparedStatement getGetFileStatement() throws SQLException {
         if (getFileStatement == null) {
-            getFileStatement = connection.prepareStatement("SELECT file_id, file_url FROM files WHERE file_id = ?");
+            getFileStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_id = ?");
         }
         return getFileStatement;
     }
 
     private PreparedStatement getCreateFileStatement() throws SQLException {
         if (createFileStatement == null) {
-            createFileStatement = connection.prepareStatement("INSERT INTO files(file_url, file_file_group_id) VALUES(?,?)", new String[]{"file_id"});
+            createFileStatement = connection.prepareStatement("INSERT INTO files(file_path, file_name, file_content_type, file_file_group_id) VALUES(?,?)", new String[]{"file_id"});
         }
         return createFileStatement;
     }
 
     private PreparedStatement getGetFileGroupStatement() throws SQLException {
         if (getFileGroupStatement == null) {
-            getFileGroupStatement = connection.prepareStatement("SELECT file_id, file_url FROM files WHERE file_file_id = ?");
+            getFileGroupStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_file_id = ?");
         }
         return getFileGroupStatement;
     }
 
     private static File populateFile(ResultSet rs) throws SQLException {
-        return new File(rs.getInt("file_id"), rs.getString("file_url"));
+        return new File(rs.getInt("file_id"), rs.getString("file_path"), rs.getString("file_name"), rs.getString("file_content_type"));
     }
 
     @Override
@@ -86,14 +86,17 @@ public class JDBCFileDAO implements FileDAO {
 
 
     @Override
-    public File createFile(String path, int fileGroup) throws DataAccessException {
+    public File createFile(String path, String fileName, String contentType, int fileGroup) throws DataAccessException {
         try {
             PreparedStatement ps = getCreateFileStatement();
             ps.setString(1, path);
+            ps.setString(2, fileName);
+            ps.setString(3, contentType);
+
             if (fileGroup == -1)
-                ps.setNull(2, Types.NULL);
+                ps.setNull(4, Types.NULL);
             else
-                ps.setInt(2, fileGroup);
+                ps.setInt(4, fileGroup);
 
             if (ps.executeUpdate() != 1)
                 throw new DataAccessException("New file record failed. No rows affected.");
@@ -101,7 +104,7 @@ public class JDBCFileDAO implements FileDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (!keys.next())
                     throw new DataAccessException("Failed to read keys for new file record.");
-                return new File(keys.getInt(1), path);
+                return new File(keys.getInt(1), path, fileName, contentType);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new file.", ex);
             }
@@ -111,7 +114,7 @@ public class JDBCFileDAO implements FileDAO {
     }
 
     @Override
-    public File createFile(String path) throws DataAccessException {
-        return createFile(path, -1);
+    public File createFile(String path, String fileName, String contentType) throws DataAccessException {
+        return createFile(path, null, null, -1);
     }
 }
