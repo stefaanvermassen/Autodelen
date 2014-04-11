@@ -180,12 +180,13 @@ public class Profile extends Controller {
                     // Save the file reference in the database
                     try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                         FileDAO dao = context.getFileDAO();
+                        UserDAO udao = context.getUserDAO();
                         try {
                             models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
-                            //TODO now set user image ID (and delete the old one?)
-
+                            //TODO: delete old profile picture!!!!
+                            user.setProfilePictureId(file.getId());
+                            udao.updateUser(user, true);
                             context.commit();
-
                             return ok("File upload successfully to " + relativePath);
                         } catch (DataAccessException ex) {
                             context.rollback();
