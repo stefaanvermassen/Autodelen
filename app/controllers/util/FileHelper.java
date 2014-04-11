@@ -74,6 +74,21 @@ public class FileHelper {
     }
 
     /**
+     * Returns a file in the public directory
+     * @param path
+     * @return
+     */
+    public static Result getPublicFile(String path, String contentType) {
+        String playPath = Play.current().path().getAbsolutePath();
+        try {
+            FileInputStream is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
+            return Controller.ok(is).as(contentType);
+        } catch (FileNotFoundException e) {
+            return Controller.notFound();
+        }
+    }
+
+    /**
      * Deletes a file relative to the upload path
      *
      * @param path The file path to delete

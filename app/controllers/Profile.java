@@ -12,6 +12,7 @@ import play.mvc.*;
 import views.html.profile.*;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -124,9 +125,15 @@ public class Profile extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result getProfilePicture(int userId){
+        //TODO: checks on whether other person can see this
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            FileDAO dao = context.getFileDAO();
-            return FileHelper.getFileStreamResult(dao, 3);
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if(user != null && user.getProfilePictureId() >= 0){
+                return FileHelper.getFileStreamResult(context.getFileDAO(), user.getProfilePictureId());
+            } else {
+                return FileHelper.getPublicFile(Paths.get("images", "no_profile.png").toString(), "image/png");
+            }
         } catch(DataAccessException ex){
             throw ex;
         }
