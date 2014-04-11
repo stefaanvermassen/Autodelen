@@ -21,7 +21,7 @@ public class FileHelper {
 
     private static final boolean MOVE_INSTEAD_OF_COPY = true;
 
-    public static final Set<String> IMAGE_CONTENT_TYPES = new HashSet<>(Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png"}));
+    public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png"}); // array is too small to allocate a Set
 
     private static String uploadFolder;
 

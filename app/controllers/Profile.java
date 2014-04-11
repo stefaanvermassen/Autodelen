@@ -112,8 +112,23 @@ public class Profile extends Controller {
         return COUNTRIES;
     }
 
+    /**
+     * The page to upload a new profile picture
+     * @param userId The userId for which the picture is uploaded
+     * @return The page to upload
+     */
     @RoleSecured.RoleAuthenticated()
-    public static Result profilePictureUpload(int userId) {
+    public static Result profilePictureUpload(int userId){
+        return ok(uploadPicture.render(userId));
+    }
+
+    /**
+     * Processes a profile picture upload request
+     * @param userId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUploadPost(int userId) {
         // First we check if the user is allowed to upload to this userId
         User currentUser = DatabaseHelper.getUserProvider().getUser();
         User user;
@@ -132,8 +147,10 @@ public class Profile extends Controller {
         }
 
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        Http.MultipartFormData.FilePart picture = body.getFile("picture");
+        Http.MultipartFormData.FilePart picture = body.getFile("picture"); //TODO: define that this is always in "file" somewhere, generalize
         if (picture != null) {
+
+            // Check the content type
             String contentType = picture.getContentType();
             if (!FileHelper.IMAGE_CONTENT_TYPES.contains(contentType)) {
                 return badRequest("Wrong type of file uploaded. Expected image.");
@@ -151,7 +168,7 @@ public class Profile extends Controller {
 
                             context.commit();
 
-                            return ok("File upload successfully.");
+                            return ok("File upload successfully to " + relativePath);
                         } catch (DataAccessException ex) {
                             context.rollback();
                             FileHelper.deleteFile(relativePath);
