@@ -153,7 +153,8 @@ public class Profile extends Controller {
             // Check the content type
             String contentType = picture.getContentType();
             if (!FileHelper.IMAGE_CONTENT_TYPES.contains(contentType)) {
-                return badRequest("Wrong type of file uploaded. Expected image.");
+                flash("danger", "Verkeerde bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType+ ")");
+                return badRequest(uploadPicture.render(userId));
             } else {
                 try {
                     // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
