@@ -200,7 +200,7 @@ public class Profile extends Controller {
                                 try {
                                     File oldPicture = dao.getFile(oldPictureId);
                                     FileHelper.deleteFile(oldPicture.getPath());
-                                    dao.deleteFile(user.getProfilePictureId());
+                                    dao.deleteFile(oldPictureId);
 
                                     context.commit();
                                 } catch (DataAccessException ex) {
