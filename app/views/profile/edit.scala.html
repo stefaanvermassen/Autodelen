@@ -25,9 +25,7 @@
                             <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="form-group">
-                                @* TODO: profile pictures *@
-                                <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
-                                <a href="@routes.Profile.profilePictureUpload(user.getId)">Wijzig profielfoto</a>
+                                <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
                             </div>
                             <div class="form-group">
                                 <p class="form-control-static h2">

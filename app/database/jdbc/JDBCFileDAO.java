@@ -16,11 +16,18 @@ public class JDBCFileDAO implements FileDAO {
     private PreparedStatement createFileStatement;
     private PreparedStatement getFileGroupStatement;
     private PreparedStatement getFileStatement;
+    private PreparedStatement deleteFileStatement;
 
     public JDBCFileDAO(Connection connection) {
         this.connection = connection;
     }
 
+    private PreparedStatement getDeleteFileStatement() throws SQLException {
+        if(deleteFileStatement == null){
+            deleteFileStatement = connection.prepareStatement("DELETE FROM files WHERE file_id = ?");
+        }
+        return deleteFileStatement;
+    }
     private PreparedStatement getGetFileStatement() throws SQLException {
         if (getFileStatement == null) {
             getFileStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_id = ?");
@@ -116,5 +123,17 @@ public class JDBCFileDAO implements FileDAO {
     @Override
     public File createFile(String path, String fileName, String contentType) throws DataAccessException {
         return createFile(path, fileName, contentType, -1);
+    }
+
+    @Override
+    public void deleteFile(int fileId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getDeleteFileStatement();
+            ps.setInt(1, fileId);
+            if(ps.executeUpdate() != 1)
+                throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to prepare delete file query.", ex);
+        }
     }
 }

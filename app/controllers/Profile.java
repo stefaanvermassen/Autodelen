@@ -5,6 +5,7 @@ import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import database.*;
 import models.Address;
+import models.File;
 import models.User;
 import models.UserRole;
 import play.data.Form;
@@ -115,38 +116,41 @@ public class Profile extends Controller {
 
     /**
      * The page to upload a new profile picture
+     *
      * @param userId The userId for which the picture is uploaded
      * @return The page to upload
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result profilePictureUpload(int userId){
+    public static Result profilePictureUpload(int userId) {
         return ok(uploadPicture.render(userId));
     }
 
     /**
      * Gets the profile picture for given user Id, or default one if missing
+     *
      * @param userId The user for which the image is requested
      * @return The image with correct content type
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result getProfilePicture(int userId){
+    public static Result getProfilePicture(int userId) {
         //TODO: checks on whether other person can see this
         //TODO: Rely on heavy caching of the image ID or views since each app page includes this
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
             User user = udao.getUser(userId, true);
-            if(user != null && user.getProfilePictureId() >= 0){
+            if (user != null && user.getProfilePictureId() >= 0) {
                 return FileHelper.getFileStreamResult(context.getFileDAO(), user.getProfilePictureId());
             } else {
                 return FileHelper.getPublicFile(Paths.get("images", "no_profile.png").toString(), "image/png");
             }
-        } catch(DataAccessException ex){
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
 
     /**
      * Processes a profile picture upload request
+     *
      * @param userId
      * @return
      */
@@ -169,30 +173,42 @@ public class Profile extends Controller {
             throw ex;
         }
 
+        // Start saving the actual picture
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        Http.MultipartFormData.FilePart picture = body.getFile("picture"); //TODO: define that this is always in "file" somewhere, generalize
+        Http.MultipartFormData.FilePart picture = body.getFile("picture");
         if (picture != null) {
-
-            // Check the content type
             String contentType = picture.getContentType();
-            if (!FileHelper.IMAGE_CONTENT_TYPES.contains(contentType)) {
-                flash("danger", "Verkeerde bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType+ ")");
+            if (!FileHelper.isImageContentType(contentType)) { // Check the content type using MIME
+                flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
                 return badRequest(uploadPicture.render(userId));
             } else {
                 try {
                     // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
-                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile"));
+                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
 
-                    // Save the file reference in the database
-                    try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                    try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {                     // Save the file reference in the database
                         FileDAO dao = context.getFileDAO();
                         UserDAO udao = context.getUserDAO();
                         try {
                             models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
-                            //TODO: delete old profile picture!!!!
+                            int oldPictureId = user.getProfilePictureId();
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user, true);
                             context.commit();
+
+                            if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
+                                try {
+                                    File oldPicture = dao.getFile(oldPictureId);
+                                    FileHelper.deleteFile(oldPicture.getPath());
+                                    dao.deleteFile(oldPictureId);
+
+                                    context.commit();
+                                } catch (DataAccessException ex) {
+                                    // Failed to delete old profile picture, but no rollback needed
+                                    throw ex;
+                                }
+                            }
+
                             flash("success", "De profielfoto werd succesvol aangepast.");
                             return redirect(routes.Profile.index(userId));
                         } catch (DataAccessException ex) {
@@ -327,9 +343,11 @@ public class Profile extends Controller {
         if (user.getContractManager() != null) {
             total++;
         }
-        //TODO: profile picture
+        if(user.getProfilePictureId() != -1){
+            total++;
+        }
 
-        return (int) (((float) total / 9) * 100);
+        return (int) (((float) total / 10) * 100); //10 records
     }
 
     /**
