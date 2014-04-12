@@ -165,7 +165,8 @@
                             <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i>
                                 Ritten
                                 @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
-                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false, true)) { requests =>
+                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { requests =>
                                     @if(requests > 0) {
                                         <span class="sidenumber">@requests</span>
                                     }

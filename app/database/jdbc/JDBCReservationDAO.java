@@ -222,13 +222,17 @@ public class JDBCReservationDAO implements ReservationDAO{
     public int numberOfReservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
         try {
             User user = DatabaseHelper.getUserProvider().getUser();
+            if(user == null)
+                return 0;
             String statement = "SELECT COUNT(*) as result FROM CarReservations INNER JOIN Cars " +
                     "ON CarReservations.reservation_car_id = Cars.car_id " +
-                    "WHERE CarReservations.reservation_status = '" + status + "'";
-            if(userIsOwner && user != null) {
+                    "WHERE CarReservations.reservation_status = '" + status.toString() + "'";
+            if(userIsLoaner && userIsOwner )
+                statement += " AND (car_owner_user_id=" +  user.getId() + " OR reservation_user_id=" +  user.getId() +")";
+            else if(userIsOwner) {
                 statement += " AND car_owner_user_id=" +  user.getId();
             }
-            if(userIsLoaner && user != null) {
+            else if(userIsLoaner) {
                 statement += " AND reservation_user_id=" +  user.getId();
             }
             PreparedStatement ps = connection.prepareStatement(statement);
@@ -310,9 +314,9 @@ public class JDBCReservationDAO implements ReservationDAO{
                     ReservationStatus status = ReservationStatus.valueOf(rs.getString("reservation_status"));
                     System.out.println(status);
                     PreparedStatement update =
-                             connection.prepareStatement("UPDATE CarReservations SET reservation_status = ? WHERE reservation_id = ? ");
-                    update.setString(1, ReservationStatus.REQUEST_DETAILS.toString());
-                    update.setInt(2, rs.getInt("reservation_id"));
+                             connection.prepareStatement("UPDATE CarReservations SET reservation_status ='" +
+                                     ReservationStatus.REQUEST_DETAILS.toString() + "' WHERE reservation_id = " +
+                                     + rs.getInt("reservation_id"));
                     if(update.executeUpdate() == 0)
                         throw new DataAccessException("Error while updating the reservations table");
                 }

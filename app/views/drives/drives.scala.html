@@ -38,9 +38,10 @@
                   </li>
                   <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
                       Voorbij</a>
-                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false, true)) { amount =>
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                              Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { amount =>
                           @if(amount > 0) {
-                              <span style="background-color: #7b7b7b" class="topnumber">1</span>
+                              <span style="background-color: #7b7b7b" class="topnumber">@amount</span>
                           }
                       }
                       <input name="status" value="PASSED" class="hidden">
@@ -49,7 +50,7 @@
                       Aanvragen</a>
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { amount =>
                           @if(amount > 0) {
-                              <span style="background-color: #7b7b7b" class="topnumber">1</span>
+                              <span style="background-color: #7b7b7b" class="topnumber">@amount</span>
                           }
                       }
                       <input name="status" value="@ReservationStatus.REQUEST.toString" class="hidden">

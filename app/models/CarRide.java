@@ -1,13 +1,11 @@
 package models;
 
-import org.joda.time.DateTime;
-
 /**
  * Created by HannesM on 10/03/14.
  */
 public class CarRide {
     private Reservation reservation; // reservation.getId() is CarRide-id
-    private CarRideStatus status;
+    private boolean status;
     private int startMileage;
     private int endMileage;
 
@@ -39,11 +37,11 @@ public class CarRide {
         this.endMileage = endMileage;
     }
 
-    public CarRideStatus getStatus() {
+    public boolean isStatus() {
         return status;
     }
 
-    public void setStatus(CarRideStatus status) {
+    public void setStatus(boolean status) {
         this.status = status;
     }
 }

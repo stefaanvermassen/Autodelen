@@ -3,7 +3,6 @@ package database.jdbc;
 import database.CarRideDAO;
 import database.DataAccessException;
 import models.CarRide;
-import models.CarRideStatus;
 import models.Reservation;
 
 import java.sql.*;
@@ -26,7 +25,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
     public static CarRide populateCarRide(ResultSet rs) throws SQLException {
         CarRide carRide = new CarRide(JDBCReservationDAO.populateReservation(rs));
-        carRide.setStatus(CarRideStatus.valueOf(rs.getString("car_ride_status")));
+        carRide.setStatus(rs.getBoolean("car_ride_status"));
         carRide.setStartMileage(rs.getInt("car_ride_start_mileage"));
         carRide.setEndMileage(rs.getInt("car_ride_end_mileage"));
 
@@ -35,7 +34,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getCreateCarRideStatement() throws SQLException {
         if (createCarRideStatement == null) {
-            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id) VALUE (?)");
+            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id, car_ride_start_mileage, car_ride_end_mileage) VALUE (?, ?, ?)");
         }
         return createCarRideStatement;
     }
@@ -58,10 +57,12 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
 
     @Override
-    public CarRide createCarRide(Reservation reservation) throws DataAccessException {
+    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateCarRideStatement();
             ps.setInt(1, reservation.getId());
+            ps.setInt(2, startMileage);
+            ps.setInt(3, endMileage);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car ride.");
@@ -94,7 +95,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
     public void updateCarRide(CarRide carRide) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateCarRideStatement();
-            ps.setString(1, carRide.getStatus().toString());
+            ps.setBoolean(1, carRide.isStatus());
             ps.setInt(2, carRide.getStartMileage());
             ps.setInt(3, carRide.getEndMileage());
 

@@ -57,17 +57,16 @@
                         <div class="btn-group btn-group-xs">
                             <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">
                                 Details
-                                @if(reservation.getUser.getId == userId) {
-                                    @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                        <i class="fa fa-bell"></i>
-                                    }
-                                } else {
-                                    @if(reservation.getStatus == ReservationStatus.REQUEST) {
-                                        <i class="fa fa-exclamation"></i>
-                                    }
+                                @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
+                                    <i class="fa fa-bell"></i>
+                                }
+                                @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
+                                        reservation.getUser.getId != userId) {
+                                    <i class="fa fa-exclamation"></i>
                                 }
                             </a>
-                            @if(reservation.getUser.getId == userId && reservation.getStatus != ReservationStatus.CANCELLED) {
+                            @if(reservation.getUser.getId == userId && reservation.getStatus == ReservationStatus.ACCEPTED ||
+                                    reservation.getStatus == ReservationStatus.REQUEST) {
                                 <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">
                                     Annuleer</a>
                             }

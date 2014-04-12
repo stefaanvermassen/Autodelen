@@ -195,7 +195,7 @@ public class Reserve extends Controller {
                 DateTime from = reservationForm.get().getTimeFrom();
                 DateTime until = reservationForm.get().getTimeUntil();
                 for(Reservation reservation : reservations) {
-                    if(reservation.getStatus() != ReservationStatus.REFUSED &&
+                    if((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                             (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
                         reservationForm.reject("De reservatie overlapt met een reeds bestaande reservatie!");
                         return badRequest(reservationDetails.render(reservationForm, car, reservations));
