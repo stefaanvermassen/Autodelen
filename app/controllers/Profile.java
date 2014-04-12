@@ -178,7 +178,7 @@ public class Profile extends Controller {
         Http.MultipartFormData.FilePart picture = body.getFile("picture");
         if (picture != null) {
             String contentType = picture.getContentType();
-            if (!FileHelper.IMAGE_CONTENT_TYPES.contains(contentType)) { // Check the content type using MIME
+            if (!FileHelper.isImageContentType(contentType)) { // Check the content type using MIME
                 flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
                 return badRequest(uploadPicture.render(userId));
             } else {
@@ -343,9 +343,11 @@ public class Profile extends Controller {
         if (user.getContractManager() != null) {
             total++;
         }
-        //TODO: profile picture
+        if(user.getProfilePictureId() != -1){
+            total++;
+        }
 
-        return (int) (((float) total / 9) * 100);
+        return (int) (((float) total / 10) * 100); //10 records
     }
 
     /**

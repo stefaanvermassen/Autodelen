@@ -25,13 +25,14 @@ public class FileHelper {
     private static final boolean MOVE_INSTEAD_OF_COPY = true;
 
     //Source: http://www.cs.helsinki.fi/u/hahonen/uusmedia/sisalto/cgi_perl_ssi/mime.html
-    public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png"}); // array is too small to allocate a Set
+    public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png", "image/tiff"}); // array is too small to allocate a Set
+    public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList(new String[]{"text/plain", "application/pdf"});
 
     private static String uploadFolder;
 
     // Initialize path to save uploads to
     static {
-        String property = ConfigurationHelper.getConfigurationString("uploads.path"); //TODO: Fix this uuuugly hack with a normal getString??
+        String property = ConfigurationHelper.getConfigurationString("uploads.path");
         if (property.startsWith("./")) {
             uploadFolder = Paths.get(Play.current().path().getAbsolutePath(), property.substring(2)).toString(); // Get relative path to Play
         } else uploadFolder = property;
@@ -68,10 +69,19 @@ public class FileHelper {
             try {
                 FileInputStream is = new FileInputStream(Paths.get(uploadFolder, file.getPath()).toFile()); //TODO: this cannot be sent with a Try-with-resources (stream already closed), check if Play disposes properly
                 return file.getContentType() != null && !file.getContentType().isEmpty() ? Controller.ok(is).as(file.getContentType()) : Controller.ok(is);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (FileNotFoundException e) {
+                Logger.error("Missing file: " + file.getPath());
+                return Controller.notFound();
             }
         } else return Controller.notFound();
+    }
+
+    public static boolean isImageContentType(String contentType){
+        return IMAGE_CONTENT_TYPES.contains(contentType);
+    }
+
+    public static boolean isDocumentContentType(String contentType){
+        return isImageContentType(contentType) || DOCUMENT_CONTENT_TYPES.contains(contentType);
     }
 
     /**
