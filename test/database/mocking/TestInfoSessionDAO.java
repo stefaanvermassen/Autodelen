@@ -60,17 +60,6 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
 	}
 
 	@Override
-	public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException {
-		List<InfoSession> list = new ArrayList<>();
-		for(InfoSession session : sessions){
-			if(since.isAfter(session.getTime().getMillis())){
-				list.add(session);
-			}
-		}
-		return list;
-	}
-
-	@Override
 	public void updateInfoSessionAddress(InfoSession session) throws DataAccessException {
 		// is ok
 	}
@@ -141,12 +130,10 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
 		return 0; // TODO: implement filter methods
 	}
 
-	@Override
-	public List<InfoSession> getInfoSessionsAfter(DateTime since,
-			database.FilterField orderBy, boolean asc, int page, int pageSize,
-			Filter filter) throws DataAccessException {
-		return null; // TODO: impelent filter methods
-	}
+    @Override
+    public List<InfoSession> getInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        return null;
+    }
 
 	@Override
 	public void updateInfosessionTime(InfoSession session)

@@ -290,7 +290,7 @@ public class DrivesControllerTest {
                 Map<String,String> data = new HashMap<>();
                 data.put("reason", "Test reden");
                 Result result1 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Refusing reservation of own car", OK, status(result1));
@@ -298,7 +298,7 @@ public class DrivesControllerTest {
                 // With empty reason
                 data.put("reason", "");
                 Result result2 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Refusing reservation without reason", BAD_REQUEST, status(result2));
@@ -310,7 +310,7 @@ public class DrivesControllerTest {
                 Reservation reservation2 = helper.createReservation(from, to, car2, user);
 
                 Result result4 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation2.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation2.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Refusing reservation of other car", BAD_REQUEST, status(result4));
@@ -319,7 +319,7 @@ public class DrivesControllerTest {
                 Reservation reservation3 = helper.createReservation(from, to, car2, user2);
 
                 Result result5 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation3.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation3.getId()),
                         fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("Refusing reservation of other car that I didn't reserve", BAD_REQUEST, status(result5));
@@ -328,7 +328,7 @@ public class DrivesControllerTest {
                 Reservation reservation4 = helper.createReservation(from, to, car, user2);
 
                 Result result6 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation4.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation4.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Refusing reservation of my car, reserved by other user", OK, status(result6));
@@ -339,7 +339,7 @@ public class DrivesControllerTest {
                 helper.updateReservation(reservation5);
 
                 Result result7 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation5.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation5.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Approving reservation of my car, reserved by other user but already cancelled", BAD_REQUEST, status(result7));
@@ -350,7 +350,7 @@ public class DrivesControllerTest {
                 helper.updateReservation(reservation6);
 
                 Result result8 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation6.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation6.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Approving reservation of my car, reserved by other user but already refused", BAD_REQUEST, status(result8));
@@ -361,7 +361,7 @@ public class DrivesControllerTest {
                 helper.updateReservation(reservation7);
 
                 Result result9 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation7.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation7.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Approving reservation of my car, reserved by other user but already accepted", BAD_REQUEST, status(result9));
@@ -372,7 +372,7 @@ public class DrivesControllerTest {
                 helper.updateReservation(reservation8);
 
                 Result result10 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation8.getId(), 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation8.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Approving reservation of my car, reserved by other user but already accepted and afterwards requested again", OK, status(result10));
@@ -380,7 +380,7 @@ public class DrivesControllerTest {
 
                 // Reservation that doesn't exist
                 Result result3 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation.getId() - 1, 1, 1, 1, "", ""),
+                        controllers.routes.ref.Drives.refuseReservation(reservation.getId() - 1),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
                 assertEquals("Refusing unexisting reservation", BAD_REQUEST, status(result3));

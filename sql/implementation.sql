@@ -22,24 +22,6 @@ CREATE TABLE `Files` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `DriverLicenses` (
-	`driver_license_id` INT NOT NULL, # Moet gebruiker zelf invullen!
-	`driver_license_file` INT NOT NULL,
-	PRIMARY KEY (`driver_license_id`),
-	FOREIGN KEY (`driver_license_file`) REFERENCES FileGroups(`file_group_id`)
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
-
-CREATE TABLE `IdentityCards` (
-	`identity_card_id` INT NOT NULL, # Identiteitskaartnummer
-	`identity_card_registration_nr` INT NOT NULL, # Rijksregisternummer
-	`identity_card_file` INT NOT NULL,
-	PRIMARY KEY (`identity_card_id`),
-	FOREIGN KEY (`identity_card_file`) REFERENCES FileGroups(`file_group_id`)
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
 
 CREATE TABLE `Addresses` (
   `address_id` INT(10) NOT NULL AUTO_INCREMENT,
@@ -66,8 +48,11 @@ CREATE TABLE `Users` (
 	`user_phone` VARCHAR(16),
 	`user_address_domicile_id` INT,
 	`user_address_residence_id` INT,
-	`user_driver_license_id` INT,
-	`user_identity_card_id` INT,
+	`user_driver_license_id` VARCHAR(32),
+	`user_driver_license_file_group_id` INT,
+	`user_identity_card_id` VARCHAR(32), # Identiteitskaartnr
+	`user_identity_card_registration_nr` VARCHAR(32), # Rijksregisternummer
+	`user_identity_card_file_group_id` INT,
 	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
 	`user_damage_history` TEXT,
 	`user_payed_deposit` BIT(1),
@@ -77,8 +62,8 @@ CREATE TABLE `Users` (
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_address_residence_id`) REFERENCES Addresses(`address_id`),
-	FOREIGN KEY (`user_driver_license_id`) REFERENCES DriverLicenses(`driver_license_id`),
-	FOREIGN KEY (`user_identity_card_id`) REFERENCES IdentityCards(`identity_card_id`),
+	FOREIGN KEY (`user_driver_license_file_group_id`) REFERENCES FileGroups(`file_group_id`),
+	FOREIGN KEY (`user_identity_card_file_group_id`) REFERENCES FileGroups(`file_group_id`),
 	FOREIGN KEY (`user_contract_manager_id`) REFERENCES Users(`user_id`),
 	FOREIGN KEY (`user_image_id`) REFERENCES Files(`file_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
