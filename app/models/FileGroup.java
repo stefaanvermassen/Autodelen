@@ -43,7 +43,9 @@ public class FileGroup implements Iterable<File> {
         return files.remove(file);
     }
 
-    public List<File> toList(){
+    public List<File> getList() { return files; } //Because Scala remplating failed to recognize iterable...
+
+    public List<File> copyList(){
         return new ArrayList<>(files); //deep copy
     }
 }
