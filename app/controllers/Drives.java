@@ -482,7 +482,7 @@ public class Drives extends Controller {
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = new JDBCFilter();
+        Filter filter = Pagination.parseFilter(searchString);
 
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
