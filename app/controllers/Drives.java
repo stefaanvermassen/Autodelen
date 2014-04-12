@@ -96,7 +96,7 @@ public class Drives extends Controller {
     /**
      * @return the html page of the index page
      */
-    public static Html showIndex() { return drives.render(1, 1, "", ""); }
+    public static Html showIndex() { return drives.render(1, 1, "", "status=" + ReservationStatus.ACCEPTED.toString()); }
 
     /**
      * Method: GET
@@ -246,7 +246,7 @@ public class Drives extends Controller {
         if(reservation == null)
             return badRequest(showIndex());
         Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), reservation);
-        return ok(detailsPage(reservationId));
+        return details(reservationId);
     }
 
     /**
@@ -269,7 +269,7 @@ public class Drives extends Controller {
             return badRequest(showIndex());
         }
         Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), reservation, refuseForm.get().reason);
-        return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
+        return details(reservationId);
     }
 
     /**
@@ -285,7 +285,7 @@ public class Drives extends Controller {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.CANCELLED);
         if(reservation == null)
             return badRequest(showIndex());
-        return index();
+        return details(reservationId);
     }
 
     /**
@@ -429,9 +429,10 @@ public class Drives extends Controller {
      * @return The number of reservations
      */
     public static int reservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
+        User user = DatabaseHelper.getUserProvider().getUser();
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
-            return dao.numberOfReservationsWithStatus(status, userIsOwner, userIsLoaner);
+            return dao.numberOfReservationsWithStatus(status, user.getId(), userIsOwner, userIsLoaner);
         } catch(DataAccessException ex) {
             throw ex;
         }

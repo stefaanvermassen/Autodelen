@@ -65,11 +65,6 @@
                                     <i class="fa fa-exclamation"></i>
                                 }
                             </a>
-                            @if(reservation.getUser.getId == userId && reservation.getStatus == ReservationStatus.ACCEPTED ||
-                                    reservation.getStatus == ReservationStatus.REQUEST) {
-                                <a class="btn btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">
-                                    Annuleer</a>
-                            }
                         </div>
                     </td>
                 </tr>
