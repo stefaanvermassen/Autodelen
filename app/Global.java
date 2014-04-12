@@ -1,9 +1,10 @@
 /**
  * Created by Cedric on 3/7/14.
  */
-import database.DatabaseConfiguration;
-import database.DatabaseHelper;
+import database.*;
 import database.jdbc.JDBCDataAccessProvider;
+import models.EmailTemplate;
+import models.MailType;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -17,9 +18,26 @@ import java.util.Locale;
 
 public class Global extends GlobalSettings {
 
+    // Tests if all templates are in the database, and if the database works
+    private void testDatabase(){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+            TemplateDAO dao = context.getTemplateDAO();
+            StringBuilder sb = new StringBuilder();
+            for(MailType type : MailType.values()){
+                if(dao.getTemplate(type) == null)
+                    sb.append(type + ", ");
+            }
+            if(sb.length() > 0)
+                throw new RuntimeException("Missing database templates for: " + sb.toString());
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+    }
+
     public void onStart(Application app) {
         try {
             DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
+            testDatabase();
 
             // Register datetime formatter
             play.data.format.Formatters.register(DateTime.class, new Formatters.SimpleFormatter<DateTime>() {
