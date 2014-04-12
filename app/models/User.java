@@ -127,7 +127,7 @@ public class User {
     public void setAddressResidence(Address addressResidence) {
         this.addressResidence = addressResidence;
     }
-    public DriverLicense getLicense() {
+    public DriverLicense getDriverLicense() {
         return license;
     }
 
@@ -139,7 +139,7 @@ public class User {
         this.gender = gender;
     }
 
-    public void setLicense(DriverLicense license) {
+    public void setDriverLicense(DriverLicense license) {
         this.license = license;
     }
 

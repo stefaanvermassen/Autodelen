@@ -9,14 +9,21 @@ import java.util.List;
  */
 public class FileGroup implements Iterable<File> {
 
+    private int id;
     private List<File> files;
 
-    public FileGroup(List<File> files){
+    public FileGroup(int id, List<File> files){
+        this.id = id;
         this.files = files;
     }
 
-    public FileGroup(){
+    public FileGroup(int id){
+        this.id = id;
         this.files = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override
