@@ -483,17 +483,6 @@ public class Drives extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = new JDBCFilter();
-        if(searchString != "") {
-            String[] searchStrings = searchString.split(",");
-            for(String s : searchStrings) {
-                String[] s2 = s.split("=");
-                if(s2.length == 2) {
-                    String f = s2[0];
-                    String v = s2[1];
-                    filter.fieldIs(FilterField.stringToField(f), v);
-                }
-            }
-        }
 
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -504,7 +493,7 @@ public class Drives extends Controller {
             }
 
             // We only want reservations from the current user (or his car(s))
-            filter.fieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
+            filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
 
             List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, PAGE_SIZE, filter);
 

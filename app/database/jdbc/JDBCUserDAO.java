@@ -41,8 +41,8 @@ public class JDBCUserDAO implements UserDAO {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-        ps.setString(start, filter.getFieldContains(FilterField.USER_FIRSTNAME, false));
-        ps.setString(start+1, filter.getFieldContains(FilterField.USER_LASTNAME, false));
+        ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
+        ps.setString(start+1, filter.getValue(FilterField.USER_LASTNAME));
     }
 
     private Connection connection;

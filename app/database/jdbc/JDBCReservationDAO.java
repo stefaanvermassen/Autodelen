@@ -40,10 +40,10 @@ public class JDBCReservationDAO implements ReservationDAO{
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-        ps.setString(start, filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
-        ps.setString(start+1, filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
+        ps.setString(start, filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID));
+        ps.setString(start+1, filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID));
         if(matchStatus)
-            ps.setString(start+2, filter.getFieldIs(FilterField.RESERVATION_STATUS));
+            ps.setString(start+2, filter.getValue(FilterField.RESERVATION_STATUS));
     }
 
     private Connection connection;
@@ -253,14 +253,14 @@ public class JDBCReservationDAO implements ReservationDAO{
         try {
             boolean matchStatus = true;
             String statement = RESERVATION_QUERY + FILTER_FRAGMENT + "AND";
-            if("PASSED".equals(filter.getFieldIs(FilterField.RESERVATION_STATUS))) {
+            if("PASSED".equals(filter.getValue(FilterField.RESERVATION_STATUS))) {
                 statement += MATCH_PASSED;
                 matchStatus = false;
             }
             else
                 statement += MATCH_STATUS;
-            if("".equals(filter.getFieldIs(FilterField.RESERVATION_STATUS)))
-                filter.fieldIs(FilterField.RESERVATION_STATUS, ReservationStatus.ACCEPTED.toString());
+            if("".equals(filter.getValue(FilterField.RESERVATION_STATUS)))
+                filter.putValue(FilterField.RESERVATION_STATUS, ReservationStatus.ACCEPTED.toString());
             switch(orderBy) {
                 // TODO: get some other things to sort on
                 default:
@@ -312,7 +312,6 @@ public class JDBCReservationDAO implements ReservationDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 while(rs.next()) {
                     ReservationStatus status = ReservationStatus.valueOf(rs.getString("reservation_status"));
-                    System.out.println(status);
                     PreparedStatement update =
                              connection.prepareStatement("UPDATE CarReservations SET reservation_status ='" +
                                      ReservationStatus.REQUEST_DETAILS.toString() + "' WHERE reservation_id = " +

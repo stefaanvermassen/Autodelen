@@ -561,8 +561,8 @@ public class InfoSessions extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        filter.fieldContains(FilterField.FROM, DateTime.now().toString());
-        filter.fieldContains(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
+        filter.putValue(FilterField.FROM, DateTime.now().toString());
+        filter.putValue(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
 
         return ok(sessionsList(page, filterField, asc, filter, false));
     }
@@ -586,11 +586,11 @@ public class InfoSessions extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
         // If no from and until is specified: show infosessions from now until 100 years from now
         // TODO: find better solution for ugly equals YYYY-MM-DD hh:mm
-        if(filter.getFieldContains(FilterField.FROM, true).equals("") || filter.getFieldContains(FilterField.FROM, true).equals("YYYY-MM-DD hh:mm")) {
-            filter.fieldContains(FilterField.FROM, DateTime.now().toString());
+        if(filter.getValue(FilterField.FROM).equals("") || filter.getValue(FilterField.FROM).equals("YYYY-MM-DD hh:mm")) {
+            filter.putValue(FilterField.FROM, DateTime.now().toString());
         }
-        if(filter.getFieldContains(FilterField.UNTIL, true).equals("") || filter.getFieldContains(FilterField.UNTIL, true).equals("YYYY-MM-DD hh:mm")) {
-            filter.fieldContains(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
+        if(filter.getValue(FilterField.UNTIL).equals("") || filter.getValue(FilterField.UNTIL).equals("YYYY-MM-DD hh:mm")) {
+            filter.putValue(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
         }
 
         return ok(sessionsList(page, filterField, asc, filter, true));
