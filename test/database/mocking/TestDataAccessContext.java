@@ -72,6 +72,16 @@ public class TestDataAccessContext implements DataAccessContext {
     }
 
     @Override
+    public ApprovalDAO getApprovalDAO() {
+        return null;
+    }
+
+    @Override
+    public FileDAO getFileDAO() {
+        return null;
+    }
+
+    @Override
     public void begin() {
 
     }

@@ -44,7 +44,7 @@ public class JDBCFileDAO implements FileDAO {
 
     private PreparedStatement getGetFileGroupStatement() throws SQLException {
         if (getFileGroupStatement == null) {
-            getFileGroupStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_file_id = ?");
+            getFileGroupStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_file_group_id = ?");
         }
         return getFileGroupStatement;
     }
@@ -82,7 +82,7 @@ public class JDBCFileDAO implements FileDAO {
                 while (rs.next()) {
                     files.add(populateFile(rs));
                 }
-                return new FileGroup(files);
+                return new FileGroup(fileGroup, files);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to read filegroup resultset.", ex);
             }

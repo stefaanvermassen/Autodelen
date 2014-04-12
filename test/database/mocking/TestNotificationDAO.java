@@ -3,6 +3,8 @@ package database.mocking;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.Filter;
+import database.FilterField;
 import models.Notification;
 import models.User;
 
@@ -20,8 +22,13 @@ public class TestNotificationDAO implements NotificationDAO{
 		notifications = new ArrayList<>();
 		idCounter=0;
 	}
-	
-	@Override
+
+    @Override
+    public int getAmountOfNotifications(Filter filter) throws DataAccessException {
+        return 0;
+    }
+
+    @Override
 	public List<Notification> getNotificationListForUser(int userId) throws DataAccessException {
 		List<Notification> list = new ArrayList<>();
 		for(Notification notification : notifications){
@@ -32,7 +39,12 @@ public class TestNotificationDAO implements NotificationDAO{
 		return list;
 	}
 
-	@Override
+    @Override
+    public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        return null;
+    }
+
+    @Override
 	public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException {
 		Notification notification = new Notification(idCounter++, user, false, subject, body, timestamp);
 		notifications.add(notification);

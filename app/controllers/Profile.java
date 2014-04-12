@@ -260,25 +260,87 @@ public class Profile extends Controller {
 
             User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            // Only a profile admin or
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
-                if (!DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_USER)) {
-                    return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.CAR_USER}));
-                }
-
-                /** TODO: Verander naar FULL user i.p.v. userRole CAR_USER
-                 * if (currentUser.getStatus() != UserStatus.FULL) {
-                 *     return badRequest(views.html.unauthorized.render(new UserRole[]{}));
-                 * }
-                 */
-
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                return ok(index.render(user, getProfileCompleteness(user)));
+            } else if(DatabaseHelper.getUserRoleProvider().isFullUser(currentUser)){
                 return ok(profile.render(user));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
             }
-
-            return ok(index.render(user, getProfileCompleteness(user)));
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    /**
+     * Returns whether the currentUser can edit the profile of user
+     *
+     * @param user        The subject
+     * @param currentUser The actor
+     * @return A boolean when the profile can be edited
+     */
+    private static boolean canEditProfile(User user, User currentUser) {
+        return currentUser.getId() == user.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN);
+    }
+
+    public static class EditIdentityCardForm {
+        public String cardNumber;
+        public String nationalNumber;
+
+        public EditIdentityCardForm(){}
+        public EditIdentityCardForm(String cardNumber, String nationalNumber){
+            this.cardNumber = cardNumber;
+            this.nationalNumber = nationalNumber;
+        }
+
+        public String validate(){
+            return null; //TODO: use validation list
+        }
+    }
+
+    /**
+     * Generates the page where the user can upload his/her identity information
+     * @param userId The user the requester wants to edit
+     * @return A page to edit the identity card information
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCard(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Dashboard.index());
+            }
+
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
+
+
+                if(user.getIdentityCard() != null){ // get all uploaded files already
+                    FileDAO fdao = context.getFileDAO();
+                    user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+
+                    form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
+                }
+
+                return ok(identitycard.render(user, form));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCardPost(int userId){
+        return ok("Received identity change post.");
     }
 
     /**
@@ -343,7 +405,7 @@ public class Profile extends Controller {
         if (user.getContractManager() != null) {
             total++;
         }
-        if(user.getProfilePictureId() != -1){
+        if (user.getProfilePictureId() != -1) {
             total++;
         }
 
