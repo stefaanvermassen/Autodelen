@@ -49,6 +49,11 @@ public class UserRoleProvider {
         return roles.contains(role) || roles.contains(UserRole.SUPER_USER); // Superuser has all roles!!
     }
 
+    public boolean hasRole(UserRole role){
+        User user = userProvider.getUser();
+        return hasRole(user, role);
+    }
+
     public EnumSet<UserRole> getRoles(int userId, boolean cached){
 
         String key = String.format(ROLES_BY_ID, userId);

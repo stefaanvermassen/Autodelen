@@ -25,7 +25,7 @@ public class JDBCUserDAO implements UserDAO {
     private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, users.user_gender, " +
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
             "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
-            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, " +
+            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, users.user_image_id, " +
             "contractManagers.user_id, contractManagers.user_password, contractManagers.user_firstname, contractManagers.user_lastname, contractManagers.user_email";
 
     private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM Users " +
@@ -145,7 +145,9 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
-    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, user_agree_terms=?, user_contract_manager_id=? WHERE user_id = ?");
+    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
+                    "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
+                    "user_agree_terms=?, user_contract_manager_id=?, user_image_id = ? WHERE user_id = ?");
     	}
     	return updateUserStatement;
     }
@@ -188,6 +190,11 @@ public class JDBCUserDAO implements UserDAO {
             user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
             user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
             user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
+
+            if(rs.getObject(tableName + ".user_image_id") != null){
+                user.setProfilePictureId(rs.getInt(tableName + ".user_image_id"));
+            }
+
             int contract_manager_id = rs.getInt(tableName + ".user_contract_manager_id");
             if(rs.wasNull()) {
                 user.setContractManager(null);
@@ -299,10 +306,11 @@ public class JDBCUserDAO implements UserDAO {
                 ps.setBoolean(13, user.isAgreeTerms());
                 if(user.getContractManager()==null) ps.setNull(14, Types.INTEGER);
                 else ps.setInt(14, user.getContractManager().getId());
+                if(user.getProfilePictureId() != -1) ps.setInt(15, user.getProfilePictureId());
+                else ps.setNull(15, Types.INTEGER);
+                ps.setInt(16, user.getId());
 
-                ps.setInt(15, user.getId());
-
-                // TODO: driver license, identity card, image
+                // TODO: driver license, identity card
             }
 
             if(ps.executeUpdate() == 0)

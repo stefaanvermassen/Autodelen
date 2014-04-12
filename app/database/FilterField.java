@@ -9,9 +9,9 @@ package database;
  */
 public enum FilterField {
     CAR_NAME, CAR_BRAND, CAR_SEATS, CAR_GPS, CAR_HOOK,
-    USER_NAME, USER_FIRSTNAME, USER_LASTNAME,
+    USER_NAME, USER_FIRSTNAME, USER_LASTNAME, USER_ID,
     ZIPCODE,
-    INFOSESSION_DATE,
+    INFOSESSION_DATE, INFOSESSION_TYPE,
     RESERVATION_USER_OR_OWNER_ID, RESERVATION_STATUS,
     FROM, UNTIL,
     UNKNOWN;
@@ -48,8 +48,11 @@ public enum FilterField {
             case "until":
                 field = UNTIL;
                 break;
-            case "date" :
+            case "infosession_date" :
                 field = INFOSESSION_DATE;
+                break;
+            case "infosession_type" :
+                field = INFOSESSION_TYPE;
                 break;
             case "user_name":
                 field = USER_NAME;

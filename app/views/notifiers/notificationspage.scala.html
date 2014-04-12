@@ -1,0 +1,24 @@
+@(notifications: List[Notification], page : Int, amountOfResults : Int, amountOfPages : Int)
+@import org.joda.time.format.DateTimeFormat
+<ul class="timeline noverticalmargin">
+@for((notification, index) <- notifications.zipWithIndex) {
+    <li class="timeline-inverted">
+        <div class="timeline-badge"><i class="fa fa-check"></i>
+        </div>
+        <div class="timeline-panel">
+            <div class="timeline-heading">
+                <button type="button" class="close" aria-hidden="true">&times;</button>
+                <h4 class="timeline-title">@notification.getSubject</h4>
+                <p>
+                    <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</small>
+                </p>
+            </div>
+            <div class="timeline-body">
+            @Html(notification.getBody)
+            </div>
+        </div>
+    </li>
+}
+</ul>
+
+<p id="pagination" name="@amountOfResults,@amountOfPages"></p>

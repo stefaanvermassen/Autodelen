@@ -6,6 +6,7 @@ import database.DataAccessProvider;
 import database.UserDAO;
 import models.Address;
 import models.UserRole;
+import models.UserStatus;
 import play.cache.Cache;
 import models.User;
 import play.mvc.Controller;
@@ -83,13 +84,16 @@ public class UserProvider {
         Controller.session("email", user.getEmail());
     }
 
-
     public User getUser(int userId) throws DataAccessException {
         return getUser(userId, true);
     }
 
     public void invalidateUser(User user) {
         Cache.remove(String.format(USER_BY_EMAIL, user.getEmail()));
+    }
+
+    public static boolean isBlocked(User user){
+        return user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING;
     }
 
     public User getUser(String email, boolean cached) throws DataAccessException {

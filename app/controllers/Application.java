@@ -22,10 +22,12 @@ public class Application extends Controller {
                         // Routes
                         routes.javascript.Cars.showCarsPage(),
                         routes.javascript.InfoSessions.showUpcomingSessionsPage(),
+                        routes.javascript.InfoSessions.showSessionsPage(),
                         routes.javascript.Reserve.showCarsPage(),
                         routes.javascript.Users.showUsersPage(),
                         routes.javascript.UserRoles.showUsersPage(),
                         routes.javascript.EmailTemplates.showExistingTemplatesPage(),
+                        routes.javascript.Notifications.showNotificationsPage(),
                         routes.javascript.InfoSessions.enrollSession(),
                         routes.javascript.Drives.showDrivesPage(),
                         routes.javascript.Maps.getMap(),

@@ -19,6 +19,7 @@ public class User {
     private UserStatus status;
     private IdentityCard identityCard;
     private String damageHistory;
+    private int profilePictureId; //TODO, review if it's okay practice to -1 = NULL
     private boolean payedDeposit;
     private boolean agreeTerms;
     private User contractManager;
@@ -44,10 +45,19 @@ public class User {
         this.password = password;
 
         this.status = UserStatus.REGISTERED;
+        this.profilePictureId = -1;
     }
 
     public void setId(int id){
         this.id = id;
+    }
+
+    public int getProfilePictureId() {
+        return profilePictureId;
+    }
+
+    public void setProfilePictureId(int profilePictureId) {
+        this.profilePictureId = profilePictureId;
     }
 
     public String getCellphone() {
