@@ -13,4 +13,5 @@ public interface FileDAO {
     public FileGroup getFiles(int fileGroup) throws DataAccessException;
     public File createFile(String path, String fileName, String contentType, int fileGroup) throws DataAccessException;
     public File createFile(String path, String fileName, String contentType) throws DataAccessException;
+    public void deleteFile(int fileId) throws DataAccessException;
 }

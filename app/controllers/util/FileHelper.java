@@ -1,5 +1,6 @@
 package controllers.util;
 
+import controllers.Assets;
 import database.DataAccessContext;
 import database.FileDAO;
 import play.Logger;
