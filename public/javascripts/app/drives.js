@@ -7,7 +7,9 @@ $(document).ready(function() {
         $('li[id^="tab"]').each(function () {
             $(this).find('input').removeClass('searchTextField');
         });
-        $(this).find('input').addClass('searchTextField');
+        if(typeof $(this).find('input') != undefined) {
+            $(this).find('input').addClass('searchTextField');
+        }
         $('#searchButton').click();
     });
 });

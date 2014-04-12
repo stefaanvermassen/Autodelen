@@ -7,8 +7,8 @@ function setAdjustEnvironment() {
     $('#untiladjust').removeClass('hidden');
     $('#untildetails').addClass('hidden');
     $('#submit').removeClass('hidden');
-    $('#adjust').text('Annuleren');
-    $('#buttons').addClass('btn-group btn-group-xs');
+    $('#adjust').text('Annuleer');
+    $('#annulateReservation').addClass('hidden');
 }
 
 function hideAdjustEnvironment() {
@@ -18,7 +18,7 @@ function hideAdjustEnvironment() {
     $('#untiladjust').addClass('hidden');
     $('#submit').addClass('hidden');
     $('#adjust').text('Reservatie inkorten');
-    $('#buttons').removeClass('btn-group btn-group-xs');
+    $('#annulateReservation').removeClass('hidden');
 }
 
 $(document).ready(function() {
