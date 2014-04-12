@@ -26,6 +26,10 @@ public class FileGroup implements Iterable<File> {
         return id;
     }
 
+    public int size(){
+        return files.size();
+    }
+
     @Override
     public Iterator<File> iterator() {
         return files.iterator();
