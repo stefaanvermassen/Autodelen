@@ -149,7 +149,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `CarReservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'REQUEST_NEW', 'CANCELLED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
+	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
 	`reservation_from` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -213,12 +213,12 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `CarRides` (
-	`car_ride_car_reservation_id` INT NOT NULL, # also primary key
-	`car_ride_status` BIT(1) NOT NULL DEFAULT 0, # goedgekeurde kilometerstand?
-	`car_ride_start_mileage` DECIMAL(10,1),
-	`car_ride_end_mileage` DECIMAL(10,1),
-	PRIMARY KEY (`car_ride_car_reservation_id`),
-	FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
+  `car_ride_car_reservation_id` INT NOT NULL, # also primary key
+  `car_ride_status` BIT(1) NOT NULL DEFAULT 0, # approved by owner?
+  `car_ride_start_mileage` DECIMAL(10,1),
+  `car_ride_end_mileage` DECIMAL(10,1),
+  PRIMARY KEY (`car_ride_car_reservation_id`),
+  FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

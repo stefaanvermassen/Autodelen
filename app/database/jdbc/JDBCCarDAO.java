@@ -41,14 +41,14 @@ public class JDBCCarDAO implements CarDAO{
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = createCarFilter();
         }
-        ps.setString(start, filter.getFieldContains(FilterField.CAR_NAME, false));
-        ps.setString(start+1, filter.getFieldContains(FilterField.CAR_BRAND, false));
-        ps.setString(start+2, filter.getFieldContains(FilterField.CAR_GPS, true));
-        ps.setString(start+3, filter.getFieldContains(FilterField.CAR_HOOK, true));
-        ps.setString(start+4, filter.getFieldContains(FilterField.CAR_SEATS, true));
-        ps.setString(start+5, filter.getFieldContains(FilterField.ZIPCODE, false));
-        ps.setString(start+6, filter.getFieldContains(FilterField.FROM, true));
-        ps.setString(start+7, filter.getFieldContains(FilterField.UNTIL, true));
+        ps.setString(start, filter.getValue(FilterField.CAR_NAME));
+        ps.setString(start+1, filter.getValue(FilterField.CAR_BRAND));
+        ps.setString(start+2, filter.getValue(FilterField.CAR_GPS));
+        ps.setString(start+3, filter.getValue(FilterField.CAR_HOOK));
+        ps.setString(start+4, filter.getValue(FilterField.CAR_SEATS));
+        ps.setString(start+5, filter.getValue(FilterField.ZIPCODE));
+        ps.setString(start+6, filter.getValue(FilterField.FROM));
+        ps.setString(start+7, filter.getValue(FilterField.UNTIL));
     }
 
 

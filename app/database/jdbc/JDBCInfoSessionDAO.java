@@ -44,8 +44,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             filter = createInfoSessionFilter();
         }
 
-        ps.setString(start, filter.getFieldContains(FilterField.FROM, true));
-        ps.setString(start+1, filter.getFieldContains(FilterField.UNTIL, true));
+        ps.setString(start, filter.getValue(FilterField.FROM));
+        ps.setString(start+1, filter.getValue(FilterField.UNTIL));
         // TODO get something to filter on
     }
 

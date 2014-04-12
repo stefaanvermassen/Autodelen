@@ -6,6 +6,7 @@ package database;
 
 import models.Car;
 import models.Reservation;
+import models.ReservationStatus;
 import models.User;
 import org.joda.time.DateTime;
 
@@ -22,7 +23,9 @@ public interface ReservationDAO {
     public void deleteReservation(Reservation reservation) throws DataAccessException;
 
     public int getAmountOfReservations(Filter filter) throws DataAccessException;
-    public List<Reservation> getReservationListForUser(int userId) throws DataAccessException;
     public List<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public List<Reservation> getReservationListForCar(int carID) throws DataAccessException;
+    public int numberOfReservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner);
+
+    public void updateTable();
 }
