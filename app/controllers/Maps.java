@@ -77,31 +77,6 @@ public class Maps extends Controller {
     }
 
     /**
-     * Resolves an address to a longtitude and latitude
-     * @param addressId
-     * @return
-     */
-    @Deprecated
-    @RoleSecured.RoleAuthenticated()
-    public static Promise<Result> getLatLong(int addressId) {
-        try {
-            return getLatLongPromise(addressId).map(
-                    new Function<F.Tuple<Double, Double>, Result>() {
-                        public Result apply(F.Tuple<Double, Double> coordinates) {
-                            return ok("Coordinates: Lat=" + coordinates._1 + ";Lon=" + coordinates._2);
-                        }
-                    });
-        } catch(DataAccessException ex) {
-            return Promise.promise(new F.Function0<Result>() {
-                @Override
-                public Result apply() throws Throwable {
-                    return badRequest("Address id does not exist.");
-                }
-            });
-        }
-    }
-
-    /**
      * Resolves the longtitude and latitude for a given address ID
      * @param addressId The address to resolve
      * @return A promise with the longtitude and latitude

@@ -19,9 +19,11 @@ POST        /userroles/edit                    controllers.UserRoles.editPost(us
 GET         /drives                            controllers.Drives.index()
 GET         /drives/page                       controllers.Drives.showDrivesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drive_details                     controllers.Drives.details(reservationId: Int)
-POST        /drive_details                     controllers.Drives.adjustDetails(reservationId: Int)
-GET         /drives-approved                   controllers.Drives.approveReservation(reservationId: Int)
-POST        /drives-refused                    controllers.Drives.refuseReservation(reservationId: Int, errorId: Int, page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+POST        /drive_details/adjusted            controllers.Drives.adjustDetails(reservationId: Int)
+GET         /drive_detais/approved             controllers.Drives.approveReservation(reservationId: Int)
+POST        /drive_details/refused             controllers.Drives.refuseReservation(reservationId: Int)
+POST        /drive_details/provide_info        controllers.Drives.provideDriveInfo(reservationId: Int)
+GET         /drive_details/approve_info        controllers.Drives.approveDriveInfo(reservationId: Int)
 GET         /drives-cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
 GET         /drivesAdmin                       controllers.Drives.drivesAdmin()
 
@@ -42,16 +44,23 @@ GET         /messages                          controllers.Messages.showMessages
 GET         /messages/new                      controllers.Messages.newMessage()
 POST        /messages/new                      controllers.Messages.createNewMessage()
 GET         /notifications                     controllers.Notifications.showNotifications()
+GET         /notifications/page                controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
 GET         /profile                           controllers.Profile.indexWithoutId()
 GET         /profile/edit                      controllers.Profile.edit(userId: Int)
 POST        /profile/edit                      controllers.Profile.editPost(userId: Int)
 GET         /profile/byid                      controllers.Profile.index(userId: Int)
+GET         /profile/changepicture             controllers.Profile.profilePictureUpload(userId: Int)
+POST        /profile/changepicture             controllers.Profile.profilePictureUploadPost(userId: Int)
+GET         /profile/picture                   controllers.Profile.getProfilePicture(userId: Int)
+GET         /profile/identitycard              controllers.Profile.editIdentityCard(userId: Int)
+POST        /profile/identitycard              controllers.Profile.editIdentityCardPost(userId: Int)
 
 # Users
 GET         /users                             controllers.Users.showUsers()
 GET         /users/page                        controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /users/impersonate                 controllers.Users.impersonate(userId: Int)
 
 # Login screen
 GET         /login                             controllers.Login.login(redirect ?= null)
@@ -74,6 +83,8 @@ GET         /infosession/new                   controllers.InfoSessions.newSessi
 POST        /infosession/new                   controllers.InfoSessions.createNewSession()
 GET         /infosession                       controllers.InfoSessions.showUpcomingSessions()
 GET         /infosession/page                  controllers.InfoSessions.showUpcomingSessionsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /infosession/admin                 controllers.InfoSessions.showSessions()
+GET         /infosession/admin/page            controllers.InfoSessions.showSessionsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /infosession/enroll                controllers.InfoSessions.enrollSession(id: Int)
 GET         /infosession/unenroll              controllers.InfoSessions.unenrollSession()
 GET         /infosession/view                  controllers.InfoSessions.detail(id: Int)
@@ -82,6 +93,7 @@ GET         /infosession/edit                  controllers.InfoSessions.editSess
 POST        /infosession/edit                  controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 GET         /infosession/delete                controllers.InfoSessions.removeSession(sessionId: Int)
+GET         /infosession/approval              controllers.InfoSessions.requestApproval()
 
 # Settings
 # TODO: REMOVE THIS!!!
@@ -105,7 +117,6 @@ GET         /cars/delete                       controllers.Cars.removeCar(carId:
 
 # Maps
 GET         /maps/tile                         controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
-GET         /maps/coordinates                  controllers.Maps.getLatLong(addressId: Int)
 GET         /maps/test                         controllers.Maps.showMap()
 
 # User Picker

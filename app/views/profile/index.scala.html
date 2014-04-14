@@ -18,7 +18,8 @@
                             Profiel compleetheid:
                         </p>
                         <div class="progress">
-                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width:@completeness%;">@completeness%</div>
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness
+                                %</div>
                         </div>
                     </div>
                 </div>
@@ -66,9 +67,16 @@
                                 }
                             </div>
                             <div class="form-group">
-                                <label class="h4">Rijksregisternummer</label>
+                                <label class="h4">Identiteitskaart</label>
                                 <p class="form-control-static">
-                                    XXX.XXXX.XXXXXXX</p> @* TODO: nummer in identity card DAO *@
+                                    @if(user.getIdentityCard != null && user.getIdentityCard.getRegistrationNr != null && !user.getIdentityCard.getRegistrationNr.isEmpty) {
+                                        @user.getIdentityCard.getRegistrationNr
+                                    } else {
+                                        Niet gespecifieerd.
+                                    }
+                                    <br/>
+                                    <a href="@routes.Profile.editIdentityCard(user.getId)">Wijzigen</a>
+                                </p>
                             </div>
                             <div class="form-group">
                                 <label class="h4">Contactverantwoordelijke</label>

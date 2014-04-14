@@ -127,13 +127,18 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>@user.toString</span>
-                            <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                            <span>@user.toString
+                                @if("y".equals(session.get("impersonated"))){
+                                    <span class="badge badge-warning">I</span>
+                                }
+                            </span>
+                           <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                            <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
                         </a>
                         <ul class="dropdown-menu dropdown-user">
-                            <li><a href="#"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                            <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
                             </li>
-                            <li><a href="#"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
+                            <li><a href="@routes.Settings.index"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
                             </li>
                             <li class="divider"></li>
                             <li><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
@@ -162,7 +167,16 @@
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li @if(title == "Ritten") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
+                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i>
+                                Ritten
+                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
+                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Drives.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>

@@ -10,26 +10,43 @@ package models;
  */
 public class IdentityCard {
     
-    private int id;
-    private String file;
+    private String id; // Identiteitskaartnummer
 
-    public IdentityCard(int id, String file) {
-        this.id = id;
-        this.file = file;
+    private String registrationNr; // Rijksregisternummer
+    private FileGroup fileGroup;
+
+    public IdentityCard() {
     }
 
-    
-    public int getId() {
+    public IdentityCard(String id, String registrationNr, FileGroup fileGroup) {
+        this.id = id;
+        this.registrationNr = registrationNr;
+        this.fileGroup = fileGroup;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
         return id;
     }
-
-    public String getFile() {
-        return file;
+    public String getRegistrationNr() {
+        return registrationNr;
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public void setRegistrationNr(String registrationNr) {
+        this.registrationNr = registrationNr;
     }
-    
+
+    public FileGroup getFileGroup() {
+        return fileGroup;
+    }
+
+    public void setFileGroup(FileGroup fileGroup) {
+        this.fileGroup = fileGroup;
+    }
+
+
     
 }

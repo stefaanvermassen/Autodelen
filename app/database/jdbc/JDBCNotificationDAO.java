@@ -1,8 +1,6 @@
 package database.jdbc;
 
-import database.DataAccessException;
-import database.DatabaseHelper;
-import database.NotificationDAO;
+import database.*;
 import models.Notification;
 import models.User;
 import org.joda.time.DateTime;
@@ -22,6 +20,21 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement createNotificationStatement;
     private PreparedStatement getNotificationListByUseridStatement;
     private PreparedStatement getNumberOfUnreadNotificationsStatement;
+    private PreparedStatement getNotificationListPageByUseridDescStatement;
+    private PreparedStatement getGetAmountOfNotificationsStatement;
+
+    public static final String NOTIFICATION_QUERY = "SELECT * FROM Notifications JOIN Users ON " +
+            "notification_user_id= user_id";
+
+    public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? ";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = new JDBCFilter();
+        }
+        ps.setString(start, filter.getValue(FilterField.USER_ID));
+    }
 
     public JDBCNotificationDAO(Connection connection) {
         this.connection = connection;
@@ -51,6 +64,13 @@ public class JDBCNotificationDAO implements NotificationDAO{
         return getNotificationListByUseridStatement;
     }
 
+    private PreparedStatement getNotificationListPageByUseridDescStatement() throws SQLException {
+        if(getNotificationListPageByUseridDescStatement == null) {
+            getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_timestamp desc LIMIT ?, ?");
+        }
+        return getNotificationListPageByUseridDescStatement;
+    }
+
     private PreparedStatement getNumberOfUnreadNotificationsStatement() throws SQLException {
         if (getNumberOfUnreadNotificationsStatement == null) {
             getNumberOfUnreadNotificationsStatement = connection.prepareStatement("SELECT COUNT(*) AS unread_number FROM Notifications JOIN Users ON " +
@@ -59,6 +79,33 @@ public class JDBCNotificationDAO implements NotificationDAO{
         return getNumberOfUnreadNotificationsStatement;
     }
 
+    private PreparedStatement getGetAmountOfNotificationsStatement() throws SQLException {
+        if(getGetAmountOfNotificationsStatement == null) {
+            getGetAmountOfNotificationsStatement = connection.prepareStatement("SELECT count(*) as amount_of_notifications FROM Notifications JOIN Users ON " +
+                    "notification_user_id= user_id" + FILTER_FRAGMENT);
+        }
+        return getGetAmountOfNotificationsStatement;
+    }
+
+
+    @Override
+    public int getAmountOfNotifications(Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfNotificationsStatement();
+            fillFragment(ps, filter, 1);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_notifications");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of notifications", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of notifications", ex);
+        }
+    }
 
     @Override
     public List<Notification> getNotificationListForUser(int userId) throws DataAccessException {
@@ -68,6 +115,21 @@ public class JDBCNotificationDAO implements NotificationDAO{
             return getNotificationList(ps);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of notifications", e);
+        }
+    }
+
+    @Override
+    public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getNotificationListPageByUseridDescStatement();
+
+            fillFragment(ps, filter, 1);
+            int first = (page-1)*pageSize;
+            ps.setInt(2, first);
+            ps.setInt(3, pageSize);
+            return getNotificationList(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of notifications", ex);
         }
     }
 

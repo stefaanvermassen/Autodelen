@@ -18,38 +18,53 @@ public class UserRoleProvider {
     private DataAccessProvider provider;
     private UserProvider userProvider;
 
-    public UserRoleProvider(DataAccessProvider provider, UserProvider userProvider){
+    public UserRoleProvider(DataAccessProvider provider, UserProvider userProvider) {
         this.provider = provider;
         this.userProvider = userProvider;
     }
 
-    public EnumSet<UserRole> getRoles(int userId){
+    public EnumSet<UserRole> getRoles(int userId) {
         return getRoles(userId, true);
     }
 
     //TODO: leave this helper function here, or move to the main databasehelper? Decoupling...
-    public boolean hasRole(String email, UserRole role){
+    public boolean hasRole(String email, UserRole role) {
         User user = userProvider.getUser(email);
-        if(user == null)
+        if (user == null)
             return false;
         else {
             return hasRole(user.getId(), role);
         }
     }
 
-    public boolean hasRole(int id, UserRole role){
+    public boolean hasRole(int id, UserRole role) {
         return hasRole(getRoles(id), role);
     }
 
-    public boolean hasRole(User user, UserRole role){
+    public boolean hasRole(User user, UserRole role) {
         return hasRole(getRoles(user.getId()), role);
     }
 
-    public static boolean hasRole(Set<UserRole> roles, UserRole role){
+    public static boolean hasRole(Set<UserRole> roles, UserRole role) {
         return roles.contains(role) || roles.contains(UserRole.SUPER_USER); // Superuser has all roles!!
     }
 
-    public EnumSet<UserRole> getRoles(int userId, boolean cached){
+    public boolean isFullUser(User user) {
+        //TODO: review what to do with admins
+        return hasRole(user, UserRole.CAR_OWNER) || hasRole(user, UserRole.CAR_USER);
+    }
+
+    public boolean isFullUser() {
+        User user = userProvider.getUser();
+        return isFullUser(user);
+    }
+
+    public boolean hasRole(UserRole role) {
+        User user = userProvider.getUser();
+        return hasRole(user, role);
+    }
+
+    public EnumSet<UserRole> getRoles(int userId, boolean cached) {
 
         String key = String.format(ROLES_BY_ID, userId);
 
@@ -72,11 +87,11 @@ public class UserRoleProvider {
                 throw ex;
             }
         } else {
-            return (EnumSet<UserRole>)obj; //Type erasure problem from Java, works at runtime
+            return (EnumSet<UserRole>) obj; //Type erasure problem from Java, works at runtime
         }
     }
 
-    public void invalidateRoles(User user){
+    public void invalidateRoles(User user) {
         Cache.remove(String.format(ROLES_BY_ID, user.getId()));
     }
 }

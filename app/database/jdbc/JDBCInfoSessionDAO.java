@@ -34,16 +34,18 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id " +
-            "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees GROUP BY infosession_id) sub ON (ses.infosession_id = sub.infosession_id) " +
-            "WHERE ses.infosession_timestamp > ? ";
+            "LEFT JOIN (SELECT COUNT(*) total, infosession_id FROM infosessionenrollees GROUP BY infosession_id) sub ON (ses.infosession_id = sub.infosession_id) ";
 
-    private static String FILTER_FRAGMENT = "  "; // TODO: get something to filter on
+    private static String FILTER_FRAGMENT = "WHERE ses.infosession_timestamp > ? AND ses.infosession_timestamp < ?"; // TODO: get something to filter on
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = createInfoSessionFilter();
         }
+
+        ps.setString(start, filter.getValue(FilterField.FROM));
+        ps.setString(start+1, filter.getValue(FilterField.UNTIL));
         // TODO get something to filter on
     }
 
@@ -140,7 +142,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getGetInfoSessionsAfterStatement() throws SQLException {
         if (getInfoSessionsAfterStatement == null) {
-            getInfoSessionsAfterStatement = connection.prepareStatement(INFOSESSION_QUERY +
+            getInfoSessionsAfterStatement = connection.prepareStatement(INFOSESSION_QUERY + FILTER_FRAGMENT +
                     "ORDER BY infosession_timestamp ASC");
         }
         return getInfoSessionsAfterStatement;
@@ -149,7 +151,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getGetInfoSessionsAfterPageByDateAscStatement() throws SQLException {
         if (getInfoSessionsAfterPageByDateAscStatement == null) {
             // Also includes the # of attendees, this query is way too complex
-            getInfoSessionsAfterPageByDateAscStatement = connection.prepareStatement(INFOSESSION_QUERY +
+            getInfoSessionsAfterPageByDateAscStatement = connection.prepareStatement(INFOSESSION_QUERY + FILTER_FRAGMENT +
                     "ORDER BY infosession_timestamp ASC LIMIT ?, ?");
         }
         return getInfoSessionsAfterPageByDateAscStatement;
@@ -157,7 +159,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getGetInfoSessionsAfterPageByDateDescStatement() throws SQLException {
         if (getInfoSessionsAfterPageByDateDescStatement == null) {
             // Also includes the # of attendees, this query is way too complex
-            getInfoSessionsAfterPageByDateDescStatement = connection.prepareStatement(INFOSESSION_QUERY +
+            getInfoSessionsAfterPageByDateDescStatement = connection.prepareStatement(INFOSESSION_QUERY + FILTER_FRAGMENT +
                     "ORDER BY infosession_timestamp DESC LIMIT ?, ?");
         }
         return getInfoSessionsAfterPageByDateDescStatement;
@@ -173,7 +175,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getGetAmountOfInfoSessionsStatement() throws SQLException {
         if(getGetAmountOfInfoSessionsStatement == null) {
             // TODO: filter the WHERE statement
-            getGetAmountOfInfoSessionsStatement = connection.prepareStatement("SELECT COUNT(infosession_id) AS amount_of_infosessions FROM InfoSessions WHERE infosession_timestamp > ? " + FILTER_FRAGMENT);
+            getGetAmountOfInfoSessionsStatement = connection.prepareStatement("SELECT COUNT(ses.infosession_id) AS amount_of_infosessions FROM InfoSessions ses " + FILTER_FRAGMENT);
         }
         return getGetAmountOfInfoSessionsStatement;
     }
@@ -295,9 +297,6 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         try {
             PreparedStatement ps = getGetAmountOfInfoSessionsStatement();
             fillFragment(ps, filter, 1);
-            // TODO: do this in filter
-            DateTime since = DateTime.now();
-            ps.setTimestamp(1, new Timestamp(since.getMillis()));
 
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
@@ -314,31 +313,6 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     /**
      *
-     * @param since The date we want the infosessions to be after
-     * @return List of all infosessions, without pagination or filtering
-     * @throws DataAccessException
-     */
-    @Override
-    public List<InfoSession> getInfoSessionsAfter(DateTime since) throws DataAccessException {
-        List<InfoSession> sessions = new ArrayList<InfoSession>();
-        try {
-            PreparedStatement ps = getGetInfoSessionsAfterStatement();
-            ps.setTimestamp(1, new Timestamp(since.getMillis())); //TODO: convert to datetime see above
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    sessions.add(populateInfoSession(rs, true));
-                }
-                return sessions;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading infosession resultset", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not infosessions.", ex);
-        }
-    }
-
-    /**
-     *
      * @param orderBy The field you want to order by
      * @param asc Ascending
      * @param page The page you want to see
@@ -348,7 +322,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
      * @throws DataAccessException
      */
     @Override
-    public List<InfoSession> getInfoSessionsAfter(DateTime since, FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public List<InfoSession> getInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
@@ -357,14 +331,13 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                     break;
             }
             if(ps == null) {
-                throw new DataAccessException("Could not create getInfoSessionsAfter statement");
+                throw new DataAccessException("Could not create getInfoSessions statement");
             }
 
-            ps.setTimestamp(1, new Timestamp(since.getMillis())); //TODO: convert to datetime see above
-            fillFragment(ps, filter, 2);
+            fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(2, first);
-            ps.setInt(3, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getInfoSessions(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of infosessions", ex);
@@ -489,7 +462,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             }
             return infosessions;
         } catch (SQLException ex) {
-            throw new DataAccessException("Error reading cars resultset", ex);
+            throw new DataAccessException("Error reading infosession resultset", ex);
         }
     }
 }

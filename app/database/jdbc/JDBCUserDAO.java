@@ -1,9 +1,6 @@
 package database.jdbc;
 
-import database.DataAccessException;
-import database.Filter;
-import database.FilterField;
-import database.UserDAO;
+import database.*;
 import models.*;
 
 import java.sql.*;
@@ -25,7 +22,8 @@ public class JDBCUserDAO implements UserDAO {
     private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, users.user_gender, " +
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
             "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
-            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, " +
+            "users.user_driver_license_id, users.user_driver_license_file_group_id, users.user_identity_card_id, users.user_identity_card_registration_nr, users.user_identity_card_file_group_id, " +
+            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, users.user_image_id, " +
             "contractManagers.user_id, contractManagers.user_password, contractManagers.user_firstname, contractManagers.user_lastname, contractManagers.user_email";
 
     private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM Users " +
@@ -33,7 +31,7 @@ public class JDBCUserDAO implements UserDAO {
             "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
             "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
 
-    // TODO: more fields to sort on
+    // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
@@ -41,8 +39,8 @@ public class JDBCUserDAO implements UserDAO {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-        ps.setString(start, filter.getFieldContains(FilterField.USER_FIRSTNAME, false));
-        ps.setString(start+1, filter.getFieldContains(FilterField.USER_LASTNAME, false));
+        ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
+        ps.setString(start+1, filter.getValue(FilterField.USER_LASTNAME));
     }
 
     private Connection connection;
@@ -61,6 +59,7 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getGetUserListPageByNameDescStatement;
     private PreparedStatement getGetAmountOfUsersStatement;
     private PreparedStatement searchUsersStatement;
+
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
@@ -145,7 +144,11 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
-    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, user_agree_terms=?, user_contract_manager_id=? WHERE user_id = ?");
+    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
+                    "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
+                    "user_agree_terms=?, user_contract_manager_id=?, user_image_id = ?, user_driver_license_id=?, user_driver_license_file_group_id=?, " +
+                    "user_identity_card_id=?, user_identity_card_registration_nr=?, user_identity_card_file_group_id=? " +
+                    "WHERE user_id = ?");
     	}
     	return updateUserStatement;
     }
@@ -171,6 +174,7 @@ public class JDBCUserDAO implements UserDAO {
         return getGetAmountOfUsersStatement;
     }
 
+
     public static User populateUser(ResultSet rs, boolean withPassword, boolean withRest) throws SQLException {
         return populateUser(rs, withPassword, withRest, "users");
     }
@@ -188,18 +192,65 @@ public class JDBCUserDAO implements UserDAO {
             user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
             user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
             user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
-            int contract_manager_id = rs.getInt(tableName + ".user_contract_manager_id");
+
+            if(rs.getObject(tableName + ".user_image_id") != null){
+                user.setProfilePictureId(rs.getInt(tableName + ".user_image_id"));
+            }
+
+            DriverLicense driverLicense = new DriverLicense();
+            boolean driverLicenseNotNull = false;
+            String driverLicenseId = rs.getString(tableName + ".user_driver_license_id");
+            if(!rs.wasNull()) {
+                driverLicenseNotNull = true;
+                driverLicense.setId(driverLicenseId);
+            }
+            int driverLicenseFileGroupId = rs.getInt(tableName + ".user_driver_license_file_group_id");
+            if(!rs.wasNull()) {
+                driverLicenseNotNull = true;
+                FileGroup driverLicenseFileGroup = new FileGroup(driverLicenseFileGroupId);
+                driverLicense.setFileGroup(driverLicenseFileGroup);
+            }
+            if(driverLicenseNotNull)
+                user.setDriverLicense(driverLicense);
+            else
+                user.setDriverLicense(null);
+
+            IdentityCard identityCard = new IdentityCard();
+            boolean identityCardNotNull = false;
+            String identityCardId = rs.getString(tableName + ".user_identity_card_id");
+            if(!rs.wasNull()) {
+                identityCardNotNull = true;
+                identityCard.setId(identityCardId);
+            }
+            String identityCardRegistrationNr = rs.getString(tableName + ".user_identity_card_registration_nr");
+            if(!rs.wasNull()) {
+                identityCardNotNull = true;
+                identityCard.setRegistrationNr(identityCardRegistrationNr);
+            }
+            int identityCardFileGroupId = rs.getInt(tableName + ".user_identity_card_file_group_id");
+            if(!rs.wasNull()) {
+                identityCardNotNull = true;
+                FileGroup identityCardFileGroup = new FileGroup(identityCardFileGroupId);
+                identityCard.setFileGroup(identityCardFileGroup);
+            }
+            if(identityCardNotNull)
+                user.setIdentityCard(identityCard);
+            else
+                user.setIdentityCard(null);
+
+            int contractManagerId = rs.getInt(tableName + ".user_contract_manager_id");
             if(rs.wasNull()) {
                 user.setContractManager(null);
             } else {
                 user.setContractManager(JDBCUserDAO.populateUser(rs, false, false, "contractManagers"));
             }
             user.setStatus(UserStatus.valueOf(rs.getString(tableName + ".user_status")));
-            // TODO: driver license, identity card, image
+
         }
 
         return user;
     }
+
 
     @Override
     public User getUser(String email) {
@@ -216,7 +267,6 @@ public class JDBCUserDAO implements UserDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
         }
-
     }
 
     @Override
@@ -299,10 +349,33 @@ public class JDBCUserDAO implements UserDAO {
                 ps.setBoolean(13, user.isAgreeTerms());
                 if(user.getContractManager()==null) ps.setNull(14, Types.INTEGER);
                 else ps.setInt(14, user.getContractManager().getId());
+                if(user.getProfilePictureId() != -1) ps.setInt(15, user.getProfilePictureId());
+                else ps.setNull(15, Types.INTEGER);
+                if(user.getDriverLicense() == null) {
+                    ps.setNull(16, Types.VARCHAR);
+                    ps.setNull(17, Types.INTEGER);
+                } else {
+                    if(user.getDriverLicense().getId() == null) ps.setNull(16, Types.VARCHAR);
+                    else ps.setString(16, user.getDriverLicense().getId());
+                    if(user.getDriverLicense().getFileGroup() == null) ps.setNull(17, Types.INTEGER);
+                    else ps.setInt(17, user.getDriverLicense().getFileGroup().getId());
+                }
 
-                ps.setInt(15, user.getId());
+                if(user.getIdentityCard() == null) {
+                    ps.setNull(18, Types.VARCHAR);
+                    ps.setNull(19, Types.VARCHAR);
+                    ps.setNull(20, Types.INTEGER);
+                } else {
+                    if(user.getIdentityCard().getId() == null) ps.setNull(18, Types.VARCHAR);
+                    else ps.setString(18, user.getIdentityCard().getId());
+                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(19, Types.VARCHAR);
+                    else ps.setString(19, user.getIdentityCard().getRegistrationNr());
+                    if(user.getIdentityCard().getFileGroup() == null) ps.setNull(20, Types.INTEGER);
+                    else ps.setInt(20, user.getIdentityCard().getFileGroup().getId());
+                }
 
-                // TODO: driver license, identity card, image
+
+                ps.setInt(21, user.getId());
             }
 
             if(ps.executeUpdate() == 0)
@@ -329,7 +402,6 @@ public class JDBCUserDAO implements UserDAO {
     @Override
     public String getVerificationString(User user, VerificationType type) throws DataAccessException {
         try {
-
             PreparedStatement ps = getGetVerificationStatement();
             ps.setInt(1, user.getId());
             ps.setString(2, type.name());

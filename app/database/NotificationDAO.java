@@ -11,7 +11,9 @@ import java.util.List;
  */
 public interface NotificationDAO {
 
-    public List<Notification> getNotificationListForUser(int userId) throws DataAccessException;
+    public int getAmountOfNotifications(Filter filter) throws DataAccessException;
+    public List<Notification> getNotificationListForUser(int userId) throws DataAccessException; // TODO: delete
+    public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public int getNumberOfUnreadNotifications(int userId) throws DataAccessException;
     public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException;
 }

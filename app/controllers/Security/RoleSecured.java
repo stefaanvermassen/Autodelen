@@ -2,6 +2,7 @@ package controllers.Security;
 
 import controllers.routes;
 import database.DatabaseHelper;
+import database.providers.UserProvider;
 import database.providers.UserRoleProvider;
 import models.User;
 import models.UserRole;
@@ -55,8 +56,7 @@ public class RoleSecured {
                 // If user is null, redirect to login page
                 if(user == null) {
                     return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
-                } else if((user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING))
-                {
+                } else if(UserProvider.isBlocked(user)) {
                     ctx.flash().put("danger", "Deze account is not niet geactiveerd of geblokkeerd.");
                     return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
                 }
