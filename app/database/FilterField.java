@@ -14,6 +14,7 @@ public enum FilterField {
     INFOSESSION_DATE, INFOSESSION_TYPE,
     RESERVATION_USER_OR_OWNER_ID,
     FROM, UNTIL,
+    MESSAGE_RECEIVER_ID, MESSAGE_SENDER_ID,
     UNKNOWN;
 
     /**
@@ -62,6 +63,12 @@ public enum FilterField {
                 break;
             case "user_lastname":
                 field = USER_LASTNAME;
+                break;
+            case "message_receiver_id":
+                field = MESSAGE_RECEIVER_ID;
+                break;
+            case "message_sender_id":
+                field = MESSAGE_SENDER_ID;
                 break;
         }
         return field;
