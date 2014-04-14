@@ -32,7 +32,8 @@ public class JDBCUserDAO implements UserDAO {
             "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
 
     // TODO: more fields to filter on
-    public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? ";
+    public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? " +
+            "AND CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -41,6 +42,8 @@ public class JDBCUserDAO implements UserDAO {
         }
         ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start+1, filter.getValue(FilterField.USER_LASTNAME));
+        ps.setString(start+2, filter.getValue(FilterField.USER_NAME));
+        ps.setString(start+3, filter.getValue(FilterField.USER_NAME));
     }
 
     private Connection connection;
@@ -58,7 +61,6 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement getGetUserListPageByNameAscStatement;
     private PreparedStatement getGetUserListPageByNameDescStatement;
     private PreparedStatement getGetAmountOfUsersStatement;
-    private PreparedStatement searchUsersStatement;
 
 
     public JDBCUserDAO(Connection connection) {
@@ -70,13 +72,6 @@ public class JDBCUserDAO implements UserDAO {
             getAllUsersStatement = connection.prepareStatement(USER_QUERY);
         }
         return getAllUsersStatement;
-    }
-
-    private PreparedStatement getSearchUsersStatement() throws SQLException {
-        if(searchUsersStatement == null){
-            searchUsersStatement = connection.prepareStatement(USER_QUERY + " WHERE CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ? ORDER BY users.user_firstname, users.user_lastname LIMIT 10");
-        }
-        return searchUsersStatement;
     }
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
@@ -504,8 +499,8 @@ public class JDBCUserDAO implements UserDAO {
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(3, first);
-            ps.setInt(4, pageSize);
+            ps.setInt(5, first);
+            ps.setInt(6, pageSize);
             return getUsers(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);
@@ -521,26 +516,6 @@ public class JDBCUserDAO implements UserDAO {
             return users;
         } catch (SQLException ex) {
             throw new DataAccessException("Error reading users resultset", ex);
-        }
-    }
-
-    @Override
-    public List<User> searchUsers(String search) throws DataAccessException {
-        try {
-            PreparedStatement ps = getSearchUsersStatement();
-            ps.setString(1, search + "%");
-            ps.setString(2, search + "%");
-            List<User> users = new ArrayList<>();
-            try(ResultSet rs = ps.executeQuery()){
-                while(rs.next()){
-                    users.add(populateUser(rs, false, true));
-                }
-                return users;
-            } catch(SQLException ex){
-                throw new DataAccessException("Failed to read user resultset.", ex);
-            }
-        } catch(SQLException ex){
-            throw new DataAccessException("Failed to get user list.", ex);
         }
     }
 }
