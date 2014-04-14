@@ -60,7 +60,7 @@ public class Messages extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        filter.fieldContains(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
+        filter.putValue(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
         return ok(notificationList(page, field, asc, filter));
 
 

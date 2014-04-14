@@ -27,7 +27,7 @@ public class JDBCMessageDAO implements MessageDAO {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-        ps.setString(start, filter.getFieldContains(FilterField.MESSAGE_RECEIVER_ID, true));
+        ps.setString(start, filter.getValue(FilterField.MESSAGE_RECEIVER_ID));
     }
 
     private Connection connection;
