@@ -41,7 +41,6 @@ public class JDBCUserDAO implements UserDAO {
             filter = new JDBCFilter();
         }
 
-        System.out.println("firstname: " +filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start+1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start+2, filter.getValue(FilterField.USER_NAME));
