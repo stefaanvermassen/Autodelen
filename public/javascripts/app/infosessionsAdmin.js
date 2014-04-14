@@ -9,7 +9,7 @@ var beginFilter = "from=" + dateToString(today) + ",until=" + dateToString(today
 
 function dateToString(date, offset_y) {
     var offset_y = offset_y  | 0;
-    return (date.getFullYear() + offset_y) + '-' + date.getMonth() + '-' + date.getDate() +
+    return (date.getFullYear() + offset_y) + '-' + (date.getMonth()+1) + '-' + date.getDate() +
         ' ' + date.getHours() + ':' + date.getMinutes();
 }
 
