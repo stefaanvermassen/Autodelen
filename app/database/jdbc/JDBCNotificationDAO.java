@@ -64,7 +64,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
         return getNotificationListByUseridStatement;
     }
 
-    private PreparedStatement getNotificationListPageByUseridDescStatement() throws SQLException {
+    private PreparedStatement getNotificationListPageByTimestampDescStatement() throws SQLException {
         if(getNotificationListPageByUseridDescStatement == null) {
             getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_timestamp desc LIMIT ?, ?");
         }
@@ -121,7 +121,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     @Override
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getNotificationListPageByUseridDescStatement();
+            PreparedStatement ps = getNotificationListPageByTimestampDescStatement();
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;

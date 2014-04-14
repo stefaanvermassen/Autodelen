@@ -1,6 +1,7 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
 @import org.joda.time.format.DateTimeFormat
 @import database.DatabaseHelper;
+@import database.providers.CommunicationProvider;
 @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
 
 <!DOCTYPE html>
@@ -48,7 +49,7 @@
                         <ul class="dropdown-menu dropdown-messages">
                             @defining(DatabaseHelper.getCommunicationProvider().getMessages(user.getId())) { messages =>
                                 @for((message, index) <- messages.zipWithIndex) {
-                                    @if(index<3){
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
                                         <li>
                                             <a href="#">
                                                 <div>
@@ -93,7 +94,7 @@
                         <ul class="dropdown-menu dropdown-messages">
                             @defining(DatabaseHelper.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
                                 @for((notification, index) <- notifications.zipWithIndex) {
-                                    @if(index<3){
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
                                         <li>
                                             <a href="#">
                                                 <div>
