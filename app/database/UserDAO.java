@@ -3,10 +3,7 @@ package database;
 import java.util.EnumSet;
 import java.util.List;
 
-import models.Address;
-import models.User;
-import models.UserRole;
-import models.VerificationType;
+import models.*;
 
 /**
  * Created by Cedric on 2/16/14.

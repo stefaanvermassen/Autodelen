@@ -1,7 +1,5 @@
 package models;
 
-import org.joda.time.DateTime;
-
 /**
  * Created by HannesM on 10/03/14.
  */

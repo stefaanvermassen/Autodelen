@@ -11,33 +11,17 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `Files` (
-	`file_id` INT NOT NULL AUTO_INCREMENT,
-	`file_url` VARCHAR(255) NOT NULL,
-	`file_file_group_id` INT,
+  `file_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `file_path` VARCHAR(255) NOT NULL,
+  `file_name` VARCHAR(128) NULL,
+  `file_content_type` VARCHAR(64) NULL,
+  `file_file_group_id` INT(11) NULL DEFAULT NULL,
 	PRIMARY KEY (`file_id`),
 	FOREIGN KEY (`file_file_group_id`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `DriverLicenses` (
-	`driver_license_id` INT NOT NULL, # Moet gebruiker zelf invullen!
-	`driver_license_file` INT NOT NULL,
-	PRIMARY KEY (`driver_license_id`),
-	FOREIGN KEY (`driver_license_file`) REFERENCES FileGroups(`file_group_id`)
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
-
-CREATE TABLE `IdentityCards` (
-	`identity_card_id` INT NOT NULL, # Identiteitskaartnummer
-	`identity_card_registration_nr` INT NOT NULL, # Rijksregisternummer
-	`identity_card_file` INT NOT NULL,
-	PRIMARY KEY (`identity_card_id`),
-	FOREIGN KEY (`identity_card_file`) REFERENCES FileGroups(`file_group_id`)
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
 
 CREATE TABLE `Addresses` (
   `address_id` INT(10) NOT NULL AUTO_INCREMENT,
@@ -64,8 +48,11 @@ CREATE TABLE `Users` (
 	`user_phone` VARCHAR(16),
 	`user_address_domicile_id` INT,
 	`user_address_residence_id` INT,
-	`user_driver_license_id` INT,
-	`user_identity_card_id` INT,
+	`user_driver_license_id` VARCHAR(32),
+	`user_driver_license_file_group_id` INT,
+	`user_identity_card_id` VARCHAR(32), # Identiteitskaartnr
+	`user_identity_card_registration_nr` VARCHAR(32), # Rijksregisternummer
+	`user_identity_card_file_group_id` INT,
 	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
 	`user_damage_history` TEXT,
 	`user_payed_deposit` BIT(1),
@@ -75,8 +62,8 @@ CREATE TABLE `Users` (
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
 	FOREIGN KEY (`user_address_residence_id`) REFERENCES Addresses(`address_id`),
-	FOREIGN KEY (`user_driver_license_id`) REFERENCES DriverLicenses(`driver_license_id`),
-	FOREIGN KEY (`user_identity_card_id`) REFERENCES IdentityCards(`identity_card_id`),
+	FOREIGN KEY (`user_driver_license_file_group_id`) REFERENCES FileGroups(`file_group_id`),
+	FOREIGN KEY (`user_identity_card_file_group_id`) REFERENCES FileGroups(`file_group_id`),
 	FOREIGN KEY (`user_contract_manager_id`) REFERENCES Users(`user_id`),
 	FOREIGN KEY (`user_image_id`) REFERENCES Files(`file_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
@@ -147,7 +134,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `CarReservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'REQUEST_NEW', 'CANCELLED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
+	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
 	`reservation_from` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -211,12 +198,12 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 CREATE TABLE `CarRides` (
-	`car_ride_car_reservation_id` INT NOT NULL, # also primary key
-	`car_ride_status` BIT(1) NOT NULL DEFAULT 0, # goedgekeurde kilometerstand?
-	`car_ride_start_mileage` DECIMAL(10,1),
-	`car_ride_end_mileage` DECIMAL(10,1),
-	PRIMARY KEY (`car_ride_car_reservation_id`),
-	FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
+  `car_ride_car_reservation_id` INT NOT NULL, # also primary key
+  `car_ride_status` BIT(1) NOT NULL DEFAULT 0, # approved by owner?
+  `car_ride_start_mileage` DECIMAL(10,1),
+  `car_ride_end_mileage` DECIMAL(10,1),
+  PRIMARY KEY (`car_ride_car_reservation_id`),
+  FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

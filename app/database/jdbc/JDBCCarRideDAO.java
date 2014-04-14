@@ -34,7 +34,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getCreateCarRideStatement() throws SQLException {
         if (createCarRideStatement == null) {
-            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id) VALUE (?)");
+            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id, car_ride_start_mileage, car_ride_end_mileage) VALUE (?, ?, ?)");
         }
         return createCarRideStatement;
     }
@@ -57,10 +57,12 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
 
     @Override
-    public CarRide createCarRide(Reservation reservation) throws DataAccessException {
+    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateCarRideStatement();
             ps.setInt(1, reservation.getId());
+            ps.setInt(2, startMileage);
+            ps.setInt(3, endMileage);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car ride.");

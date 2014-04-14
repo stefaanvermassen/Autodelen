@@ -39,7 +39,7 @@ public class Notifications extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        filter.fieldContains(FilterField.USER_ID, user.getId() + "");
+        filter.putValue(FilterField.USER_ID, user.getId() + "");
         return ok(notificationList(page, field, asc, filter));
 
 

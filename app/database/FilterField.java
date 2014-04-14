@@ -8,14 +8,24 @@ package database;
  * Fields we can filter on the DAOs
  */
 public enum FilterField {
-    CAR_NAME, CAR_BRAND, CAR_SEATS, CAR_GPS, CAR_HOOK,
-    USER_NAME, USER_FIRSTNAME, USER_LASTNAME, USER_ID,
-    ZIPCODE,
-    INFOSESSION_DATE, INFOSESSION_TYPE,
-    RESERVATION_USER_OR_OWNER_ID,
-    FROM, UNTIL,
-    MESSAGE_RECEIVER_ID, MESSAGE_SENDER_ID,
-    UNKNOWN;
+
+    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_GPS(true), CAR_HOOK(true),
+    USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
+    ZIPCODE(false),
+    INFOSESSION_DATE(true), INFOSESSION_TYPE(false),
+    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_STATUS(true),
+    MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
+    FROM(true), UNTIL(true);
+
+    boolean exactValue;
+
+    private FilterField(boolean exactValue) {
+        this.exactValue = exactValue;
+    }
+
+    public boolean useExactValue() {
+        return exactValue;
+    }
 
     /**
      *
@@ -69,6 +79,9 @@ public enum FilterField {
                 break;
             case "message_sender_id":
                 field = MESSAGE_SENDER_ID;
+                break;
+            case "status":
+                field = RESERVATION_STATUS;
                 break;
         }
         return field;

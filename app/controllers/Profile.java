@@ -1,14 +1,19 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.ConfigurationHelper;
+import controllers.util.FileHelper;
 import database.*;
 import models.Address;
+import models.File;
 import models.User;
 import models.UserRole;
 import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -110,6 +115,122 @@ public class Profile extends Controller {
     }
 
     /**
+     * The page to upload a new profile picture
+     *
+     * @param userId The userId for which the picture is uploaded
+     * @return The page to upload
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUpload(int userId) {
+        return ok(uploadPicture.render(userId));
+    }
+
+    /**
+     * Gets the profile picture for given user Id, or default one if missing
+     *
+     * @param userId The user for which the image is requested
+     * @return The image with correct content type
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result getProfilePicture(int userId) {
+        //TODO: checks on whether other person can see this
+        //TODO: Rely on heavy caching of the image ID or views since each app page includes this
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if (user != null && user.getProfilePictureId() >= 0) {
+                return FileHelper.getFileStreamResult(context.getFileDAO(), user.getProfilePictureId());
+            } else {
+                return FileHelper.getPublicFile(Paths.get("images", "no_profile.png").toString(), "image/png");
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Processes a profile picture upload request
+     *
+     * @param userId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUploadPost(int userId) {
+        // First we check if the user is allowed to upload to this userId
+        User currentUser = DatabaseHelper.getUserProvider().getUser();
+        User user;
+
+        // We load the other user(by id)
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            user = dao.getUser(userId, true);
+
+            // Check if the userId exists
+            if (user == null || currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        // Start saving the actual picture
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart picture = body.getFile("picture");
+        if (picture != null) {
+            String contentType = picture.getContentType();
+            if (!FileHelper.isImageContentType(contentType)) { // Check the content type using MIME
+                flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                return badRequest(uploadPicture.render(userId));
+            } else {
+                try {
+                    // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
+                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+
+                    try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {                     // Save the file reference in the database
+                        FileDAO dao = context.getFileDAO();
+                        UserDAO udao = context.getUserDAO();
+                        try {
+                            models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
+                            int oldPictureId = user.getProfilePictureId();
+                            user.setProfilePictureId(file.getId());
+                            udao.updateUser(user, true);
+                            context.commit();
+
+                            if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
+                                try {
+                                    File oldPicture = dao.getFile(oldPictureId);
+                                    FileHelper.deleteFile(oldPicture.getPath());
+                                    dao.deleteFile(oldPictureId);
+
+                                    context.commit();
+                                } catch (DataAccessException ex) {
+                                    // Failed to delete old profile picture, but no rollback needed
+                                    throw ex;
+                                }
+                            }
+
+                            flash("success", "De profielfoto werd succesvol aangepast.");
+                            return redirect(routes.Profile.index(userId));
+                        } catch (DataAccessException ex) {
+                            context.rollback();
+                            FileHelper.deleteFile(relativePath);
+                            throw ex;
+                        }
+                    } catch (DataAccessException ex) {
+                        FileHelper.deleteFile(relativePath);
+                        throw ex;
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        } else {
+            flash("error", "Missing file");
+            return redirect(routes.Application.index());
+        }
+    }
+
+    /**
      * Method: GET
      *
      * @return A profile page for the currently requesting user
@@ -139,25 +260,87 @@ public class Profile extends Controller {
 
             User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            // Only a profile admin or
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
-                if (!DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_USER)) {
-                    return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.CAR_USER}));
-                }
-
-                /** TODO: Verander naar FULL user i.p.v. userRole CAR_USER
-                 * if (currentUser.getStatus() != UserStatus.FULL) {
-                 *     return badRequest(views.html.unauthorized.render(new UserRole[]{}));
-                 * }
-                 */
-
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                return ok(index.render(user, getProfileCompleteness(user)));
+            } else if(DatabaseHelper.getUserRoleProvider().isFullUser(currentUser)){
                 return ok(profile.render(user));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
             }
-
-            return ok(index.render(user, getProfileCompleteness(user)));
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    /**
+     * Returns whether the currentUser can edit the profile of user
+     *
+     * @param user        The subject
+     * @param currentUser The actor
+     * @return A boolean when the profile can be edited
+     */
+    private static boolean canEditProfile(User user, User currentUser) {
+        return currentUser.getId() == user.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN);
+    }
+
+    public static class EditIdentityCardForm {
+        public String cardNumber;
+        public String nationalNumber;
+
+        public EditIdentityCardForm(){}
+        public EditIdentityCardForm(String cardNumber, String nationalNumber){
+            this.cardNumber = cardNumber;
+            this.nationalNumber = nationalNumber;
+        }
+
+        public String validate(){
+            return null; //TODO: use validation list
+        }
+    }
+
+    /**
+     * Generates the page where the user can upload his/her identity information
+     * @param userId The user the requester wants to edit
+     * @return A page to edit the identity card information
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCard(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Dashboard.index());
+            }
+
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
+
+
+                if(user.getIdentityCard() != null){ // get all uploaded files already
+                    FileDAO fdao = context.getFileDAO();
+                    user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+
+                    form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
+                }
+
+                return ok(identitycard.render(user, form));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCardPost(int userId){
+        return ok("Received identity change post.");
     }
 
     /**
@@ -222,9 +405,11 @@ public class Profile extends Controller {
         if (user.getContractManager() != null) {
             total++;
         }
-        //TODO: profile picture
+        if (user.getProfilePictureId() != -1) {
+            total++;
+        }
 
-        return (int) (((float) total / 9) * 100);
+        return (int) (((float) total / 10) * 100); //10 records
     }
 
     /**

@@ -33,7 +33,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-        ps.setString(start, filter.getFieldContains(FilterField.USER_ID, true));
+        ps.setString(start, filter.getValue(FilterField.USER_ID));
     }
 
     public JDBCNotificationDAO(Connection connection) {

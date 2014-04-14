@@ -12,52 +12,30 @@ import java.util.Map;
 public class JDBCFilter implements Filter {
 
     // EnumMap doesn't want F.class as a constructor-argument, so we use HashMap
-    private Map<FilterField, String> contains = new HashMap<FilterField, String>();
+    private Map<FilterField, String> content = new HashMap<FilterField, String>();
 
-    private Map<FilterField, String> is = new HashMap<>();
-
+    /**
+     * Associate with a given filterfield a specified value.
+     * @param field The filterfield
+     * @param string The value
+     */
     @Override
-    public void fieldIs(FilterField field, String string) {
-        is.put(field, string);
+    public void putValue(FilterField field, String string) {
+        content.put(field, string);
     }
 
     /**
-     *
-     * @param field The field you want to filter on
-     * @param string The string you want the field to contain
+     * Retrieve the value contained in the specified filterfield.
+     * @param field The filterfield for which you want to retrieve the value
+     * @return A JDBC-SQL-representation (or exact representation) of the value contained in the specified filterfield
      */
     @Override
-    public void fieldContains(FilterField field, String string) {
-        contains.put(field, string);
-    }
-
-    @Override
-    public String getFieldIs(FilterField field) {
-        String string;
-        if(is.containsKey(field))
-            string =  is.get(field);
-        else
-            string =  "";
-
-        return string;
-    }
-
-    /**
-     *
-     * @param field The field you want to get a filter-representation for
-     * @param exactValue The exact value
-     * @return A JDBC-SQL-representation (or exact representation) of the value you want the field to contain
-     */
-    @Override
-    public String getFieldContains(FilterField field, boolean exactValue) {
-        String string;
-        if(contains.containsKey(field))
-            string =  contains.get(field);
-        else
-            string =  "";
-
-        if(exactValue)
-            return string;
-        return "%" + string + "%";
+    public String getValue(FilterField field) {
+        String value = "";
+        if(content.containsKey(field))
+            value =  content.get(field);
+        if(field.useExactValue())
+            return value;
+        return "%" + value + "%";
     }
 }

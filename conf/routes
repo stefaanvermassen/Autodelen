@@ -22,6 +22,8 @@ GET         /drive_details                     controllers.Drives.details(reserv
 POST        /drive_details/adjusted            controllers.Drives.adjustDetails(reservationId: Int)
 GET         /drive_detais/approved             controllers.Drives.approveReservation(reservationId: Int)
 POST        /drive_details/refused             controllers.Drives.refuseReservation(reservationId: Int)
+POST        /drive_details/provide_info        controllers.Drives.provideDriveInfo(reservationId: Int)
+GET         /drive_details/approve_info        controllers.Drives.approveDriveInfo(reservationId: Int)
 GET         /drives-cancelled                  controllers.Drives.cancelReservation(reservationId: Int)
 GET         /drivesAdmin                       controllers.Drives.drivesAdmin()
 
@@ -50,6 +52,11 @@ GET         /profile                           controllers.Profile.indexWithoutI
 GET         /profile/edit                      controllers.Profile.edit(userId: Int)
 POST        /profile/edit                      controllers.Profile.editPost(userId: Int)
 GET         /profile/byid                      controllers.Profile.index(userId: Int)
+GET         /profile/changepicture             controllers.Profile.profilePictureUpload(userId: Int)
+POST        /profile/changepicture             controllers.Profile.profilePictureUploadPost(userId: Int)
+GET         /profile/picture                   controllers.Profile.getProfilePicture(userId: Int)
+GET         /profile/identitycard              controllers.Profile.editIdentityCard(userId: Int)
+POST        /profile/identitycard              controllers.Profile.editIdentityCardPost(userId: Int)
 
 # Users
 GET         /users                             controllers.Users.showUsers()
