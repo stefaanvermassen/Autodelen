@@ -33,13 +33,15 @@ public class JDBCUserDAO implements UserDAO {
 
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? " +
-            "AND CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?";
+            "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?)";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
+
+        System.out.println("firstname: " +filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start+1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start+2, filter.getValue(FilterField.USER_NAME));
@@ -57,7 +59,6 @@ public class JDBCUserDAO implements UserDAO {
     private PreparedStatement createVerificationStatement;
     private PreparedStatement getVerificationStatement;
     private PreparedStatement deleteVerificationStatement;
-    private PreparedStatement getAllUsersStatement;
     private PreparedStatement getGetUserListPageByNameAscStatement;
     private PreparedStatement getGetUserListPageByNameDescStatement;
     private PreparedStatement getGetAmountOfUsersStatement;
@@ -65,13 +66,6 @@ public class JDBCUserDAO implements UserDAO {
 
     public JDBCUserDAO(Connection connection) {
         this.connection = connection;
-    }
-
-    private PreparedStatement getGetAllUsersStatement() throws SQLException {
-        if(getAllUsersStatement == null){
-            getAllUsersStatement = connection.prepareStatement(USER_QUERY);
-        }
-        return getAllUsersStatement;
     }
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
@@ -439,24 +433,6 @@ public class JDBCUserDAO implements UserDAO {
 
         } catch(SQLException ex){
             throw new DataAccessException("Failed to delete verification.", ex);
-        }
-    }
-
-    @Override
-    public List<User> getAllUsers() throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetAllUsersStatement();
-            List<User> users = new ArrayList<>();
-            try(ResultSet rs = ps.executeQuery()){
-                while(rs.next()){
-                    users.add(populateUser(rs, false, true));
-                }
-                return users;
-            } catch(SQLException ex){
-                throw new DataAccessException("Failed to read user resultset.", ex);
-            }
-        } catch(SQLException ex){
-            throw new DataAccessException("Failed to get user list.", ex);
         }
     }
 

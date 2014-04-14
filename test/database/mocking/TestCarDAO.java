@@ -73,7 +73,6 @@ public class TestCarDAO implements CarDAO{
 		return getCarList().size(); // TODO: implement Filter methods
 	}
 
-	@Override
 	public List<Car> getCarList() throws DataAccessException {
 		return cars;
 	}
