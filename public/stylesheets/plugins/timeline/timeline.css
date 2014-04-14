@@ -1,3 +1,7 @@
+.text-muted {
+    float:right;
+}
+
 .timeline {
     position: relative;
     padding: 20px 0 20px;
@@ -47,8 +51,6 @@
     padding: 20px;
     border: 1px solid #d4d4d4;
     border-radius: 2px;
-    -webkit-box-shadow: 0 1px 6px rgba(0,0,0,0.175);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.175);
 }
 
 .timeline > li > .timeline-panel:before {

@@ -39,7 +39,7 @@
                                             <button type="button" class="close" aria-hidden="true">&times;</button>
                                             <h4 class="timeline-title">@notification.getSubject</h4>
                                             <p>
-                                                <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</small>
+                                                <small class="text-muted"><i class="fa fa-time"></i> @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(notification.getTimestamp)</small>
                                             </p>
                                         </div>
                                         <div class="timeline-body">
