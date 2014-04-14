@@ -1,23 +1,27 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
 import models.AutocompleteValue;
 import models.Message;
 import models.User;
 import org.joda.time.DateTime;
+import play.api.templates.Html;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
+import views.html.notifiers.messagespage;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Messages extends Controller {
 
+    private static final int PAGE_SIZE = 10;
 
     /**
      * Class implementing a model wrapped in a form.
@@ -45,16 +49,36 @@ public class Messages extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result showMessages() {
+        return ok(messages.render());
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result showMessagesPage(int page, int ascInt, String orderBy, String searchString) {
         User user = DatabaseHelper.getUserProvider().getUser();
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        filter.putValue(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
+        return ok(notificationList(page, field, asc, filter));
+
+
+    }
+
+    private static Html notificationList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             MessageDAO dao = context.getMessageDAO();
-            List<Message> messageList = dao.getReceivedMessageListForUser(user.getId());
-            return ok(messages.render(messageList));
+            List<Message> messageList = dao.getMessageList(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfMessages(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return messagespage.render(messageList, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
     }
-
 
     /**
      * Method: GET

@@ -1,6 +1,8 @@
 package database.providers;
 
+import controllers.util.Pagination;
 import database.*;
+import database.jdbc.JDBCFilter;
 import models.Message;
 import models.Notification;
 import play.cache.Cache;
@@ -11,6 +13,9 @@ import java.util.List;
  * Created by stefaan on 20/03/14.
  */
 public class CommunicationProvider {
+
+    public static final int AMOUNT_OF_VISIBLE_NOTIFICATIONS = 3;
+    public static final int AMOUNT_OF_VISIBLE_MESSAGES = 3;
 
     private static final String NOTIFICATIONS_BY_ID = "notification:id:%d";
     private static final String NOTIFICATION_NUMBER_BY_ID = "notification_number:id:%d";
@@ -37,7 +42,10 @@ public class CommunicationProvider {
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 NotificationDAO dao = context.getNotificationDAO();
-                List<Notification> notifications = dao.getNotificationListForUser(userId);
+                Filter filter = new JDBCFilter();
+
+                filter.putValue(FilterField.USER_ID, userId + "");
+                List<Notification> notifications = dao.getNotificationList(null, false, 1, AMOUNT_OF_VISIBLE_NOTIFICATIONS, filter);
                 if (notifications != null) {
                     Cache.set(key, notifications);
                     return notifications;
@@ -102,7 +110,10 @@ public class CommunicationProvider {
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 MessageDAO dao = context.getMessageDAO();
-                List<Message> messages = dao.getReceivedMessageListForUser(userId);
+                Filter filter = new JDBCFilter();
+
+                filter.putValue(FilterField.MESSAGE_RECEIVER_ID, userId + "");
+                List<Message> messages = dao.getMessageList(null, false, 1, AMOUNT_OF_VISIBLE_MESSAGES, filter);
                 if (messages != null) {
                     Cache.set(key, messages);
                     return messages;

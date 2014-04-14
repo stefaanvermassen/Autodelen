@@ -58,7 +58,6 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement getCarStatement;
     private PreparedStatement getCarsOfUserStatement;
     private PreparedStatement deleteCarStatement;
-    private PreparedStatement getGetCarListStatement;
     private PreparedStatement getGetCarListPageByNameAscStatement;
     private PreparedStatement getGetCarListPageByNameDescStatement;
     private PreparedStatement getGetCarListPageByBrandAscStatement;
@@ -143,13 +142,6 @@ public class JDBCCarDAO implements CarDAO{
             getCarsOfUserStatement = connection.prepareStatement("SELECT * FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE user_id=?");
         }
         return getCarsOfUserStatement;
-    }
-
-    private PreparedStatement getGetCarListStatement() throws SQLException {
-        if(getGetCarListStatement == null) {
-            getGetCarListStatement = connection.prepareStatement(CAR_QUERY);
-        }
-        return getGetCarListStatement;
     }
 
 
@@ -310,16 +302,6 @@ public class JDBCCarDAO implements CarDAO{
 		}
 		
 	}
-
-    @Override
-    public List<Car> getCarList() throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetCarListStatement();
-            return getCars(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
-        }
-    }
 
     /**
      * @param filter The filter to apply to

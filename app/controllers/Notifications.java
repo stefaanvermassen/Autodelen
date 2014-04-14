@@ -9,6 +9,8 @@ import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.notifiers.*;
+import views.html.notifiers.notifications;
+import views.html.notifiers.notificationspage;
 
 import java.util.List;
 
