@@ -6,15 +6,20 @@ import database.FilterField;
 import models.*;
 import controllers.Security.RoleSecured;
 
+import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.cars.*;
+import views.html.cars.addcar;
+import views.html.cars.addcarcostmodal;
 import views.html.cars.cars;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
+import views.html.reserve.reservationDetailsPartial;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -69,6 +74,21 @@ public class Cars extends Controller {
                 return "Een auto heeft minstens 2 zitplaatsen";
             else if(doors < 2)
                 return "Een auto heeft minstens 2 deuren";
+            return null;
+        }
+    }
+
+    public static class CarCostModel {
+
+        public String description;
+        public BigDecimal amount;
+        public BigDecimal mileage;
+        public DateTime time;
+
+
+        public String validate() {
+            if("".equals(description))
+                return "Geef aub een beschrijving op.";
             return null;
         }
     }
@@ -326,12 +346,14 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
+            CarCostDAO carCostDao = context.getCarCostDAO();
+            List<CarCost> carCostList = carCostDao.getCarCostListForCar(car);
 
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
-                return ok(detail.render(car));
+                return ok(detail.render(car, carCostList));
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -373,6 +395,72 @@ public class Cars extends Controller {
             }
         } catch (DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result getCarCostModal(int id){
+        // TODO: hide from other users (badRequest)
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(id);
+            if(car == null){
+                return badRequest("Fail."); //TODO: error in flashes?
+            } else {
+                return ok(addcarcostmodal.render(Form.form(CarCostModel.class), car));
+            }
+        } catch(DataAccessException ex){
+            throw ex; //log?
+        }
+    }
+
+    /**
+     * Method: POST
+     * @return redirect to the CarCostForm you just filled in or to the car-detail page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result addNewCarCost(int carId) {
+        Form<CarCostModel> carCostForm = Form.form(CarCostModel.class).bindFromRequest();
+        if (carCostForm.hasErrors()) {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                CarDAO dao = context.getCarDAO();
+                Car car = dao.getCar(carId);
+                CarCostDAO carCostDao = context.getCarCostDAO();
+                List<CarCost> carCostList = carCostDao.getCarCostListForCar(car);
+                flash("danger", "Kost toevoegen mislukt.");
+                return badRequest(detail.render(car, carCostList));
+            }catch(DataAccessException ex){
+                throw ex; //log?
+            }
+
+        } else {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                CarCostDAO dao = context.getCarCostDAO();
+                try {
+                    CarCostModel model = carCostForm.get();
+                    CarDAO cardao = context.getCarDAO();
+                    Car car = cardao.getCar(carId);
+                    CarCost carCost = dao.createCarCost(car, model.amount, model.mileage, model.description, model.time);
+                    context.commit();
+
+                    if (carCost != null) {
+                        return redirect(
+                                routes.Cars.detail(car.getId())
+                        );
+                    } else {
+                        carCostForm.error("Failed to add the car to the database. Contact administrator.");
+                        return badRequest(addcarcostmodal.render(carCostForm, car));
+                    }
+                }
+                catch(DataAccessException ex){
+                    context.rollback();
+                    throw ex;
+                }
+            } catch (DataAccessException ex) {
+                //TODO: send fail message
+                throw ex;
+            }
         }
     }
 }

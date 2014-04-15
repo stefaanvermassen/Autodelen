@@ -1,17 +1,39 @@
-@(car : Car)
+@(car: Car, carCostList: java.util.List[CarCost])
 @import database.DatabaseHelper;
     @scripts = {
+        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+        <script src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")' type="text/javascript"></script>
+        <script src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")' type="text/javascript"></script>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
         <script>
-        $(document).ready(function() {
-            $( "#deleteButton" ).click(function() {
-                if(confirm("Ben je zeker dat je deze auto wil verwijderen?")){
-                    window.location = '@routes.Cars.removeCar(car.getId)';
-                }
-            });
-        });
-    </script>
+        $ ( document ).ready ( function ( ) {
+        $ ( "#deleteButton" ).click ( function ( ) {
+        if ( confirm ( "Ben je zeker dat je deze auto wil verwijderen?" ) ) {
+        window.location = ' @routes.Cars.removeCar(car.getId) ';
+        }
+        } ) ;
+        } ) ;
+        </script>
+        <script>
+        function loadModal ( carId ) {
+        myJsRoutes.controllers.Cars.getCarCostModal ( carId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        </script>
     }
-@app("Details Auto", Html(""), scripts) {
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    }
+@app("Details Auto", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -22,35 +44,36 @@
 
     <div id="page-wrapper">
         <div class="row">
-            <div class="col-lg-12">        
-            <h1 class="page-header">Auto's</h1>
-            @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
-                @flashes()
-                @if(isAdmin) {
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+            <div class="col-lg-12">
+                <h1 class="page-header">Auto's</h1>
+                @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
+                    @flashes()
+                    @if(isAdmin) {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                            </div>
+                                <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
+                                <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
+                            </div>
                         </div>
-                            <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
-                            <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
-                        </div>
-                    </div>
-                }
+                    }
 
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen auto
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen auto
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                    @detailPartial(car, carCostList: java.util.List[CarCost])
                 </div>
-                    <!-- /.panel-heading -->
-                <div class="panel-body">
-                @detailPartial(car)
-            </div>
-            </div>
-            }
+                </div>
+                }
             </div>
         </div>
     </div>
     <!-- /page-wrapper -->
+    <div id="resultModal"></div>
 }
