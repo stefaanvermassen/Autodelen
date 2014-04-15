@@ -490,7 +490,8 @@ public class Profile extends Controller {
                         }
                     }
 
-                    if(!user.getIdentityCard().getRegistrationNr().equals(model.nationalNumber) || !user.getIdentityCard().getId().equals(model.cardNumber)) {
+                    if((user.getIdentityCard().getRegistrationNr() != null && !user.getIdentityCard().getRegistrationNr().equals(model.nationalNumber)) ||
+                            user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber)) {
                         card.setRegistrationNr(model.nationalNumber);
                         card.setId(model.cardNumber);
                         updateUser = true;
