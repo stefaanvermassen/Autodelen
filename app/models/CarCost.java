@@ -11,7 +11,7 @@ public class CarCost {
 
     private int id;
     private Car car;
-    private int amount;
+    private BigDecimal amount;
     private DateTime time;
     private BigDecimal mileage;
     private String description;
@@ -32,11 +32,11 @@ public class CarCost {
         this.car = car;
     }
 
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -64,7 +64,7 @@ public class CarCost {
         this.time = time;
     }
 
-    public CarCost(int id, Car car, int amount, BigDecimal mileage, String description, DateTime time){
+    public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time){
         this.id = id;
         this.car = car;
         this.amount = amount;

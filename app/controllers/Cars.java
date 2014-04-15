@@ -81,7 +81,7 @@ public class Cars extends Controller {
     public static class CarCostModel {
 
         public String description;
-        public int amount;
+        public BigDecimal amount;
         public BigDecimal mileage;
         public DateTime time;
 
@@ -346,12 +346,14 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
+            CarCostDAO carCostDao = context.getCarCostDAO();
+            List<CarCost> carCostList = carCostDao.getCarCostListForCar(car);
 
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
-                return ok(detail.render(car));
+                return ok(detail.render(car, carCostList));
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -424,8 +426,10 @@ public class Cars extends Controller {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
+                CarCostDAO carCostDao = context.getCarCostDAO();
+                List<CarCost> carCostList = carCostDao.getCarCostListForCar(car);
                 flash("danger", "Kost toevoegen mislukt.");
-                return badRequest(detail.render(car));
+                return badRequest(detail.render(car, carCostList));
             }catch(DataAccessException ex){
                 throw ex; //log?
             }

@@ -1,4 +1,4 @@
-@(car: Car)
+@(car: Car, carCostList: java.util.List[CarCost])
 @import database.DatabaseHelper;
     @scripts = {
         <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -67,7 +67,7 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                    @detailPartial(car)
+                    @detailPartial(car, carCostList: java.util.List[CarCost])
                 </div>
                 </div>
                 }
