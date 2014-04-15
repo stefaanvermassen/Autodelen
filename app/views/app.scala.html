@@ -187,7 +187,7 @@
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_OWNER)){
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
-                            <a href="@routes.Cars.showCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
                         </li>
                         }
 
@@ -233,6 +233,11 @@
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)){
                             <li @if(title == "Infosessies (Admin)") {class="active"}>
                             <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
+                            </li>
+                        }
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
+                            <li @if(title == "Auto's (Admin)") {class="active"}>
+                            <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
                             </li>
                         }
 
