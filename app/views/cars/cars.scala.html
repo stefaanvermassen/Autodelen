@@ -1,21 +1,21 @@
 @(cars: List[Car])
 
-@scripts = {
+    @scripts = {
 
-}
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-}
+    }
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    }
 
 @app("Auto's", stylesheets, scripts) {
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
-        <li class="active">Auto's</li>
-    </ol>
-</div>
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Auto's</li>
+        </ol>
+    </div>
 
-<div id="page-wrapper">
+    <div id="page-wrapper">
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Auto's</h1>
@@ -26,37 +26,49 @@
                         <!-- /.panel-heading -->
                     <div class="panel-body">
                         <div id="resultsTable" class="table-responsive">
-                        @if(cars.isEmpty) {
-                            <tr>
-                                <td style="text-align: center; background-color: #F0F0F0; padding: 8px;" colspan="6">
-                                    U heeft momenteel geen auto in het systeem.
-                                </td>
-                            </tr>
-                        } else {
-                            @for(car <- cars) {
-                                <tr>
-                                    <td>@car.getName</td>
-                                    <td>@car.getBrand</td>
-                                    <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a></td>
-                                    <td>
-                                        <div class="btn-group btn-group-xs">
-                                            <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">detail</a>
-                                            <a class="btn btn-success" href="@routes.Reserve.reserve(car.getId)">reserveer</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
+                            <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+                                <thead>
+                                    <tr role="row">
+                                        <th name="name" class="sortable" tabindex="0" >Naam</th>
+                                        <th name="brand" class="sortable" tabindex="0" >Merk</th>
+                                        <th>Eigenaar</th>
+                                        <th>Acties</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @if(cars.isEmpty) {
+                                    <tr>
+                                        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="6">
+                                            U heeft momenteel geen auto in het systeem.
+                                        </td>
+                                    </tr>
+                                } else {
+                                    @for(car <- cars) {
+                                        <tr>
+                                            <td>@car.getName</td>
+                                            <td>@car.getBrand</td>
+                                            <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a></td>
+                                            <td>
+                                                <div class="btn-group btn-group-xs">
+                                                    <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">detail</a>
+                                                    <a class="btn btn-success" href="@routes.Reserve.reserve(car.getId)">reserveer</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <!-- /.panel-body -->
+                        <!-- /.panel-body -->
                 </div>
-                <!-- /.panel -->
+                    <!-- /.panel -->
             </div>
-            <!-- /col-lg-12 -->
+                <!-- /col-lg-12 -->
         </div>
-        <!-- /row -->
+            <!-- /row -->
 
-</div>
-<!-- /page-wrapper -->
+    </div>
+    <!-- /page-wrapper -->
 }
