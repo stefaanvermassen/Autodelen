@@ -10,6 +10,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -148,25 +149,29 @@ public class FileHelper {
     private static void createResizedJpeg(File sourceFile, File destFile, int maxWidth) throws IOException {
         try(ImageInputStream iis = ImageIO.createImageInputStream(sourceFile)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-            if (readers.hasNext()) {
+            while(readers.hasNext()){
                 ImageReader reader = readers.next();
-                reader.setInput(iis, false); // We want to enforce a specific reader to keep the format
-                if(reader.getNumImages(true) > 1){
-                    throw new RuntimeException("Multi-image containers are disabled.");
-                }
+                try {
+                    reader.setInput(iis, false); // We want to enforce a specific reader to keep the format
+                    if (reader.getNumImages(true) > 1) {
+                        throw new RuntimeException("Multi-image containers are disabled.");
+                    }
 
-                BufferedImage sourceImage = reader.read(1); //no support for multi-image files??
-                Image thumbnail = sourceImage.getScaledInstance(maxWidth, -1, Image.SCALE_SMOOTH);
-                BufferedImage bufferedThumbnail = new BufferedImage(thumbnail.getWidth(null), thumbnail.getHeight(null), BufferedImage.TYPE_INT_RGB);
-                bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
-                ImageIO.write(bufferedThumbnail, reader.getFormatName(), new FileOutputStream(destFile, false));
-            } else throw new RuntimeException("No image reader installed for given format.");
+                    BufferedImage sourceImage = reader.read(0); //no support for multi-image files??
+                    Image thumbnail = sourceImage.getScaledInstance(maxWidth, -1, Image.SCALE_SMOOTH);
+                    BufferedImage bufferedThumbnail = new BufferedImage(thumbnail.getWidth(null), thumbnail.getHeight(null), BufferedImage.TYPE_INT_RGB);
+                    bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
+                    ImageIO.write(bufferedThumbnail, reader.getFormatName(), new FileOutputStream(destFile, false));
+                    return;
+                } catch(IIOException ex){
+                    continue;
+                }
+            }
+            throw new RuntimeException("No image reader installed for given format.");
         } catch(IOException ex){
             //??
             throw ex;
         }
-
-
     }
 
     private static void copyFile(File sourceFile, File destFile) throws IOException {

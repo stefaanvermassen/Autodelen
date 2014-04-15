@@ -185,7 +185,12 @@ public class Profile extends Controller {
             } else {
                 try {
                     // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
-                    Path relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+
+                    // Non-resized:
+                    //Path relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+
+                    // Resized:
+                    Path relativePath = FileHelper.saveResizedImage(picture, ConfigurationHelper.getConfigurationString("uploads.profile"), 800);
 
                     try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {                     // Save the file reference in the database
                         FileDAO dao = context.getFileDAO();
