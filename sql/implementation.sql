@@ -234,7 +234,8 @@ CREATE TABLE `Messages` ( # from user to user != Notifications
 	`message_read` BIT(1) NOT NULL DEFAULT 0,
 	`message_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van een Dégage-gebruiker',
 	`message_body` TEXT NOT NULL,
-	`message_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   `message_created_at` DATETIME,
+   `message_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`message_id`),
 	FOREIGN KEY (`message_from_user_id`) REFERENCES Users(`user_id`),
 	FOREIGN KEY (`message_to_user_id`) REFERENCES Users(`user_id`)
@@ -293,7 +294,8 @@ CREATE TABLE `Notifications` ( # from system to user
 	`notification_read` BIT(1) NOT NULL DEFAULT 0,
 	`notification_subject` VARCHAR(255),
 	`notification_body` TEXT,
-	`notification_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   `notification_created_at` DATETIME,
+   `notification_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`notification_id`),
 	FOREIGN KEY (`notification_user_id`) REFERENCES Users(`user_id`)
 )
@@ -397,4 +399,17 @@ BEGIN
   END IF;
 END $$
 
+CREATE TRIGGER Messages_ins BEFORE INSERT ON Messages FOR EACH ROW
+BEGIN
+  IF new.message_created_at IS NULL THEN
+    SET new.message_created_at = now();
+  END IF;
+END $$
+
+CREATE TRIGGER Notifications_ins BEFORE INSERT ON Notifications FOR EACH ROW
+BEGIN
+  IF new.notification_created_at IS NULL THEN
+    SET new.notification_created_at = now();
+  END IF;
+END $$
 DELIMITER ;

@@ -43,7 +43,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     public static Notification populateNotification(ResultSet rs) throws SQLException {
         Notification notification = new Notification(rs.getInt("notification_id"), JDBCUserDAO.populateUser(rs, false, false),
                 rs.getBoolean("notification_read"), rs.getString("notification_subject"), rs.getString("notification_body"),
-                new DateTime(rs.getTimestamp("notification_timestamp")));
+                new DateTime(rs.getTimestamp("notification_created_at")));
         return notification;
     }
 
@@ -51,7 +51,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
         if (createNotificationStatement == null) {
             createNotificationStatement = connection.prepareStatement("INSERT INTO Notifications (notification_user_id, " +
                     "notification_read, notification_subject,"
-                    + "notification_body, notification_timestamp) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    + "notification_body) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createNotificationStatement;
     }
@@ -59,14 +59,14 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
         if (getNotificationListByUseridStatement == null) {
             getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM Notifications JOIN Users ON " +
-                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_timestamp DESC;");
+                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_created_at DESC;");
         }
         return getNotificationListByUseridStatement;
     }
 
     private PreparedStatement getNotificationListPageByTimestampDescStatement() throws SQLException {
         if(getNotificationListPageByUseridDescStatement == null) {
-            getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_timestamp desc LIMIT ?, ?");
+            getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_created_at desc LIMIT ?, ?");
         }
         return getNotificationListPageByUseridDescStatement;
     }
@@ -154,14 +154,13 @@ public class JDBCNotificationDAO implements NotificationDAO{
     }
 
     @Override
-    public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException {
+    public Notification createNotification(User user, String subject, String body) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateNotificationStatement();
             ps.setInt(1, user.getId());
             ps.setBoolean(2, false);
             ps.setString(3, subject);
             ps.setString(4,body);
-            ps.setTimestamp(5, new Timestamp(timestamp.getMillis()));
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating notification.");
@@ -170,7 +169,8 @@ public class JDBCNotificationDAO implements NotificationDAO{
                 keys.next(); //if this fails we want an exception anyway
                 DatabaseHelper.getCommunicationProvider().invalidateNotifications(user.getId());
                 DatabaseHelper.getCommunicationProvider().invalidateNotificationNumber(user.getId());
-                return new Notification(keys.getInt(1), user, false, subject, body, timestamp);
+                // new DateTime() is not exactly correct, if you want the exact timestamp, do a getNotification()
+                return new Notification(keys.getInt(1), user, false, subject, body, new DateTime());
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new notification.", ex);
             }
