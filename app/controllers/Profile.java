@@ -13,6 +13,7 @@ import play.mvc.*;
 import views.html.profile.*;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -184,13 +185,13 @@ public class Profile extends Controller {
             } else {
                 try {
                     // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
-                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+                    Path relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
 
                     try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {                     // Save the file reference in the database
                         FileDAO dao = context.getFileDAO();
                         UserDAO udao = context.getUserDAO();
                         try {
-                            models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
+                            models.File file = dao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
                             int oldPictureId = user.getProfilePictureId();
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user, true);
@@ -199,7 +200,7 @@ public class Profile extends Controller {
                             if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
                                 try {
                                     File oldPicture = dao.getFile(oldPictureId);
-                                    FileHelper.deleteFile(oldPicture.getPath());
+                                    FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
                                     dao.deleteFile(oldPictureId);
 
                                     context.commit();
@@ -320,7 +321,6 @@ public class Profile extends Controller {
             // Only a profile admin or user itself can edit
             if (canEditProfile(user, currentUser)) {
                 Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
-
 
                 if(user.getIdentityCard() != null){ // get all uploaded files already
                     FileDAO fdao = context.getFileDAO();
