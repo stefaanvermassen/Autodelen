@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
+import controllers.util.FileAction;
 import controllers.util.FileHelper;
 import database.*;
 import models.*;
@@ -357,14 +358,22 @@ public class Profile extends Controller {
     }
 
     /**
-     * Method: GET
-     * Deletes a file from the identity card filegroup
-     * @param userId The user to delete from
-     * @param fileId The file to delete
-     * @return A redirect to the identity card page overview
+     * Returns the file requested after authorization checks
+     * @param userId
+     * @param fileId
+     * @return
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result deleteIdentityCardFile(int userId, int fileId){
+    public static Result viewIdentityCardFile(int userId, int fileId){
+        return identityCardFileAction(userId, fileId, new FileAction() {
+            @Override
+            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+                 return FileHelper.getFileStreamResult(dao, file.getId());
+            }
+        });
+    }
+
+    private static Result identityCardFileAction(int userId, int fileId, FileAction action){
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
             FileDAO fdao = context.getFileDAO();
@@ -380,12 +389,7 @@ public class Profile extends Controller {
                 models.File file = files.getFileWithId(fileId);
                 if(file != null){
                     try {
-                        fdao.deleteFile(fileId);
-                        FileHelper.deleteFile(Paths.get(file.getPath()));
-                        context.commit();
-                        
-                        flash("success", file.getFileName() + " werd met succes verwijderd.");
-                        return redirect(routes.Profile.editIdentityCard(userId));
+                        return action.process(file, fdao, context);
                     } catch(IOException | DataAccessException ex){
                         context.rollback();
                         throw new RuntimeException(ex);
@@ -401,6 +405,28 @@ public class Profile extends Controller {
         } catch(DataAccessException ex){
             throw ex;
         }
+    }
+
+    /**
+     * Method: GET
+     * Deletes a file from the identity card filegroup
+     * @param userId The user to delete from
+     * @param fileId The file to delete
+     * @return A redirect to the identity card page overview
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result deleteIdentityCardFile(final int userId, int fileId){
+        return identityCardFileAction(userId, fileId, new FileAction() {
+            @Override
+            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+                dao.deleteFile(file.getId());
+                FileHelper.deleteFile(Paths.get(file.getPath()));
+                context.commit();
+
+                flash("success", file.getFileName() + " werd met succes verwijderd.");
+                return redirect(routes.Profile.editIdentityCard(userId));
+            }
+        });
     }
 
     /**

@@ -53,7 +53,7 @@
                                     <ul>
                                      @for(file <- user.getIdentityCard.getFileGroup.getList){
                                         <li>
-                                            <a href="#">@file.getFileName</a>
+                                            <a href="@routes.Profile.viewIdentityCardFile(user.getId, file.getId)">@file.getFileName</a>
                                             <a href="@routes.Profile.deleteIdentityCardFile(user.getId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
                                         </li>
                                     }
