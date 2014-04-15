@@ -25,7 +25,7 @@ POST        /drive_details/refused                  controllers.Drives.refuseRes
 POST        /drive_details/provide_info             controllers.Drives.provideDriveInfo(reservationId: Int)
 GET         /drive_details/approve_info             controllers.Drives.approveDriveInfo(reservationId: Int)
 GET         /drives-cancelled                       controllers.Drives.cancelReservation(reservationId: Int)
-GET         /drivesAdmin                            controllers.Drives.drivesAdmin()
+GET         /drives/admin                            controllers.Drives.drivesAdmin()
 
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
