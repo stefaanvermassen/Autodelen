@@ -45,7 +45,7 @@ public class Notifier extends Mailer {
             EmailTemplate template = dao.getTemplate(MailType.WELCOME);
             mail = replaceUserTags(user, template.getBody());
             NotificationDAO notificationDAO = context.getNotificationDAO();
-            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            notificationDAO.createNotification(user, template.getSubject(), mail);
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
@@ -65,7 +65,7 @@ public class Notifier extends Mailer {
             mail = replaceUserTags(user, template.getBody());
             mail = replaceInfoSessionTags(infoSession, mail);
             NotificationDAO notificationDAO = context.getNotificationDAO();
-            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            notificationDAO.createNotification(user, template.getSubject(), mail);
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
@@ -86,7 +86,7 @@ public class Notifier extends Mailer {
             mail = replaceCarReservationTags(carReservation, mail);
             mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
             NotificationDAO notificationDAO = context.getNotificationDAO();
-            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            notificationDAO.createNotification(user, template.getSubject(), mail);
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
@@ -111,7 +111,7 @@ public class Notifier extends Mailer {
             mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
             mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
             NotificationDAO notificationDAO = context.getNotificationDAO();
-            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            notificationDAO.createNotification(user, template.getSubject(), mail);
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());
@@ -132,7 +132,7 @@ public class Notifier extends Mailer {
             mail = replaceCarReservationTags(carReservation, mail);
             mail = mail.replace("%reservation_reason%", reason);
             NotificationDAO notificationDAO = context.getNotificationDAO();
-            notificationDAO.createNotification(user, template.getSubject(), mail, new DateTime());
+            notificationDAO.createNotification(user, template.getSubject(), mail);
             if(template.getSendMail()){
                 setSubject(template.getSubject());
                 addRecipient(user.getEmail());

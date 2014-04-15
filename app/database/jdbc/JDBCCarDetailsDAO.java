@@ -32,7 +32,7 @@ public class JDBCCarDetailsDAO implements CarDetailsDAO{
     
     private PreparedStatement getUpdateCarDetailsStatement() throws SQLException{
     	if(updateCarDetailsStatement==null){
-    		updateCarDetailsStatement=connection.prepareStatement("UPDATE TechnicalCarDetails SET car_license_plate=?, car_chasis_number=?, car_registration=? WHERE details_id=?");
+    		updateCarDetailsStatement=connection.prepareStatement("UPDATE TechnicalCarDetails SET details_car_license_plate=?, details_car_chasis_number=?, details_car_registration=? WHERE details_id=?");
     	}
     	return updateCarDetailsStatement;
     }
@@ -46,13 +46,13 @@ public class JDBCCarDetailsDAO implements CarDetailsDAO{
     
     private PreparedStatement getCreateCarDetailsStatement() throws SQLException {
     	if(createCarDetailsStatement==null){
-    		createCarDetailsStatement=connection.prepareStatement("INSERT INTO TechnicalCarDetails(car_license_plate, car_chasis_number, car_registration) VALUES (?,?,?)",AUTO_GENERATED_KEYS);
+    		createCarDetailsStatement=connection.prepareStatement("INSERT INTO TechnicalCarDetails(details_car_license_plate, details_car_chasis_number, details_car_registration) VALUES (?,?,?)",AUTO_GENERATED_KEYS);
     	}
     	return createCarDetailsStatement;
     }
     
     public static CarDetails populateCarDetails(ResultSet rs) throws SQLException{
-    	return new CarDetails(rs.getInt("details_id"),rs.getString("car_license_plate"),rs.getString("car_registration"),rs.getInt("car_chasis_number"));
+    	return new CarDetails(rs.getInt("details_id"),rs.getString("details_car_license_plate"),rs.getString("details_car_registration"),rs.getInt("details_car_chasis_number"));
     }
 
 	@Override

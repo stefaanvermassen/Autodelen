@@ -114,7 +114,7 @@ public class Messages extends Controller {
                 try {
                     User sender = DatabaseHelper.getUserProvider().getUser();
                     User receiver = DatabaseHelper.getUserProvider().getUser(createForm.get().useremail);
-                    Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body, new DateTime());
+                    Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
                     if (mes != null) {
                         return redirect(
                                 routes.Messages.showMessages() // return to infosession list

@@ -47,7 +47,7 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement getCreateMessageStatement() throws SQLException {
         if (createMessageStatement == null) {
             createMessageStatement = connection.prepareStatement("INSERT INTO Messages (message_from_user_id, message_to_user_id, " +
-                    "message_read, message_subject, message_body, message_timestamp) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    "message_read, message_subject, message_body) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createMessageStatement;
     }
@@ -55,14 +55,14 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement getGetReceivedMessageListByUseridStatement() throws SQLException {
         if (getReceivedMessageListByUseridStatement == null) {
             getReceivedMessageListByUseridStatement = connection.prepareStatement(MESSAGE_QUERY + FILTER_FRAGMENT +
-                    " ORDER BY message_timestamp DESC;");
+                    " ORDER BY message_created_at DESC;");
         }
         return getReceivedMessageListByUseridStatement;
     }
 
     private PreparedStatement getGetMessageListPageByTimestampStatement() throws SQLException {
         if (getMessageListPageByTimestampStatement == null) {
-            getMessageListPageByTimestampStatement = connection.prepareStatement(MESSAGE_QUERY + FILTER_FRAGMENT + " ORDER BY message_timestamp DESC LIMIT ?, ?");
+            getMessageListPageByTimestampStatement = connection.prepareStatement(MESSAGE_QUERY + FILTER_FRAGMENT + " ORDER BY message_created_at DESC LIMIT ?, ?");
         }
         return getMessageListPageByTimestampStatement;
     }
@@ -72,7 +72,7 @@ public class JDBCMessageDAO implements MessageDAO {
             getSentMessageListByUseridStatement = connection.prepareStatement("SELECT * FROM Messages " +
                     "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
                     "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id " +
-                    "WHERE message_from_user_id=? ORDER BY message_timestamp DESC");
+                    "WHERE message_from_user_id=? ORDER BY message_created_at DESC");
         }
         return getSentMessageListByUseridStatement;
     }
@@ -105,7 +105,7 @@ public class JDBCMessageDAO implements MessageDAO {
         Message message = new Message(rs.getInt("message_id"), JDBCUserDAO.populateUser(rs, false, false, "Sender"),
                 JDBCUserDAO.populateUser(rs, false, false, "Receiver"), rs.getBoolean("message_read"),
                 rs.getString("message_subject"), rs.getString("message_body"),
-                new DateTime(rs.getTimestamp("message_timestamp")));
+                new DateTime(rs.getTimestamp("message_created_at")));
         return message;
     }
 
@@ -175,7 +175,7 @@ public class JDBCMessageDAO implements MessageDAO {
     }
 
     @Override
-    public Message createMessage(User sender, User receiver, String subject, String body, DateTime timestamp) throws DataAccessException {
+    public Message createMessage(User sender, User receiver, String subject, String body) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateMessageStatement();
             ps.setInt(1, sender.getId());
@@ -183,7 +183,6 @@ public class JDBCMessageDAO implements MessageDAO {
             ps.setBoolean(3, false);
             ps.setString(4, subject);
             ps.setString(5,body);
-            ps.setTimestamp(6, new Timestamp(timestamp.getMillis()));
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating message.");
@@ -192,7 +191,8 @@ public class JDBCMessageDAO implements MessageDAO {
                 keys.next(); //if this fails we want an exception anyway
                 DatabaseHelper.getCommunicationProvider().invalidateMessages(receiver.getId());
                 DatabaseHelper.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
-                return new Message(keys.getInt(1), sender, receiver, false, subject, body, timestamp);
+                // new DateTime() is not exactly correct, if you want the exact timestamp, do a getMessage()
+                return new Message(keys.getInt(1), sender, receiver, false, subject, body, new DateTime());
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new message.", ex);
             }
