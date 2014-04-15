@@ -32,14 +32,14 @@ public class JDBCCarInsuranceDAO implements CarInsuranceDAO{
 	
 	private PreparedStatement getCreateCarInsuranceStatement() throws SQLException{
 		if(createCarInsuranceStatement==null){
-			createCarInsuranceStatement = connection.prepareStatement("INSERT INTO CarInsurances(car_id, insurance_expiration, insurance_contract_id, isurance_bonus_malus) VALUES(?,?,?,?)", AUTO_GENERATED_KEYS);
+			createCarInsuranceStatement = connection.prepareStatement("INSERT INTO CarInsurances(insurance_car_id, insurance_expiration, insurance_contract_id, isurance_bonus_malus) VALUES(?,?,?,?)", AUTO_GENERATED_KEYS);
 		}
 		return createCarInsuranceStatement;
 	}
 	
 	private PreparedStatement getUpdateCarInsuranceStatement() throws SQLException{
 		if(updateCarInsuranceStatement==null){
-			updateCarInsuranceStatement = connection.prepareStatement("UPDATE CarInsurances SET car_id=?, insurance_expiration=?, insurance_contract_id=?, isurance_bonus_malus=?) WHERE insurance_id=?");
+			updateCarInsuranceStatement = connection.prepareStatement("UPDATE CarInsurances SET insurance_car_id=?, insurance_expiration=?, insurance_contract_id=?, isurance_bonus_malus=?) WHERE insurance_id=?");
 		}
 		return updateCarInsuranceStatement;
 	}
@@ -53,14 +53,14 @@ public class JDBCCarInsuranceDAO implements CarInsuranceDAO{
 	
 	private PreparedStatement getDeleteAllCarInsuranceStatement() throws SQLException{
 		if(deleteAllCarInsuranceStatement==null){
-			deleteAllCarInsuranceStatement = connection.prepareStatement("DELETE FROM CarInsurance WHERE car_id=?");
+			deleteAllCarInsuranceStatement = connection.prepareStatement("DELETE FROM CarInsurance WHERE insurance_car_id=?");
 		}
 		return deleteAllCarInsuranceStatement;
 	}
 	
 	private PreparedStatement getAllCarInsuranceStatement() throws SQLException{
 		if(deleteCarInsuranceStatement==null){
-			deleteCarInsuranceStatement = connection.prepareStatement("SELECT * FROM CarInsurance WHERE car_id=?");
+			deleteCarInsuranceStatement = connection.prepareStatement("SELECT * FROM CarInsurance WHERE insurance_car_id=?");
 		}
 		return deleteCarInsuranceStatement;
 	}
