@@ -46,20 +46,22 @@
                                 <i class="fa fa-wrench"></i> Reeds geuploade bestanden
                             </div>
 
-                            <div class="panel-body">
-                                @if(user.getIdentityCard == null || user.getIdentityCard.getFileGroup.size() == 0) {
+                             <div class="panel-body">
+                                @if(user.getIdentityCard == null || user.getIdentityCard.getFileGroup == null || user.getIdentityCard.getFileGroup.size() == 0) {
                                     Nog geen bestanden geupload.
                                 } else {
                                     <ul>
-                                    @for(file <- user.getIdentityCard.getFileGroup.getList){
+                                     @for(file <- user.getIdentityCard.getFileGroup.getList){
                                         <li>
                                             <a href="#">@file.getFileName</a>
                                             <a href="#delete"><span class="glyphicon glyphicon-remove"></span></a>
                                         </li>
                                     }
+
                                     </ul>
                                 }
                             </div>
+
                                 <!-- /.panel-body -->
                         </div>
                             <!-- /.panel -->

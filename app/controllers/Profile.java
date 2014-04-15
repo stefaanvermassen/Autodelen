@@ -4,10 +4,7 @@ import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import database.*;
-import models.Address;
-import models.File;
-import models.User;
-import models.UserRole;
+import models.*;
 import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
@@ -269,7 +266,7 @@ public class Profile extends Controller {
             // Only a profile admin or user itself can edit
             if (canEditProfile(user, currentUser)) {
                 return ok(index.render(user, getProfileCompleteness(user)));
-            } else if(DatabaseHelper.getUserRoleProvider().isFullUser(currentUser)){
+            } else if (DatabaseHelper.getUserRoleProvider().isFullUser(currentUser)) {
                 return ok(profile.render(user));
             } else {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
@@ -294,19 +291,22 @@ public class Profile extends Controller {
         public String cardNumber;
         public String nationalNumber;
 
-        public EditIdentityCardForm(){}
-        public EditIdentityCardForm(String cardNumber, String nationalNumber){
+        public EditIdentityCardForm() {
+        }
+
+        public EditIdentityCardForm(String cardNumber, String nationalNumber) {
             this.cardNumber = cardNumber;
             this.nationalNumber = nationalNumber;
         }
 
-        public String validate(){
+        public String validate() {
             return null; //TODO: use validation list
         }
     }
 
     /**
      * Generates the page where the user can upload his/her identity information
+     *
      * @param userId The user the requester wants to edit
      * @return A page to edit the identity card information
      */
@@ -327,12 +327,11 @@ public class Profile extends Controller {
             if (canEditProfile(user, currentUser)) {
                 Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
 
-                if(user.getIdentityCard() != null){ // get all uploaded files already
+                if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) { // get all uploaded files already
                     FileDAO fdao = context.getFileDAO();
                     user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
-
-                    form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
                 }
+                form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
 
                 return ok(identitycard.render(user, form));
             } else {
@@ -344,8 +343,59 @@ public class Profile extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result editIdentityCardPost(int userId){
-        return ok("Received identity change post.");
+    public static Result editIdentityCardPost(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            if (user == null || !canEditProfile(user, currentUser)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) {
+                user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+            }
+
+            Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(identitycard.render(user, form));
+            } else {
+                try {
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    EditIdentityCardForm model = form.get();
+
+                    IdentityCard card = user.getIdentityCard();
+                    if (card == null) {
+                        card = new IdentityCard();
+                        user.setIdentityCard(card);
+                    }
+                    card.setRegistrationNr(model.nationalNumber);
+                    card.setId(model.cardNumber);
+
+                    // Now check if we also have to create / add file to the group
+                    Http.MultipartFormData.FilePart newFile = body.getFile("file");
+                    if (newFile != null) {
+
+                    }
+
+                    udao.updateUser(user, true);
+                    context.commit();
+
+                    flash("success", "Uw identiteitskaart werd succesvol bijgewerkt.");
+                    return ok(identitycard.render(user, form));
+                } catch(DataAccessException ex){
+                    context.rollback();
+                    throw ex;
+                }
+            }
+
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        //return ok("Received identity change post.");
     }
 
     /**
@@ -362,7 +412,7 @@ public class Profile extends Controller {
             User user = dao.getUser(userId, true);
             User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
+            if (!canEditProfile(user, currentUser)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 
