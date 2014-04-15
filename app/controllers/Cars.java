@@ -87,6 +87,8 @@ public class Cars extends Controller {
 
 
         public String validate() {
+            if("".equals(description))
+                return "Geef aub een beschrijving op.";
             return null;
         }
     }
@@ -422,7 +424,8 @@ public class Cars extends Controller {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
-                return badRequest(addcarcostmodal.render(carCostForm, car));
+                flash("danger", "Kost toevoegen mislukt.");
+                return badRequest(detail.render(car));
             }catch(DataAccessException ex){
                 throw ex; //log?
             }

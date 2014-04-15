@@ -39,8 +39,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
             ps.setInt(1, car.getId());
             ps.setInt(2, amount);
             ps.setString(3, description);
-            //Todo: use actual time from form
-            ps.setTimestamp(4, new Timestamp(new DateTime().getMillis()));
+            ps.setTimestamp(4, new Timestamp(time.getMillis()));
             ps.setBigDecimal(5, mileage);
 
             if(ps.executeUpdate() == 0)
