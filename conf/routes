@@ -118,6 +118,8 @@ GET         /cars/view                              controllers.Cars.detail(id: 
 GET         /cars/edit                              controllers.Cars.editCar(carId: Int)
 POST        /cars/edit                              controllers.Cars.editCarPost(carId: Int)
 GET         /cars/delete                            controllers.Cars.removeCar(carId: Int)
+GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
+POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
 
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
