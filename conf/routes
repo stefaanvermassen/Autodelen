@@ -57,6 +57,7 @@ POST        /profile/changepicture             controllers.Profile.profilePictur
 GET         /profile/picture                   controllers.Profile.getProfilePicture(userId: Int)
 GET         /profile/identitycard              controllers.Profile.editIdentityCard(userId: Int)
 POST        /profile/identitycard              controllers.Profile.editIdentityCardPost(userId: Int)
+GET         /profile/identitycard/deletefile   controllers.Profile.deleteIdentityCardFile(userId: Int, fileId: Int)
 
 # Users
 GET         /users                             controllers.Users.showUsers()
