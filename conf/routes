@@ -25,7 +25,7 @@ POST        /drive_details/refused                  controllers.Drives.refuseRes
 POST        /drive_details/provide_info             controllers.Drives.provideDriveInfo(reservationId: Int)
 GET         /drive_details/approve_info             controllers.Drives.approveDriveInfo(reservationId: Int)
 GET         /drives-cancelled                       controllers.Drives.cancelReservation(reservationId: Int)
-GET         /drivesAdmin                            controllers.Drives.drivesAdmin()
+GET         /drives/admin                           controllers.Drives.drivesAdmin()
 
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
@@ -109,7 +109,8 @@ GET         /emailtemplate/edit                     controllers.EmailTemplates.s
 POST        /emailtemplate/edit                     controllers.EmailTemplates.editTemplate()
 
 # Cars
-GET         /cars                                   controllers.Cars.showCars()
+GET         /cars/admin                             controllers.Cars.showCars()
+GET         /cars                                   controllers.Cars.showUserCars()
 GET         /cars/page                              controllers.Cars.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/new                               controllers.Cars.newCar()
 POST        /cars/new                               controllers.Cars.addNewCar()

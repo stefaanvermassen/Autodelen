@@ -11,6 +11,9 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.cars.*;
+import views.html.cars.cars;
+import views.html.cars.carsAdmin;
+import views.html.cars.carspage;
 
 import java.util.List;
 
@@ -75,7 +78,23 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     public static Result showCars() {
-        return ok(cars.render());
+        return ok(carsAdmin.render());
+    }
+
+    /**
+     * @return The cars index-page with user cars  (only available to car_owners)
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result showUserCars() {
+        User user = DatabaseHelper.getUserProvider().getUser();
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            List<Car> listOfCars = dao.getCarsOfUser(user.getId());
+            return ok(cars.render(listOfCars));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
     }
 
     /**
