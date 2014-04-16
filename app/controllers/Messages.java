@@ -33,6 +33,8 @@ public class Messages extends Controller {
         public String useremail;
 
         public String validate() {
+            if("".equals(useremail) || "".equals(subject) || "".equals(body))
+                return "Vul alle velden in";
 
             return null;
         }
