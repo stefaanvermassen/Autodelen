@@ -120,6 +120,9 @@ POST        /cars/edit                              controllers.Cars.editCarPost
 GET         /cars/delete                            controllers.Cars.removeCar(carId: Int)
 GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
 POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
+GET         /cars/carcosts                          controllers.Cars.showCarCosts()
+GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
+GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)

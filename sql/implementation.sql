@@ -79,7 +79,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `UserRoles` (
 	`userrole_userid` INT NOT NULL,
-	`userrole_role` ENUM('SUPER_USER', 'CAR_OWNER', 'CAR_USER', 'INFOSESSION_ADMIN', 'MAIL_ADMIN', 'PROFILE_ADMIN', 'RESERVATION_ADMIN') NOT NULL,
+	`userrole_role` ENUM('SUPER_USER', 'CAR_OWNER', 'CAR_USER', 'INFOSESSION_ADMIN', 'MAIL_ADMIN', 'PROFILE_ADMIN', 'RESERVATION_ADMIN', 'CAR_ADMIN') NOT NULL,
 	PRIMARY KEY (`userrole_userid`, `userrole_role`),
 	FOREIGN KEY (`userrole_userid`) REFERENCES Users(`user_id`)
 )
@@ -202,7 +202,7 @@ CREATE TABLE `CarCosts` (
 	`car_cost_proof` INT,
 	`car_cost_amount` DECIMAL(19,4) NOT NULL,
 	`car_cost_description` TEXT,
-	`car_cost_status` BIT(1) NOT NULL DEFAULT 0,
+	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST',
 	`car_cost_time` DATETIME,
 	`car_cost_mileage` DECIMAL(10,1),
 	`car_cost_created_at` DATETIME,

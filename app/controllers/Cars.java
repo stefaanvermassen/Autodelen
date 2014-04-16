@@ -6,6 +6,7 @@ import database.FilterField;
 import models.*;
 import controllers.Security.RoleSecured;
 
+import notifiers.Notifier;
 import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
@@ -14,6 +15,7 @@ import play.mvc.Result;
 import views.html.cars.*;
 import views.html.cars.addcar;
 import views.html.cars.addcarcostmodal;
+import views.html.cars.carCostsAdmin;
 import views.html.cars.cars;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
@@ -96,7 +98,7 @@ public class Cars extends Controller {
     /**
      * @return The cars index-page with all cars (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showCars() {
         return ok(carsAdmin.render());
     }
@@ -125,7 +127,7 @@ public class Cars extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
@@ -161,7 +163,7 @@ public class Cars extends Controller {
     /**
      * @return A form to create a new car (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result newCar() {
         return ok(addcar.render(Form.form(CarModel.class), 0));
     }
@@ -170,7 +172,7 @@ public class Cars extends Controller {
      * Method: POST
      * @return redirect to the CarForm you just filled in or to the cars-index page (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
@@ -217,7 +219,7 @@ public class Cars extends Controller {
      * @param carId The car to edit
      * @return A form to edit the car (only available to the corresponding car owner or administrator)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -271,7 +273,7 @@ public class Cars extends Controller {
      * @return Redirect to the car-index page on error or the car detail-page on succes (only available to the corresponding car owner or administrator)
      */
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCarPost(int carId) {
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
@@ -341,7 +343,7 @@ public class Cars extends Controller {
      * @param carId The car to show details of
      * @return A detail page of the car (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
     public static Result detail(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -366,7 +368,7 @@ public class Cars extends Controller {
      * @param carId The car to be removed
      * @return redirect to the index carpage, with error-messages if there were any problems
      */
-    @RoleSecured.RoleAuthenticated(UserRole.RESERVATION_ADMIN)
+    @RoleSecured.RoleAuthenticated(UserRole.CAR_ADMIN)
     public static Result removeCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -398,7 +400,7 @@ public class Cars extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result getCarCostModal(int id){
         // TODO: hide from other users (badRequest)
 
@@ -463,4 +465,78 @@ public class Cars extends Controller {
             }
         }
     }
+
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the carcost requests
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showCarCosts() {
+        User user = DatabaseHelper.getUserProvider().getUser();
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarCostDAO dao = context.getCarCostDAO();
+            List<CarCost> carCostList = dao.getRequestedCarCostList();
+            return ok(carCostsAdmin.render(carCostList));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a car-bound cost of a car is approved by the car admin.
+     *
+     * @param carCostId  The carCost being approved
+     * @return the carcost index page if returnToDetail is 0, car detail page if 1.
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result approveCarCost(int carCostId, int returnToDetail) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarCostDAO dao = context.getCarCostDAO();
+            CarCost carCost = dao.getCarCost(carCostId);
+            carCost.setStatus(CarCostStatus.ACCEPTED);
+            dao.updateCarCost(carCost);
+            context.commit();
+            //Todo: send notification!
+            if(returnToDetail==0){
+                return showCarCosts();
+            }else{
+                return detail(carCost.getCar().getId());
+            }
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+
+
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a car-bound cost of a car is approved by the car admin.
+     *
+     * @param carCostId  The carCost being approved
+     * @return the carcost index page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result refuseCarCost(int carCostId, int returnToDetail) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarCostDAO dao = context.getCarCostDAO();
+            CarCost carCost = dao.getCarCost(carCostId);
+            carCost.setStatus(CarCostStatus.REFUSED);
+            dao.updateCarCost(carCost);
+            context.commit();
+            //Todo: send notification!
+            if(returnToDetail==0){
+                return showCarCosts();
+            }else{
+                return detail(carCost.getCar().getId());
+            }
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 }
