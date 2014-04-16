@@ -1,4 +1,5 @@
 @(car: Car, carCostList: java.util.List[CarCost])
+    @import org.joda.time.format.DateTimeFormat
     @import database.DatabaseHelper;
     @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
         @if(car.getOwner.getId == user.getId()) {
@@ -65,7 +66,7 @@
                 @for(carCost <- carCostList) {
                     <tr>
                         <td>@carCost.getDescription</td>
-                        <td>@carCost.getTime</td>
+                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(carCost.getTime)</td>
                         <td>@carCost.getAmount</td>
                         <td>
                             <div class="btn-group btn-group-xs">
