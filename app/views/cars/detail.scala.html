@@ -46,7 +46,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Auto's</h1>
-                @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
+                @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
                     @flashes()
                     @if(isAdmin) {
                         <div class="panel panel-default">

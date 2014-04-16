@@ -96,7 +96,7 @@ public class Cars extends Controller {
     /**
      * @return The cars index-page with all cars (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showCars() {
         return ok(carsAdmin.render());
     }
@@ -125,7 +125,7 @@ public class Cars extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
@@ -161,7 +161,7 @@ public class Cars extends Controller {
     /**
      * @return A form to create a new car (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result newCar() {
         return ok(addcar.render(Form.form(CarModel.class), 0));
     }
@@ -170,7 +170,7 @@ public class Cars extends Controller {
      * Method: POST
      * @return redirect to the CarForm you just filled in or to the cars-index page (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
@@ -217,7 +217,7 @@ public class Cars extends Controller {
      * @param carId The car to edit
      * @return A form to edit the car (only available to the corresponding car owner or administrator)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -271,7 +271,7 @@ public class Cars extends Controller {
      * @return Redirect to the car-index page on error or the car detail-page on succes (only available to the corresponding car owner or administrator)
      */
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCarPost(int carId) {
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
@@ -341,7 +341,7 @@ public class Cars extends Controller {
      * @param carId The car to show details of
      * @return A detail page of the car (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
     public static Result detail(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -366,7 +366,7 @@ public class Cars extends Controller {
      * @param carId The car to be removed
      * @return redirect to the index carpage, with error-messages if there were any problems
      */
-    @RoleSecured.RoleAuthenticated(UserRole.RESERVATION_ADMIN)
+    @RoleSecured.RoleAuthenticated(UserRole.CAR_ADMIN)
     public static Result removeCar(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
