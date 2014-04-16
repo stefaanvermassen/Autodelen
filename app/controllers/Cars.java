@@ -6,6 +6,7 @@ import database.FilterField;
 import models.*;
 import controllers.Security.RoleSecured;
 
+import notifiers.Notifier;
 import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
@@ -14,6 +15,7 @@ import play.mvc.Result;
 import views.html.cars.*;
 import views.html.cars.addcar;
 import views.html.cars.addcarcostmodal;
+import views.html.cars.carCostsAdmin;
 import views.html.cars.cars;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
@@ -398,7 +400,7 @@ public class Cars extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result getCarCostModal(int id){
         // TODO: hide from other users (badRequest)
 
@@ -463,4 +465,78 @@ public class Cars extends Controller {
             }
         }
     }
+
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the carcost requests
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showCarCosts() {
+        User user = DatabaseHelper.getUserProvider().getUser();
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarCostDAO dao = context.getCarCostDAO();
+            List<CarCost> carCostList = dao.getRequestedCarCostList();
+            return ok(carCostsAdmin.render(carCostList));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a car-bound cost of a car is approved by the car admin.
+     *
+     * @param carCostId  The carCost being approved
+     * @return the carcost index page if returnToDetail is 0, car detail page if 1.
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result approveCarCost(int carCostId, int returnToDetail) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarCostDAO dao = context.getCarCostDAO();
+            CarCost carCost = dao.getCarCost(carCostId);
+            carCost.setStatus(CarCostStatus.ACCEPTED);
+            dao.updateCarCost(carCost);
+            context.commit();
+            //Todo: send notification!
+            if(returnToDetail==0){
+                return showCarCosts();
+            }else{
+                return detail(carCost.getCar().getId());
+            }
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+
+
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a car-bound cost of a car is approved by the car admin.
+     *
+     * @param carCostId  The carCost being approved
+     * @return the carcost index page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result refuseCarCost(int carCostId, int returnToDetail) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarCostDAO dao = context.getCarCostDAO();
+            CarCost carCost = dao.getCarCost(carCostId);
+            carCost.setStatus(CarCostStatus.REFUSED);
+            dao.updateCarCost(carCost);
+            context.commit();
+            //Todo: send notification!
+            if(returnToDetail==0){
+                return showCarCosts();
+            }else{
+                return detail(carCost.getCar().getId());
+            }
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 }

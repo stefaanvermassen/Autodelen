@@ -248,6 +248,9 @@
                             <li @if(title == "Auto's (Admin)") {class="active"}>
                             <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
                             </li>
+                            <li @if(title == "Autokosten (Admin)") {class="active"}>
+                                <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
+                            </li>
                         }
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){

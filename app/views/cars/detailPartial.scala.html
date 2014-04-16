@@ -38,7 +38,7 @@
         </div>
     </div>
     </div>
-    @if(car.getOwner.getId == user.getId()) {
+    @if(car.getOwner.getId == user.getId() || DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
             <h2>Autogebonden kosten</h2>
         <p>
             Vul hier als eigenaar uw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.
@@ -52,7 +52,11 @@
                     <th name="description" class="sortable" tabindex="0" >Beschrijving</th>
                     <th name="time" class="sortable" tabindex="0" >Tijd</th>
                     <th>Bedrag</th>
+                    <th>Status</th>
                     <th>Bewijs</th>
+                    @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
+                        <th>Acties</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -69,10 +73,43 @@
                         <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(carCost.getTime)</td>
                         <td>@carCost.getAmount</td>
                         <td>
+                            @carCost.getStatus match {
+                                case CarCostStatus.ACCEPTED => {
+                                    <span class="fa fa-check-circle"></span>
+                                }
+                                case CarCostStatus.REFUSED => {
+                                    <span class="fa fa-minus-circle"></span>
+                                }
+                                case CarCostStatus.REQUEST => {
+                                    <span class="fa fa-question-circle"></span>
+                                }
+                                case _ => {}
+                            }
+                            @carCost.getStatus.getDescription
+                        </td>
+                        <td>
                             <div class="btn-group btn-group-xs">
                                 <a class="btn btn-primary" href="">Link</a>
                             </div>
                         </td>
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
+                            <td>
+                                @carCost.getStatus match {
+                                    case CarCostStatus.ACCEPTED => {
+                                        <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                                    }
+                                    case CarCostStatus.REFUSED => {
+                                        <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                                    }
+                                    case CarCostStatus.REQUEST => {
+                                        <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                                        <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                                    }
+                                    case _ => {}
+                                }
+
+                            </td>
+                        }
                     </tr>
                 }
             }

@@ -2,8 +2,7 @@ package database.jdbc;
 
 import database.CarCostDAO;
 import database.DataAccessException;
-import models.Car;
-import models.CarCost;
+import models.*;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
@@ -22,9 +21,17 @@ public class JDBCCarCostDAO implements CarCostDAO {
     private PreparedStatement updateCarCostStatement;
     private PreparedStatement getCarCostListForCarStatement;
     private PreparedStatement getRequestedCarCostListStatement;
+    private PreparedStatement getCarCostStatement;
 
     public JDBCCarCostDAO(Connection connection) {
         this.connection = connection;
+    }
+
+    private PreparedStatement getGetCarCostStatement() throws SQLException {
+        if (getCarCostStatement == null) {
+            getCarCostStatement = connection.prepareStatement("SELECT * FROM CarCosts JOIN Cars ON car_cost_car_id = car_id WHERE car_cost_id=?");
+        }
+        return getCarCostStatement;
     }
 
     private PreparedStatement getCreateCarCostStatement() throws SQLException {
@@ -63,6 +70,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
 
     public static CarCost populateCarCost(ResultSet rs, Car car) throws SQLException {
         CarCost carCost = new CarCost(rs.getInt("car_cost_id"), car, rs.getBigDecimal("car_cost_amount"), rs.getBigDecimal("car_cost_mileage"), rs.getString("car_cost_description"), new DateTime(rs.getTimestamp("car_cost_time")));
+        carCost.setStatus(CarCostStatus.valueOf(rs.getString("car_cost_status")));
         return carCost;
     }
 
@@ -117,7 +125,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
             PreparedStatement ps = getUpdateCarCostStatement();
             ps.setBigDecimal(1, carCost.getAmount());
             ps.setString(2, carCost.getDescription());
-            ps.setString(3, carCost.getStatus().getDescription());
+            ps.setString(3, carCost.getStatus().toString());
             ps.setTimestamp(4, new Timestamp(carCost.getTime().getMillis()));
             ps.setBigDecimal(5, carCost.getMileage());
             ps.setInt(6, carCost.getId());
@@ -127,6 +135,23 @@ public class JDBCCarCostDAO implements CarCostDAO {
             throw new DataAccessException("Unable to update CarCost", e);
         }
 
+    }
+
+    @Override
+    public CarCost getCarCost(int id) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetCarCostStatement();
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return populateCarCost(rs, JDBCCarDAO.populateCar(rs, false, false));
+                else return null;
+            }catch (SQLException e){
+                throw new DataAccessException("Error reading reservation resultset", e);
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to get reservation", e);
+        }
     }
 
     private List<CarCost> getCarCostList(PreparedStatement ps, Car car) throws DataAccessException {

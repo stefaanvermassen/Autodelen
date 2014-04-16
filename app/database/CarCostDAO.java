@@ -15,4 +15,5 @@ public interface CarCostDAO {
     public List<CarCost> getCarCostListForCar(Car car) throws DataAccessException;
     public List<CarCost> getRequestedCarCostList() throws DataAccessException;
     public void updateCarCost(CarCost carCost) throws DataAccessException;
+    public CarCost getCarCost(int id) throws DataAccessException;
 }
