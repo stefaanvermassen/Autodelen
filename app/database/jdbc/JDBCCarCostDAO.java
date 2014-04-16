@@ -2,10 +2,8 @@ package database.jdbc;
 
 import database.CarCostDAO;
 import database.DataAccessException;
-import database.DatabaseHelper;
 import models.Car;
 import models.CarCost;
-import models.Message;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
@@ -82,6 +80,16 @@ public class JDBCCarCostDAO implements CarCostDAO {
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of carcosts", e);
         }
+    }
+
+    @Override
+    public List<CarCost> getRequestedCarCostList() throws DataAccessException {
+        return null;
+    }
+
+    @Override
+    public void updateCarCost(CarCost carCost) throws DataAccessException {
+
     }
 
     private List<CarCost> getCarCostList(PreparedStatement ps, Car car) throws DataAccessException {
