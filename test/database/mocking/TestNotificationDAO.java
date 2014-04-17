@@ -41,7 +41,13 @@ public class TestNotificationDAO implements NotificationDAO{
 
     @Override
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        return null;
+        List<Notification> list = new ArrayList<>();
+        for(Notification notification : notifications){
+            if(notification.getUser().getId()==1){ // TODO: getUserId from filter
+                list.add(notification);
+            }
+        }
+        return list.subList((page-1)*pageSize, page*pageSize > list.size() ? list.size() : page*pageSize );
     }
 
 	@Override

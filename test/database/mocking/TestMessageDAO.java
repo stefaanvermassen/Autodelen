@@ -41,7 +41,13 @@ public class TestMessageDAO implements MessageDAO{
 
     @Override
     public List<Message> getMessageList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        return null;
+        List<Message> list = new ArrayList<>();
+        for(Message message : messages){
+            if(message.getReceiver().getId()==1){ // TODO: get userId from filter
+                list.add(message);
+            }
+        }
+        return list;
     }
 
     @Override
