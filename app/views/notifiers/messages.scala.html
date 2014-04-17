@@ -7,7 +7,7 @@
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
 @stylesheets = {
-    <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
+    <!-- <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet"> -->
 }
 @app("Berichten", stylesheets, scripts) {
 
@@ -28,19 +28,30 @@
                     <a class="btn btn-default btn-sm" href="@routes.Messages.newMessage()">Nieuw bericht</a>
                 </div>
             </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-comments"></i> Berichten
-                </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div id="resultsTable">
-                        <!-- Here comes the loaded timeline -->
+
+            <ul class="nav nav-tabs" id="myTab">
+              <li class="active"><a href="#received" data-toggle="tab">Ontvangen</a></li>
+              <li><a href="#sent" data-toggle="tab">Verzonden</a></li>
+            </ul>
+
+            <div class="tab-content">
+              <div class="tab-pane active" id="received">
+                <div class="panel panel-default tabpanel">
+                    <div class="panel-body">
+                        <div id="resultsTable">
+                            <!-- Here comes the loaded timeline -->
+                        </div>
                     </div>
                 </div>
-                <!-- /.panel-body -->
+              </div>
+              <div class="tab-pane" id="sent">
+                <div class="panel panel-default tabpanel">
+                    <div class="panel-body">
+                        Yarr, more booty!
+                    </div>
+                </div>
+              </div>
             </div>
-            <!-- /.panel -->
         </div>
         <!-- /col-lg-12 -->
     </div>

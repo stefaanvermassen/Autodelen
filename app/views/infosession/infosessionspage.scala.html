@@ -29,22 +29,16 @@
             <td>@session.getAddress</td>
             <td>
                 <div class="btn-group btn-group-xs">
-
+                    <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">details</a>
                     @if(enrolled == null && (session.getMaxEnrollees == 0 || session.getEnrolleeCount < session.getMaxEnrollees)) {
                         <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(session.getId)">inschrijven</a>
                     } else {
-                        @* Scala y u o 'else if' ??? *@
+                        @* Scala y u no 'else if' ??? *@
                         @if(enrolled != null && enrolled.getId == session.getId){
-                            <button type="button" disabled="disabled" class="btn btn-success">inschrijven</button>
+                            <button type="button" disabled="disabled" onclick="showConfirmationModal(@session.getId())" class="btn btn-success">inschrijven</button>
                         } else {
-                            <button type="button" onclick="confirmSubscription(@session.getId())" class="btn btn-success">inschrijven</button>
+                            <button type="button" onclick="showConfirmationModal(@session.getId())" class="btn btn-success">inschrijven</button>
                         }
-                    }
-                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">details</a>
-                    @if(enrolled != null && session.getId == enrolled.getId) {
-                        <a class="btn btn-warning" href="@routes.InfoSessions.unenrollSession">uitschrijven</a>
-                    } else {
-                        <button disabled="disabled" type="button" class="btn btn-warning">uitschrijven</button>
                     }
                 </div>
             </td>
