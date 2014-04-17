@@ -126,7 +126,6 @@ public class TestUserDAO implements UserDAO {
         }
     }
 
-    @Override
     public List<User> getAllUsers() throws DataAccessException {
         return userList;
     }
@@ -140,10 +139,5 @@ public class TestUserDAO implements UserDAO {
 	public List<User> getUserList(FilterField orderBy, boolean asc, int page,
 			int pageSize, Filter filter) throws DataAccessException {
 		return getAllUsers(); // TODO: add filter methods
-	}
-
-	@Override
-	public List<User> searchUsers(String search) throws DataAccessException {
-		return getAllUsers(); // TODO: add search methods
 	}
 }

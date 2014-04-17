@@ -2,17 +2,18 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
+import controllers.util.FileAction;
 import controllers.util.FileHelper;
 import database.*;
-import models.Address;
-import models.File;
-import models.User;
-import models.UserRole;
+import models.*;
+import play.Logger;
 import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
 
+import javax.imageio.IIOException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -184,13 +185,27 @@ public class Profile extends Controller {
             } else {
                 try {
                     // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
-                    String relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+                    Path relativePath;
+
+                    // Non-resized:
+                    //relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+
+
+                    // Resized:
+                    try {
+                        relativePath = FileHelper.saveResizedImage(picture, ConfigurationHelper.getConfigurationString("uploads.profile"), 800);
+                    } catch(IIOException ex){
+                        // This means imagereader failed.
+                        Logger.error("Failed profile picture resize: " + ex.getMessage());
+                        flash("danger", "Uw afbeelding is corrupt / niet ondersteund. Gelieve het opnieuw te proberen of een administrator te contacteren.");
+                        return badRequest(uploadPicture.render(userId));
+                    }
 
                     try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {                     // Save the file reference in the database
                         FileDAO dao = context.getFileDAO();
                         UserDAO udao = context.getUserDAO();
                         try {
-                            models.File file = dao.createFile(relativePath, picture.getFilename(), picture.getContentType());
+                            models.File file = dao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
                             int oldPictureId = user.getProfilePictureId();
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user, true);
@@ -199,7 +214,7 @@ public class Profile extends Controller {
                             if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
                                 try {
                                     File oldPicture = dao.getFile(oldPictureId);
-                                    FileHelper.deleteFile(oldPicture.getPath());
+                                    FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
                                     dao.deleteFile(oldPictureId);
 
                                     context.commit();
@@ -263,7 +278,7 @@ public class Profile extends Controller {
             // Only a profile admin or user itself can edit
             if (canEditProfile(user, currentUser)) {
                 return ok(index.render(user, getProfileCompleteness(user)));
-            } else if(DatabaseHelper.getUserRoleProvider().isFullUser(currentUser)){
+            } else if (DatabaseHelper.getUserRoleProvider().isFullUser(currentUser)) {
                 return ok(profile.render(user));
             } else {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
@@ -288,18 +303,21 @@ public class Profile extends Controller {
         public String cardNumber;
         public String nationalNumber;
 
-        public EditIdentityCardForm(){}
-        public EditIdentityCardForm(String cardNumber, String nationalNumber){
+        public EditIdentityCardForm() {
+        }
+
+        public EditIdentityCardForm(String cardNumber, String nationalNumber) {
             this.cardNumber = cardNumber;
             this.nationalNumber = nationalNumber;
         }
 
-        public String validate(){
+        public String validate() {
             return null; //TODO: use validation list
         }
     }
 
     /**
+     * Method: GET
      * Generates the page where the user can upload his/her identity information
      * @param userId The user the requester wants to edit
      * @return A page to edit the identity card information
@@ -321,11 +339,12 @@ public class Profile extends Controller {
             if (canEditProfile(user, currentUser)) {
                 Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
 
-
-                if(user.getIdentityCard() != null){ // get all uploaded files already
+                if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) { // get all uploaded files already
                     FileDAO fdao = context.getFileDAO();
                     user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+                }
 
+                if(user.getIdentityCard() != null) {
                     form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
                 }
 
@@ -338,9 +357,162 @@ public class Profile extends Controller {
         }
     }
 
+    /**
+     * Returns the file requested after authorization checks
+     * @param userId
+     * @param fileId
+     * @return
+     */
     @RoleSecured.RoleAuthenticated()
-    public static Result editIdentityCardPost(int userId){
-        return ok("Received identity change post.");
+    public static Result viewIdentityCardFile(int userId, int fileId){
+        return identityCardFileAction(userId, fileId, new FileAction() {
+            @Override
+            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+                 return FileHelper.getFileStreamResult(dao, file.getId());
+            }
+        });
+    }
+
+    private static Result identityCardFileAction(int userId, int fileId, FileAction action){
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            if (user == null || !canEditProfile(user, currentUser)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null){
+                FileGroup files = fdao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                models.File file = files.getFileWithId(fileId);
+                if(file != null){
+                    try {
+                        return action.process(file, fdao, context);
+                    } catch(IOException | DataAccessException ex){
+                        context.rollback();
+                        throw new RuntimeException(ex);
+                    }
+                } else {
+                    flash("danger", "Bestand niet gevonden.");
+                    return redirect(routes.Profile.editIdentityCard(userId));
+                }
+            } else {
+                flash("danger", "Deze gebruiker heeft geen bestanden voor identiteitskaart.");
+                return redirect(routes.Profile.editIdentityCard(userId));
+            }
+        } catch(DataAccessException ex){
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     * Deletes a file from the identity card filegroup
+     * @param userId The user to delete from
+     * @param fileId The file to delete
+     * @return A redirect to the identity card page overview
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result deleteIdentityCardFile(final int userId, int fileId){
+        return identityCardFileAction(userId, fileId, new FileAction() {
+            @Override
+            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+                dao.deleteFile(file.getId());
+                FileHelper.deleteFile(Paths.get(file.getPath()));
+                context.commit();
+
+                flash("success", file.getFileName() + " werd met succes verwijderd.");
+                return redirect(routes.Profile.editIdentityCard(userId));
+            }
+        });
+    }
+
+    /**
+     * Method: POST
+     * Processes the request to add files / change identity card information
+     * @param userId The user to edit
+     * @return The overview page or error page when something went wrong
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCardPost(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            if (user == null || !canEditProfile(user, currentUser)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) {
+                user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+            }
+
+            Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(identitycard.render(user, form));
+            } else {
+                try {
+                    boolean updateUser = false; // Only perform a user update when we changed something (so not when adding a file to existing filegroup)
+
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    EditIdentityCardForm model = form.get();
+
+                    IdentityCard card = user.getIdentityCard();
+                    if (card == null) {
+                        updateUser = true;
+                        card = new IdentityCard();
+                        user.setIdentityCard(card);
+                    }
+
+                    // Now check if we also have to create / add file to the group
+                    Http.MultipartFormData.FilePart newFile = body.getFile("file");
+                    if (newFile != null) {
+                        if(!FileHelper.isDocumentContentType(newFile.getContentType())){
+                            flash("danger", "Het documentstype dat u bijgevoegd heeft is niet toegestaan. (" + newFile.getContentType() + ").");
+                            return badRequest(identitycard.render(user, form));
+                        } else {
+                            FileGroup group = card.getFileGroup();
+                            if (group == null) {
+                                // Create new filegroup
+                                group = fdao.createFileGroup();
+                                card.setFileGroup(group);
+                                updateUser = true;
+                            }
+
+                            // Now we add the file to the group
+                            Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.identitycard"));
+                            models.File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
+                            group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        }
+                    }
+
+                    if((user.getIdentityCard().getRegistrationNr() != null && !user.getIdentityCard().getRegistrationNr().equals(model.nationalNumber)) ||
+                            user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber)) {
+                        card.setRegistrationNr(model.nationalNumber);
+                        card.setId(model.cardNumber);
+                        updateUser = true;
+                    }
+
+                    if(updateUser) {
+                        udao.updateUser(user, true);
+                    }
+                    context.commit();
+
+                    flash("success", "Uw identiteitskaart werd succesvol bijgewerkt.");
+                    return ok(identitycard.render(user, form));
+                } catch(DataAccessException | IOException ex){ //IO or database error causes a rollback
+                    context.rollback();
+                    throw new RuntimeException(ex); //unchecked
+                }
+            }
+
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     /**
@@ -357,7 +529,7 @@ public class Profile extends Controller {
             User user = dao.getUser(userId, true);
             User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
+            if (!canEditProfile(user, currentUser)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 

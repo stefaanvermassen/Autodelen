@@ -58,7 +58,6 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement getCarStatement;
     private PreparedStatement getCarsOfUserStatement;
     private PreparedStatement deleteCarStatement;
-    private PreparedStatement getGetCarListStatement;
     private PreparedStatement getGetCarListPageByNameAscStatement;
     private PreparedStatement getGetCarListPageByNameDescStatement;
     private PreparedStatement getGetCarListPageByBrandAscStatement;
@@ -145,13 +144,6 @@ public class JDBCCarDAO implements CarDAO{
         return getCarsOfUserStatement;
     }
 
-    private PreparedStatement getGetCarListStatement() throws SQLException {
-        if(getGetCarListStatement == null) {
-            getGetCarListStatement = connection.prepareStatement(CAR_QUERY);
-        }
-        return getGetCarListStatement;
-    }
-
 
     private PreparedStatement getGetCarListPageByNameAscStatement() throws SQLException {
         if(getGetCarListPageByNameAscStatement == null) {
@@ -202,10 +194,6 @@ public class JDBCCarDAO implements CarDAO{
             ps.setInt(5, seats);
             ps.setInt(6, doors);
             ps.setInt(7, year);
-            //Calendar cal = Calendar.getInstance();
-            //cal.set(year, 0,0);
-            //ps.setDate(6, new Date(cal.getTime().getTime()));
-
             ps.setBoolean(8, gps);
             ps.setBoolean(9, hook);
             ps.setString(10, fuel.toString());
@@ -220,15 +208,11 @@ public class JDBCCarDAO implements CarDAO{
             }
             ps.setString(15, comments);
 
-            java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
-            String currentDatetime = sqlDate.toString();
-            //ps.setDate(15,sqlDate);
-
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next();
-                return new Car(keys.getInt(1), name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
+                return new Car(keys.getInt(1), name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new car.", ex);
             }
@@ -251,9 +235,6 @@ public class JDBCCarDAO implements CarDAO{
             }
             ps.setInt(5, car.getSeats());
             ps.setInt(6, car.getDoors());
-            //Calendar cal = Calendar.getInstance();
-            //cal.set(car.getYear(), 0,0);
-            //ps.setDate(6, new Date(cal.getTime().getTime()));
             ps.setInt(7, car.getYear());
             ps.setBoolean(8, car.isGps());
             ps.setBoolean(9, car.isHook());
@@ -268,7 +249,6 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setNull(14, Types.INTEGER);
             }
             ps.setString(15,car.getComments());
-            //ps.setDate(15,new Date(new java.util.Date().getTime()));
 
             ps.setInt(16, car.getId());
 
@@ -310,16 +290,6 @@ public class JDBCCarDAO implements CarDAO{
 		}
 		
 	}
-
-    @Override
-    public List<Car> getCarList() throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetCarListStatement();
-            return getCars(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
-        }
-    }
 
     /**
      * @param filter The filter to apply to

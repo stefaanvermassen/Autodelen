@@ -26,13 +26,12 @@ public class Car {
     private int ownerAnnualKm;
     private User owner;
     private String comments;
-    private String lastEdit;
 
     public Car() {
-        this(0, null, null, null, null, 0, 0, 0, false, false, null, 0, 0, 0, null, null, null);
+        this(0, null, null, null, null, 0, 0, 0, false, false, null, 0, 0, 0, null, null);
     }
 
-    public Car(int id, String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments, String lastEdit) {
+    public Car(int id, String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -49,7 +48,6 @@ public class Car {
         this.ownerAnnualKm = ownerAnnualKm;
         this.owner = owner;
         this.comments = comments;
-        this.lastEdit = lastEdit;
     }
    
     public int getId() {
@@ -174,14 +172,6 @@ public class Car {
 
     public void setComments(String comments) {
         this.comments = comments;
-    }
-
-    public String getLastEdit() {
-        return lastEdit;
-    }
-
-    public void setLastEdit(String lastEdit) {
-        this.lastEdit = lastEdit;
     }
 
     @Override

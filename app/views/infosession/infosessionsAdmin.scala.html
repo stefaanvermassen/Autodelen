@@ -14,7 +14,7 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 
-@app("Infosessies", stylesheets, scripts) {
+@app("Infosessies (Admin)", stylesheets, scripts) {
 <div id="page-header-wrapper">
    <ol class="breadcrumb">
         <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -52,18 +52,20 @@
                         <div id="from" class="inline-block">
                             <label for="">Vanaf</label>
                             <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_from">
-                                <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
+                                <input id="input_from" class="form-control" size="16" value="">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                             </div>
+                            <input id="hidden_from" name="from" class="hidden searchTextField">
                         </div>
                         <div id="until" class="inline-block">
                             <label for="">Tot</label>
                             <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_until">
-                                <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
+                                <input id="input_until" class="form-control" size="16" value="">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                             </div>
+                            <input id="hidden_until" name="until" class="hidden searchTextField">
                         </div>
                         <div class="form-group">
                             <div class="btn-group btn-group-sm">

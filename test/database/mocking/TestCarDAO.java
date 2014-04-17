@@ -40,7 +40,7 @@ public class TestCarDAO implements CarDAO{
 				return new Car(car.getId(),car.getName(), car.getBrand(),car.getType(), car.getLocation(),car.getSeats(),
 						car.getDoors(),car.getYear(),car.isGps(),car.isHook(),car.getFuel(),
 						car.getFuelEconomy(),car.getEstimatedValue(),car.getOwnerAnnualKm(),
-						car.getOwner(),car.getComments(),car.getLastEdit());
+						car.getOwner(),car.getComments());
 				}
 		}
 		return null;
@@ -62,8 +62,7 @@ public class TestCarDAO implements CarDAO{
 			boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue,
 			int ownerAnnualKm, User owner, String comments)
 			throws DataAccessException {
-		String lastEdit = new DateTime().toString();
-		Car car = new Car(idCounter++,name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments,lastEdit);
+		Car car = new Car(idCounter++,name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments);
 		cars.add(car);
 		return car;
 	}
@@ -73,7 +72,6 @@ public class TestCarDAO implements CarDAO{
 		return getCarList().size(); // TODO: implement Filter methods
 	}
 
-	@Override
 	public List<Car> getCarList() throws DataAccessException {
 		return cars;
 	}

@@ -48,4 +48,13 @@ public class FileGroup implements Iterable<File> {
     public List<File> copyList(){
         return new ArrayList<>(files); //deep copy
     }
+
+    public File getFileWithId(int fileId){
+        // Linear search is fast enough (<= 1k files)
+        for(File file : files){
+            if(file.getId() == fileId)
+                return file;
+        }
+        return null;
+    }
 }

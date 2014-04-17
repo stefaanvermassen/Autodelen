@@ -41,4 +41,17 @@ public class File {
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
+
+    public boolean equals(Object o){
+        if(o == null)                return false;
+        if(!(o instanceof File)) return false;
+
+        File other = (File) o;
+        return other.getId() == this.getId();
+    }
+
+    @Override
+    public int hashCode(){
+        return this.getId();
+    }
 }

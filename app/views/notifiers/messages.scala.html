@@ -1,9 +1,15 @@
-@(messageList: java.util.List[Message])
-@import org.joda.time.format.DateTimeFormat
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+    var route = myJsRoutes.controllers.Messages.showMessagesPage;
+    var autoLoad = 1;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
 }
-@app("Berichten", stylesheets) {
+@app("Berichten", stylesheets, scripts) {
 
 <div id="page-header-wrapper">
     <ol class="breadcrumb">
@@ -28,26 +34,9 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <ul class="chat">
-                    @for((message, index) <- messageList.zipWithIndex) {
-                        <li class="left clearfix">
-                            <span class="chat-img pull-left">
-                                <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle">
-                            </span>
-                            <div class="chat-body clearfix">
-                                <div class="header">
-                                    <strong class="primary-font">@message.getSubject</strong> 
-                                    <small class="pull-right text-muted">
-                                        <i class="fa fa-clock-o fa-fw"></i> @DateTimeFormat.forPattern("HH:mm dd/MM").print(message.getTimestamp)
-                                    </small>
-                                </div>
-                                <p>
-                                    @Html(message.getBody)
-                                </p>
-                            </div>
-                        </li>
-                    }
-                    </ul>
+                    <div id="resultsTable">
+                        <!-- Here comes the loaded timeline -->
+                    </div>
                 </div>
                 <!-- /.panel-body -->
             </div>
