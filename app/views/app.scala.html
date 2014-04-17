@@ -53,7 +53,7 @@
                                 @for((message, index) <- messages.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
                                         <li>
-                                            <a href="#">
+                                            <a href="@routes.Messages.showMessages()">
                                                 <div>
                                                     @if(!message.isRead){
                                                         <strong>Dégage [ongelezen]</strong>

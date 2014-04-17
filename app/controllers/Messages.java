@@ -134,4 +134,23 @@ public class Messages extends Controller {
             }
         }
     }
+
+    /**
+     * Method: GET
+     *
+     * @param messageId Id of the message that has to be removed
+     * @return message index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markMessageAsRead(int messageId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+           MessageDAO dao = context.getMessageDAO();
+           dao.markMessageAsRead(messageId);
+            System.out.println("test");
+            context.commit();
+            return redirect(routes.Messages.showMessages());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
 }

@@ -203,10 +203,9 @@ public class JDBCMessageDAO implements MessageDAO {
 
     @Override
     public void markMessageAsRead(int messageID) throws DataAccessException {
-
         try {
             PreparedStatement ps = getSetReadStatement();
-            ps.setBoolean(1, false);
+            ps.setBoolean(1, true);
             ps.setInt(2,messageID);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating message.");

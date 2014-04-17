@@ -42,6 +42,7 @@ GET         /settings                               controllers.Settings.index()
 # Notifiers
 GET         /messages                               controllers.Messages.showMessages()
 GET         /messages/page                          controllers.Messages.showMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
 GET         /messages/new                           controllers.Messages.newMessage()
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
