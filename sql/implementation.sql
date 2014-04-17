@@ -209,7 +209,7 @@ CREATE TABLE `CarCosts` (
 	`car_cost_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
 	FOREIGN KEY (`car_cost_car_id`) REFERENCES Cars(`car_id`),
-	FOREIGN KEY (`car_cost_proof`) REFERENCES FileGroups(`file_group_id`)
+	FOREIGN KEY (`car_cost_proof`) REFERENCES Files(`file_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
