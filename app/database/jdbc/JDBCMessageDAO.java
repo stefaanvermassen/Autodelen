@@ -215,6 +215,17 @@ public class JDBCMessageDAO implements MessageDAO {
 
     }
 
+    @Override
+    public List<Message> getSentMessageListForUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetSentMessageListByUseridStatement();
+            ps.setInt(1, userId);
+            return getMessageList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of sent messages", e);
+        }
+    }
+
     private List<Message> getMessageList(PreparedStatement ps) throws DataAccessException {
         List<Message> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
