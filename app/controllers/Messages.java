@@ -94,6 +94,31 @@ public class Messages extends Controller {
         return ok(addmessage.render(editForm));
     }
 
+    /**
+     * Method: GET
+     *
+     * @return a new message form, with the user already filled in, for reply purposes
+     */
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result reply(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Messages.showMessages());
+            }
+            MessageCreationModel model = new MessageCreationModel();
+            model.useremail = user.getEmail();
+            Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
+            return ok(addmessage.render(editForm.fill(model)));
+
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 
     /**
      * Method: POST

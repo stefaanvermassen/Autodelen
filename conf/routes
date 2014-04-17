@@ -44,6 +44,7 @@ GET         /messages                               controllers.Messages.showMes
 GET         /messages/page                          controllers.Messages.showMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
 GET         /messages/new                           controllers.Messages.newMessage()
+GET         /messages/reply                         controllers.Messages.reply(userId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
 GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
