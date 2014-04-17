@@ -44,13 +44,6 @@ public class TestNotificationDAO implements NotificationDAO{
         return null;
     }
 
-    @Override
-	public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException {
-		Notification notification = new Notification(idCounter++, user, false, subject, body, timestamp);
-		notifications.add(notification);
-		return notification;
-	}
-
 	@Override
 	public int getNumberOfUnreadNotifications(int userId) throws DataAccessException {
 		int counter = 0;
@@ -61,5 +54,12 @@ public class TestNotificationDAO implements NotificationDAO{
 		}
 		return counter;
 	}
-	
+
+    @Override
+    public Notification createNotification(User user, String subject, String body) throws DataAccessException {
+        Notification notification = new Notification(idCounter++, user, false, subject, body, new DateTime());
+        notifications.add(notification);
+        return notification;
+    }
+
 }

@@ -612,7 +612,7 @@ public class JDBCDAOTest {
      */
     private void createCarRides() throws Exception {
         for(Reservation reservation : reservations) {
-            CarRide carRide = carRideDAO.createCarRide(reservation);
+            CarRide carRide = carRideDAO.createCarRide(reservation, 0, 0);
 
             carRides.add(carRide);
         }

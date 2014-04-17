@@ -244,16 +244,6 @@ public class DrivesControllerTest {
                 );
                 assertEquals("Approving reservation of my car, reserved by other user but already accepted", BAD_REQUEST, status(result9));
 
-                // Reservation of my car that other user requested AGAIN AFTER PREVIOUS ACCEPTANCE
-                Reservation reservation8 = helper.createReservation(from, to, car, user2);
-                reservation8.setStatus(ReservationStatus.REQUEST_NEW);
-                helper.updateReservation(reservation8);
-
-                Result result10 = callAction(
-                        controllers.routes.ref.Drives.approveReservation(reservation8.getId()),
-                        fakeRequest().withCookies(loginCookie)
-                );
-                assertEquals("Approving reservation of my car, reserved by other user but already accepted and afterwards requested again", OK, status(result10));
 
                 // Reservation that doesn't exist
                 Result result3 = callAction(
@@ -366,18 +356,6 @@ public class DrivesControllerTest {
                 );
                 assertEquals("Approving reservation of my car, reserved by other user but already accepted", BAD_REQUEST, status(result9));
 
-                // Reservation of my car that other user requested AGAIN AFTER PREVIOUS ACCEPTANCE
-                Reservation reservation8 = helper.createReservation(from, to, car, user2);
-                reservation8.setStatus(ReservationStatus.REQUEST_NEW);
-                helper.updateReservation(reservation8);
-
-                Result result10 = callAction(
-                        controllers.routes.ref.Drives.refuseReservation(reservation8.getId()),
-                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
-                );
-                assertEquals("Approving reservation of my car, reserved by other user but already accepted and afterwards requested again", OK, status(result10));
-
-
                 // Reservation that doesn't exist
                 Result result3 = callAction(
                         controllers.routes.ref.Drives.refuseReservation(reservation.getId() - 1),
@@ -478,17 +456,6 @@ public class DrivesControllerTest {
                         fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("Cancelling reservation of my car, reserved by other user but already accepted", BAD_REQUEST, status(result9));
-
-                // Reservation of other car that I requested AGAIN AFTER PREVIOUS ACCEPTANCE
-                Reservation reservation8 = helper.createReservation(from, to, car2, user);
-                reservation8.setStatus(ReservationStatus.REQUEST_NEW);
-                helper.updateReservation(reservation8);
-
-                Result result10 = callAction(
-                        controllers.routes.ref.Drives.cancelReservation(reservation8.getId()),
-                        fakeRequest().withCookies(loginCookie)
-                );
-                assertEquals("Cancelling reservation of my car, reserved by other user but already accepted and afterwards requested again", OK, status(result10));
 
                 // Reservation that doesn't exist
                 Result result3 = callAction(

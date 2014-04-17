@@ -3,6 +3,8 @@ package database.mocking;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.Filter;
+import database.FilterField;
 import org.joda.time.DateTime;
 
 import play.libs.Time;
@@ -21,7 +23,12 @@ public class TestMessageDAO implements MessageDAO{
 		idCounter=0;
 	}
 
-	@Override
+    @Override
+    public int getAmountOfMessages(Filter filter) throws DataAccessException {
+        return 0;
+    }
+
+    @Override
 	public List<Message> getReceivedMessageListForUser(int userId) throws DataAccessException {
 		List<Message> list = new ArrayList<>();
 		for(Message message : messages){
@@ -32,7 +39,12 @@ public class TestMessageDAO implements MessageDAO{
 		return list;
 	}
 
-	@Override
+    @Override
+    public List<Message> getMessageList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        return null;
+    }
+
+    @Override
 	public int getNumberOfUnreadMessages(int userId) throws DataAccessException {
 		int counter = 0;
 		for(Message message : messages){
@@ -43,7 +55,14 @@ public class TestMessageDAO implements MessageDAO{
 		return counter;
 	}
 
-	@Override
+    @Override
+    public Message createMessage(User sender, User receiver, String subject, String body) throws DataAccessException {
+            Message message = new Message(idCounter++,sender, receiver, false, subject, body, new DateTime());
+            messages.add(message);
+            return message;
+    }
+
+    @Override
 	public void markMessageAsRead(int messageID) throws DataAccessException {
 		for(Message message : messages){
 			if(message.getId()==messageID){
@@ -51,14 +70,6 @@ public class TestMessageDAO implements MessageDAO{
 				return;
 			}
 		}
-	}
-
-	@Override
-	public Message createMessage(User sender, User receiver, String subject,
-			String body, DateTime timestamp) throws DataAccessException {
-		Message message = new Message(idCounter++,sender, receiver, false, subject, body, timestamp);
-		messages.add(message);
-		return message;
 	}
 	
 }
