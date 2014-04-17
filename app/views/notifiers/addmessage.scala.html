@@ -1,4 +1,5 @@
 @(form: play.data.Form[controllers.Messages.MessageCreationModel])
+    @import database.DatabaseHelper;
     @stylesheets = {
         <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
 
@@ -33,11 +34,21 @@
                     @helper.form(routes.Messages.createNewMessage , 'class -> "form-horizontal") {
                         <div class="form-group">
                             <label class="col-md-1 control-label" for="receiver">Ontvanger</label>
-                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
-                                <input type="text" data-toggle="dropdown" class="form-control input-md" />
-                                <input type="hidden" name="useremail" />
-                                <ul class="dropdown-menu" role="menu"></ul>
-                            </div>
+                            @if(form("useremail").value){
+                                @defining(DatabaseHelper.getUserProvider().getUser(form("useremail").value)) { user =>
+                                    <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                        <input type="hidden" name="useremail" value="@user.getEmail" />
+                                        <ul class="dropdown-menu" role="menu"></ul>
+                                    </div>
+                                }
+                            }else{
+                                <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                    <input type="text" data-toggle="dropdown" class="form-control input-md" />
+                                    <input type="hidden" name="useremail" />
+                                    <ul class="dropdown-menu" role="menu"></ul>
+                                </div>
+                            }
                         </div>
                         <div class="form-group">
                             <label class="col-md-1 control-label" for="subject">Onderwerp</label>

@@ -17,6 +17,7 @@ public interface MessageDAO {
     public int getNumberOfUnreadMessages(int userId) throws DataAccessException;
     public Message createMessage(User sender, User receiver, String subject, String body) throws DataAccessException;
     public void markMessageAsRead(int messageID) throws DataAccessException;
+    public List<Message> getSentMessageListForUser(int userId) throws DataAccessException;
 
 
 }

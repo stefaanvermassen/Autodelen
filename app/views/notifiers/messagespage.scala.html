@@ -17,7 +17,10 @@
                     </p>
                 </div>
                 @* TODO: antwoordlogica *@
-                <button class="pull-right btn btn-default btn-sm">Antwoorden</button>
+                @if(!message.isRead) {
+                    <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>
+                }
+                <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.reply(message.getSender.getId)">Antwoorden</a>
             </div>
         </li>
     }

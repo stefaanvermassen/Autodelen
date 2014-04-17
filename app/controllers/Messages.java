@@ -94,6 +94,31 @@ public class Messages extends Controller {
         return ok(addmessage.render(editForm));
     }
 
+    /**
+     * Method: GET
+     *
+     * @return a new message form, with the user already filled in, for reply purposes
+     */
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result reply(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Messages.showMessages());
+            }
+            MessageCreationModel model = new MessageCreationModel();
+            model.useremail = user.getEmail();
+            Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
+            return ok(addmessage.render(editForm.fill(model)));
+
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 
     /**
      * Method: POST
@@ -132,6 +157,25 @@ public class Messages extends Controller {
             } catch (DataAccessException ex) {
                 throw ex; //TODO: show gracefully
             }
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @param messageId Id of the message that has to be removed
+     * @return message index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markMessageAsRead(int messageId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+           MessageDAO dao = context.getMessageDAO();
+           dao.markMessageAsRead(messageId);
+            System.out.println("test");
+            context.commit();
+            return redirect(routes.Messages.showMessages());
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 }
