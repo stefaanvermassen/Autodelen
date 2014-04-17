@@ -45,7 +45,7 @@ public class Profile extends Controller {
             }
 
             city = address.getCity();
-            number = address.getCity();
+            number = address.getNumber();
             street = address.getStreet();
             bus = address.getBus();
             zipCode = address.getZip();
