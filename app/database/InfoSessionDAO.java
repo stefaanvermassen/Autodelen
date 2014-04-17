@@ -31,4 +31,5 @@ public interface InfoSessionDAO {
     public void unregisterUser(InfoSession session, User user) throws DataAccessException;
     public void unregisterUser(int infoSessionId, int userId) throws DataAccessException;
     public InfoSession getAttendingInfoSession(User user) throws DataAccessException;
+    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(User user) throws DataAccessException;
 }

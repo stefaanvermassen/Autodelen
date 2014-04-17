@@ -472,9 +472,16 @@ public class InfoSessions extends Controller {
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO udao = context.getUserDAO();
+                FileDAO fdao = context.getFileDAO();
                 user = udao.getUser(user.getId(), true); // gets the full user instead of small cached one
+                if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null){
+                    // TODO: fix identity card dao so this line is unnecessary
+                    user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));
+                }
 
                 ApprovalDAO dao = context.getApprovalDAO();
+                InfoSessionDAO idao = context.getInfoSessionDAO();
+                Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                 List<Approval> approvals = dao.getPendingApprovals(user);//TODO: just request a COUNT instead of fetching the list
 
                 if (!approvals.isEmpty()) {
@@ -486,10 +493,12 @@ public class InfoSessions extends Controller {
                         errors.add("Verblijfsadres ontbreekt.");
                     if(user.getIdentityCard() == null)
                         errors.add("Identiteitskaart ontbreekt.");
+                    if(user.getIdentityCard() != null && (user.getIdentityCard().getFileGroup() == null || user.getIdentityCard().getFileGroup().size() == 0))
+                        errors.add("Bewijsgegevens identiteitskaart ontbreken");
                     if(user.getCellphone() == null && user.getPhone() == null)
                         errors.add("Telefoon/GSM ontbreekt.");
-
-                    //TODO: check if attended infosession last month and status was 'Attended'
+                    if(lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT)
+                        errors.add("U bent nog niet aanwezig geweest op een infosessie.");
                 }
             } catch (DataAccessException ex) {
                 throw ex;
