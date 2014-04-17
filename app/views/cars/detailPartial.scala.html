@@ -89,7 +89,9 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-xs">
-                                <a class="btn btn-primary" href="">Link</a>
+                                <a class="btn btn-primary" href="@routes.Cars.getProof(carCost.getProofId)">Link</a>
+
+
                             </div>
                         </td>
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {

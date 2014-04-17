@@ -16,6 +16,7 @@ public class CarCost {
     private BigDecimal mileage;
     private String description;
     private CarCostStatus status;
+    private int proofId;
 
     public int getId() {
         return id;
@@ -73,7 +74,15 @@ public class CarCost {
         this.status = status;
     }
 
-    public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time){
+    public int getProofId() {
+        return proofId;
+    }
+
+    public void setProofId(int proofId) {
+        this.proofId = proofId;
+    }
+
+    public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time, int proofId){
         this.id = id;
         this.car = car;
         this.amount = amount;
@@ -81,5 +90,6 @@ public class CarCost {
         this.description = description;
         this.time = time;
         this.status = CarCostStatus.REQUEST;
+        this.proofId = proofId;
     }
 }
