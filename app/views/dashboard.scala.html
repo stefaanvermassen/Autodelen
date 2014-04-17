@@ -23,8 +23,25 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-		    @flashes()
             <h1 class="page-header">Dashboard</h1>
+            @flashes()
+
+            <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Goedkeuringsaanvraag
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <!-- TODO: Hide this panel when not needed -->
+                        <p>
+                            Dien hier een goedkeuringsaanvraag in om een volwaardig lid te worden.
+                        </p>
+                        <a class="btn btn-success" href="@routes.InfoSessions.requestApproval">Goedkeuringsaanvraag indienen</a>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+                
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-wrench"></i> Temporary Toolbox

@@ -274,7 +274,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(detail.render(session, enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + session.getTime().toString("dd-MM-yyyy") + " om " + session.getTime().toString("HH:mm"))));
                                 }
                             }
                     );
@@ -395,8 +395,8 @@ public class InfoSessions extends Controller {
                             dao.registerUser(session, user);
 
                             context.commit();
-                            flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".") :
-                                    "U bent van infosessie veranderd naar " + session.getTime().toString("dd/MM/yyyy"));
+                            flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                                    "U bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
                             Notifier.sendInfoSessionEnrolledMail(user, session);
                             return redirect(routes.InfoSessions.detail(sessionId));
                         } catch (DataAccessException ex) {
@@ -523,7 +523,7 @@ public class InfoSessions extends Controller {
                         new F.Function<F.Tuple<Double, Double>, Result>() {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
                                 return ok(infosessions.render(enrolled,
-                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
+                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getTime().toString("dd-MM-yyyy") + " om " + enrolled.getTime().toString("HH:mm"))));
                             }
                         }
                 );
