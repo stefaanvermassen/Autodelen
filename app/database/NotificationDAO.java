@@ -16,4 +16,5 @@ public interface NotificationDAO {
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public int getNumberOfUnreadNotifications(int userId) throws DataAccessException;
     public Notification createNotification(User user, String subject, String body) throws DataAccessException;
+    public void markNotificationAsRead(int notificationId) throws DataAccessException;
 }

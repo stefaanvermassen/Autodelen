@@ -36,7 +36,6 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement getSentMessageListByUseridStatement;
     private PreparedStatement getNumberOfUnreadMessagesStatement;
     private PreparedStatement setReadStatement;
-
     private PreparedStatement getMessageListPageByTimestampStatement;
     private PreparedStatement getAmountOfMessagesStatement;
 

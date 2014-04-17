@@ -47,6 +47,7 @@ GET         /messages/new                           controllers.Messages.newMess
 GET         /messages/reply                         controllers.Messages.reply(userId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
+GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
 GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
