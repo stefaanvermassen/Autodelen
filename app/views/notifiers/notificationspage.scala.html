@@ -5,11 +5,17 @@
         <li>
             <div class="chat-body clearfix">
                 <div class="header">
-                    <strong class="primary-font">@notification.getSubject</strong>
+                    @if(!notification.getRead){
+                        <strong class="primary-font">@notification.getSubject (Ongelezen)</strong>
+                    }else{
+                        <strong class="primary-font">@notification.getSubject</strong>
+                    }
                     <small class="text-muted">
                         - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(notification.getTimestamp)
                     </small>
-                    <button type="button" class="close" aria-hidden="true"><small><i class="fa fa-eye fa-fw"></i></small></button>
+                    @if(!notification.getRead){
+                        <a type="button" class="close" aria-hidden="true" href="@routes.Notifications.markNotificationAsRead(notification.getId)"><small><i class="fa fa-eye fa-fw"></i></small></a>
+                    }
                 </div>
                 <div class="msg-body">
                     <p>

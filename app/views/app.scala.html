@@ -53,7 +53,7 @@
                                 @for((message, index) <- messages.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
                                         <li>
-                                            <a href="@routes.Messages.showMessages()">
+                                            <a href="#">
                                                 <div>
                                                     @if(!message.isRead){
                                                         <strong>Dégage [ongelezen]</strong>
@@ -98,12 +98,12 @@
                                 @for((notification, index) <- notifications.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
                                         <li>
-                                            <a href="#">
+                                            <a href="@routes.Notifications.showNotifications()">
                                                 <div>
                                                     @if(!notification.getRead){
-                                                    <strong>Dégage [ongelezen]</strong>
+                                                    <strong>Dégage (ongelezen)</strong>
                                                         }else{
-                                                    <strong>Dégage</strong>
+                                                    Dégage
                                                         }
                                                     <span class="pull-right text-muted">
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
