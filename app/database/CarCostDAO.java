@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface CarCostDAO {
 
-    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time) throws DataAccessException;
+    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time, int fileId) throws DataAccessException;
     public List<CarCost> getCarCostListForCar(Car car) throws DataAccessException;
     public List<CarCost> getRequestedCarCostList() throws DataAccessException;
     public void updateCarCost(CarCost carCost) throws DataAccessException;

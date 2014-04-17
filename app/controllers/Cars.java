@@ -1,5 +1,7 @@
 package controllers;
 
+import controllers.util.ConfigurationHelper;
+import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
@@ -8,9 +10,11 @@ import controllers.Security.RoleSecured;
 
 import notifiers.Notifier;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import views.html.cars.*;
 import views.html.cars.addcar;
@@ -19,9 +23,14 @@ import views.html.cars.carCostsAdmin;
 import views.html.cars.cars;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
+import views.html.profile.uploadPicture;
 import views.html.reserve.reservationDetailsPartial;
 
+import javax.imageio.IIOException;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -443,16 +452,40 @@ public class Cars extends Controller {
                     CarCostModel model = carCostForm.get();
                     CarDAO cardao = context.getCarDAO();
                     Car car = cardao.getCar(carId);
-                    CarCost carCost = dao.createCarCost(car, model.amount, model.mileage, model.description, model.time);
-                    context.commit();
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    Http.MultipartFormData.FilePart proof = body.getFile("picture");
+                    if (proof != null) {
+                        String contentType = proof.getContentType();
+                        if (!FileHelper.isDocumentContentType(contentType)) {
+                            flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                            return redirect(routes.Cars.detail(carId));
+                        } else {
+                            try {
+                                Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.carboundproofs"));
+                                    FileDAO fdao = context.getFileDAO();
+                                    try {
+                                        models.File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
+                                        CarCost carCost = dao.createCarCost(car, model.amount, model.mileage, model.description, model.time, file.getId());
+                                        context.commit();
+                                        if (carCost == null) {
+                                            flash("danger", "Failed to add the carcost to the database. Contact administrator.");
+                                            return redirect(routes.Cars.detail(carId));
+                                        }
+                                        flash("success", "Uw autokost werd toegevoegd.");
+                                        return redirect(routes.Cars.detail(carId));
+                                    } catch (DataAccessException ex) {
+                                        context.rollback();
+                                        FileHelper.deleteFile(relativePath);
+                                        throw ex;
+                                    }
 
-                    if (carCost != null) {
-                        return redirect(
-                                routes.Cars.detail(car.getId())
-                        );
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex); //no more checked catch -> error page!
+                            }
+                        }
                     } else {
-                        carCostForm.error("Failed to add the car to the database. Contact administrator.");
-                        return badRequest(addcarcostmodal.render(carCostForm, car));
+                        flash("error", "Missing file");
+                        return redirect(routes.Application.index());
                     }
                 }
                 catch(DataAccessException ex){
@@ -501,9 +534,11 @@ public class Cars extends Controller {
             context.commit();
             //Todo: send notification!
             if(returnToDetail==0){
-                return showCarCosts();
+                flash("succes", "Autokost succesvol geaccepteerd");
+                return redirect(routes.Cars.showCarCosts());
             }else{
-                return detail(carCost.getCar().getId());
+                flash("succes", "Autokost succesvol geaccepteerd");
+                return redirect(routes.Cars.detail(carCost.getCar().getId()));
             }
         }catch(DataAccessException ex) {
             throw ex;
@@ -530,13 +565,25 @@ public class Cars extends Controller {
             context.commit();
             //Todo: send notification!
             if(returnToDetail==0){
-                return showCarCosts();
+                flash("succes", "Autokost succesvol geweigerd");
+                return redirect(routes.Cars.showCarCosts());
             }else{
-                return detail(carCost.getCar().getId());
+                flash("succes", "Autokost succesvol geweigerd");
+                return redirect(routes.Cars.detail(carCost.getCar().getId()));
             }
         }catch(DataAccessException ex) {
             throw ex;
         }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result getProof(int proofId) {
+        User currentUser = DatabaseHelper.getUserProvider().getUser();
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
     }
 
 }
