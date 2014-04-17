@@ -29,7 +29,7 @@ public class DrivesControllerTest {
     public void setUp(){
         helper = new TestHelper();
         helper.setTestProvider();
-        user = helper.createRegisteredUser("test@test.com", "1234piano", "Pol", "Thijs",new UserRole[]{UserRole.CAR_USER});
+        user = helper.createRegisteredUser("test@test.com", "1234piano", "Pol", "Thijs",new UserRole[]{UserRole.CAR_USER, UserRole.CAR_OWNER});
     }
 
     /**
@@ -46,7 +46,8 @@ public class DrivesControllerTest {
 
                 // Reservation of own car
                 // First create a reservation to see
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 DateTime from = new DateTime(2015, 1, 1, 0, 0);
                 DateTime to = new DateTime(2015, 1, 2, 0, 0);
                 Reservation reservation = helper.createReservation(from, to, car, user);
@@ -62,6 +63,9 @@ public class DrivesControllerTest {
         });
     }
 
+    /**
+     * Tests Drives.showDrivesPage()
+     */
     @Test
     public void testShowDrivesPage() {
         running(fakeApplication(), new Runnable() {
@@ -73,13 +77,14 @@ public class DrivesControllerTest {
 
                 // Reservation of own car
                 // First create a reservation, so there's something to show
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 DateTime from = new DateTime(2015, 1, 1, 0, 0);
                 DateTime to = new DateTime(2015, 1, 2, 0, 0);
                 Reservation reservation = helper.createReservation(from, to, car, user);
 
                 Result result2 = callAction(
-                        controllers.routes.ref.Drives.showDrivesPage(1,1,"",""),
+                        controllers.routes.ref.Drives.showDrivesPage(1, 1, "", ""),
                         fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("ShowDrivesPage first page", OK, status(result2));
@@ -88,9 +93,51 @@ public class DrivesControllerTest {
             }
         });
     }
+
+    /**
+     * Tests Drives.drivesAdmin() as authorized and as unauthorized
+     */
+    @Test
+    public void testDrivesAdmin() {
+        running(fakeApplication(), new Runnable() {
+
+            @Override
+            public void run() {
+                helper.setTestProvider();
+                loginCookie = helper.login(user,"1234piano");
+
+                // Reservation of own car
+                // First create a reservation to see
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                DateTime from = new DateTime(2015, 1, 1, 0, 0);
+                DateTime to = new DateTime(2015, 1, 2, 0, 0);
+                Reservation reservation = helper.createReservation(from, to, car, user);
+
+                Result result2 = callAction(
+                        controllers.routes.ref.Drives.drivesAdmin(),
+                        fakeRequest().withCookies(loginCookie)
+                );
+                assertEquals("Index of drives adminpage without adminrights", UNAUTHORIZED, status(result2));
+
+                helper.addUserRole(user, UserRole.RESERVATION_ADMIN);
+                loginCookie = helper.login(user,"1234piano");
+
+                Result result3 = callAction(
+                        controllers.routes.ref.Drives.drivesAdmin(),
+                        fakeRequest().withCookies(loginCookie)
+                );
+                assertEquals("Index of drives adminpage with adminrights", OK, status(result3));
+
+                helper.removeUserRole(user, UserRole.RESERVATION_ADMIN);
+                helper.logout();
+            }
+        });
+    }
+
     /**
      * Tests method Drives.details()
-     * Once with an existing reservation and once with a non-existing reservation
+     * Once with an existing reservation, of own car that I reserved/didn't reserve, of other car that I reserved/didn't reserve, and once with a non-existing reservation
      */
     @Test
     public void testDetails(){
@@ -103,7 +150,8 @@ public class DrivesControllerTest {
 
                 // Reservation of own car
                 // First create a reservation
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 DateTime from = new DateTime(2015, 1, 1, 0, 0);
                 DateTime to = new DateTime(2015, 1, 2, 0, 0);
                 Reservation reservation = helper.createReservation(from, to, car, user);
@@ -156,8 +204,139 @@ public class DrivesControllerTest {
     }
 
     /**
+     * Tests Drives.adjustDetails()
+     */
+    @Test
+    public void testAdjustDetails() {
+        running(fakeApplication(), new Runnable() {
+
+            @Override
+            public void run() {
+                helper.setTestProvider();
+                loginCookie = helper.login(user,"1234piano");
+
+                // Reservation of own car, shorter until
+                // First create a reservation
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                DateTime from = new DateTime(2015, 1, 1, 0, 0);
+                DateTime to = new DateTime(2015, 1, 2, 0, 0);
+                Reservation reservation = helper.createReservation(from, to, car, user);
+
+                Map<String,String> reserveData = new HashMap<>();
+                reserveData.put("from", "2015-01-01 00:00");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result result2 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter until of reservation of own car", OK, status(result2));
+
+                // shorter from and until
+                reserveData.put("from", "2015-01-01 00:01");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result result3 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details of reservation to shorter from and until of own car", OK, status(result3));
+
+                //longer until
+                reserveData.put("from", "2015-01-01 00:00");
+                reserveData.put("until", "2015-02-01 23:59");
+                Result result4 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to longer until of reservation of own car", BAD_REQUEST, status(result4));
+
+                // longer from
+                reserveData.put("from", "2014-12-01 00:00");
+                reserveData.put("until", "2015-02-01 23:59");
+                Result result5 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to longer from of reservation of own car", BAD_REQUEST, status(result5));
+
+                // reservation already refused
+                reservation.setStatus(ReservationStatus.REFUSED);
+                reserveData.put("from", "2014-12-01 00:00");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result resul = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter from of reservation of own car, that is already refused", BAD_REQUEST, status(resul));
+
+                // reservation already cancelled
+                reservation.setStatus(ReservationStatus.CANCELLED);
+                reserveData.put("from", "2014-12-01 00:00");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result resul2 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter from of reservation of own car, that is already cancelled", BAD_REQUEST, status(resul2));
+
+                // reservation already refused
+                reservation.setStatus(ReservationStatus.FINISHED);
+                reserveData.put("from", "2014-12-01 00:00");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result resul3 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter from of reservation of own car, that is already finished", BAD_REQUEST, status(resul3));
+
+                // Reservation of other car that I reserved
+                User user2 = helper.createRegisteredUser("test2@test.com", "1234piano", "Niet", "Ik");
+                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
+                Reservation reservation2 = helper.createReservation(from, to, car2, user);
+                reserveData.put("from", "2015-01-01 00:00");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result result6 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation2.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter until of reservation of other car that I reserved", OK, status(result6));
+
+                // Reservation of other car that I didn't reserve
+                Reservation reservation3 = helper.createReservation(from, to, car2, user2);
+                reserveData.put("from", "2015-01-01 00:00");
+                reserveData.put("until", "2015-01-01 23:58");
+                Result result7 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation3.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter until of reservation of other car that I didn't reserve", BAD_REQUEST, status(result7));
+
+                // Reservation of my car that other user reserved
+                Reservation reservation4 = helper.createReservation(from, to, car, user2);
+                reserveData.put("from", "2015-01-01 00:00");
+                reserveData.put("until", "2015-01-01 23:59");
+                Result result8 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(reservation4.getId()),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter until of reservation of own car that other user reserved", BAD_REQUEST, status(result8));
+
+                // Reservation that doesn't exist
+                Result result9 = callAction(
+                        controllers.routes.ref.Drives.adjustDetails(-1),
+                        fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
+                );
+                assertEquals("Adjust details to shorter until of reservation that doesn't exist", BAD_REQUEST, status(result9));
+
+
+                helper.logout();
+            }
+        });
+    }
+
+    /**
      * Tests method Drives.approveReservation()
-     * Once with an existing reservation of own car, of other car, of other car by other user, already cancelled, accepted, refused, re-requested
+     * Once with an existing reservation of own car, of other car, of other car by other user, already cancelled, accepted, refused
      * Once with a non-existing reservation
      */
     @Test
@@ -171,7 +350,8 @@ public class DrivesControllerTest {
 
                 // Reservation of own car
                 // First create a reservation
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 DateTime from = new DateTime(2015, 1, 1, 0, 0);
                 DateTime to = new DateTime(2015, 1, 2, 0, 0);
                 Reservation reservation = helper.createReservation(from, to, car, user);
@@ -184,7 +364,7 @@ public class DrivesControllerTest {
 
                 // Reservation of other car that I reserved
                 User user2 = helper.createRegisteredUser("test2@test.com", "1234piano", "Niet", "Ik");
-                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
+                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
                 Reservation reservation2 = helper.createReservation(from, to, car2, user);
 
                 Result result4 = callAction(
@@ -259,7 +439,7 @@ public class DrivesControllerTest {
 
     /**
      * Tests method Drives.refuseReservation()
-     * Once with an existing reservation of own car, of other car, of other car by other user, once with empty reason, already cancelled, accepted, refused, re-requested
+     * Once with an existing reservation of own car, of other car, of other car by other user, once with empty reason, already cancelled, accepted, refused
      * Once with a non-existing reservation
      */
     @Test
@@ -272,7 +452,8 @@ public class DrivesControllerTest {
                 loginCookie = helper.login(user,"1234piano");
 
                 // First create a reservation
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 DateTime from = new DateTime(2015, 1, 1, 0, 0);
                 DateTime to = new DateTime(2015, 1, 2, 0, 0);
                 Reservation reservation = helper.createReservation(from, to, car, user);
@@ -296,7 +477,7 @@ public class DrivesControllerTest {
                 data.put("reason", "Test reden");
                 // Reservation of other car that I reserved
                 User user2 = helper.createRegisteredUser("test2@test.com", "1234piano", "Niet", "Ik");
-                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
+                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
                 Reservation reservation2 = helper.createReservation(from, to, car2, user);
 
                 Result result4 = callAction(
@@ -370,7 +551,7 @@ public class DrivesControllerTest {
 
     /**
      * Tests method Drives.refuseReservation()
-     * Once with an existing reservation of own car, of other car, of other car by other user,, already cancelled, accepted, refused, re-requested
+     * Once with an existing reservation of own car, of other car, of other car by other user,, already cancelled, accepted, refused
      * Once with a non-existing reservation
      */
     @Test
@@ -384,7 +565,8 @@ public class DrivesControllerTest {
 
                 // Reservation of own car
                 // First create a reservation
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Address address = helper.createAddress("Belgium", "9000", "Gent", "Straat", "1", "");
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 DateTime from = new DateTime(2015, 1, 1, 0, 0);
                 DateTime to = new DateTime(2015, 1, 2, 0, 0);
                 Reservation reservation = helper.createReservation(from, to, car, user);
@@ -397,7 +579,7 @@ public class DrivesControllerTest {
 
                 // Reservation of other car that I reserved
                 User user2 = helper.createRegisteredUser("test2@test.com", "1234piano", "Niet", "Ik");
-                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
+                Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");
                 Reservation reservation2 = helper.createReservation(from, to, car2, user);
 
                 Result result4 = callAction(
@@ -455,7 +637,7 @@ public class DrivesControllerTest {
                         controllers.routes.ref.Drives.cancelReservation(reservation7.getId()),
                         fakeRequest().withCookies(loginCookie)
                 );
-                assertEquals("Cancelling reservation of my car, reserved by other user but already accepted", BAD_REQUEST, status(result9));
+                assertEquals("Cancelling reservation of my car, reserved by other user but already accepted", OK, status(result9));
 
                 // Reservation that doesn't exist
                 Result result3 = callAction(

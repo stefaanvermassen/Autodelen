@@ -193,7 +193,6 @@ public class ReserveControllerTest {
                         helper.removeUserRole(user2, userRoles[i - 1]);
                     }
                     helper.addUserRole(user2, userRoles[i]);
-                    DatabaseHelper.getUserRoleProvider().invalidateRoles(user2);
 
                     // Now let's try to see the pages
 

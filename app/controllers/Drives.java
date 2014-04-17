@@ -205,11 +205,11 @@ public class Drives extends Controller {
             Reservation reservation = rdao.getReservation(reservationId);
             if(reservation == null) {
                 adjustForm.reject("Er is een fout gebeurt bij het opvragen van de rit.");
-                return badRequest(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
+                return badRequest(showIndex());
             }
             if(!isLoaner(reservation, user)) {
                 adjustForm.reject("U bent niet gemachtigd deze actie uit te voeren.");
-                return badRequest(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
+                return badRequest(showIndex());
             }
             DateTime from = adjustForm.get().getTimeFrom();
             DateTime until = adjustForm.get().getTimeUntil();
@@ -225,7 +225,7 @@ public class Drives extends Controller {
             reservation.setTo(until);
             rdao.updateReservation(reservation);
             context.commit();
-            return badRequest(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
+            return ok(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
         } catch(DataAccessException ex) {
             throw ex;
         }
@@ -312,6 +312,12 @@ public class Drives extends Controller {
                     case CANCELLED:
                         if (!isLoaner(reservation, user)) {
                             flash("Error", "Alleen de ontlener mag een reservatie annuleren!");
+                            return null;
+                        } else if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+                            flash("Error", "De reservatie is al geannuleerd!");
+                            return null;
+                        } else if (reservation.getStatus() == ReservationStatus.REFUSED) {
+                            flash("Error", "De reservatie is al geweigerd!");
                             return null;
                         }
                         break;
