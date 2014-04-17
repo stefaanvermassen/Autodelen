@@ -51,8 +51,22 @@
                     </div>
                 }
 
-                <!-- TODO: Hide this button when not needed -->
-                <a class="btn btn-success" href="@routes.InfoSessions.requestApproval">Goedkeuringsaanvraag indienen</a>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Goedkeuringsaanvraag
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <!-- TODO: Hide this panel when not needed -->
+                        <p>
+                            Voordat je een goedkeuringsaanvraag kan indienen is het nodig om een infosessie te volgen.
+                        </p>
+                        <a class="btn btn-success" href="@routes.InfoSessions.requestApproval">Goedkeuringsaanvraag indienen</a>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
