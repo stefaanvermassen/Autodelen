@@ -8,6 +8,9 @@ public class CarRide {
     private boolean status;
     private int startMileage;
     private int endMileage;
+    private boolean damaged;
+
+    private int refueling;
 
     public CarRide(Reservation reservation) {
         this.reservation = reservation;
@@ -43,5 +46,21 @@ public class CarRide {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public int getRefueling() {
+        return refueling;
+    }
+
+    public void setRefueling(int refueling) {
+        this.refueling = refueling;
+    }
+
+    public boolean isDamaged() {
+        return damaged;
+    }
+
+    public void setDamaged(boolean damaged) {
+        this.damaged = damaged;
     }
 }

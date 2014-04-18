@@ -65,8 +65,8 @@ public class Drives extends Controller {
         // String containing the reason for refusing a reservation
         public Integer startMileage;
         public Integer endMileage;
-        // TODO: add remarks (fuel,...)
-        public String remarks;
+        public Boolean damaged;
+        public Integer refueling;
 
         /**
          * Validates the form:
@@ -78,6 +78,10 @@ public class Drives extends Controller {
                 return "Gelieve zowel de start als eind kilometerstand op te geven";
             if(startMileage >= endMileage)
                 return "De kilometerstand voor de rit kan niet kleiner zijn dan deze na de rit";
+            if(startMileage < 0 || endMileage < 0)
+                return "De kilometerstand kan niet negatief zijn";
+            if(refueling == null || refueling  < 0)
+                return "Er werd een ongeldig aantal tankbeurten opgegeven";
             return null;
         }
 
@@ -360,7 +364,8 @@ public class Drives extends Controller {
             // Test if ride already exists
             CarRide ride = dao.getCarRide(reservationId);
             if(ride == null)
-                ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage);
+                ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage,
+                        detailsForm.get().damaged, detailsForm.get().refueling);
             // Owner is allowed to adjust the information
             else if(isOwner) {
                 ride.setStartMileage(detailsForm.get().startMileage);

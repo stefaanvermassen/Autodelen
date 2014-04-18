@@ -22,10 +22,20 @@
             <textarea name="remarks" class="form-control" type="text" placeholder="Opmerkingen">@infoForm("remarks").value</textarea>
         </div>
         <div class="form-group">
-                <label>De auto liep schade op:</label>
-                <input type="checkbox" class="form-control">
-                <p>Bij het aanvinken van deze checkbox zal een schadedossier aangemaakt worden.
-                    Er zal u gevraagd worden bijkomende informatie op te geven.</p>
+            <label>Schade opvolging:</label>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="damaged" id="damaged" value="false" checked>
+                    De auto liep geen schade op
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="damaged" id="damaged" value="true">
+                    De auto liep schade op (<i>een schadedossier zal aangemaakt worden waarbij u om bijkomende
+                    informatie gevraagd wordt</i>)
+                </label>
+            </div>
         </div>
         <div class="form-group">
             <label>Aantal tankbeuren:</label>
