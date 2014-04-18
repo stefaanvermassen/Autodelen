@@ -3,23 +3,16 @@
     <script src="@routes.Assets.at("javascripts/app/reservations.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/timeinput.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
     <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery-ui.js"))'></script>
-    <script src="@routes.Assets.at("javascripts/fullcalendar.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/plugins/calendar.js")" type="text/javascript"></script>
     <script>
         $(document).ready(function() {
             $("#test").calendar({
-                selectionStartId: $('#calendar_from')
-            });
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next',
-                    center: 'title',
-                    right: 'today'
-                }
-            });
+                selectionStartId : 'calendar_from'
+            }) ;
         });
     </script>
     <script>
@@ -41,9 +34,8 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fullcalendar.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fullcalendar.print.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/calendar.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/timeinput.css")">
 }
 @app("Reserveren", stylesheets, scripts) {
 
@@ -127,24 +119,10 @@
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Kalender
-                        </div>
-                        <div class="panel-body">
-                            <div id='calendar'></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
                             <i class="fa fa-bar-chart-o fa-fw"></i> Custom Kalender
                         </div>
                         <div class="panel-body">
                             <div id="test">
-                                <div class="form-group">
-                                    <label>Reservatie van:</label>
-                                    <input id="calendar_from" class="form-control" type="text">
-                                </div>
                             </div>
                         </div>
                     </div>

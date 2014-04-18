@@ -42,9 +42,13 @@ table.custom_calendar td.current_month {
 }
 
 table.custom_calendar td.today {
-    background-color: #deedd1;
+    background-color: #cdedc0;
 }
 
 table.custom_calendar td.selected {
     background-color: #f0f0ff;
+}
+
+table.custom_calendar td.selected.disabled {
+    background-color: #ffeeff;
 }

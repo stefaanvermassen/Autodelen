@@ -1,6 +1,6 @@
 /*
  * =========================================
- * Datetimeinput v1
+ * Datetimeinput v2
  * =========================================
  *
  * This script contains an extra plugin to JQuery named datetimeinput.
@@ -21,10 +21,11 @@
      */
     var Datetimeinput = function (element, options) {
         this.element = $(element);
-        this.formatString = "YYYY-MM-DD hh:mm";
+        this.formatString = options.formatString || "yyyy-mm-dd hh:ii";
         this.skipChars = ["-", " ", ":"];
         this.position = 0;
         this.stepToken;
+        this.keydown = false;
         this._attachEvents();
 
         // An inputfield value can already be set before calling constructing the datetimeinput
@@ -99,14 +100,18 @@
          * @private
          */
         _keydown: function(evt) {
-            var code = evt.keyCode || evt.which;
+            if(this.keydown)
+                evt.preventDefault();
+            else
+                this.keydown = true;
+            /*var code = evt.keyCode || evt.which;
             if(this.validateToken(code)) {
                 this.stepToken = true;
             } else {
                 evt.preventDefault();
                 this.stepToken = false;
             }
-            this.element[0].setSelectionRange(this.position, this.position + 1);
+            this.element[0].setSelectionRange(this.position, this.position + 1);*/
         },
 
         /**
@@ -117,6 +122,11 @@
          * @private
          */
         _keyup: function(evt) {
+            this.keydown = false;
+            if(this.validateInput())
+                this.stepToken = true;
+            else
+                this.stepToken = false;
             this.goToNextValidPosition();
             this.element[0].setSelectionRange(this.position, this.position + 1);
         },
@@ -132,6 +142,11 @@
         },
 
         // EXTRA FUNCTIONS
+
+        setValue: function(value) {
+            this.element.val(value);
+            this.validateInput();
+        },
 
         /**
          * Function telling whether a given position in the formatString is valid.
@@ -192,6 +207,13 @@
          */
         resetDatetimeinput: function() {
             this.element.val(this.formatString);
+        },
+
+        validateInput: function() {
+            var num = parseInt(this.element.val().charAt(this.position), 10);
+            if(isNaN(num))
+                return false;
+            return true;
         },
 
         /**
@@ -263,7 +285,7 @@
          * @returns {boolean} true if the token is part of a valid month, year,...
          */
         validateToken: function(code) {
-            var string = this.formatString;
+            var string = this.formatString.toUpperCase();
             var pos = this.position;
             // Move left
             if(code == 37) {
