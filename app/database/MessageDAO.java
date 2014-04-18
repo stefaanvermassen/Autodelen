@@ -12,12 +12,10 @@ import java.util.List;
 public interface MessageDAO {
 
     public int getAmountOfMessages(Filter filter) throws DataAccessException;
-    public List<Message> getReceivedMessageListForUser(int userId) throws DataAccessException; // TODO: delete
     public List<Message> getMessageList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public int getNumberOfUnreadMessages(int userId) throws DataAccessException;
     public Message createMessage(User sender, User receiver, String subject, String body) throws DataAccessException;
     public void markMessageAsRead(int messageID) throws DataAccessException;
-    public List<Message> getSentMessageListForUser(int userId) throws DataAccessException;
 
 
 }
