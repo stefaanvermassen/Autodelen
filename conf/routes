@@ -125,6 +125,7 @@ GET         /cars/delete                            controllers.Cars.removeCar(c
 GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
 POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()
+GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)

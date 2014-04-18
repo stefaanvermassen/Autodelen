@@ -21,6 +21,7 @@ public class Application extends Controller {
                 Routes.javascriptRouter("myJsRoutes",
                         // Routes
                         routes.javascript.Cars.showCarsPage(),
+                        routes.javascript.Cars.showCarCostsPage(),
                         routes.javascript.Cars.getCarCostModal(),
                         routes.javascript.InfoSessions.showUpcomingSessionsPage(),
                         routes.javascript.InfoSessions.showSessionsPage(),
