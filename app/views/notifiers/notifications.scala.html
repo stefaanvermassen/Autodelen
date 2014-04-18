@@ -29,23 +29,34 @@
                         </div>
                     }
                 }
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-comments"></i> Notificaties
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body noverticalpadding">
-                        <div id="resultsTable">
-                            <!-- Here comes the loaded timeline -->
+
+                <ul class="nav nav-tabs" id="myTab">
+                  <li class="active"><a href="#unread" data-toggle="tab">Ongelezen</a></li>
+                  <li><a href="#read" data-toggle="tab">Gelezen</a></li>
+                </ul>
+
+                <div class="tab-content">
+                  <div class="tab-pane active" id="unread">
+                    <div class="panel panel-default tabpanel">
+                        <div class="panel-body">
+                            <div id="resultsTable">
+                                <!-- Here comes the loaded timeline -->
+                            </div>
                         </div>
                     </div>
-                        <!-- /.panel-body -->
+                  </div>
+                  <div class="tab-pane" id="read">
+                    <div class="panel panel-default tabpanel">
+                        <div class="panel-body">
+                            Yarr, more booty!
+                        </div>
+                    </div>
+                  </div>
                 </div>
-                    <!-- /.panel -->
             </div>
-                <!-- /col-lg-12 -->
+            <!-- /col-lg-12 -->
         </div>
-            <!-- /row -->
+        <!-- /row -->
     </div>
     <!-- /page-wrapper -->
 }

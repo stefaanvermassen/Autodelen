@@ -42,9 +42,12 @@ GET         /settings                               controllers.Settings.index()
 # Notifiers
 GET         /messages                               controllers.Messages.showMessages()
 GET         /messages/page                          controllers.Messages.showMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
 GET         /messages/new                           controllers.Messages.newMessage()
+GET         /messages/reply                         controllers.Messages.reply(userId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
+GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
 GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
@@ -123,6 +126,7 @@ POST        /cars/carcost/new                       controllers.Cars.addNewCarCo
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
+GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
 
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)

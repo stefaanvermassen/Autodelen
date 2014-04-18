@@ -36,7 +36,6 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement getSentMessageListByUseridStatement;
     private PreparedStatement getNumberOfUnreadMessagesStatement;
     private PreparedStatement setReadStatement;
-
     private PreparedStatement getMessageListPageByTimestampStatement;
     private PreparedStatement getAmountOfMessagesStatement;
 
@@ -203,10 +202,9 @@ public class JDBCMessageDAO implements MessageDAO {
 
     @Override
     public void markMessageAsRead(int messageID) throws DataAccessException {
-
         try {
             PreparedStatement ps = getSetReadStatement();
-            ps.setBoolean(1, false);
+            ps.setBoolean(1, true);
             ps.setInt(2,messageID);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating message.");
@@ -214,6 +212,17 @@ public class JDBCMessageDAO implements MessageDAO {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public List<Message> getSentMessageListForUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetSentMessageListByUseridStatement();
+            ps.setInt(1, userId);
+            return getMessageList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of sent messages", e);
+        }
     }
 
     private List<Message> getMessageList(PreparedStatement ps) throws DataAccessException {

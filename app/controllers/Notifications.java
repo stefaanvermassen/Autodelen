@@ -60,4 +60,22 @@ public class Notifications extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     *
+     * @param notificationId Id of the message that has to be marked as read
+     * @return message index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markNotificationAsRead(int notificationId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            NotificationDAO dao = context.getNotificationDAO();
+            dao.markNotificationAsRead(notificationId);
+            context.commit();
+            return redirect(routes.Notifications.showNotifications());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 }

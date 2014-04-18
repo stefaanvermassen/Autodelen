@@ -22,6 +22,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getNumberOfUnreadNotificationsStatement;
     private PreparedStatement getNotificationListPageByUseridDescStatement;
     private PreparedStatement getGetAmountOfNotificationsStatement;
+    private PreparedStatement setReadStatement;
 
     public static final String NOTIFICATION_QUERY = "SELECT * FROM Notifications JOIN Users ON " +
             "notification_user_id= user_id";
@@ -85,6 +86,13 @@ public class JDBCNotificationDAO implements NotificationDAO{
                     "notification_user_id= user_id" + FILTER_FRAGMENT);
         }
         return getGetAmountOfNotificationsStatement;
+    }
+
+    private PreparedStatement getSetReadStatement() throws SQLException {
+        if (setReadStatement == null) {
+            setReadStatement = connection.prepareStatement("UPDATE Notifications SET notification_read = ? WHERE notification_id = ?;");
+        }
+        return setReadStatement;
     }
 
 
@@ -176,6 +184,19 @@ public class JDBCNotificationDAO implements NotificationDAO{
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to create notification", e);
+        }
+    }
+
+    @Override
+    public void markNotificationAsRead(int notificationId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSetReadStatement();
+            ps.setBoolean(1, true);
+            ps.setInt(2,notificationId);
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating notification.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

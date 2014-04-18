@@ -37,7 +37,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
     private PreparedStatement getCreateCarCostStatement() throws SQLException {
         if (createCarCostStatement == null) {
             createCarCostStatement = connection.prepareStatement("INSERT INTO CarCosts (car_cost_car_id, car_cost_amount, " +
-                    "car_cost_description, car_cost_time, car_cost_mileage) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarCostStatement;
     }
@@ -69,13 +69,13 @@ public class JDBCCarCostDAO implements CarCostDAO {
     }
 
     public static CarCost populateCarCost(ResultSet rs, Car car) throws SQLException {
-        CarCost carCost = new CarCost(rs.getInt("car_cost_id"), car, rs.getBigDecimal("car_cost_amount"), rs.getBigDecimal("car_cost_mileage"), rs.getString("car_cost_description"), new DateTime(rs.getTimestamp("car_cost_time")));
+        CarCost carCost = new CarCost(rs.getInt("car_cost_id"), car, rs.getBigDecimal("car_cost_amount"), rs.getBigDecimal("car_cost_mileage"), rs.getString("car_cost_description"), new DateTime(rs.getTimestamp("car_cost_time")), rs.getInt("car_cost_proof"));
         carCost.setStatus(CarCostStatus.valueOf(rs.getString("car_cost_status")));
         return carCost;
     }
 
     @Override
-    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time) throws DataAccessException {
+    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time, int fileId) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateCarCostStatement();
             ps.setInt(1, car.getId());
@@ -83,13 +83,13 @@ public class JDBCCarCostDAO implements CarCostDAO {
             ps.setString(3, description);
             ps.setTimestamp(4, new Timestamp(time.getMillis()));
             ps.setBigDecimal(5, mileage);
-
+            ps.setInt(6, fileId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating carcost.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new CarCost(keys.getInt(1), car, amount, mileage, description, time);
+                return new CarCost(keys.getInt(1), car, amount, mileage, description, time, fileId);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for carcost.", ex);
             }
