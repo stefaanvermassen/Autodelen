@@ -313,11 +313,8 @@ public class Drives extends Controller {
                         if (!isLoaner(reservation, user)) {
                             flash("Error", "Alleen de ontlener mag een reservatie annuleren!");
                             return null;
-                        } else if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-                            flash("Error", "De reservatie is al geannuleerd!");
-                            return null;
-                        } else if (reservation.getStatus() == ReservationStatus.REFUSED) {
-                            flash("Error", "De reservatie is al geweigerd!");
+                        } else if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
+                            flash("Error", "De reservatie is niet meer in aanvraag en is niet goedgekeurd!");
                             return null;
                         }
                         break;
