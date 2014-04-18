@@ -77,5 +77,16 @@ public class TestMessageDAO implements MessageDAO{
 			}
 		}
 	}
-	
+
+    @Override
+    public List<Message> getSentMessageListForUser(int userId) throws DataAccessException {
+        List<Message> list = new ArrayList<>();
+        for(Message message : messages){
+            if(message.getSender().getId()==userId){
+                list.add(message);
+            }
+        }
+        return list;
+    }
+
 }

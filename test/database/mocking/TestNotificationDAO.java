@@ -68,4 +68,9 @@ public class TestNotificationDAO implements NotificationDAO{
         return notification;
     }
 
+    @Override
+    public void markNotificationAsRead(int notificationId) throws DataAccessException {
+        //TODO
+    }
+
 }
