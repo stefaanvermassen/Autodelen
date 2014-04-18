@@ -5,6 +5,7 @@ import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
+import database.providers.UserRoleProvider;
 import models.*;
 import controllers.Security.RoleSecured;
 
@@ -25,6 +26,7 @@ import views.html.cars.cars;
 import views.html.cars.detail;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
+import views.html.flashes;
 import views.html.profile.uploadPicture;
 import views.html.reserve.reservationDetailsPartial;
 
@@ -509,7 +511,6 @@ public class Cars extends Controller {
         return ok(carCostsAdmin.render());
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showCarCostsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
@@ -517,7 +518,40 @@ public class Cars extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
+        // Check if admin or car owner
+        User user = DatabaseHelper.getUserProvider().getUser();
+        UserRoleProvider userRoleProvider = DatabaseHelper.getUserRoleProvider();
+        if(!userRoleProvider.hasRole(user, UserRole.CAR_ADMIN) || !userRoleProvider.hasRole(user, UserRole.SUPER_USER)) {
+            String carIdString = filter.getValue(FilterField.CAR_ID);
+            int carId;
+            if(carIdString.equals("")) {
+                carId = -1;
+            } else {
+                carId = Integer.parseInt(carIdString);
+            }
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                CarDAO carDAO = context.getCarDAO();
+                List<Car> listOfCars = carDAO.getCarsOfUser(user.getId());
+                // Check if carId in cars
+                boolean isCarOfUser = false;
+                for(Car c : listOfCars) {
+                    if(c.getId() == carId) {
+                        isCarOfUser = true;
+                        break;
+                    }
+                }
+                if(!isCarOfUser) {
+                    flash("danger", "U bent niet de eigenaar van deze auto.");
+                    return badRequest(cars.render(listOfCars));
+                }
+
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        }
+
         return ok(carCostList(page, field, asc, filter));
+
     }
 
     private static Html carCostList(int page, FilterField orderBy, boolean asc, Filter filter) {
