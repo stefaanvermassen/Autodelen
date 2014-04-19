@@ -19,14 +19,16 @@ public class Approval {
     private DateTime submitted;
     private DateTime reviewed;
     private InfoSession session;
+    private ApprovalStatus status;
 
-    public Approval(int id, User user, User admin, DateTime submitted, DateTime reviewed, InfoSession session) {
+    public Approval(int id, User user, User admin, DateTime submitted, DateTime reviewed, InfoSession session, ApprovalStatus status) {
         this.id = id;
         this.user = user;
         this.admin = admin;
         this.submitted = submitted;
         this.reviewed = reviewed;
         this.session = session;
+        this.status = status;
     }
 
     public int getId(){
@@ -71,5 +73,13 @@ public class Approval {
 
     public void setSession(InfoSession session) {
         this.session = session;
+    }
+
+    public ApprovalStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApprovalStatus status) {
+        this.status = status;
     }
 }
