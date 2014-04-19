@@ -130,13 +130,9 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>@user.toString
-                                @if("y".equals(session.get("impersonated"))){
-                                    <span class="badge badge-warning">I</span>
-                                }
-                            </span>
-                           <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
-                            <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            <span>@user.toString</span>
+                           <!-- <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture"> -->
+                            <img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -154,6 +150,10 @@
                 <!-- /.navbar-top-links -->
             </nav>
             <!-- /.navbar-static-top -->
+
+            @if("y".equals(session.get("impersonated"))){
+                <div class="impersonating">You are impersonating @user.toString!</div>
+            }
 
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
