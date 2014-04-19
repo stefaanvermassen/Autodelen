@@ -1,6 +1,7 @@
 /*set colors*/
 @textColor: white;  
 @topnumberBGColor: red;
+@navtogColor: #ddd;
 @bg: #7dba4d;
 
 /*computed*/
@@ -46,4 +47,20 @@
 .topnumber {
 	color: @textColor;
 	background-color: @topnumberBGColor;
+}
+
+.navbar-default .navbar-toggle {
+	border-color: @navtogColor;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: @navtogColor;
+}
+
+.navbar-default .navbar-toggle:hover {
+	background-color: @bglighter;
+}
+
+.navbar-default .navbar-toggle:focus {
+	background-color: @bg;
 }
