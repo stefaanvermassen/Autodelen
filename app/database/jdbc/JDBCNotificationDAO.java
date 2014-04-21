@@ -27,7 +27,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     public static final String NOTIFICATION_QUERY = "SELECT * FROM Notifications JOIN Users ON " +
             "notification_user_id= user_id";
 
-    public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? ";
+    public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? AND notification_read = ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -35,6 +35,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
             filter = new JDBCFilter();
         }
         ps.setString(start, filter.getValue(FilterField.USER_ID));
+        ps.setString(start+1, filter.getValue(FilterField.NOTIFICATION_READ));
     }
 
     public JDBCNotificationDAO(Connection connection) {
@@ -133,8 +134,8 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(2, first);
-            ps.setInt(3, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getNotificationList(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of notifications", ex);
