@@ -32,6 +32,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private MessageDAO messageDAO;
     private ApprovalDAO approvalDAO;
     private FileDAO fileDAO;
+    private SettingDAO settingDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -178,5 +179,13 @@ public class JDBCDataAccessContext implements DataAccessContext {
             fileDAO = new JDBCFileDAO(connection);
         }
         return fileDAO;
+    }
+
+    @Override
+    public SettingDAO getSettingDAO() {
+        if(settingDAO == null){
+            settingDAO = new JDBCSettingDAO(connection);
+        }
+        return settingDAO;
     }
 }
