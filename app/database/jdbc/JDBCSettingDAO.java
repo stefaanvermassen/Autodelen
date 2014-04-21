@@ -5,10 +5,7 @@ import database.SettingDAO;
 import models.Setting;
 import org.joda.time.DateTime;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +125,10 @@ public class JDBCSettingDAO implements SettingDAO {
             PreparedStatement ps = getUpdateSettingStatement();
             ps.setString(1, value);
             ps.setString(2, name);
-            ps.setDate(3, new java.sql.Date(after.getMillis()));
+            if(after == null)
+                ps.setNull(3, Types.DATE);
+            else
+                ps.setDate(3, new java.sql.Date(after.getMillis()));
             ps.setInt(4, id);
 
             if(ps.executeUpdate() == 0)

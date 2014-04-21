@@ -1,14 +1,11 @@
 package database.providers;
 
 import database.DataAccessContext;
-import database.DataAccessException;
 import database.DataAccessProvider;
 import database.SettingDAO;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import java.text.ParseException;
 
 /**
  * Created by Cedric on 4/21/2014.
@@ -30,6 +27,10 @@ public class SettingProvider {
             SettingDAO dao = context.getSettingDAO();
             dao.createSettingAfterDate(name, value, afterDate);
         }
+    }
+
+    public void createSetting(String name, boolean value, DateTime afterDate){
+        createSetting(name, Boolean.toString(value), afterDate);
     }
 
     public void createSetting(String name, int value, DateTime afterDate) {
@@ -61,6 +62,10 @@ public class SettingProvider {
 
     public DateTime getDate(String name, DateTime forDate) {
         return DATE_FORMAT.parseDateTime(getString(name, forDate));
+    }
+
+    public boolean getBool(String name, DateTime forDate){
+        return Boolean.parseBoolean(getString(name, forDate));
     }
 
     /**
@@ -102,5 +107,12 @@ public class SettingProvider {
     public DateTime getDate(String name) {
         return getDate(name,  DateTime.now());
     }
+
+    /**
+     * Gets setting based on current timestamp
+     * @param name
+     * @return
+     */
+    public boolean getBool(String name) { return getBool(name, DateTime.now()); }
 
 }

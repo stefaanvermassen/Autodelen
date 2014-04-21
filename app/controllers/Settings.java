@@ -9,9 +9,7 @@ import org.joda.time.DateTime;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.settings.editsysvar;
-import views.html.settings.overview;
-import views.html.settings.sysvars;
+import views.html.settings.*;
 
 import java.util.List;
 import java.util.Set;
@@ -25,14 +23,16 @@ public class Settings extends Controller {
         public DateTime after;
 
 
-        public EditSettingModel(){}
-        public EditSettingModel(String value, String name, DateTime after){
+        public EditSettingModel() {
+        }
+
+        public EditSettingModel(String value, String name, DateTime after) {
             this.value = value;
             this.name = name;
             this.after = after;
         }
 
-        public String validate(){
+        public String validate() {
             return null; //TODO
         }
     }
@@ -87,11 +87,11 @@ public class Settings extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
-    public static Result editSysvar(int id){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result editSysvar(int id) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
             Setting setting = dao.getSetting(id);
-            if(setting == null){
+            if (setting == null) {
                 flash("danger", "Deze setting ID bestaat niet.");
                 return redirect(routes.Settings.sysvarsOverview());
             } else {
@@ -102,17 +102,42 @@ public class Settings extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
-    public static Result editSysvarPost(int id){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result editSysvarPost(int id) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
 
             Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
             if (form.hasErrors()) {
                 return badRequest(editsysvar.render(form, dao.getSetting(id)));
             } else {
-
+                EditSettingModel model = form.get();
+                dao.updateSetting(id, model.name, model.value, model.after);
+                context.commit();
+                flash("success", "De systeemvariabele werd succesvol aangepast.");
+                return redirect(routes.Settings.sysvarsOverview());
             }
-            return ok("edit POST request received.");
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result createSysvar() {
+        return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, DateTime.now()))));
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result createSysvarPost() {
+        Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
+        if (form.hasErrors() || form.get().name == null) {
+            return badRequest(createsysvar.render(form));
+        } else {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                SettingDAO dao = context.getSettingDAO();
+                EditSettingModel model = form.get();
+                dao.createSettingAfterDate(model.name, model.value, model.after);
+                context.commit();
+                flash("success", "De systeemvariabele werd succesvol aangemaakt.");
+                return redirect(routes.Settings.sysvarsOverview());
+            }
         }
     }
 
