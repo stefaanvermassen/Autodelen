@@ -11,7 +11,8 @@ import java.util.List;
  */
 public interface SettingDAO {
     public String getSettingForDate(String name, DateTime date) throws DataAccessException;
-    public void createSettingAfterDate(String name, String value, DateTime after);
+    public void createSettingAfterDate(String name, String value, DateTime after) throws DataAccessException;
     public Setting getSetting(int id) throws DataAccessException;
+    public void updateSetting(int id, String name, String value, DateTime after) throws DataAccessException;
     public List<Setting> getSettings() throws DataAccessException;
 }

@@ -22,9 +22,17 @@ public class JDBCSettingDAO implements SettingDAO {
     private PreparedStatement createSettingAfterStatement;
     private PreparedStatement getSettingsStatement;
     private PreparedStatement getSettingStatement;
+    private PreparedStatement updateSettingStatement;
 
     public JDBCSettingDAO(Connection connection){
         this.connection = connection;
+    }
+
+    private PreparedStatement getUpdateSettingStatement() throws SQLException {
+        if(updateSettingStatement == null){
+            updateSettingStatement = connection.prepareStatement("UPDATE settings SET setting_value=?, setting_name=?, setting_after=? WHERE setting_id = ?");
+        }
+        return updateSettingStatement;
     }
 
     private PreparedStatement getGetSettingForDateStatement() throws SQLException {
@@ -111,6 +119,22 @@ public class JDBCSettingDAO implements SettingDAO {
             }
         } catch(SQLException ex){
             throw new DataAccessException("Failed to prepare statement for overview.");
+        }
+    }
+
+    @Override
+    public void updateSetting(int id, String name, String value, DateTime after) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUpdateSettingStatement();
+            ps.setString(1, value);
+            ps.setString(2, name);
+            ps.setDate(3, new java.sql.Date(after.getMillis()));
+            ps.setInt(4, id);
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Failed to update setting. No rows affected.");
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to prepare setting update statement.", ex);
         }
     }
 

@@ -99,12 +99,21 @@ public class Settings extends Controller {
                 return ok(editsysvar.render(Form.form(EditSettingModel.class).fill(model), setting));
             }
         }
-
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result editSysvarPost(int id){
-        return ok("edit POST request received.");
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            SettingDAO dao = context.getSettingDAO();
+
+            Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(editsysvar.render(form, dao.getSetting(id)));
+            } else {
+
+            }
+            return ok("edit POST request received.");
+        }
     }
 
 
