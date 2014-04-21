@@ -2,14 +2,30 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
+import models.Setting;
 import models.User;
 import models.UserRole;
-import play.mvc.*;
-import views.html.settings.*;
+import org.joda.time.DateTime;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.settings.overview;
+import views.html.settings.sysvars;
 
+import java.util.List;
 import java.util.Set;
 
 public class Settings extends Controller {
+
+
+    public static class EditSettingModel {
+        public String value;
+        public String name;
+        public DateTime after;
+
+        public String validate(){
+            return null; //TODO
+        }
+    }
 
     public static Result index() {
         return ok(overview.render());
@@ -19,6 +35,7 @@ public class Settings extends Controller {
     /**
      * Method: GET
      * Temporary method to create a superuser
+     *
      * @return Redirect to the userrole page
      */
     @Deprecated
@@ -48,7 +65,20 @@ public class Settings extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
 
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result sysvarsOverview() {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            SettingDAO dao = context.getSettingDAO();
+            List<Setting> settings = dao.getSettings();
+            return ok(sysvars.render(settings));
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result editSysvar(int id){
+        return ok("edit request received.");
     }
 
 }

@@ -105,6 +105,9 @@ GET         /infosession/approval                   controllers.InfoSessions.req
 # Settings
 # TODO: REMOVE THIS!!!
 GET         /settings/instantadmin                  controllers.Settings.instantAdmin()
+GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(id: Int)
+GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
+
 
 # Emailtemplates
 GET         /emailtemplate                          controllers.EmailTemplates.showExistingTemplates()

@@ -3,24 +3,25 @@ package database.jdbc;
 import database.DataAccessException;
 import database.SettingDAO;
 import models.Setting;
+import org.joda.time.DateTime;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Created by Cedric on 4/21/2014.
  */
-public class JDBCSettingDAO implements SettingDAO{
+public class JDBCSettingDAO implements SettingDAO {
 
     private Connection connection;
     private PreparedStatement getSettingForDateStatement;
     private PreparedStatement createSettingAfterStatement;
     private PreparedStatement getSettingsStatement;
+    private PreparedStatement getSettingStatement;
 
     public JDBCSettingDAO(Connection connection){
         this.connection = connection;
@@ -47,12 +48,23 @@ public class JDBCSettingDAO implements SettingDAO{
         return getSettingsStatement;
     }
 
+    private PreparedStatement getGetSettingStatement() throws SQLException {
+        if(getSettingStatement == null){
+            getSettingStatement = connection.prepareStatement("SELECT setting_id, setting_name, setting_value, setting_after FROM settings WHERE setting_id = ?");
+        }
+        return getSettingStatement;
+    }
+
+    private static Setting populateSetting(ResultSet rs) throws SQLException {
+        return new Setting(rs.getInt("setting_id"), rs.getString("setting_name"), rs.getString("setting_value"), rs.getObject("setting_after") == null ? null : new DateTime(rs.getDate("setting_after")));
+    }
+
     @Override
-    public String getSettingForDate(String name, Date date) throws DataAccessException {
+    public String getSettingForDate(String name, DateTime date) throws DataAccessException {
         try {
             PreparedStatement ps = getGetSettingForDateStatement();
             ps.setString(1, name);
-            ps.setDate(2, new java.sql.Date(date.getTime()));
+            ps.setDate(2, new java.sql.Date(date.getMillis()));
 
             try(ResultSet rs = ps.executeQuery()) {
                 if(!rs.next())
@@ -69,12 +81,12 @@ public class JDBCSettingDAO implements SettingDAO{
     }
 
     @Override
-    public void createSettingAfterDate(String name, String value, Date after) {
+    public void createSettingAfterDate(String name, String value, DateTime after) {
         try {
             PreparedStatement ps = getCreateSettingAfterStatement();
             ps.setString(1, name);
             ps.setString(2, value);
-            ps.setDate(3, new java.sql.Date(after.getTime()));
+            ps.setDate(3, new java.sql.Date(after.getMillis()));
 
             if(ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to create setting. Rows inserted != 1");
@@ -85,13 +97,31 @@ public class JDBCSettingDAO implements SettingDAO{
     }
 
     @Override
+    public Setting getSetting(int id) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetSettingStatement();
+            ps.setInt(1, id);
+            try(ResultSet rs = ps.executeQuery()){
+                if(!rs.next())
+                    return null;
+                else
+                    return populateSetting(rs);
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read overview resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to prepare statement for overview.");
+        }
+    }
+
+    @Override
     public List<Setting> getSettings() throws DataAccessException {
         try {
             PreparedStatement ps = getGetSettingsStatement(); //TODO: add timestamp filtering
             try(ResultSet rs = ps.executeQuery()){
                 List<Setting> settings = new ArrayList<>();
                 while(rs.next()){
-                    settings.add(new Setting(rs.getInt("setting_id"), rs.getString("setting_name"), rs.getString("setting_value"), rs.getDate("setting_after")));
+                    settings.add(populateSetting(rs));
                 }
                 return settings;
             } catch(SQLException ex){

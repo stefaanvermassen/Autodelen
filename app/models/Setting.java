@@ -1,6 +1,5 @@
 package models;
-
-import java.util.Date;
+import org.joda.time.DateTime;
 
 /**
  * Created by Cedric on 4/21/2014.
@@ -10,9 +9,9 @@ public class Setting {
     private int id;
     private String name;
     private String value;
-    private Date afterDate;
+    private DateTime afterDate;
 
-    public Setting(int id, String name, String value, Date afterDate) {
+    public Setting(int id, String name, String value, DateTime afterDate) {
         this.id = id;
         this.name = name;
         this.value = value;
@@ -43,11 +42,11 @@ public class Setting {
         this.value = value;
     }
 
-    public Date getAfterDate() {
+    public DateTime getAfterDate() {
         return afterDate;
     }
 
-    public void setAfterDate(Date afterDate) {
+    public void setAfterDate(DateTime afterDate) {
         this.afterDate = afterDate;
     }
 }

@@ -4,10 +4,11 @@ import database.DataAccessContext;
 import database.DataAccessException;
 import database.DataAccessProvider;
 import database.SettingDAO;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Date;
 
 /**
  * Created by Cedric on 4/21/2014.
@@ -16,7 +17,7 @@ public class SettingProvider {
 
     //TODO: provide caching for all overview - WARNING - dates may vary on request!
     private static final String SETTING_KEY = "setting:%s";
-    private static final DateFormat DATETIMEFORMATTER = DateFormat.getDateTimeInstance();
+    public static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     private DataAccessProvider provider;
 
@@ -24,46 +25,42 @@ public class SettingProvider {
         this.provider = provider;
     }
 
-    public void createSetting(String name, String value, Date afterDate) {
+    public void createSetting(String name, String value, DateTime afterDate) {
         try (DataAccessContext context = provider.getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
             dao.createSettingAfterDate(name, value, afterDate);
         }
     }
 
-    public void createSetting(String name, int value, Date afterDate) {
+    public void createSetting(String name, int value, DateTime afterDate) {
         createSetting(name, Integer.toString(value), afterDate);
     }
 
-    public void createSetting(String name, double value, Date afterDate) {
+    public void createSetting(String name, double value, DateTime afterDate) {
         createSetting(name, Double.toString(value), afterDate);
     }
 
-    public void createSetting(String name, Date value, Date afterDate) {
-        createSetting(name, DATETIMEFORMATTER.format(value), afterDate);
+    public void createSetting(String name, DateTime value, DateTime afterDate) {
+        createSetting(name, value.toString(DATE_FORMAT), afterDate);
     }
 
-    public String getString(String name, Date forDate) {
+    public String getString(String name, DateTime forDate) {
         try (DataAccessContext context = provider.getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
             return dao.getSettingForDate(name, forDate);
         }
     }
 
-    public int getInt(String name, Date forDate) {
+    public int getInt(String name, DateTime forDate) {
         return Integer.valueOf(getString(name, forDate));
     }
 
-    public double getDouble(String name, Date forDate) {
+    public double getDouble(String name, DateTime forDate) {
         return Double.valueOf(getString(name, forDate));
     }
 
-    public Date getDate(String name, Date forDate) {
-        try {
-            return DATETIMEFORMATTER.parse(getString(name, forDate));
-        } catch (ParseException e) {
-            throw new RuntimeException(e); //uncheck
-        }
+    public DateTime getDate(String name, DateTime forDate) {
+        return DATE_FORMAT.parseDateTime(getString(name, forDate));
     }
 
     /**
@@ -73,7 +70,7 @@ public class SettingProvider {
      * @return
      */
     public String getString(String name) {
-        return getString(name, new Date());
+        return getString(name, DateTime.now());
     }
 
     /**
@@ -83,7 +80,7 @@ public class SettingProvider {
      * @return
      */
     public int getInt(String name) {
-        return getInt(name, new Date());
+        return getInt(name, DateTime.now());
     }
 
     /**
@@ -93,7 +90,7 @@ public class SettingProvider {
      * @return
      */
     public double getDouble(String name) {
-        return getDouble(name, new Date());
+        return getDouble(name, DateTime.now());
     }
 
     /**
@@ -102,8 +99,8 @@ public class SettingProvider {
      * @param name
      * @return
      */
-    public Date getDate(String name) {
-        return getDate(name, new Date());
+    public DateTime getDate(String name) {
+        return getDate(name,  DateTime.now());
     }
 
 }
