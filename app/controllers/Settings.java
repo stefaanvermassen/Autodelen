@@ -95,7 +95,7 @@ public class Settings extends Controller {
                 flash("danger", "Deze setting ID bestaat niet.");
                 return redirect(routes.Settings.sysvarsOverview());
             } else {
-                EditSettingModel model = new EditSettingModel(setting.getName(), setting.getValue(), setting.getAfterDate());
+                EditSettingModel model = new EditSettingModel(setting.getValue(), setting.getName(), setting.getAfterDate());
                 return ok(editsysvar.render(Form.form(EditSettingModel.class).fill(model), setting));
             }
         }
