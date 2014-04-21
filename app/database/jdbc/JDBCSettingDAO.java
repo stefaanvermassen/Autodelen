@@ -2,12 +2,15 @@ package database.jdbc;
 
 import database.DataAccessException;
 import database.SettingDAO;
+import models.Setting;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Cedric on 4/21/2014.
@@ -17,6 +20,7 @@ public class JDBCSettingDAO implements SettingDAO{
     private Connection connection;
     private PreparedStatement getSettingForDateStatement;
     private PreparedStatement createSettingAfterStatement;
+    private PreparedStatement getSettingsStatement;
 
     public JDBCSettingDAO(Connection connection){
         this.connection = connection;
@@ -34,6 +38,13 @@ public class JDBCSettingDAO implements SettingDAO{
             createSettingAfterStatement = connection.prepareStatement("INSERT INTO settings(setting_name, setting_value, setting_after) VALUES(?, ?, ?)");
         }
         return createSettingAfterStatement;
+    }
+
+    private PreparedStatement getGetSettingsStatement() throws SQLException {
+        if(getSettingsStatement == null){
+            getSettingsStatement = connection.prepareStatement("SELECT setting_id, setting_name, setting_value, setting_after FROM settings ORDER BY setting_name ASC");
+        }
+        return getSettingsStatement;
     }
 
     @Override
@@ -70,6 +81,24 @@ public class JDBCSettingDAO implements SettingDAO{
 
         } catch(SQLException ex){
             throw new DataAccessException("Failed to prepare create setting statement.", ex);
+        }
+    }
+
+    @Override
+    public List<Setting> getSettings() throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetSettingsStatement(); //TODO: add timestamp filtering
+            try(ResultSet rs = ps.executeQuery()){
+                List<Setting> settings = new ArrayList<>();
+                while(rs.next()){
+                    settings.add(new Setting(rs.getInt("setting_id"), rs.getString("setting_name"), rs.getString("setting_value"), rs.getDate("setting_after")));
+                }
+                return settings;
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read settings resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to prepare statement for settings.");
         }
     }
 }
