@@ -95,10 +95,10 @@ public class JDBCSettingDAO implements SettingDAO{
                 }
                 return settings;
             } catch(SQLException ex){
-                throw new DataAccessException("Failed to read settings resultset.", ex);
+                throw new DataAccessException("Failed to read overview resultset.", ex);
             }
         } catch(SQLException ex){
-            throw new DataAccessException("Failed to prepare statement for settings.");
+            throw new DataAccessException("Failed to prepare statement for overview.");
         }
     }
 }

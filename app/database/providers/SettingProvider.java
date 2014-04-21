@@ -14,7 +14,7 @@ import java.util.Date;
  */
 public class SettingProvider {
 
-    //TODO: provide caching for all settings - WARNING - dates may vary on request!
+    //TODO: provide caching for all overview - WARNING - dates may vary on request!
     private static final String SETTING_KEY = "setting:%s";
     private static final DateFormat DATETIMEFORMATTER = DateFormat.getDateTimeInstance();
 

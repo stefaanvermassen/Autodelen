@@ -5,14 +5,14 @@ import database.*;
 import models.User;
 import models.UserRole;
 import play.mvc.*;
-import views.html.*;
+import views.html.settings.*;
 
 import java.util.Set;
 
 public class Settings extends Controller {
 
     public static Result index() {
-        return ok(settings.render());
+        return ok(overview.render());
     }
 
 
@@ -30,7 +30,7 @@ public class Settings extends Controller {
             Set<UserRole> roles = dao.getUserRoles(user.getId());
             if (roles.contains(UserRole.SUPER_USER)) {
                 flash("warning", "U heeft reeds superuser rechten.");
-                return badRequest(dashboard.render());
+                return badRequest(views.html.dashboard.render());
             } else {
                 try {
                     dao.addUserRole(user.getId(), UserRole.SUPER_USER);
