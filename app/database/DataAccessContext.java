@@ -30,6 +30,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public FileDAO getFileDAO();
 
+    public SettingDAO getSettingDAO();
+
     public void begin();
 
     public void commit();
