@@ -135,7 +135,7 @@
                                     <span class="badge badge-warning">I</span>
                                 }
                             </span>
-                            @if(DatabaseHelper.getSettingProvider.getBool("show_profile")) {
+                            @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
                                <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
                                 <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
                             }

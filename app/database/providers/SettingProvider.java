@@ -29,7 +29,7 @@ public class SettingProvider {
         }
     }
 
-    public void createSetting(String name, boolean value, DateTime afterDate){
+    public void createSetting(String name, boolean value, DateTime afterDate) {
         createSetting(name, Boolean.toString(value), afterDate);
     }
 
@@ -52,20 +52,60 @@ public class SettingProvider {
         }
     }
 
+    public String getStringOrDefault(String name, String defaultValue, DateTime forDate) {
+        String value = getString(name, forDate);
+        if (value == null)
+            return defaultValue;
+        else
+            return value;
+    }
+
     public int getInt(String name, DateTime forDate) {
         return Integer.valueOf(getString(name, forDate));
+    }
+
+    public int getIntOrDefault(String name, int defaultValue, DateTime forDate) {
+        try {
+            return getInt(name, forDate);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
     }
 
     public double getDouble(String name, DateTime forDate) {
         return Double.valueOf(getString(name, forDate));
     }
 
+    public double getDoubleOrDefault(String name, double defaultValue, DateTime forDate) {
+        try {
+            return getDouble(name, forDate);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
+
     public DateTime getDate(String name, DateTime forDate) {
         return DATE_FORMAT.parseDateTime(getString(name, forDate));
     }
 
-    public boolean getBool(String name, DateTime forDate){
+    public DateTime getDateOrDefault(String name, DateTime defaultValue, DateTime forDate) {
+        try {
+            return getDate(name, forDate);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
+
+    public boolean getBool(String name, DateTime forDate) {
         return Boolean.parseBoolean(getString(name, forDate));
+    }
+
+    public boolean getBoolOrDefault(String name, boolean defaultValue, DateTime forDate) {
+        try {
+            return getBool(name, forDate);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -78,6 +118,10 @@ public class SettingProvider {
         return getString(name, DateTime.now());
     }
 
+    public String getStringOrDefault(String name, String defaultValue){
+        return getStringOrDefault(name, defaultValue, DateTime.now());
+    }
+
     /**
      * Gets setting based on current timestamp
      *
@@ -86,6 +130,10 @@ public class SettingProvider {
      */
     public int getInt(String name) {
         return getInt(name, DateTime.now());
+    }
+
+    public int getIntOrDefault(String name, int defaultValue){
+        return getIntOrDefault(name, defaultValue, DateTime.now());
     }
 
     /**
@@ -98,6 +146,10 @@ public class SettingProvider {
         return getDouble(name, DateTime.now());
     }
 
+    public double getDoubleOrDefault(String name, double defaultValue){
+        return getDoubleOrDefault(name, defaultValue, DateTime.now());
+    }
+
     /**
      * Gets setting based on current timestamp
      *
@@ -105,14 +157,25 @@ public class SettingProvider {
      * @return
      */
     public DateTime getDate(String name) {
-        return getDate(name,  DateTime.now());
+        return getDate(name, DateTime.now());
+    }
+
+    public DateTime getDateOrDefault(String name, DateTime defaultValue){
+        return getDateOrDefault(name, defaultValue, DateTime.now());
     }
 
     /**
      * Gets setting based on current timestamp
+     *
      * @param name
      * @return
      */
-    public boolean getBool(String name) { return getBool(name, DateTime.now()); }
+    public boolean getBool(String name) {
+        return getBool(name, DateTime.now());
+    }
+
+    public boolean getBoolOrDefault(String name, boolean defaultValue){
+        return getBoolOrDefault(name, defaultValue, DateTime.now());
+    }
 
 }
