@@ -14,6 +14,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import views.html.login.*;
 
@@ -420,10 +421,18 @@ public class Login extends Controller {
             DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
         }
 
-        session().clear();
-        return redirect(
-                routes.Application.index()
-        );
+        if(session("impersonated") != null){
+            session("email", session("impersonated"));
+            session().remove("impersonated");
+            return redirect(
+                    routes.Dashboard.index()
+            );
+        } else {
+            session().clear();
+            return redirect(
+                    routes.Application.index()
+            );
+        }
     }
 
 }

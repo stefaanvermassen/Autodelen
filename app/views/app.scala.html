@@ -131,7 +131,7 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString
-                                @if("y".equals(session.get("impersonated"))){
+                                @if(session.get("impersonated") != null){
                                     <span class="badge badge-warning">I</span>
                                 }
                             </span>
