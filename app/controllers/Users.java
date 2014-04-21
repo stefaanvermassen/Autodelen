@@ -70,8 +70,9 @@ public class Users extends Controller {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, false);
             if(user != null){
+                String originalEmail = session("email"); //TODO: migrate to userprovider also
                 DatabaseHelper.getUserProvider().createUserSession(user);
-                session("impersonated", "y");
+                session("impersonated", originalEmail);
                 return redirect(routes.Dashboard.index());
             } else {
                 flash("danger", "Deze gebruikersID bestaat niet.");

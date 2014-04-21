@@ -39,7 +39,7 @@ public class JDBCCarDAO implements CarDAO{
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = createCarFilter();
+            filter = new JDBCFilter();
         }
         ps.setString(start, filter.getValue(FilterField.CAR_NAME));
         ps.setString(start+1, filter.getValue(FilterField.CAR_BRAND));
@@ -50,7 +50,6 @@ public class JDBCCarDAO implements CarDAO{
         ps.setString(start+6, filter.getValue(FilterField.FROM));
         ps.setString(start+7, filter.getValue(FilterField.UNTIL));
     }
-
 
     private Connection connection;
     private PreparedStatement createCarStatement;
@@ -313,11 +312,6 @@ public class JDBCCarDAO implements CarDAO{
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
         }
-    }
-
-    @Override
-    public Filter createCarFilter() {
-        return new JDBCFilter();
     }
 
     /**

@@ -1,8 +1,8 @@
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
     <script>
     var route = myJsRoutes.controllers.Notifications.showNotificationsPage;
-    var autoLoad = 1;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
@@ -31,24 +31,19 @@
                 }
 
                 <ul class="nav nav-tabs" id="myTab">
-                  <li class="active"><a href="#unread" data-toggle="tab">Ongelezen</a></li>
-                  <li><a href="#read" data-toggle="tab">Gelezen</a></li>
+                  <li id="tab_unread" name="0" class="active"><a href="#resultsPanel" data-toggle="tab">Ongelezen</a></li>
+                  <li id="tab_read" name="1"><a href="#resultsPanel" data-toggle="tab">Gelezen</a></li>
+                  <li class="hidden"><button id="searchButton"></button></li>
                 </ul>
+                <input id='hidden_input' name="notification_read" value="0" class="searchTextField hidden">
 
                 <div class="tab-content">
-                  <div class="tab-pane active" id="unread">
+                  <div class="tab-pane active" id="resultsPanel">
                     <div class="panel panel-default tabpanel">
                         <div class="panel-body">
                             <div id="resultsTable">
                                 <!-- Here comes the loaded timeline -->
                             </div>
-                        </div>
-                    </div>
-                  </div>
-                  <div class="tab-pane" id="read">
-                    <div class="panel panel-default tabpanel">
-                        <div class="panel-body">
-                            Yarr, more booty!
                         </div>
                     </div>
                   </div>

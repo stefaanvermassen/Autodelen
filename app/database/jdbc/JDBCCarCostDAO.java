@@ -2,6 +2,8 @@ package database.jdbc;
 
 import database.CarCostDAO;
 import database.DataAccessException;
+import database.Filter;
+import database.FilterField;
 import models.*;
 import org.joda.time.DateTime;
 
@@ -16,12 +18,31 @@ import java.util.List;
 public class JDBCCarCostDAO implements CarCostDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"carcost_id"};
+
+    public static final String CAR_COST_QUERY = "SELECT * FROM CarCosts " +
+            "JOIN Cars ON car_cost_car_id = car_id ";
+
+    public static final String FILTER_FRAGMENT = " WHERE car_cost_status LIKE ? AND car_cost_car_id LIKE ?";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = new JDBCFilter();
+        }
+        ps.setString(start, filter.getValue(FilterField.CAR_COST_STATUS));
+        String carId = filter.getValue(FilterField.CAR_ID);
+        if(carId.equals("")) { // Not very nice programming, but works :D
+            carId = "%%";
+        }
+        ps.setString(start+1, carId);
+    }
+
     private Connection connection;
     private PreparedStatement createCarCostStatement;
     private PreparedStatement updateCarCostStatement;
-    private PreparedStatement getCarCostListForCarStatement;
-    private PreparedStatement getRequestedCarCostListStatement;
     private PreparedStatement getCarCostStatement;
+    private PreparedStatement getCarCostListPageByDateDescStatement;
+    private PreparedStatement getGetAmountOfCarCostsStatement;
 
     public JDBCCarCostDAO(Connection connection) {
         this.connection = connection;
@@ -42,22 +63,20 @@ public class JDBCCarCostDAO implements CarCostDAO {
         return createCarCostStatement;
     }
 
-    private PreparedStatement getGetCarCostListForCarStatement() throws SQLException {
-        if (getCarCostListForCarStatement == null) {
-            getCarCostListForCarStatement = connection.prepareStatement("SELECT * FROM CarCosts " +
-                    "JOIN Cars ON car_cost_car_id = car_id "+
-                    "WHERE car_cost_car_id=? ORDER BY car_cost_created_at DESC;");
+    private PreparedStatement getGetCarCostListPageByDateDescStatement() throws SQLException {
+        if (getCarCostListPageByDateDescStatement == null) {
+            getCarCostListPageByDateDescStatement = connection.prepareStatement(CAR_COST_QUERY + FILTER_FRAGMENT +
+                    " ORDER BY car_cost_created_at DESC LIMIT ?, ?");
         }
-        return getCarCostListForCarStatement;
+        return getCarCostListPageByDateDescStatement;
     }
 
-    private PreparedStatement getGetRequestedCarCostListStatement() throws SQLException {
-        if (getRequestedCarCostListStatement == null) {
-            getRequestedCarCostListStatement = connection.prepareStatement("SELECT * FROM CarCosts " +
-                    "JOIN Cars ON car_cost_car_id = car_id "+
-                    "WHERE car_cost_status = 'REQUEST' ORDER BY car_cost_created_at DESC;");
+    private PreparedStatement getGetAmountOfCarCostsStatement() throws SQLException {
+        if(getGetAmountOfCarCostsStatement == null) {
+            getGetAmountOfCarCostsStatement = connection.prepareStatement("SELECT count(car_cost_id) AS amount_of_carcosts FROM CarCosts " +
+                    "JOIN Cars ON car_cost_car_id = car_id " + FILTER_FRAGMENT);
         }
-        return getRequestedCarCostListStatement;
+        return getGetAmountOfCarCostsStatement;
     }
 
     private PreparedStatement getUpdateCarCostStatement() throws SQLException {
@@ -99,23 +118,44 @@ public class JDBCCarCostDAO implements CarCostDAO {
     }
 
     @Override
-    public List<CarCost> getCarCostListForCar(Car car) throws DataAccessException {
+    public int getAmountOfCarCosts(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetCarCostListForCarStatement();
-            ps.setInt(1, car.getId());
-            return getCarCostList(ps, car);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of carcosts", e);
+            PreparedStatement ps = getGetAmountOfCarCostsStatement();
+            fillFragment(ps, filter, 1);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_carcosts");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of carcosts", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of carcosts", ex);
         }
     }
 
     @Override
-    public List<CarCost> getRequestedCarCostList() throws DataAccessException {
+    public List<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetRequestedCarCostListStatement();
-            return getRequestedCarCostList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of carcosts", e);
+            PreparedStatement ps = null;
+            switch(orderBy) { // TODO: more to orderBy, asc/desc
+                case CAR_COST_DATE:
+                    ps = getGetCarCostListPageByDateDescStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create getCarCostList statement");
+            }
+
+            fillFragment(ps, filter, 1);
+            int first = (page-1)*pageSize;
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
+            return getCarCostList(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of carcosts", ex);
         }
     }
 
@@ -154,20 +194,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
         }
     }
 
-    private List<CarCost> getCarCostList(PreparedStatement ps, Car car) throws DataAccessException {
-        List<CarCost> list = new ArrayList<>();
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(populateCarCost(rs, car));
-            }
-            return list;
-        }catch (SQLException e){
-            throw new DataAccessException("Error while reading carcost resultset", e);
-
-        }
-    }
-
-    private List<CarCost> getRequestedCarCostList(PreparedStatement ps) throws DataAccessException {
+    private List<CarCost> getCarCostList(PreparedStatement ps) throws DataAccessException {
         List<CarCost> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
