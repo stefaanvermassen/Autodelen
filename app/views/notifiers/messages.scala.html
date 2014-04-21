@@ -1,8 +1,8 @@
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/messages.js")'></script>
     <script>
-    var route = myJsRoutes.controllers.Messages.showMessagesPage;
-    var autoLoad = 1;
+        var route = myJsRoutes.controllers.Messages.showReceivedMessagesPage;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
@@ -30,24 +30,18 @@
             </div>
 
             <ul class="nav nav-tabs" id="myTab">
-              <li class="active"><a href="#received" data-toggle="tab">Ontvangen</a></li>
-              <li><a href="#sent" data-toggle="tab">Verzonden</a></li>
+              <li id="tab_received" class="active"><a href="#resultsPanel" data-toggle="tab">Ontvangen</a></li>
+              <li id="tab_sent"><a href="#resultsPanel" data-toggle="tab">Verzonden</a></li>
+              <li class="hidden"><button id="searchButton"></button></li>
             </ul>
 
             <div class="tab-content">
-              <div class="tab-pane active" id="received">
+              <div class="tab-pane active" id="resultsPanel">
                 <div class="panel panel-default tabpanel">
                     <div class="panel-body">
                         <div id="resultsTable">
-                            <!-- Here comes the loaded timeline -->
+                            <!-- Here comes the loaded page -->
                         </div>
-                    </div>
-                </div>
-              </div>
-              <div class="tab-pane" id="sent">
-                <div class="panel panel-default tabpanel">
-                    <div class="panel-body">
-                        Yarr, more booty!
                     </div>
                 </div>
               </div>

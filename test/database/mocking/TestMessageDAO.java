@@ -28,16 +28,6 @@ public class TestMessageDAO implements MessageDAO{
         return 0;
     }
 
-    @Override
-	public List<Message> getReceivedMessageListForUser(int userId) throws DataAccessException {
-		List<Message> list = new ArrayList<>();
-		for(Message message : messages){
-			if(message.getReceiver().getId()==userId){
-				list.add(message);
-			}
-		}
-		return list;
-	}
 
     @Override
     public List<Message> getMessageList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
@@ -77,16 +67,5 @@ public class TestMessageDAO implements MessageDAO{
 			}
 		}
 	}
-
-    @Override
-    public List<Message> getSentMessageListForUser(int userId) throws DataAccessException {
-        List<Message> list = new ArrayList<>();
-        for(Message message : messages){
-            if(message.getSender().getId()==userId){
-                list.add(message);
-            }
-        }
-        return list;
-    }
 
 }

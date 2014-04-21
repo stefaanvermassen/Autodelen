@@ -55,7 +55,7 @@ public class Messages extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result showMessagesPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showReceivedMessagesPage(int page, int ascInt, String orderBy, String searchString) {
         User user = DatabaseHelper.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -63,12 +63,22 @@ public class Messages extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         filter.putValue(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
-        return ok(notificationList(page, field, asc, filter));
-
-
+        return ok(messageList(page, field, asc, filter));
     }
 
-    private static Html notificationList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    @RoleSecured.RoleAuthenticated()
+    public static Result showSentMessagesPage(int page, int ascInt, String orderBy, String searchString) {
+        User user = DatabaseHelper.getUserProvider().getUser();
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        filter.putValue(FilterField.MESSAGE_SENDER_ID, user.getId() + "");
+        return ok(messageList(page, field, asc, filter));
+    }
+
+    private static Html messageList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             MessageDAO dao = context.getMessageDAO();
             List<Message> messageList = dao.getMessageList(orderBy, asc, page, PAGE_SIZE, filter);
