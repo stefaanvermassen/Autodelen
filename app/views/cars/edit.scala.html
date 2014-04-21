@@ -1,0 +1,117 @@
+@(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
+@import database.DatabaseHelper;
+
+@app(if (car == null) "Nieuwe auto" else "Bewerk auto") {
+
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <h1 class="page-header">@(if (car == null) "Nieuwe auto" else "Bewerk auto") </h1>
+        <div class="row">
+        @helper.form(if (car == null) routes.Cars.addNewCar() else routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal") {
+            <div class="col-lg-3">
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
+                <div class="panel panel-default">
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+
+                        <div class="form-group">
+                            @if(car == null) {
+                                <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                            } else {
+                                <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                            }
+                            <!-- TODO: profile picture-->
+                        </div>
+                        <div class="form-group">
+                            <p class="form-control-static h2">
+                                @helper.inputText(form("name"), '_label -> "Autonaam", 'placeholder -> "Autonaam")
+                                @helper.inputText(form("brand"), '_label -> "Merk", 'placeholder -> "Merk")
+                                @helper.inputText(form("type"), '_label -> "Type", 'placeholder -> "Type")
+                            </p>
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                    <!-- /.panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Details
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Details</h3>
+                                </div>
+                                <div class="panel-body">
+                                    @helper.inputText(form("seats"), '_label -> "Aantal zitplaatsen", 'placeholder -> "Aantal zitplaatsen", 'type -> "number")
+                                    @helper.inputText(form("doors"), '_label -> "Aantal deuren", 'placeholder -> "Aantal deuren", 'type -> "number")
+                                    @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof")
+                                    @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
+                                    @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
+                                    @helper.inputText(form("year"), '_label -> "Bouwjaar", 'placeholder -> "Bouwjaar", 'type -> "number")
+                                    @helper.inputText(form("fuelEconomy"), '_label -> "Gemiddeld verbruik (per 100 km)", 'placeholder -> "Gemiddeld verbruik (per 100 km)", 'type -> "number")
+                                    @helper.inputText(form("estimatedValue"), '_label -> "Geschatte huidige waarde", 'placeholder -> "Geschatte huidige waarde", 'type -> "number")
+                                    @helper.inputText(form("ownerAnnualKm"), '_label -> "Gemiddeld aantal kilometers (per jaar)", 'placeholder -> "Gemiddeld aantal kilometers (per jaar)", 'type -> "number")
+                                    @helper.textarea(form("comments"), '_label -> "Commentaar", 'placeholder -> "Commentaar")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Adres</h3>
+                                </div>
+                                <div class="panel-body">
+                                    @helper.inputText(form("address.street"), '_label -> "Straat", 'placeholder -> "Straat")
+                                    @helper.inputText(form("address.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
+                                    @helper.inputText(form("address.city"), '_label -> "Stad", 'placeholder -> "Stad")
+                                    @helper.inputText(form("address.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
+                                    @helper.inputText(form("address.bus"), '_label -> "Bus", 'placeholder -> "Bus")
+                                    @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Technische details</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <label class="h4">Nummerplaat</label>
+                                    <p class="form-control-static">XXX-XXX</p>
+                                        <!-- TODO: technische details, verzekering?, gepriviligeerden toewijzen  -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @if(car == null) {
+                                <button name="saveChanges" class="btn btn-block btn-success">Auto aanmaken</button>
+                            } else {
+                                <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                            }
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel-default -->
+            </div>
+            <!-- /col-md-9 -->
+        }
+        </div>
+    </div>
+            <!-- /row -->
+}

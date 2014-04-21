@@ -1,4 +1,5 @@
 @(car: Car)
+    @import controllers.Cars;
     @import org.joda.time.format.DateTimeFormat
     @import database.DatabaseHelper;
     @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
@@ -18,16 +19,17 @@
                 <strong>Adres: </strong> @car.getLocation <br>
                 <strong>Merk: </strong> @car.getBrand <br>
                 <strong>Type: </strong> @car.getType <br>
+                <strong>Brandstof: </strong>  @{Cars.getReverseFuelMap().get(car.getFuel) } <br>
                 <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
                 <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
                 <strong>Aantal zitplaatsen: </strong> @car.getSeats <br>
                 <strong>Aantal deuren: </strong> @car.getDoors <br>
-                <strong>Bouwjaar: </strong> @car.getYear <br>
+                <strong>Bouwjaar: </strong> @if(car.getYear == null) { Onbekend } else { @car.getYear }<br> <!-- Does not work yet..-->
                 <strong>Gemiddeld verbruik (per 100 km): </strong> @car.getFuelEconomy <br>
                 <strong>Geschatte huidige waarde: </strong> @car.getEstimatedValue <br>
                 <strong>Gemiddeld aantal kilometers (per jaar): </strong> @car.getOwnerAnnualKm <br>
                 <strong>Commentaar: </strong> <br> @car.getComments
-                    <!-- TODO: fuel, Comments, (Laatste aanpassing?) -->
+                    <!-- TODO: fuel, (Laatste aanpassing?) -->
                 @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
             </p>
         </div>
@@ -38,16 +40,4 @@
         </div>
     </div>
     </div>
-    @if(car.getOwner.getId == user.getId() || DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
-            <h2>Autogebonden kosten</h2>
-        <p>
-            Vul hier als eigenaar uw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.
-
-        </p>
-        <button class="btn btn-primary" onclick="loadModal(@car.getId)">Nieuwe kost</button>
-        <p></p>
-
-        <input name="car_id" value="@car.getId" class="searchTextField hidden">
-        @carCostsPartial()
-    }
 }

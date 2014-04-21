@@ -15,15 +15,15 @@ public class Car {
     private String brand;
     private String type;
     private Address location;
-    private int seats;
-    private int doors;
-    private int year;
+    private Integer seats;
+    private Integer doors;
+    private Integer year;
     private boolean gps;
     private boolean hook;
     private CarFuel fuel;
-    private int fuelEconomy;
-    private int estimatedValue;
-    private int ownerAnnualKm;
+    private Integer fuelEconomy;
+    private Integer estimatedValue;
+    private Integer ownerAnnualKm;
     private User owner;
     private String comments;
 
@@ -31,7 +31,7 @@ public class Car {
         this(0, null, null, null, null, 0, 0, 0, false, false, null, 0, 0, 0, null, null);
     }
 
-    public Car(int id, String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) {
+    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, User owner, String comments) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -86,27 +86,27 @@ public class Car {
         this.location = location;
     }
 
-    public int getSeats() {
+    public Integer getSeats() {
         return seats;
     }
 
-    public void setSeats(int seats) {
+    public void setSeats(Integer seats) {
         this.seats = seats;
     }
 
-    public int getDoors() {
+    public Integer getDoors() {
         return doors;
     }
 
-    public void setDoors(int doors) {
+    public void setDoors(Integer doors) {
         this.doors = doors;
     }
 
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(Integer year) {
         this.year = year;
     }
 
@@ -134,27 +134,27 @@ public class Car {
         this.fuel = fuel;
     }
 
-    public int getFuelEconomy() {
+    public Integer getFuelEconomy() {
         return fuelEconomy;
     }
 
-    public void setFuelEconomy(int fuelEconomy) {
+    public void setFuelEconomy(Integer fuelEconomy) {
         this.fuelEconomy = fuelEconomy;
     }
 
-    public int getEstimatedValue() {
+    public Integer getEstimatedValue() {
         return estimatedValue;
     }
 
-    public void setEstimatedValue(int estimatedValue) {
+    public void setEstimatedValue(Integer estimatedValue) {
         this.estimatedValue = estimatedValue;
     }
 
-    public int getOwnerAnnualKm() {
+    public Integer getOwnerAnnualKm() {
         return ownerAnnualKm;
     }
 
-    public void setOwnerAnnualKm(int ownerAnnualKm) {
+    public void setOwnerAnnualKm(Integer ownerAnnualKm) {
         this.ownerAnnualKm = ownerAnnualKm;
     }
 

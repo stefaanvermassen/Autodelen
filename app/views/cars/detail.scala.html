@@ -40,6 +40,8 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     }
 @app("Details Auto", stylesheets, scripts) {
+    @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -76,10 +78,28 @@
                         @detailPartial(car)
                     </div>
                 </div>
+
+                @if(car.getOwner.getId == user.getId() || DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Autogebonden kosten
+                        </div>
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <p>Vul hier als eigenaar uw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.</p>
+                            <button class="btn btn-primary" onclick="loadModal(@car.getId)">Nieuwe kost</button>
+                            <p></p>
+
+                            <input name="car_id" value="@car.getId" class="searchTextField hidden">
+                            @carCostsPartial()
+                        </div>
+                    </div>
                 }
             </div>
         </div>
     </div>
     <!-- /page-wrapper -->
     <div id="resultModal"></div>
+    }
+    }
 }

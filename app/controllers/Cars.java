@@ -1,5 +1,6 @@
 package controllers;
 
+import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
@@ -18,7 +19,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import views.html.cars.*;
-import views.html.cars.addcar;
+import views.html.cars.edit;
 import views.html.cars.addcarcostmodal;
 import views.html.cars.carCostsAdmin;
 import views.html.cars.carCostspage;
@@ -35,7 +36,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static controllers.util.Addresses.getCountryList;
+import static controllers.util.Addresses.modifyAddress;
 
 
 /**
@@ -46,29 +53,78 @@ public class Cars extends Controller {
     private static final int PAGE_SIZE = 10;
     private static final int PAGE_SIZE_CAR_COSTS = 10;
 
+    private static Map<String, CarFuel> fuelMap;
+    private static Map<CarFuel, String> reverseFuelMap;
+    private static List<String> fuelList;
+
+    public static Map<String, CarFuel> getFuelMap() {
+        if(fuelMap == null) {
+            fuelMap = new HashMap<>();
+            fuelMap.put("Biodiesel", CarFuel.BIODIESEL);
+            fuelMap.put("Diesel", CarFuel.DIESEL);
+            fuelMap.put("Electrisch", CarFuel.ELECTRIC);
+            fuelMap.put("Gas", CarFuel.GAS);
+            fuelMap.put("Hybride", CarFuel.HYBRID);
+            fuelMap.put("Benzine", CarFuel.PETROL);
+        }
+        return fuelMap;
+    }
+
+    public static Map<CarFuel,String> getReverseFuelMap() {
+        if(reverseFuelMap == null) {
+            reverseFuelMap = new HashMap<>();
+            for(String s : getFuelMap().keySet()) {
+                reverseFuelMap.put(getFuelMap().get(s),s);
+            }
+        }
+        return reverseFuelMap;
+    }
+
+    public static List<String> getFuelList() {
+        if(fuelList == null) {
+            fuelList = new ArrayList<>();
+            fuelList.addAll(getFuelMap().keySet());
+        }
+        return fuelList;
+    }
+
     public static class CarModel {
 
         public String name;
         public String brand;
         public String type;
-        public int seats;
-        public int doors;
+        public Integer seats;
+        public Integer doors;
         public boolean gps;
         public boolean hook;
-        public int year;
-        public CarFuel fuel;
-        public int fuelEconomy;
-        public int estimatedValue;
-        public int ownerAnnualKm;
+        public Integer year;
+        public String fuel;
+        public Integer fuelEconomy;
+        public Integer estimatedValue;
+        public Integer ownerAnnualKm;
         public String comments;
 
-        public String address_zip;
-        public String address_city;
-        public String address_street;
-        public String address_number;
-        public String address_bus;
+        public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
-        //TODO: check input (year,...)
+        public void populate(Car car) {
+            if(car == null) return;
+
+            name = car.getName();
+            brand = car.getBrand();
+            type = car.getType();
+            seats = car.getSeats();
+            doors = car.getDoors();
+            year = car.getYear();
+            gps = car.isGps();
+            hook = car.isHook();
+            fuel = getReverseFuelMap().get(car.getFuel());
+            fuelEconomy = car.getFuelEconomy();
+            estimatedValue = car.getEstimatedValue();
+            ownerAnnualKm = car.getOwnerAnnualKm();
+            comments = car.getComments();
+
+            address.populate(car.getLocation());
+        }
 
         /**
          * Validates the form:
@@ -79,7 +135,7 @@ public class Cars extends Controller {
          */
         public String validate() {
             // TODO: temporary only check if city is not null
-            if("".equals(address_zip) || "".equals(address_city))
+            if(address.isEmpty())
                 return "Geef aub het adres op.";
             else if(name.length() <= 0)
                 return "Geef aub de autonaam op.";
@@ -89,21 +145,6 @@ public class Cars extends Controller {
                 return "Een auto heeft minstens 2 zitplaatsen";
             else if(doors < 2)
                 return "Een auto heeft minstens 2 deuren";
-            return null;
-        }
-    }
-
-    public static class CarCostModel {
-
-        public String description;
-        public BigDecimal amount;
-        public BigDecimal mileage;
-        public DateTime time;
-
-
-        public String validate() {
-            if("".equals(description))
-                return "Geef aub een beschrijving op.";
             return null;
         }
     }
@@ -175,11 +216,24 @@ public class Cars extends Controller {
     }
 
     /**
+     * Gets the picture for given car Id, or default one if missing
+     *
+     * @param carId The car for which the image is requested
+     * @return The image with correct content type
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result getPicture(int carId) {
+        //TODO: checks on whether other person can see this
+        // TODO: actual car picture
+        return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+    }
+
+    /**
      * @return A form to create a new car (only available to car_owner+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result newCar() {
-        return ok(addcar.render(Form.form(CarModel.class), 0));
+        return ok(edit.render(Form.form(CarModel.class), null, getCountryList(),getFuelList()));
     }
 
     /**
@@ -190,7 +244,7 @@ public class Cars extends Controller {
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
-            return badRequest(addcar.render(carForm, 0));
+            return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
@@ -198,15 +252,13 @@ public class Cars extends Controller {
                     User user = DatabaseHelper.getUserProvider().getUser();
                     CarModel model = carForm.get();
                     AddressDAO adao = context.getAddressDAO();
-                    // TODO: add country
-                    Address address = adao.createAddress("Belgium", model.address_zip, model.address_city, model.address_street,
-                            model.address_number, model.address_bus);
+                    Address address = modifyAddress(model.address, null, adao);
 
                     // TODO: also accept other users (only admin can do this)
-                    // TODO: get boolean out (hook and gps) of form, enum fuel, comments
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                            model.year, model.gps, model.hook, CarFuel.DIESEL, model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, user, "");
+                            model.year, model.gps, model.hook, getFuelMap().get(model.fuel), model.fuelEconomy, model.estimatedValue,
+                            model.ownerAnnualKm, user, model.comments);
+
                     context.commit();
 
                     if (car != null) {
@@ -215,7 +267,7 @@ public class Cars extends Controller {
                         );
                     } else {
                         carForm.error("Failed to add the car to the database. Contact administrator.");
-                        return badRequest(addcar.render(carForm, 0));
+                        return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
                     }
                 }
                 catch(DataAccessException ex){
@@ -250,30 +302,10 @@ public class Cars extends Controller {
                 }
 
                 CarModel model = new CarModel();
-                model.name = car.getName();
-                model.brand = car.getBrand();
-                model.type = car.getType();
-                model.seats = car.getSeats();
-                model.doors = car.getDoors();
-                model.year = car.getYear();
-                model.gps = car.isGps();
-                model.hook = car.isHook();
-                model.fuel = car.getFuel();
-                model.fuelEconomy = car.getFuelEconomy();
-                model.estimatedValue = car.getEstimatedValue();
-                model.ownerAnnualKm = car.getOwnerAnnualKm();
-                model.comments = car.getComments();
-
-                if(car.getLocation() != null) {
-                    model.address_street = car.getLocation().getStreet();
-                    model.address_number = car.getLocation().getNumber();
-                    model.address_bus = car.getLocation().getBus();
-                    model.address_zip = car.getLocation().getZip();
-                    model.address_city = car.getLocation().getCity();
-                }
+                model.populate(car);
 
                 Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
-                return ok(addcar.render(editForm, carId));
+                return ok(edit.render(editForm, car, getCountryList(),getFuelList()));
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -289,66 +321,62 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCarPost(int carId) {
-        Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
-        if (editForm.hasErrors()) {
-            return badRequest(addcar.render(editForm, carId));
-        } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                CarDAO dao = context.getCarDAO();
-                Car car = dao.getCar(carId);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(carId);
 
-                if (car == null) {
-                    flash("danger", "Car met ID=" + carId + " bestaat niet.");
-                    return badRequest(carList());
-                }
+            Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
+            if (editForm.hasErrors())
+                return badRequest(edit.render(editForm, car, getCountryList(),getFuelList()));
 
-                User currentUser = DatabaseHelper.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
-                    flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
-                    return badRequest(carList());
-                }
+            if (car == null) {
+                flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                return badRequest(carList());
+            }
 
-                try {
-                    CarModel carModel = editForm.get();
-                    car.setName(carModel.name);
-                    car.setBrand(carModel.brand);
-                    car.setType(carModel.type);
-                    car.setDoors(carModel.doors);
-                    car.setSeats(carModel.seats);
-                    car.setGps(carModel.gps);
-                    car.setHook(carModel.hook);
-                    car.setYear(carModel.year);
-                    car.setFuelEconomy(carModel.fuelEconomy);
-                    car.setEstimatedValue(carModel.estimatedValue);
-                    car.setOwnerAnnualKm(carModel.ownerAnnualKm);
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                return badRequest(carList());
+            }
 
-                    AddressDAO adao = context.getAddressDAO();
-                    Address address = car.getLocation();
-                    if(address == null) {
-                        address = adao.createAddress("Belgium", carModel.address_zip, carModel.address_city, carModel.address_street, carModel.address_number, carModel.address_bus);
-                        car.setLocation(address);
-                    } else {
-                        address.setCity(carModel.address_city);
-                        address.setBus(carModel.address_bus);
-                        address.setNumber(carModel.address_number);
-                        address.setStreet(carModel.address_street);
-                        address.setZip(carModel.address_zip);
-                        adao.updateAddress(address);
-                    }
+            try {
+                CarModel model = editForm.get();
+                car.setName(model.name);
+                car.setBrand(model.brand);
+                car.setType(model.type);
+                car.setDoors(model.doors);
+                car.setSeats(model.seats);
+                car.setGps(model.gps);
+                car.setHook(model.hook);
+                car.setFuel(getFuelMap().get(model.fuel));
+                car.setYear(model.year);
+                car.setFuelEconomy(model.fuelEconomy);
+                car.setEstimatedValue(model.estimatedValue);
+                car.setOwnerAnnualKm(model.ownerAnnualKm);
 
-                    car.setComments(carModel.comments);
-                    dao.updateCar(car);
+                AddressDAO adao = context.getAddressDAO();
+                Address address = car.getLocation();
+                boolean delete = model.address.isEmpty() && address != null;
+                car.setLocation(delete || model.address.isEmpty() ? null : modifyAddress(model.address, address, adao));
 
-                    context.commit();
-                    flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                    return detail(carId);
-                } catch (DataAccessException ex) {
-                    context.rollback();
-                    throw ex;
-                }
+                // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
+                // TODO: soft-delete addresses and keep references
+                if (delete)
+                    adao.deleteAddress(address);
+
+                car.setComments(model.comments);
+                dao.updateCar(car);
+
+                context.commit();
+                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                return detail(carId);
             } catch (DataAccessException ex) {
+                context.rollback();
                 throw ex;
             }
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 
@@ -412,6 +440,26 @@ public class Cars extends Controller {
             throw ex;
         }
     }
+
+    /************************
+     *      Car costs       *
+     ************************/
+
+    public static class CarCostModel {
+
+        public String description;
+        public BigDecimal amount;
+        public BigDecimal mileage;
+        public DateTime time;
+
+
+        public String validate() {
+            if("".equals(description))
+                return "Geef aub een beschrijving op.";
+            return null;
+        }
+    }
+
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result getCarCostModal(int id){

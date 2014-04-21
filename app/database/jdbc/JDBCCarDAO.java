@@ -179,7 +179,7 @@ public class JDBCCarDAO implements CarDAO{
     }
     
     @Override
-    public Car createCar(String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
+    public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, User owner, String comments) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement();
             ps.setString(1, name);
@@ -190,15 +190,39 @@ public class JDBCCarDAO implements CarDAO{
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
-            ps.setInt(5, seats);
-            ps.setInt(6, doors);
-            ps.setInt(7, year);
+            if(seats != null) {
+                ps.setInt(5, seats);
+            } else {
+                ps.setNull(5, Types.INTEGER);
+            }
+            if(doors != null) {
+                ps.setInt(6, doors);
+            } else {
+                ps.setNull(6, Types.INTEGER);
+            }
+            if(year != null) {
+                ps.setInt(7, year);
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
             ps.setBoolean(8, gps);
             ps.setBoolean(9, hook);
             ps.setString(10, fuel.toString());
-            ps.setInt(11, fuelEconomy);
-            ps.setInt(12, estimatedValue);
-            ps.setInt(13, ownerAnnualKm);
+            if(fuelEconomy != null) {
+                ps.setInt(11, fuelEconomy);
+            } else {
+                ps.setNull(11, Types.INTEGER);
+            }
+            if(estimatedValue!= null) {
+                ps.setInt(12, estimatedValue);
+            } else {
+                ps.setNull(12, Types.INTEGER);
+            }
+            if(ownerAnnualKm != null) {
+                ps.setInt(13, ownerAnnualKm);
+            } else {
+                ps.setNull(13, Types.INTEGER);
+            }
             // Owner cannot be null according to SQL script so this will throw an Exception
             if(owner != null) {
                 ps.setInt(14, owner.getId());
