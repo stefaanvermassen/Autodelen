@@ -6,8 +6,10 @@ import models.Setting;
 import models.User;
 import models.UserRole;
 import org.joda.time.DateTime;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.settings.editsysvar;
 import views.html.settings.overview;
 import views.html.settings.sysvars;
 
@@ -21,6 +23,14 @@ public class Settings extends Controller {
         public String value;
         public String name;
         public DateTime after;
+
+
+        public EditSettingModel(){}
+        public EditSettingModel(String value, String name, DateTime after){
+            this.value = value;
+            this.name = name;
+            this.after = after;
+        }
 
         public String validate(){
             return null; //TODO
@@ -78,7 +88,24 @@ public class Settings extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result editSysvar(int id){
-        return ok("edit request received.");
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            SettingDAO dao = context.getSettingDAO();
+            Setting setting = dao.getSetting(id);
+            if(setting == null){
+                flash("danger", "Deze setting ID bestaat niet.");
+                return redirect(routes.Settings.sysvarsOverview());
+            } else {
+                EditSettingModel model = new EditSettingModel(setting.getName(), setting.getValue(), setting.getAfterDate());
+                return ok(editsysvar.render(Form.form(EditSettingModel.class).fill(model), setting));
+            }
+        }
+
     }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result editSysvarPost(int id){
+        return ok("edit POST request received.");
+    }
+
 
 }
