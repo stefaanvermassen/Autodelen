@@ -33,6 +33,35 @@ public class ReserveControllerTest {
         user = helper.createRegisteredUser("test@test.com", "1234piano", "Pol", "Thijs",new UserRole[]{UserRole.CAR_USER});
     }
 
+    @Test
+    public void testGetCarModal() {
+        running(fakeApplication(), new Runnable() {
+
+            @Override
+            public void run() {
+                helper.setTestProvider();
+                loginCookie = helper.login(user,"1234piano");
+
+                // Test if we can see a reservation-screen of a car
+                // First create a car
+                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                Result result2 = callAction(
+                        controllers.routes.ref.Reserve.getCarModal(car.getId()),
+                        fakeRequest().withCookies(loginCookie)
+                );
+                assertEquals("Requesting carModal", OK, status(result2));
+
+                // Test if we can see a reservation-screen of a car that doesn't exist
+                Result result3 = callAction(
+                        controllers.routes.ref.Reserve.reserve(car.getId()-1),
+                        fakeRequest().withCookies(loginCookie)
+                );
+                assertEquals("Requesting carModal for unexisting car", BAD_REQUEST, status(result3));
+                helper.logout();
+            }
+        });
+    }
+
     /**
      * Tests method Reserve.reserve()
      * Once with an existing car, and once with a non-existing car
@@ -164,7 +193,6 @@ public class ReserveControllerTest {
                         helper.removeUserRole(user2, userRoles[i - 1]);
                     }
                     helper.addUserRole(user2, userRoles[i]);
-                    DatabaseHelper.getUserRoleProvider().invalidateRoles(user2);
 
                     // Now let's try to see the pages
 
@@ -188,8 +216,18 @@ public class ReserveControllerTest {
                     else
                         assertEquals("Requesting reserve as " + userRoles[i].toString(), UNAUTHORIZED, status(resultShowCarsPage));
 
-                    // reserve()
+                    // getCarModal()
                     Car car = helper.createCar("MijnenAuto" + i, "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
+                    Result resultGetCarModal = callAction(
+                            controllers.routes.ref.Reserve.getCarModal(car.getId()),
+                            fakeRequest().withCookies(loginCookie)
+                    );
+                    if(userRoles[i] == UserRole.CAR_USER || userRoles[i] == UserRole.SUPER_USER)
+                        assertEquals("Requesting carModal as as " + userRoles[i].toString(), OK, status(resultGetCarModal));
+                    else
+                        assertEquals("Requesting carModel as " + userRoles[i].toString(), UNAUTHORIZED, status(resultGetCarModal));
+
+                    // reserve()
                     Result result1 = callAction(
                             controllers.routes.ref.Reserve.reserve(car.getId()),
                             fakeRequest().withCookies(loginCookie)
