@@ -157,6 +157,10 @@
             </nav>
             <!-- /.navbar-static-top -->
 
+            @if("y".equals(session.get("impersonated"))){
+                <div class="impersonating">You are impersonating @user.toString!</div>
+            }
+
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">

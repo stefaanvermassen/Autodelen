@@ -37,21 +37,23 @@
                       <input name="status" value="@ReservationStatus.ACCEPTED.toString" class="searchTextField hidden">
                   </li>
                   <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
-                      Voorbij</a>
+                      Voorbij
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
                               Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { amount =>
                           @if(amount > 0) {
-                              <span style="background-color: #7b7b7b" class="topnumber">@amount</span>
+                              (@amount)
                           }
                       }
+                      </a>
                   </li>
                   <li id="tab_request"><a href="#resultpanel" data-toggle="tab">
-                      Aanvragen</a>
+                      Aanvragen
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { amount =>
                           @if(amount > 0) {
-                              <span style="background-color: #7b7b7b" class="topnumber">@amount</span>
+                              (@amount)
                           }
                       }
+                      </a>
                       <input name="status" value="@ReservationStatus.REQUEST.toString" class="hidden">
                   </li>
                   <li class="hidden"><button id="searchButton"></button></li>
