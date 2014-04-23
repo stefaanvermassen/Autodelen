@@ -320,6 +320,15 @@ CREATE TABLE `approvals` (
 )
 ENGINE=InnoDB;
 
+CREATE TABLE `settings` (
+  `setting_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `setting_name` CHAR(32) NOT NULL,
+  `setting_value` VARCHAR(256) NULL DEFAULT NULL,
+  `setting_after` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`setting_id`)
+)
+  ENGINE=InnoDB;
+
 DELIMITER $$
 
 CREATE TRIGGER Files_ins BEFORE INSERT ON Files FOR EACH ROW

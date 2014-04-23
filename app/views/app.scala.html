@@ -130,9 +130,15 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>@user.toString</span>
-                           <!-- <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture"> -->
-                                <img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">
+                            <span>@user.toString
+                                @if(session.get("impersonated") != null){
+                                    <span class="badge badge-warning">I</span>
+                                }
+                            </span>
+                            @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
+                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                                <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -260,6 +266,11 @@
                         <li @if(title == "Gebruikersrollen") {class="active"}>
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
                         </li>
+
+                        <li>
+                            <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
+                        </li>
+
                         <li @if(title == "Rapportering") {class="active"}>
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>

@@ -18,14 +18,16 @@ public class TestCarRidesDAO implements CarRideDAO {
 		rides = new ArrayList<>();
 	}
 
-	@Override
-	public CarRide createCarRide(Reservation reservation) throws DataAccessException {
-		CarRide ride = new CarRide(reservation);
-		rides.add(ride);
-		return ride;
-	}
+    @Override
+    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage) throws DataAccessException {
+        CarRide ride = new CarRide(reservation);
+        ride.setStartMileage(startMileage);
+        ride.setEndMileage(endMileage);
+        rides.add(ride);
+        return ride;
+    }
 
-	@Override
+    @Override
 	public CarRide getCarRide(int id) throws DataAccessException {
 		for(CarRide ride : rides){
 			if(ride.getReservation().getId()==id){

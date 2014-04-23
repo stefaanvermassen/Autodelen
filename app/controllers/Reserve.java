@@ -93,7 +93,7 @@ public class Reserve extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result getCarModal(int id){
         // TODO: hide from other users (badRequest)
 

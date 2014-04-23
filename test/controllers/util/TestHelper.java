@@ -64,11 +64,13 @@ public class TestHelper {
     public  void addUserRole(User user, UserRole role) {
         UserRoleDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
         dao.addUserRole(user.getId(), role);
+        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
     }
 
     public  void removeUserRole(User user, UserRole role) {
         UserRoleDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
         dao.removeUserRole(user.getId(), role);
+        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
     }
 
     public Car createCar(String name, String brand, String type,
