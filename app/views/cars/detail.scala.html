@@ -76,15 +76,8 @@
                         }
                     }
                 }
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen auto
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        @detailPartial(car)
-                    </div>
-                </div>
+
+                @detailPartial(car)
 
                 @if(car.getOwner.getId == user.getId() || DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
                     <div class="panel panel-default">
