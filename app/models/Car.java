@@ -24,14 +24,15 @@ public class Car {
     private Integer fuelEconomy;
     private Integer estimatedValue;
     private Integer ownerAnnualKm;
+    private TechnicalCarDetails technicalCarDetails;
     private User owner;
     private String comments;
 
     public Car() {
-        this(0, null, null, null, null, 0, 0, 0, false, false, null, 0, 0, 0, null, null);
+        this(0, null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null);
     }
 
-    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, User owner, String comments) {
+    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, User owner, String comments) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -46,6 +47,7 @@ public class Car {
         this.fuelEconomy = fuelEconomy;
         this.estimatedValue = estimatedValue;
         this.ownerAnnualKm = ownerAnnualKm;
+        this.technicalCarDetails = technicalCarDetails;
         this.owner = owner;
         this.comments = comments;
     }
@@ -158,6 +160,14 @@ public class Car {
         this.ownerAnnualKm = ownerAnnualKm;
     }
 
+    public TechnicalCarDetails getTechnicalCarDetails() {
+        return technicalCarDetails;
+    }
+
+    public void setTechnicalCarDetails(TechnicalCarDetails technicalCarDetails) {
+        this.technicalCarDetails = technicalCarDetails;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -181,22 +191,25 @@ public class Car {
 
         Car car = (Car) o;
 
-        if (doors != car.doors) return false;
-        if (estimatedValue != car.estimatedValue) return false;
-        if (fuelEconomy != car.fuelEconomy) return false;
         if (gps != car.gps) return false;
         if (hook != car.hook) return false;
         if (id != car.id) return false;
-        if (ownerAnnualKm != car.ownerAnnualKm) return false;
-        if (seats != car.seats) return false;
-        if (year != car.year) return false;
-        if (!brand.equals(car.brand)) return false;
+        if (brand != null ? !brand.equals(car.brand) : car.brand != null) return false;
         if (comments != null ? !comments.equals(car.comments) : car.comments != null) return false;
+        if (doors != null ? !doors.equals(car.doors) : car.doors != null) return false;
+        if (estimatedValue != null ? !estimatedValue.equals(car.estimatedValue) : car.estimatedValue != null)
+            return false;
         if (fuel != car.fuel) return false;
+        if (fuelEconomy != null ? !fuelEconomy.equals(car.fuelEconomy) : car.fuelEconomy != null) return false;
         if (location != null ? !location.equals(car.location) : car.location != null) return false;
-        if (!name.equals(car.name)) return false;
-        if (owner.getId() != car.owner.getId()) return false;
-        if (!type.equals(car.type)) return false;
+        if (name != null ? !name.equals(car.name) : car.name != null) return false;
+        if (owner != null ? owner.getId() != car.owner.getId() : car.owner != null) return false;
+        if (ownerAnnualKm != null ? !ownerAnnualKm.equals(car.ownerAnnualKm) : car.ownerAnnualKm != null) return false;
+        if (seats != null ? !seats.equals(car.seats) : car.seats != null) return false;
+        if (technicalCarDetails != null ? !technicalCarDetails.equals(car.technicalCarDetails) : car.technicalCarDetails != null)
+            return false;
+        if (type != null ? !type.equals(car.type) : car.type != null) return false;
+        if (year != null ? !year.equals(car.year) : car.year != null) return false;
 
         return true;
     }
@@ -204,20 +217,21 @@ public class Car {
     @Override
     public int hashCode() {
         int result = id;
-        result = 31 * result + name.hashCode();
-        result = 31 * result + brand.hashCode();
-        result = 31 * result + type.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (brand != null ? brand.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + seats;
-        result = 31 * result + doors;
-        result = 31 * result + year;
+        result = 31 * result + (seats != null ? seats.hashCode() : 0);
+        result = 31 * result + (doors != null ? doors.hashCode() : 0);
+        result = 31 * result + (year != null ? year.hashCode() : 0);
         result = 31 * result + (gps ? 1 : 0);
         result = 31 * result + (hook ? 1 : 0);
         result = 31 * result + (fuel != null ? fuel.hashCode() : 0);
-        result = 31 * result + fuelEconomy;
-        result = 31 * result + estimatedValue;
-        result = 31 * result + ownerAnnualKm;
-        result = 31 * result + owner.getId();
+        result = 31 * result + (fuelEconomy != null ? fuelEconomy.hashCode() : 0);
+        result = 31 * result + (estimatedValue != null ? estimatedValue.hashCode() : 0);
+        result = 31 * result + (ownerAnnualKm != null ? ownerAnnualKm.hashCode() : 0);
+        result = 31 * result + (technicalCarDetails != null ? technicalCarDetails.hashCode() : 0);
+        result = 31 * result + (owner != null ? owner.getId() : 0);
         result = 31 * result + (comments != null ? comments.hashCode() : 0);
         return result;
     }

@@ -2,13 +2,8 @@
     @import controllers.Cars;
     @import org.joda.time.format.DateTimeFormat
     @import database.DatabaseHelper;
-    @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
-        @if(car.getOwner.getId == user.getId()) {
-            <div class="alert alert-info alert-dismissable">
-                U bent eigenaar.
-            </div>
-        }
-        <div class="row">
+
+<div class="row">
 
     <div class="col-lg-4">
         <div class="well">
@@ -39,5 +34,4 @@
             Map placeholder
         </div>
     </div>
-    </div>
-}
+</div>

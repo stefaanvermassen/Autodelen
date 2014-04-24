@@ -184,7 +184,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
-                    return populateCarCost(rs, JDBCCarDAO.populateCar(rs, false, false));
+                    return populateCarCost(rs, JDBCCarDAO.populateCar(rs, false));
                 else return null;
             }catch (SQLException e){
                 throw new DataAccessException("Error reading reservation resultset", e);
@@ -198,7 +198,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
         List<CarCost> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(populateCarCost(rs, JDBCCarDAO.populateCar(rs, false, false)));
+                list.add(populateCarCost(rs, JDBCCarDAO.populateCar(rs, false)));
             }
             return list;
         }catch (SQLException e){

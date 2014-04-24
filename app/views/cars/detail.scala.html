@@ -54,21 +54,28 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Auto's</h1>
-                @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
-                    @flashes()
-                    @if(isAdmin) {
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                    @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                        @flashes()
+                        @if(isAdmin || car.getOwner.getId == user.getId()) {
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                                </div>
+                                    <!-- /.panel-heading -->
+                                <div class="panel-body">
+                                    @if(car.getOwner.getId == user.getId()) {
+                                        <div class="alert alert-info alert-dismissable">
+                                            U bent eigenaar.
+                                        </div>
+                                    }
+                                    <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
+                                    <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
+                                </div>
                             </div>
-                                <!-- /.panel-heading -->
-                            <div class="panel-body">
-                                <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
-                                <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
-                            </div>
-                        </div>
+                        }
                     }
-
+                }
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen auto
@@ -100,6 +107,5 @@
     </div>
     <!-- /page-wrapper -->
     <div id="resultModal"></div>
-    }
     }
 }

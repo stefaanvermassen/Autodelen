@@ -1,7 +1,16 @@
 @(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
 @import database.DatabaseHelper;
+@stylesheets = {
+    <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
 
-@app(if (car == null) "Nieuwe auto" else "Bewerk auto") {
+}
+@scripts = {
+    <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+
+}
+
+@app(if (car == null) "Nieuwe auto" else "Bewerk auto", stylesheets, scripts) {
 
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -20,6 +29,9 @@
                     </div>
                 }
                 <div class="panel panel-default">
+                    <div class="panel-header">
+                        
+                    </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
 
@@ -31,12 +43,52 @@
                             }
                             <!-- TODO: profile picture-->
                         </div>
+                        @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                            @if(isAdmin) {
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="receiver">Eigenaar</label>
+                                        @if(form("userEmail").value){
+                                            @defining(DatabaseHelper.getUserProvider().getUser(form("userEmail").value)) { user =>
+                                                <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                    <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                                    <input type="hidden" name="userEmail" value="@user.getEmail" />
+                                                    <ul class="dropdown-menu" role="menu"></ul>
+                                                </div>
+                                            }
+                                        }else{
+                                            @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                                                <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                    <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
+                                                    <input type="hidden" name="userEmail" value="@user.getEmail"/>
+                                                    <ul class="dropdown-menu" role="menu"></ul>
+                                                </div>
+                                            }
+                                        }
+                                </div>
+                            }
+                        }
                         <div class="form-group">
-                            <p class="form-control-static h2">
-                                @helper.inputText(form("name"), '_label -> "Autonaam", 'placeholder -> "Autonaam")
-                                @helper.inputText(form("brand"), '_label -> "Merk", 'placeholder -> "Merk")
-                                @helper.inputText(form("type"), '_label -> "Type", 'placeholder -> "Type")
-                            </p>
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="name">Autonaam</label>
+                                    <div class="col-md-12">
+                                        <input id="name" name="name" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("name").value">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="brand">Automerk</label>
+                                    <div class="col-md-12">
+                                        <input id="brand" name="brand" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("brand").value">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="type">Type</label>
+                                    <div class="col-md-12">
+                                        <input id="type" name="type" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("type").value">
+                                    </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </div>
                         <!-- /.panel-body -->
@@ -53,34 +105,115 @@
                         <div class="form-group">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h3 class="panel-title">Details</h3>
+                                    <h3 class="panel-title">Adres</h3>
                                 </div>
                                 <div class="panel-body">
-                                    @helper.inputText(form("seats"), '_label -> "Aantal zitplaatsen", 'placeholder -> "Aantal zitplaatsen", 'type -> "number")
-                                    @helper.inputText(form("doors"), '_label -> "Aantal deuren", 'placeholder -> "Aantal deuren", 'type -> "number")
-                                    @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof")
-                                    @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
-                                    @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
-                                    @helper.inputText(form("year"), '_label -> "Bouwjaar", 'placeholder -> "Bouwjaar", 'type -> "number")
-                                    @helper.inputText(form("fuelEconomy"), '_label -> "Gemiddeld verbruik (per 100 km)", 'placeholder -> "Gemiddeld verbruik (per 100 km)", 'type -> "number")
-                                    @helper.inputText(form("estimatedValue"), '_label -> "Geschatte huidige waarde", 'placeholder -> "Geschatte huidige waarde", 'type -> "number")
-                                    @helper.inputText(form("ownerAnnualKm"), '_label -> "Gemiddeld aantal kilometers (per jaar)", 'placeholder -> "Gemiddeld aantal kilometers (per jaar)", 'type -> "number")
-                                    @helper.textarea(form("comments"), '_label -> "Commentaar", 'placeholder -> "Commentaar")
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.street">Straat</label>
+                                            <div class="col-md-12">
+                                                <input id="address.street" name="address.street" type="text" class="form-control input-md" value="@form("address.street").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.number">Nummer</label>
+                                            <div class="col-md-12">
+                                                <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" value="@form("address.number").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.bus">Bus</label>
+                                            <div class="col-md-12">
+                                                <input id="address.bus" maxlength="3" name="address.bus" type="text" class="form-control input-md" value="@form("address.bus").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.zipCode">Postcode</label>
+                                            <div class="col-md-12">
+                                                <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" value="@form("address.zipCode").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.city">Stad</label>
+                                            <div class="col-md-12">
+                                                <input id="address.city" name="address.city" type="text" class="form-control input-md" value="@form("address.city").value">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                        @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land")
+                                        </div>
+                                    </fieldset>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h3 class="panel-title">Adres</h3>
+                                    <h3 class="panel-title">Details</h3>
                                 </div>
                                 <div class="panel-body">
-                                    @helper.inputText(form("address.street"), '_label -> "Straat", 'placeholder -> "Straat")
-                                    @helper.inputText(form("address.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
-                                    @helper.inputText(form("address.city"), '_label -> "Stad", 'placeholder -> "Stad")
-                                    @helper.inputText(form("address.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
-                                    @helper.inputText(form("address.bus"), '_label -> "Bus", 'placeholder -> "Bus")
-                                    @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land")
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="seats">Aantal zitplaatsen</label>
+                                            <div class="col-md-12">
+                                                <input id="seats" name="seats" type="number" class="form-control input-md" value="@form("seats").value">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="doors">Aantal deuren</label>
+                                            <div class="col-md-12">
+                                                <input id="doors" name="doors" type="number" class="form-control input-md" value="@form("doors").value">
+                                            </div>
+                                        </div>
+                                            <div class="col-md-12">
+                                                @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
+                                            </div>
+                                            <div class="col-md-12">
+                                                @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
+                                            </div>
+                                            <div class="col-md-12">
+                                                @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof")
+                                            </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="year">Bouwjaar</label>
+                                            <div class="col-md-12">
+                                                <input id="year" name="year" type="number" class="form-control input-md" value="@form("year").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="fuelEconomy">Gemiddeld verbruik (per 100 km)</label>
+                                            <div class="col-md-12">
+                                                <input id="fuelEconomy" name="fuelEconomy" type="number" class="form-control input-md" value="@form("fuelEconomy").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="estimatedValue">Geschatte huidige waarde</label>
+                                            <div class="col-md-12">
+                                                <input id="estimatedValue" name="estimatedValue" type="number" class="form-control input-md" value="@form("estimatedValue").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="ownerAnnualKm">Gemiddeld aantal kilometers (per jaar)</label>
+                                            <div class="col-md-12">
+                                                <input id="ownerAnnualKm" name="ownerAnnualKm" type="number" class="form-control input-md" value="@form("ownerAnnualKm").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-1" for="comments">Commentaar</label>
+                                            <div class="col-md-12">
+                                                <textarea id="comments" name="comments" class="form-control input-md" rows="6" maxlength="256">@form("comments").value</textarea>
+                                            </div>
+                                        </div>
+                                    </fieldset>
                                 </div>
                             </div>
                         </div>
@@ -91,11 +224,30 @@
                                     <h3 class="panel-title">Technische details</h3>
                                 </div>
                                 <div class="panel-body">
-                                    <label class="h4">Nummerplaat</label>
-                                    <p class="form-control-static">XXX-XXX</p>
-                                        <!-- TODO: technische details, verzekering?, gepriviligeerden toewijzen  -->
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="licensePlate">Nummerplaat</label>
+                                            <div class="col-md-12">
+                                                <input id="licensePlate" name="licensePlate" type="text" class="form-control input-md" value="@form("licensePlate").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
+                                            <div class="col-md-12">
+                                                <input id="registration" name="registration" type="text" class="form-control input-md" value="@form("registration").value">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="chassisNumber">Chassisnummer</label>
+                                            <div class="col-md-12">
+                                                <input id="chassisNumber" name="chassisNumber" type="number" class="form-control input-md" value="@form("chassisNumber").value">
+                                            </div>
+                                        </div>
+                                    </fieldset>
                                 </div>
                             </div>
+                            <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
                         </div>
                         <div class="form-group">
                             @if(car == null) {

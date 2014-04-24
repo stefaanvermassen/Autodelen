@@ -90,6 +90,8 @@ public class Cars extends Controller {
 
     public static class CarModel {
 
+        public String userEmail;
+
         public String name;
         public String brand;
         public String type;
@@ -104,10 +106,17 @@ public class Cars extends Controller {
         public Integer ownerAnnualKm;
         public String comments;
 
+        // TechnicalCarDetails
+        public String licensePlate;
+        public String registration;
+        public Integer chassisNumber;
+
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public void populate(Car car) {
             if(car == null) return;
+
+            userEmail = car.getOwner().getEmail();
 
             name = car.getName();
             brand = car.getBrand();
@@ -123,6 +132,12 @@ public class Cars extends Controller {
             ownerAnnualKm = car.getOwnerAnnualKm();
             comments = car.getComments();
 
+            if(car.getTechnicalCarDetails() != null) {
+                licensePlate = car.getTechnicalCarDetails().getLicensePlate();
+                registration = car.getTechnicalCarDetails().getRegistration();
+                chassisNumber = car.getTechnicalCarDetails().getChassisNumber();
+            }
+
             address.populate(car.getLocation());
         }
 
@@ -134,18 +149,22 @@ public class Cars extends Controller {
          * @return An error string or null
          */
         public String validate() {
-            // TODO: temporary only check if city is not null
+            String error = "";
+            if("".equals(userEmail))
+                error += "Geef een eigenaar op.<br>";
             if(address.isEmpty())
-                return "Geef aub het adres op.";
-            else if(name.length() <= 0)
-                return "Geef aub de autonaam op.";
-            else if(brand.length() <= 0)
-                return "Geef aub het automerk op.";
-            else if(seats < 2)
-                return "Een auto heeft minstens 2 zitplaatsen";
-            else if(doors < 2)
-                return "Een auto heeft minstens 2 deuren";
-            return null;
+                error += "Geef het adres op.<br>";
+            if(name.length() <= 0)
+                error +=  "Geef de autonaam op.<br>";
+            if(brand.length() <= 0)
+                error +=  "Geef het automerk op.<br>";
+            if(seats != null && seats < 2)
+                error +=  "Een auto heeft minstens 2 zitplaatsen.<br>";
+            if(doors != null && doors < 2)
+                error +=  "Een auto heeft minstens 2 deuren.<br>";
+
+            if("".equals(error)) return null;
+            else return error;
         }
     }
 
@@ -254,10 +273,20 @@ public class Cars extends Controller {
                     AddressDAO adao = context.getAddressDAO();
                     Address address = modifyAddress(model.address, null, adao);
 
-                    // TODO: also accept other users (only admin can do this)
+                    User owner = user;
+                    if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                            || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                        // User is permitted to add cars for other users
+                        owner = DatabaseHelper.getUserProvider().getUser(model.userEmail);
+                    }
+                    TechnicalCarDetails technicalCarDetails = null;
+                    if((model.licensePlate != null && !model.licensePlate.equals("")) || (model.registration != null && !model.registration.equals(""))
+                            || (model.chassisNumber != null && model.chassisNumber != 0)) {
+                        technicalCarDetails = new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber);
+                    }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.gps, model.hook, getFuelMap().get(model.fuel), model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, user, model.comments);
+                            model.ownerAnnualKm, technicalCarDetails, owner, model.comments);
 
                     context.commit();
 
@@ -345,16 +374,48 @@ public class Cars extends Controller {
                 car.setName(model.name);
                 car.setBrand(model.brand);
                 car.setType(model.type);
-                car.setDoors(model.doors);
-                car.setSeats(model.seats);
+                if(model.doors != null)
+                    car.setDoors(model.doors);
+                if(model.seats != null)
+                    car.setSeats(model.seats);
                 car.setGps(model.gps);
                 car.setHook(model.hook);
                 car.setFuel(getFuelMap().get(model.fuel));
-                car.setYear(model.year);
-                car.setFuelEconomy(model.fuelEconomy);
-                car.setEstimatedValue(model.estimatedValue);
-                car.setOwnerAnnualKm(model.ownerAnnualKm);
-
+                if(model.year != null)
+                    car.setYear(model.year);
+                else
+                    car.setYear(null);
+                if(model.fuelEconomy != null)
+                    car.setFuelEconomy(model.fuelEconomy);
+                else
+                    car.setFuelEconomy(null);
+                if(model.estimatedValue != null)
+                    car.setEstimatedValue(model.estimatedValue);
+                else
+                    car.setEstimatedValue(null);
+                if(model.ownerAnnualKm != null)
+                    car.setOwnerAnnualKm(model.ownerAnnualKm);
+                else
+                    car.setOwnerAnnualKm(null);
+                if(car.getTechnicalCarDetails() == null) {
+                    if((model.licensePlate != null && !model.licensePlate.equals("")) || (model.registration != null && !model.registration.equals(""))
+                            || (model.chassisNumber != null && model.chassisNumber != 0))
+                        car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber));
+                }
+                else {
+                    if(model.licensePlate != null && !model.licensePlate.equals(""))
+                        car.getTechnicalCarDetails().setLicensePlate(model.licensePlate);
+                    else
+                        car.getTechnicalCarDetails().setLicensePlate(null);
+                    if(model.registration != null && !model.registration.equals(""))
+                        car.getTechnicalCarDetails().setRegistration(model.registration);
+                    else
+                        car.getTechnicalCarDetails().setRegistration(null);
+                    if(model.chassisNumber != null && model.chassisNumber != 0)
+                        car.getTechnicalCarDetails().setChassisNumber(model.chassisNumber);
+                    else
+                        car.getTechnicalCarDetails().setChassisNumber(null);
+                }
                 AddressDAO adao = context.getAddressDAO();
                 Address address = car.getLocation();
                 boolean delete = model.address.isEmpty() && address != null;
@@ -366,6 +427,14 @@ public class Cars extends Controller {
                     adao.deleteAddress(address);
 
                 car.setComments(model.comments);
+
+                User user = DatabaseHelper.getUserProvider().getUser();
+                if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                        || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                    // User is permitted to add cars for other users
+                    car.setOwner(DatabaseHelper.getUserProvider().getUser(model.userEmail));
+                }
+
                 dao.updateCar(car);
 
                 context.commit();
