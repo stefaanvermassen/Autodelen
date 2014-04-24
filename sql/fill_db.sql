@@ -1,6 +1,7 @@
 use autodelen;
 source implementation.sql;
 source templates.sql;
+source settings.sql;
 source random_addresses.sql;
 source random_users.sql;
 source random_cars.sql;
