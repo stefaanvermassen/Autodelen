@@ -87,6 +87,11 @@ public class TestDataAccessContext implements DataAccessContext {
     }
 
     @Override
+    public SettingDAO getSettingDAO() {
+        return null;
+    }
+
+    @Override
     public void begin() {
 
     }
