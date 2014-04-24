@@ -52,11 +52,6 @@ public class TestCarDAO implements CarDAO{
 	}
 
 	@Override
-	public Filter createCarFilter() {
-		return new JDBCFilter();
-	}
-
-	@Override
 	public Car createCar(String name, String brand, String type,
 			Address location, int seats, int doors, int year, boolean gps,
 			boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue,
