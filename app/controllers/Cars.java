@@ -1,10 +1,12 @@
 package controllers;
 
+import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
+import database.providers.UserRoleProvider;
 import models.*;
 import controllers.Security.RoleSecured;
 
@@ -17,12 +19,15 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import views.html.cars.*;
-import views.html.cars.addcar;
+import views.html.cars.edit;
 import views.html.cars.addcarcostmodal;
 import views.html.cars.carCostsAdmin;
+import views.html.cars.carCostspage;
 import views.html.cars.cars;
+import views.html.cars.detail;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
+import views.html.flashes;
 import views.html.profile.uploadPicture;
 import views.html.reserve.reservationDetailsPartial;
 
@@ -31,7 +36,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static controllers.util.Addresses.getCountryList;
+import static controllers.util.Addresses.modifyAddress;
 
 
 /**
@@ -40,31 +51,95 @@ import java.util.List;
 public class Cars extends Controller {
 
     private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE_CAR_COSTS = 10;
+
+    private static Map<String, CarFuel> fuelMap;
+    private static Map<CarFuel, String> reverseFuelMap;
+    private static List<String> fuelList;
+
+    public static Map<String, CarFuel> getFuelMap() {
+        if(fuelMap == null) {
+            fuelMap = new HashMap<>();
+            fuelMap.put("Biodiesel", CarFuel.BIODIESEL);
+            fuelMap.put("Diesel", CarFuel.DIESEL);
+            fuelMap.put("Electrisch", CarFuel.ELECTRIC);
+            fuelMap.put("Gas", CarFuel.GAS);
+            fuelMap.put("Hybride", CarFuel.HYBRID);
+            fuelMap.put("Benzine", CarFuel.PETROL);
+        }
+        return fuelMap;
+    }
+
+    public static Map<CarFuel,String> getReverseFuelMap() {
+        if(reverseFuelMap == null) {
+            reverseFuelMap = new HashMap<>();
+            for(String s : getFuelMap().keySet()) {
+                reverseFuelMap.put(getFuelMap().get(s),s);
+            }
+        }
+        return reverseFuelMap;
+    }
+
+    public static List<String> getFuelList() {
+        if(fuelList == null) {
+            fuelList = new ArrayList<>();
+            fuelList.addAll(getFuelMap().keySet());
+        }
+        return fuelList;
+    }
 
     public static class CarModel {
+
+        public String userEmail;
 
         public String name;
         public String brand;
         public String type;
-        public int seats;
-        public int doors;
+        public Integer seats;
+        public Integer doors;
         public boolean gps;
         public boolean hook;
-        public int year;
-        public CarFuel fuel;
-        public int fuelEconomy;
-        public int estimatedValue;
-        public int ownerAnnualKm;
+        public Integer year;
+        public String fuel;
+        public Integer fuelEconomy;
+        public Integer estimatedValue;
+        public Integer ownerAnnualKm;
         public String comments;
 
-        // TODO: remove when user can't add cars unless his address is specified
-        public String address_zip;
-        public String address_city;
-        public String address_street;
-        public String address_number;
-        public String address_bus;
+        // TechnicalCarDetails
+        public String licensePlate;
+        public String registration;
+        public Integer chassisNumber;
 
-        //TODO: check input (year,...)
+        public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
+
+        public void populate(Car car) {
+            if(car == null) return;
+
+            userEmail = car.getOwner().getEmail();
+
+            name = car.getName();
+            brand = car.getBrand();
+            type = car.getType();
+            seats = car.getSeats();
+            doors = car.getDoors();
+            year = car.getYear();
+            gps = car.isGps();
+            hook = car.isHook();
+            fuel = getReverseFuelMap().get(car.getFuel());
+            fuelEconomy = car.getFuelEconomy();
+            estimatedValue = car.getEstimatedValue();
+            ownerAnnualKm = car.getOwnerAnnualKm();
+            comments = car.getComments();
+
+            if(car.getTechnicalCarDetails() != null) {
+                licensePlate = car.getTechnicalCarDetails().getLicensePlate();
+                registration = car.getTechnicalCarDetails().getRegistration();
+                chassisNumber = car.getTechnicalCarDetails().getChassisNumber();
+            }
+
+            address.populate(car.getLocation());
+        }
 
         /**
          * Validates the form:
@@ -74,33 +149,22 @@ public class Cars extends Controller {
          * @return An error string or null
          */
         public String validate() {
-            // TODO: temporary only check if city is not null
-            if("".equals(address_zip) || "".equals(address_city))
-                return "Geef aub het adres op.";
-            else if(name.length() <= 0)
-                return "Geef aub de autonaam op.";
-            else if(brand.length() <= 0)
-                return "Geef aub het automerk op.";
-            else if(seats < 2)
-                return "Een auto heeft minstens 2 zitplaatsen";
-            else if(doors < 2)
-                return "Een auto heeft minstens 2 deuren";
-            return null;
-        }
-    }
+            String error = "";
+            if("".equals(userEmail))
+                error += "Geef een eigenaar op.<br>";
+            if(address.isEmpty())
+                error += "Geef het adres op.<br>";
+            if(name.length() <= 0)
+                error +=  "Geef de autonaam op.<br>";
+            if(brand.length() <= 0)
+                error +=  "Geef het automerk op.<br>";
+            if(seats != null && seats < 2)
+                error +=  "Een auto heeft minstens 2 zitplaatsen.<br>";
+            if(doors != null && doors < 2)
+                error +=  "Een auto heeft minstens 2 deuren.<br>";
 
-    public static class CarCostModel {
-
-        public String description;
-        public BigDecimal amount;
-        public BigDecimal mileage;
-        public DateTime time;
-
-
-        public String validate() {
-            if("".equals(description))
-                return "Geef aub een beschrijving op.";
-            return null;
+            if("".equals(error)) return null;
+            else return error;
         }
     }
 
@@ -120,6 +184,7 @@ public class Cars extends Controller {
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
+            // Doesn't need to be paginated, because a single user will never have a lot of cars
             List<Car> listOfCars = dao.getCarsOfUser(user.getId());
             return ok(cars.render(listOfCars));
         } catch (DataAccessException ex) {
@@ -170,11 +235,24 @@ public class Cars extends Controller {
     }
 
     /**
+     * Gets the picture for given car Id, or default one if missing
+     *
+     * @param carId The car for which the image is requested
+     * @return The image with correct content type
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result getPicture(int carId) {
+        //TODO: checks on whether other person can see this
+        // TODO: actual car picture
+        return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+    }
+
+    /**
      * @return A form to create a new car (only available to car_owner+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result newCar() {
-        return ok(addcar.render(Form.form(CarModel.class), 0));
+        return ok(edit.render(Form.form(CarModel.class), null, getCountryList(),getFuelList()));
     }
 
     /**
@@ -185,7 +263,7 @@ public class Cars extends Controller {
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
-            return badRequest(addcar.render(carForm, 0));
+            return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
@@ -193,15 +271,23 @@ public class Cars extends Controller {
                     User user = DatabaseHelper.getUserProvider().getUser();
                     CarModel model = carForm.get();
                     AddressDAO adao = context.getAddressDAO();
-                    // TODO: add country
-                    Address address = adao.createAddress("Belgium", model.address_zip, model.address_city, model.address_street,
-                            model.address_number, model.address_bus);
+                    Address address = modifyAddress(model.address, null, adao);
 
-                    // TODO: also accept other users (only admin can do this)
-                    // TODO: get boolean out (hook and gps) of form, enum fuel, comments
+                    User owner = user;
+                    if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                            || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                        // User is permitted to add cars for other users
+                        owner = DatabaseHelper.getUserProvider().getUser(model.userEmail);
+                    }
+                    TechnicalCarDetails technicalCarDetails = null;
+                    if((model.licensePlate != null && !model.licensePlate.equals("")) || (model.registration != null && !model.registration.equals(""))
+                            || (model.chassisNumber != null && model.chassisNumber != 0)) {
+                        technicalCarDetails = new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber);
+                    }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                            model.year, model.gps, model.hook, CarFuel.DIESEL, model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, user, "");
+                            model.year, model.gps, model.hook, getFuelMap().get(model.fuel), model.fuelEconomy, model.estimatedValue,
+                            model.ownerAnnualKm, technicalCarDetails, owner, model.comments);
+
                     context.commit();
 
                     if (car != null) {
@@ -210,7 +296,7 @@ public class Cars extends Controller {
                         );
                     } else {
                         carForm.error("Failed to add the car to the database. Contact administrator.");
-                        return badRequest(addcar.render(carForm, 0));
+                        return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
                     }
                 }
                 catch(DataAccessException ex){
@@ -245,30 +331,10 @@ public class Cars extends Controller {
                 }
 
                 CarModel model = new CarModel();
-                model.name = car.getName();
-                model.brand = car.getBrand();
-                model.type = car.getType();
-                model.seats = car.getSeats();
-                model.doors = car.getDoors();
-                model.year = car.getYear();
-                model.gps = car.isGps();
-                model.hook = car.isHook();
-                model.fuel = car.getFuel();
-                model.fuelEconomy = car.getFuelEconomy();
-                model.estimatedValue = car.getEstimatedValue();
-                model.ownerAnnualKm = car.getOwnerAnnualKm();
-                model.comments = car.getComments();
-
-                if(car.getLocation() != null) {
-                    model.address_street = car.getLocation().getStreet();
-                    model.address_number = car.getLocation().getNumber();
-                    model.address_bus = car.getLocation().getBus();
-                    model.address_zip = car.getLocation().getZip();
-                    model.address_city = car.getLocation().getCity();
-                }
+                model.populate(car);
 
                 Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
-                return ok(addcar.render(editForm, carId));
+                return ok(edit.render(editForm, car, getCountryList(),getFuelList()));
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -284,66 +350,102 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCarPost(int carId) {
-        Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
-        if (editForm.hasErrors()) {
-            return badRequest(addcar.render(editForm, carId));
-        } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                CarDAO dao = context.getCarDAO();
-                Car car = dao.getCar(carId);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(carId);
 
-                if (car == null) {
-                    flash("danger", "Car met ID=" + carId + " bestaat niet.");
-                    return badRequest(carList());
+            Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
+            if (editForm.hasErrors())
+                return badRequest(edit.render(editForm, car, getCountryList(),getFuelList()));
+
+            if (car == null) {
+                flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                return badRequest(carList());
+            }
+
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                return badRequest(carList());
+            }
+
+            try {
+                CarModel model = editForm.get();
+                car.setName(model.name);
+                car.setBrand(model.brand);
+                car.setType(model.type);
+                if(model.doors != null)
+                    car.setDoors(model.doors);
+                if(model.seats != null)
+                    car.setSeats(model.seats);
+                car.setGps(model.gps);
+                car.setHook(model.hook);
+                car.setFuel(getFuelMap().get(model.fuel));
+                if(model.year != null)
+                    car.setYear(model.year);
+                else
+                    car.setYear(null);
+                if(model.fuelEconomy != null)
+                    car.setFuelEconomy(model.fuelEconomy);
+                else
+                    car.setFuelEconomy(null);
+                if(model.estimatedValue != null)
+                    car.setEstimatedValue(model.estimatedValue);
+                else
+                    car.setEstimatedValue(null);
+                if(model.ownerAnnualKm != null)
+                    car.setOwnerAnnualKm(model.ownerAnnualKm);
+                else
+                    car.setOwnerAnnualKm(null);
+                if(car.getTechnicalCarDetails() == null) {
+                    if((model.licensePlate != null && !model.licensePlate.equals("")) || (model.registration != null && !model.registration.equals(""))
+                            || (model.chassisNumber != null && model.chassisNumber != 0))
+                        car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber));
+                }
+                else {
+                    if(model.licensePlate != null && !model.licensePlate.equals(""))
+                        car.getTechnicalCarDetails().setLicensePlate(model.licensePlate);
+                    else
+                        car.getTechnicalCarDetails().setLicensePlate(null);
+                    if(model.registration != null && !model.registration.equals(""))
+                        car.getTechnicalCarDetails().setRegistration(model.registration);
+                    else
+                        car.getTechnicalCarDetails().setRegistration(null);
+                    if(model.chassisNumber != null && model.chassisNumber != 0)
+                        car.getTechnicalCarDetails().setChassisNumber(model.chassisNumber);
+                    else
+                        car.getTechnicalCarDetails().setChassisNumber(null);
+                }
+                AddressDAO adao = context.getAddressDAO();
+                Address address = car.getLocation();
+                boolean delete = model.address.isEmpty() && address != null;
+                car.setLocation(delete || model.address.isEmpty() ? null : modifyAddress(model.address, address, adao));
+
+                // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
+                // TODO: soft-delete addresses and keep references
+                if (delete)
+                    adao.deleteAddress(address);
+
+                car.setComments(model.comments);
+
+                User user = DatabaseHelper.getUserProvider().getUser();
+                if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                        || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                    // User is permitted to add cars for other users
+                    car.setOwner(DatabaseHelper.getUserProvider().getUser(model.userEmail));
                 }
 
-                User currentUser = DatabaseHelper.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
-                    flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
-                    return badRequest(carList());
-                }
+                dao.updateCar(car);
 
-                try {
-                    CarModel carModel = editForm.get();
-                    car.setName(carModel.name);
-                    car.setBrand(carModel.brand);
-                    car.setType(carModel.type);
-                    car.setDoors(carModel.doors);
-                    car.setSeats(carModel.seats);
-                    car.setGps(carModel.gps);
-                    car.setHook(carModel.hook);
-                    car.setYear(carModel.year);
-                    car.setFuelEconomy(carModel.fuelEconomy);
-                    car.setEstimatedValue(carModel.estimatedValue);
-                    car.setOwnerAnnualKm(carModel.ownerAnnualKm);
-
-                    AddressDAO adao = context.getAddressDAO();
-                    Address address = car.getLocation();
-                    if(address == null) {
-                        address = adao.createAddress("Belgium", carModel.address_zip, carModel.address_city, carModel.address_street, carModel.address_number, carModel.address_bus);
-                        car.setLocation(address);
-                    } else {
-                        address.setCity(carModel.address_city);
-                        address.setBus(carModel.address_bus);
-                        address.setNumber(carModel.address_number);
-                        address.setStreet(carModel.address_street);
-                        address.setZip(carModel.address_zip);
-                        adao.updateAddress(address);
-                    }
-
-                    car.setComments(carModel.comments);
-                    dao.updateCar(car);
-
-                    context.commit();
-                    flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                    return detail(carId);
-                } catch (DataAccessException ex) {
-                    context.rollback();
-                    throw ex;
-                }
+                context.commit();
+                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                return detail(carId);
             } catch (DataAccessException ex) {
+                context.rollback();
                 throw ex;
             }
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 
@@ -357,20 +459,19 @@ public class Cars extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
-            CarCostDAO carCostDao = context.getCarCostDAO();
-            List<CarCost> carCostList = carCostDao.getCarCostListForCar(car);
 
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
-                return ok(detail.render(car, carCostList));
+                return ok(detail.render(car));
             }
         } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
         }
     }
+
 
     /**
      * TODO: delete this out of final version
@@ -409,6 +510,26 @@ public class Cars extends Controller {
         }
     }
 
+    /************************
+     *      Car costs       *
+     ************************/
+
+    public static class CarCostModel {
+
+        public String description;
+        public BigDecimal amount;
+        public BigDecimal mileage;
+        public DateTime time;
+
+
+        public String validate() {
+            if("".equals(description))
+                return "Geef aub een beschrijving op.";
+            return null;
+        }
+    }
+
+
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result getCarCostModal(int id){
         // TODO: hide from other users (badRequest)
@@ -437,10 +558,8 @@ public class Cars extends Controller {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
-                CarCostDAO carCostDao = context.getCarCostDAO();
-                List<CarCost> carCostList = carCostDao.getCarCostListForCar(car);
                 flash("danger", "Kost toevoegen mislukt.");
-                return badRequest(detail.render(car, carCostList));
+                return badRequest(detail.render(car));
             }catch(DataAccessException ex){
                 throw ex; //log?
             }
@@ -506,11 +625,66 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showCarCosts() {
+        return ok(carCostsAdmin.render());
+    }
+
+    public static Result showCarCostsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        // Check if admin or car owner
         User user = DatabaseHelper.getUserProvider().getUser();
+        UserRoleProvider userRoleProvider = DatabaseHelper.getUserRoleProvider();
+        if(!userRoleProvider.hasRole(user, UserRole.CAR_ADMIN) || !userRoleProvider.hasRole(user, UserRole.SUPER_USER)) {
+            String carIdString = filter.getValue(FilterField.CAR_ID);
+            int carId;
+            if(carIdString.equals("")) {
+                carId = -1;
+            } else {
+                carId = Integer.parseInt(carIdString);
+            }
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                CarDAO carDAO = context.getCarDAO();
+                List<Car> listOfCars = carDAO.getCarsOfUser(user.getId());
+                // Check if carId in cars
+                boolean isCarOfUser = false;
+                for(Car c : listOfCars) {
+                    if(c.getId() == carId) {
+                        isCarOfUser = true;
+                        break;
+                    }
+                }
+                if(!isCarOfUser) {
+                    flash("danger", "U bent niet de eigenaar van deze auto.");
+                    return badRequest(cars.render(listOfCars));
+                }
+
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
+        }
+
+        return ok(carCostList(page, field, asc, filter));
+
+    }
+
+    private static Html carCostList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
-            List<CarCost> carCostList = dao.getRequestedCarCostList();
-            return ok(carCostsAdmin.render(carCostList));
+
+            if(orderBy == null) {
+                orderBy = FilterField.CAR_COST_DATE;
+            }
+
+            List<CarCost> listOfResults = dao.getCarCostList(orderBy, asc, page, PAGE_SIZE_CAR_COSTS, filter);
+
+            int amountOfResults = dao.getAmountOfCarCosts(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE_CAR_COSTS);
+
+            return carCostspage.render(listOfResults, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -533,11 +707,11 @@ public class Cars extends Controller {
             dao.updateCarCost(carCost);
             context.commit();
             //Todo: send notification!
+
+            flash("succes", "Autokost succesvol geaccepteerd");
             if(returnToDetail==0){
-                flash("succes", "Autokost succesvol geaccepteerd");
                 return redirect(routes.Cars.showCarCosts());
             }else{
-                flash("succes", "Autokost succesvol geaccepteerd");
                 return redirect(routes.Cars.detail(carCost.getCar().getId()));
             }
         }catch(DataAccessException ex) {
@@ -578,12 +752,11 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result getProof(int proofId) {
-        User currentUser = DatabaseHelper.getUserProvider().getUser();
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
-            } catch (DataAccessException ex) {
-                throw ex;
-            }
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
 }

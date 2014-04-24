@@ -64,9 +64,10 @@ if(typeof beginOrder == 'undefined') {
     var beginOrder = "";
 }
 if(typeof beginFilter == 'undefined') {
-    var beginFilter = "";
+    var beginFilter = importSearchTextFields();
 }
 var pageLoaded = false;
+
 
 // Initially, we load the first page in ascending order, ordered by the default column, without filtering
 $(document).ready(loadPage(beginPage, beginAsc, beginOrder, beginFilter));
@@ -80,22 +81,27 @@ $(document).ready(loadPage(beginPage, beginAsc, beginOrder, beginFilter));
 var searchButton = document.getElementById("searchButton");
 if(searchButton != null) {
     searchButton.onclick = function () {
-        var searchFields = document.getElementsByClassName("searchTextField");
-        var values = new Array();
-        var fields = new Array();
-        for (var i = 0; i < searchFields.length; i++) {
-            var searchField = searchFields[i];
-            fields[i] = searchField.getAttribute('name');
-            values[i] = searchField.value;
-            if(fields[i].indexOf('=') != -1 || values[i].indexOf('=') != -1 ||
-                fields[i].indexOf(',') != -1 || values[i].indexOf(',') != -1) {
-                alert(errorMessageFilter);
-                return;
-            }
-        }
-        var searchString = createSearchString(fields, values);
+        var searchString = importSearchTextFields()
         loadPage(1, 1, "", searchString);
     }
+}
+
+function importSearchTextFields() {
+    var searchFields = document.getElementsByClassName("searchTextField");
+    var values = new Array();
+    var fields = new Array();
+    for (var i = 0; i < searchFields.length; i++) {
+        var searchField = searchFields[i];
+        fields[i] = searchField.getAttribute('name');
+        values[i] = searchField.value;
+        if(fields[i].indexOf('=') != -1 || values[i].indexOf('=') != -1 ||
+            fields[i].indexOf(',') != -1 || values[i].indexOf(',') != -1) {
+            alert(errorMessageFilter);
+            return;
+        }
+    }
+    var searchString = createSearchString(fields, values);
+    return searchString;
 }
 
 // The function to load a new page

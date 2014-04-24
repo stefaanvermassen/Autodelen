@@ -86,6 +86,20 @@ CREATE TABLE `UserRoles` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
+CREATE TABLE `TechnicalCarDetails` (
+	`details_id` INT NOT NULL AUTO_INCREMENT,
+	`details_car_license_plate` VARCHAR(64),
+	`details_car_registration` VARCHAR(64),
+	`details_car_chassis_number` INT(17),
+	`details_created_at` DATETIME,
+	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`details_id`),
+	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+
 CREATE TABLE `Cars` (
 	`car_id` INT NOT NULL AUTO_INCREMENT,
 	`car_name` VARCHAR(64) NOT NULL,
@@ -101,6 +115,7 @@ CREATE TABLE `Cars` (
 	`car_fuel_economy` INT,
 	`car_estimated_value` INT,
 	`car_owner_annual_km` INT,
+	`car_technical_details` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
 	`car_images_id` INT,
@@ -109,7 +124,8 @@ CREATE TABLE `Cars` (
 	PRIMARY KEY (`car_id`),
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES Users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES Addresses(`address_id`) ON DELETE CASCADE,
-	FOREIGN KEY (`car_images_id`) REFERENCES FileGroups(`file_group_id`)
+	FOREIGN KEY (`car_images_id`) REFERENCES FileGroups(`file_group_id`),
+	FOREIGN KEY (`car_technical_details`) REFERENCES TechnicalCarDetails(`details_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -124,21 +140,6 @@ CREATE TABLE `CarInsurances` (
 	`insurance_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`insurance_id`),
 	FOREIGN KEY (`insurance_car_id`) REFERENCES Cars(`car_id`) ON DELETE CASCADE
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
-
-CREATE TABLE `TechnicalCarDetails` (
-	`details_id` INT NOT NULL AUTO_INCREMENT,
-	`details_car_id` INT NOT NULL,
-	`details_car_license_plate` VARCHAR(64) NOT NULL DEFAULT '0',
-	`details_car_registration` VARCHAR(64) NOT NULL DEFAULT '0',
-	`details_car_chassis_number` INT(17) NOT NULL DEFAULT '0',
-	`details_created_at` DATETIME,
-	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`details_id`),
-	FOREIGN KEY (`details_car_id`) REFERENCES Cars(`car_id`) ON DELETE CASCADE,
-	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -350,6 +351,15 @@ CREATE TABLE `approvals` (
   CONSTRAINT `FK_approval_session` FOREIGN KEY (`approval_infosession`) REFERENCES `infosessions` (`infosession_id`)
 )
 ENGINE=InnoDB;
+
+CREATE TABLE `settings` (
+  `setting_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `setting_name` CHAR(32) NOT NULL,
+  `setting_value` VARCHAR(256) NULL DEFAULT NULL,
+  `setting_after` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`setting_id`)
+)
+  ENGINE=InnoDB;
 
 DELIMITER $$
 

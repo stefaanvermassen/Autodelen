@@ -408,7 +408,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -443,7 +443,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, user, comments);
         cars.add(car);
         sc.close();
     }
@@ -479,7 +479,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -612,7 +612,7 @@ public class JDBCDAOTest {
      */
     private void createCarRides() throws Exception {
         for(Reservation reservation : reservations) {
-            CarRide carRide = carRideDAO.createCarRide(reservation);
+            CarRide carRide = carRideDAO.createCarRide(reservation, 0, 0);
 
             carRides.add(carRide);
         }

@@ -1,123 +1,85 @@
-@(car: Car, carCostList: java.util.List[CarCost])
-    @import org.joda.time.format.DateTimeFormat
-    @import database.DatabaseHelper;
-    @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
-        @if(car.getOwner.getId == user.getId()) {
-            <div class="alert alert-info alert-dismissable">
-                U bent eigenaar.
-            </div>
-        }
-        <div class="row">
+@(car: Car)
+@import controllers.Cars;
+@import org.joda.time.format.DateTimeFormat
+@import database.DatabaseHelper;
+@defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-header">
 
-    <div class="col-lg-4">
-        <div class="well">
-            <p>
-                    <!-- TODO: mooie opmaak -->
-                <strong>Naam: </strong> @car.getName <br>
-                <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a> <br>
-                <strong>Adres: </strong> @car.getLocation <br>
-                <strong>Merk: </strong> @car.getBrand <br>
-                <strong>Type: </strong> @car.getType <br>
-                <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
-                <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
-                <strong>Aantal zitplaatsen: </strong> @car.getSeats <br>
-                <strong>Aantal deuren: </strong> @car.getDoors <br>
-                <strong>Bouwjaar: </strong> @car.getYear <br>
-                <strong>Gemiddeld verbruik (per 100 km): </strong> @car.getFuelEconomy <br>
-                <strong>Geschatte huidige waarde: </strong> @car.getEstimatedValue <br>
-                <strong>Gemiddeld aantal kilometers (per jaar): </strong> @car.getOwnerAnnualKm <br>
-                <strong>Commentaar: </strong> <br> @car.getComments
-                    <!-- TODO: fuel, Comments, (Laatste aanpassing?) -->
-                @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-            </p>
-        </div>
-    </div>
-    <div class="col-lg-8">
-        <div class="well">
-            Map placeholder
-        </div>
-    </div>
-    </div>
-    @if(car.getOwner.getId == user.getId() || DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
-            <h2>Autogebonden kosten</h2>
-        <p>
-            Vul hier als eigenaar uw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.
-            Hier horen geen ritgebonden kosten bij, zoals tankkosten.
+                </div>
+                    <!-- /.panel-heading -->
+                <div class="panel-body">
 
-        </p>
-        <button class="btn btn-primary" onclick="loadModal(@car.getId)">Nieuwe kost</button>
-        <p></p>
-        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-carCosts">
-            <thead>
-                <tr role="row">
-                    <th name="description" class="sortable" tabindex="0" >Beschrijving</th>
-                    <th name="time" class="sortable" tabindex="0" >Tijd</th>
-                    <th>Bedrag</th>
-                    <th>Status</th>
-                    <th>Bewijs</th>
-                    @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
-                        <th>Acties</th>
+                    @if(car == null) {
+                        <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                    } else {
+                        <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
                     }
-                </tr>
-            </thead>
-            <tbody>
-            @if(carCostList.isEmpty) {
-                <tr>
-                    <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="6">
-                        U heeft momenteel geen autogebonden kosten in het systeem.
-                    </td>
-                </tr>
-            } else {
-                @for(carCost <- carCostList) {
-                    <tr>
-                        <td>@carCost.getDescription</td>
-                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(carCost.getTime)</td>
-                        <td>@carCost.getAmount</td>
-                        <td>
-                            @carCost.getStatus match {
-                                case CarCostStatus.ACCEPTED => {
-                                    <span class="fa fa-check-circle"></span>
-                                }
-                                case CarCostStatus.REFUSED => {
-                                    <span class="fa fa-minus-circle"></span>
-                                }
-                                case CarCostStatus.REQUEST => {
-                                    <span class="fa fa-question-circle"></span>
-                                }
-                                case _ => {}
-                            }
-                            @carCost.getStatus.getDescription
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-xs">
-                                <a class="btn btn-primary" href="@routes.Cars.getProof(carCost.getProofId)">Link</a>
+                    <!-- TODO: profile picture-->
 
+                <h2>@car.getName</h2>
+                <h3>@car.getBrand @car.getType</h3>
+                <p> <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a></p>
 
-                            </div>
-                        </td>
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
-                            <td>
-                                @carCost.getStatus match {
-                                    case CarCostStatus.ACCEPTED => {
-                                        <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
-                                    }
-                                    case CarCostStatus.REFUSED => {
-                                        <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
-                                    }
-                                    case CarCostStatus.REQUEST => {
-                                        <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
-                                        <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
-                                    }
-                                    case _ => {}
-                                }
+                    <!-- /.panel-body -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+                <!-- /.panel -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Details
+                </div>
+                    <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Adres</h3>
+                        </div>
+                        <div class="panel-body">
+                            Map placeholder<br>
+                            <strong>Adres:</strong> @car.getLocation.toString
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Details</h3>
+                        </div>
+                        <div class="panel-body">
+                            <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
+                            <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
+                            <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                            <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                            <strong>Brandstof: </strong>  @{Cars.getReverseFuelMap().get(car.getFuel) } <br>
+                            <strong>Commentaar: </strong> <br> @car.getComments
+                        </div>
+                    </div>
 
-                            </td>
-                        }
-                    </tr>
-                }
-            }
-            </tbody>
-        </table>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Geheime details (enkel zichtbaar door admin en eigenaar)</h3>
+                        </div>
 
-    }
+                        <div class="panel-body">
+
+                            <strong>Bouwjaar: </strong> @if(car.getYear == null) { Onbekend } else { @car.getYear }<br>
+                            <strong>Gemiddeld verbruik (per 100 km): </strong> @if(car.getFuelEconomy == null) { Onbekend } else { @car.getFuelEconomy }<br>
+                            <strong>Geschatte huidige waarde: </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
+                            <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { @car.getTechnicalCarDetails.getRegistration }<br>
+                            <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
+                        </div>
+                    </div>
+                        <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
+                </div>
+                    <!-- /.panel-body -->
+            </div>
+                <!-- /.panel-default -->
+        </div>
+            <!-- /col-md-9 -->
+    </div>
 }

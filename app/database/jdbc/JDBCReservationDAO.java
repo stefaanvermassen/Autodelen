@@ -62,7 +62,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
-        Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs, false, false), JDBCUserDAO.populateUser(rs, false, false), new DateTime(rs.getTimestamp("reservation_from")), new DateTime(rs.getTimestamp("reservation_to")));
+        Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs, false), JDBCUserDAO.populateUser(rs, false, false), new DateTime(rs.getTimestamp("reservation_from")), new DateTime(rs.getTimestamp("reservation_to")));
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         return reservation;
     }

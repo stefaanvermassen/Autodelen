@@ -41,7 +41,8 @@ GET         /settings                               controllers.Settings.index()
 
 # Notifiers
 GET         /messages                               controllers.Messages.showMessages()
-GET         /messages/page                          controllers.Messages.showMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/sent/page                     controllers.Messages.showSentMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
 GET         /messages/new                           controllers.Messages.newMessage()
 GET         /messages/reply                         controllers.Messages.reply(userId: Int)
@@ -104,6 +105,12 @@ GET         /infosession/approval                   controllers.InfoSessions.req
 # Settings
 # TODO: REMOVE THIS!!!
 GET         /settings/instantadmin                  controllers.Settings.instantAdmin()
+GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(id: Int)
+POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost(id: Int)
+GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
+GET         /settings/sysvars/create                controllers.Settings.createSysvar()
+POST         /settings/sysvars/create                controllers.Settings.createSysvarPost()
+
 
 # Emailtemplates
 GET         /emailtemplate                          controllers.EmailTemplates.showExistingTemplates()
@@ -120,10 +127,12 @@ POST        /cars/new                               controllers.Cars.addNewCar()
 GET         /cars/view                              controllers.Cars.detail(id: Int)
 GET         /cars/edit                              controllers.Cars.editCar(carId: Int)
 POST        /cars/edit                              controllers.Cars.editCarPost(carId: Int)
+GET         /cars/picture                           controllers.Cars.getPicture(carId: Int)
 GET         /cars/delete                            controllers.Cars.removeCar(carId: Int)
 GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
 POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()
+GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
