@@ -53,7 +53,7 @@
                                 @for((message, index) <- messages.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
                                         <li>
-                                            <a href="#">
+                                            <a href="@routes.Messages.showMessages()">
                                                 <div>
                                                     @if(!message.isRead){
                                                         <strong>Dégage [ongelezen]</strong>
@@ -98,12 +98,12 @@
                                 @for((notification, index) <- notifications.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
                                         <li>
-                                            <a href="#">
+                                            <a href="@routes.Notifications.showNotifications()">
                                                 <div>
                                                     @if(!notification.getRead){
-                                                    <strong>Dégage [ongelezen]</strong>
+                                                    <strong>Dégage (ongelezen)</strong>
                                                         }else{
-                                                    <strong>Dégage</strong>
+                                                    Dégage
                                                         }
                                                     <span class="pull-right text-muted">
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
@@ -131,12 +131,14 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString
-                                @if("y".equals(session.get("impersonated"))){
+                                @if(session.get("impersonated") != null){
                                     <span class="badge badge-warning">I</span>
                                 }
                             </span>
-                           <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
-                            <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
+                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                                <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -154,6 +156,10 @@
                 <!-- /.navbar-top-links -->
             </nav>
             <!-- /.navbar-static-top -->
+
+            @if("y".equals(session.get("impersonated"))){
+                <div class="impersonating">You are impersonating @user.toString!</div>
+            }
 
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
@@ -182,7 +188,7 @@
                             </a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         }
 
@@ -203,7 +209,7 @@
                             }</a>
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i>Notificaties
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties
                             @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
                               @if(unread_number>0){
                                   <span class="sidenumber">@unread_number</span>
@@ -260,6 +266,11 @@
                         <li @if(title == "Gebruikersrollen") {class="active"}>
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
                         </li>
+
+                        <li>
+                            <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
+                        </li>
+
                         <li @if(title == "Rapportering") {class="active"}>
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>

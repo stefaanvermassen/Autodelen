@@ -209,7 +209,7 @@ CREATE TABLE `CarCosts` (
 	`car_cost_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
 	FOREIGN KEY (`car_cost_car_id`) REFERENCES Cars(`car_id`),
-	FOREIGN KEY (`car_cost_proof`) REFERENCES FileGroups(`file_group_id`)
+	FOREIGN KEY (`car_cost_proof`) REFERENCES Files(`file_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -319,6 +319,15 @@ CREATE TABLE `approvals` (
   CONSTRAINT `FK_approval_session` FOREIGN KEY (`approval_infosession`) REFERENCES `infosessions` (`infosession_id`)
 )
 ENGINE=InnoDB;
+
+CREATE TABLE `settings` (
+  `setting_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `setting_name` CHAR(32) NOT NULL,
+  `setting_value` VARCHAR(256) NULL DEFAULT NULL,
+  `setting_after` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`setting_id`)
+)
+  ENGINE=InnoDB;
 
 DELIMITER $$
 

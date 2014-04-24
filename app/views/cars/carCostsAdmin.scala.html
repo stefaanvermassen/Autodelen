@@ -1,6 +1,16 @@
-@(carCostList: java.util.List[CarCost])
-@import org.joda.time.format.DateTimeFormat
-@app("Autokosten (Admin)") {
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
+    <script>
+        var route = myJsRoutes.controllers.Cars.showCarCostsPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
+
+@app("Autokosten (Admin)", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -19,63 +29,7 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-
-                        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-carCosts">
-                            <thead>
-                                <tr role="row">
-                                    <th>Auto</th>
-                                    <th>Beschrijving</th>
-                                    <th>Tijd</th>
-                                    <th>Bedrag</th>
-                                    <th>Status</th>
-                                    <th>Bewijs</th>
-                                    <th>Acties</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @if(carCostList.isEmpty) {
-                                <tr>
-                                    <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
-                                        Er zijn momenteel geen autogebonden kostaanvragen in het systeem.
-                                    </td>
-                                </tr>
-                            } else {
-                                @for(carCost <- carCostList) {
-                                    <tr>
-                                        <td><a href="@routes.Cars.detail(carCost.getCar.getId)">@carCost.getCar.getName</a></td>
-                                        <td>@carCost.getDescription</td>
-                                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(carCost.getTime)</td>
-                                        <td>@carCost.getAmount</td>
-                                        <td>
-                                            @carCost.getStatus match {
-                                                case CarCostStatus.ACCEPTED => {
-                                                    <span class="fa fa-check-circle"></span>
-                                                }
-                                                case CarCostStatus.REFUSED => {
-                                                    <span class="fa fa-minus-circle"></span>
-                                                }
-                                                case CarCostStatus.REQUEST => {
-                                                    <span class="fa fa-question-circle"></span>
-                                                }
-                                                case _ => {}
-                                            }
-                                            @carCost.getStatus.getDescription
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-xs">
-                                                <a class="btn btn-primary" href="">Link</a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId, 0)">Goedkeuren</a>
-                                            <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId, 0)">Afkeuren</a>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            </tbody>
-                        </table>
-
+                        @carCostsPartial()
                     </div>
                         <!-- /.panel-body -->
                 </div>

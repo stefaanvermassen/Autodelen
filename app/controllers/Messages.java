@@ -55,7 +55,7 @@ public class Messages extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result showMessagesPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showReceivedMessagesPage(int page, int ascInt, String orderBy, String searchString) {
         User user = DatabaseHelper.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -63,12 +63,22 @@ public class Messages extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         filter.putValue(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
-        return ok(notificationList(page, field, asc, filter));
-
-
+        return ok(messageList(page, field, asc, filter));
     }
 
-    private static Html notificationList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    @RoleSecured.RoleAuthenticated()
+    public static Result showSentMessagesPage(int page, int ascInt, String orderBy, String searchString) {
+        User user = DatabaseHelper.getUserProvider().getUser();
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        filter.putValue(FilterField.MESSAGE_SENDER_ID, user.getId() + "");
+        return ok(messageList(page, field, asc, filter));
+    }
+
+    private static Html messageList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             MessageDAO dao = context.getMessageDAO();
             List<Message> messageList = dao.getMessageList(orderBy, asc, page, PAGE_SIZE, filter);
@@ -92,6 +102,31 @@ public class Messages extends Controller {
     public static Result newMessage() {
         Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
         return ok(addmessage.render(editForm));
+    }
+
+    /**
+     * Method: GET
+     *
+     * @return a new message form, with the user already filled in, for reply purposes
+     */
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result reply(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Messages.showMessages());
+            }
+            MessageCreationModel model = new MessageCreationModel();
+            model.useremail = user.getEmail();
+            Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
+            return ok(addmessage.render(editForm.fill(model)));
+
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
 
@@ -132,6 +167,24 @@ public class Messages extends Controller {
             } catch (DataAccessException ex) {
                 throw ex; //TODO: show gracefully
             }
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @param messageId Id of the message that has to be marked as read
+     * @return message index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markMessageAsRead(int messageId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+           MessageDAO dao = context.getMessageDAO();
+           dao.markMessageAsRead(messageId);
+            context.commit();
+            return redirect(routes.Messages.showMessages());
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 }

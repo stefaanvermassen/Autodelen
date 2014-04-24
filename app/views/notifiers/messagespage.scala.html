@@ -1,24 +1,34 @@
 @(messageList: java.util.List[Message], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import org.joda.time.format.DateTimeFormat
+@import database.DatabaseHelper;
 <ul class="chat">
-@for((message, index) <- messageList.zipWithIndex) {
-    <li class="left clearfix">
-        <span class="chat-img pull-left">
-            <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle">
-        </span>
-        <div class="chat-body clearfix">
-            <div class="header">
-                <strong class="primary-font">@message.getSubject</strong>
-                <small class="pull-right text-muted">
-                    <i class="fa fa-clock-o fa-fw"></i> @DateTimeFormat.forPattern("HH:mm dd/MM").print(message.getTimestamp)
-                </small>
+    @for((message, index) <- messageList.zipWithIndex) {
+        <li>
+            <div class="chat-body clearfix">
+                <div class="header">
+                    <img src="@routes.Assets.at("images/avatar.jpg")" alt="User Avatar" class="img-circle msg-avatar">
+                    <strong class="primary-font">@message.getSender</strong>
+                    <small class="text-muted">
+                        - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(message.getTimestamp)
+                    </small>
+                </div>
+                <div class="msg-body">
+                    <p>
+                    @Html(message.getBody)
+                    </p>
+                </div>
+                @* TODO: antwoordlogica *@
+                @defining(DatabaseHelper.getUserProvider.getUser.getId) { userId =>
+                    @if(message.getReceiver.getId == userId) {
+                        @if(!message.isRead) {
+                            <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>
+                        }
+                        <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.reply(message.getSender.getId)">Antwoorden</a>
+                    }
+                }
             </div>
-            <p>
-            @Html(message.getBody)
-            </p>
-        </div>
-    </li>
-}
+        </li>
+    }
 </ul>
 
 <p id="pagination" name="@amountOfResults,@amountOfPages"></p>
