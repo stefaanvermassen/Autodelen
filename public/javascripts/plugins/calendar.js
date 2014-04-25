@@ -17,12 +17,44 @@
         return (year * 10000) + (month * 100) + day;
     }
 
-    function formatDateValue(dateValue) {
-        if(dateValue == null)
+    function formatDateValue(dateValue, format) {
+        if (dateValue == null)
             return null;
         var year = getYear(dateValue);
         var month = getMonth(dateValue);
         var day = getDay(dateValue);
+        var success = true;
+        var index = 0;
+        var y = 0, m = 0, d = 0;
+        var f = format.toLowerCase();
+        var formattedString = '';
+        while (index < f.length && success) {
+            switch (f.charAt(index)) {
+                case 'y':
+                    var ystring = '';
+                    while (index < f.length && f.charAt(index) === 'y') {
+                        var value = year % 10;
+                        year = Math.floor(year / 10);
+                        ystring = value + ystring;
+                        index++;
+                    }
+                    formattedString += ystring + f.charAt(index++);
+                    break;
+                case 'm':
+                    index += 2;
+                    formattedString += ((month < 10) ? '0' + month : month) + f.charAt(index++);
+                    break;
+                case 'd':
+                    index += 2;
+                    formattedString += ((day < 10) ? '0' + day : day) + f.charAt(index++);
+                    break;
+                default:
+                    success = false;
+
+            }
+        }
+        if(success)
+            return formattedString;
         return year + '-' + ((month < 10) ? '0' + month : month) + '-' + ((day < 10) ? '0' + day : day);
     }
 
@@ -45,13 +77,22 @@
     var Calendar = function (element, options) {
         this.options = options || {};
         this.element = $(element);
+        this.disablePast = options.disablePast || false;
+        this.dateFormat = options.dateFormat || "yyyy-mm-dd";
+        if(!this._checkDateFormat())
+            this.dateFormat = "yyyy-mm-dd";
+        this.startDateId = options.startDateId || null;
+        if(!(this.startDateId instanceof jQuery) && this.startDateId != null)
+            this.startDateId = $('#' + this.startDateId);
+        this.endDateId = options.endDateId || null;
+        if(!(this.endDateId instanceof jQuery) && this.endDateId != null)
+            this.endDateId = $('#' + this.endDateId);
 
         var date = new Date();
         this.year = date.getFullYear();
         this.month = date.getMonth();
         this.day = date.getDate();
         this.dateValueToday = converToDateValue(this.day, this.month, this.year);
-
         this.monthDisplayed = this.month;
         this.yearDisplayed = this.year;
 
@@ -65,20 +106,10 @@
         this.rowId = 'calendar_row_';
         this.cellId = 'calendar_cell_';
 
-        this.startDateId = options.startDateId || 'calendar_date_start';
-        this.endDateId = options.endDateId || 'calendar_date_end';
-        this.startTimeId = options.startDateId || 'calendar_time_start';
-        this.endTimeId = options.endDateId || 'calendar_time_end';
-        this.startDateLabel = options.startDateLabel || 'Selectie van:';
-        this.endDateLabel = options.endDateLabel || 'Selectie tot:';
-        this.startTimeLabel = options.startTimeLabel || 'Tijdstip vanaf:';
-        this.endTimeLabel = options.endTimeLabel || 'Tijdstip tot:';
-
-        this.dateFormat = 'yyyy-mm-dd';
-
         this.firstSelectedValue = null;
         this.secondSelectedValue = null;
         this.mousedown = false;
+        this.mousemove = false;
 
         this.initCalendar();
     };
@@ -119,12 +150,15 @@
         },
 
         _attachCalendarEvents: function() {
-            $('#' + this.calendarBody).off(this._bodyEvents);
+            var body = $('#' + this.calendarBody);
+            body.off(this._bodyEvents);
             this._bodyEvents = {
+                click: $.proxy(this._click, this),
                 mousedown: $.proxy(this._mousedown, this),
-                mouseup:$.proxy(this._mouseup, this),
-                mousemove: $.proxy(this._mousemove, this)};
-            $('#' + this.calendarBody).on(this._bodyEvents);
+                mouseup: $.proxy(this._mouseup, this),
+                mousemove: $.proxy(this._mousemove, this),
+                touchmove: $.proxy(this._touchmove, this)};
+            body.on(this._bodyEvents);
         },
 
         /**
@@ -140,8 +174,43 @@
             this._events = [];
         },
 
+        _checkDateFormat: function() {
+            var y;
+            var m;
+            var d;
+            var f = this.dateFormat.toLocaleLowerCase();
+            for(var i = 0; i < f.length; i++) {
+                switch(f.charAt(i)) {
+                    case('y'):
+                        y = 0;
+                        while(i < f.length && f.charAt(i) === 'y') {
+                            y++;
+                            i++;
+                        }
+                        break;
+                    case('m'):
+                        m = 0;
+                        while(i < f.length && f.charAt(i) === 'm') {
+                            m++;
+                            i++;
+                        }
+                        break;
+                    case('d'):
+                        d = 0;
+                        while(i < f.length && f.charAt(i) === 'd') {
+                            d++;
+                            i++;
+                        }
+                        break;
+                    default:
+                        return false;
+                }
+            }
+            return (4 == y || 2 == y) && 2 == m && 2 == d;
+        },
+
         _clickPrev: function() {
-            if(this.monthDisplayed == this.month && this.yearDisplayed == this.year)
+            if(this.monthDisplayed == this.month && this.yearDisplayed == this.year && this.disablePast)
                 return;
             this.monthDisplayed = (this.monthDisplayed + 11) % 12;
             if(this.monthDisplayed == 11)
@@ -162,34 +231,44 @@
             this.resetCalendar();
         },
 
-        _clickCell: function(evt, ignoreshift) {
-            var check = ignoreshift || false;
-            if((evt.shiftKey || check) && this.firstSelectedValue != null) {
-                if (this.firstSelectedValue >= evt.target.value) {
+        _clickCell: function(target, shiftpressed) {
+            if(shiftpressed && this.firstSelectedValue != null) {
+                if (this.firstSelectedValue >= target.value) {
                     this.setValueSecondSelected((this.secondSelectedValue != null) ? this.secondSelectedValue : this.firstSelectedValue);
-                    this.setValueFirstSelected(evt.target.value);
+                    this.setValueFirstSelected(target.value);
                 } else {
-                    this.setValueSecondSelected(evt.target.value);
+                    this.setValueSecondSelected(target.value);
                 }
             }
             else {
-                this.setValueFirstSelected(evt.target.value);
+                this.setValueFirstSelected(target.value);
                 this.setValueSecondSelected(this.firstSelectedValue);
             }
             this._colorSelectedDates();
         },
 
+        _selectCell: function(target) {
+            this._clickCell(target, true);
+        },
+
+        _click: function(evt) {
+            if(!this.mousemove) {
+                this._clickCell(evt.target, evt.shiftKey);
+            }
+            this.mousemove = false;
+        },
+
         _mousedown: function(evt) {
             this.mousedown = true;
-            this._clickCell(evt);
+            this._clickCell(evt.target, $(evt.target).hasClass('selected'));
         },
 
         _mouseup: function() {
-            if(this.firstSelectedValue < this.dateValueToday && this.secondSelectedValue < this.dateValueToday) {
+            if(this.firstSelectedValue < this.dateValueToday && this.secondSelectedValue < this.dateValueToday && this.disablePast) {
                 this.setValueFirstSelected(null);
                 this.setValueSecondSelected(null);
                 this._colorSelectedDates();
-            } else if(this.firstSelectedValue < this.dateValueToday) {
+            } else if(this.firstSelectedValue < this.dateValueToday && this.disablePast) {
                 this.setValueFirstSelected(this.dateValueToday);
                 this._colorSelectedDates();
             }
@@ -197,24 +276,31 @@
         },
 
         _mousemove: function(evt) {
-            if(this.mousedown)
-                this._clickCell(evt, true);
+            if(this.mousedown) {
+                this.mousemove = true;
+                this._selectCell(evt.target);
+            }
             this.element.css('cursor','default');
+        },
+
+        _touchmove: function(evt) {
+            var touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+            evt.preventDefault();
+            this.mousemove = true;
+            this._selectCell(document.elementFromPoint(touch.clientX, touch.clientY));
         },
 
         // Functions containing calendar logic
         setValueFirstSelected: function(value) {
             this.firstSelectedValue = value;
-            this._setValueDatetimeinput(this.startDateId, value);
+            if(this.startDateId != null)
+                this.startDateId.val(formatDateValue(value, this.dateFormat));
         },
 
         setValueSecondSelected: function(value) {
             this.secondSelectedValue = value;
-            this._setValueDatetimeinput(this.endDateId, value);
-        },
-
-        _setValueDatetimeinput: function(id, value) {
-            $('#' + id).datetimeinput('setValue', formatDateValue(value));
+            if(this.endDateId != null)
+                this.endDateId.val(formatDateValue(value, this.dateFormat));
         },
 
         resetCalendar: function() {
@@ -237,35 +323,8 @@
 
         // Rendering functions
         renderCalender: function() {
-            this._renderDatetimeinput(this.startDateId, this.startDateLabel, this.startTimeId, this.startTimeLabel);
-            this._renderDatetimeinput(this.endDateId, this.endDateLabel, this.endTimeId, this.endTimeLabel);
             this._renderTitle();
             this._renderTable();
-        },
-
-        _renderDatetimeinput: function(dateId, dateLabel, timeId, timeLabel) {
-            this.element.append($('<div>')
-                .attr('class', 'col-sm-6 form-group')
-                .append($('<label>')
-                    .text(dateLabel)
-                )
-                .append($('<input>')
-                    .attr('id', dateId)
-                    .attr('class', 'form-control')
-                )
-                .append($('<br />'))
-                .append($('<label>')
-                    .text(timeLabel)
-                )
-                .append($('<input>')
-                    .attr('id', timeId)
-                    .attr('class', 'form-control')
-                )
-            );
-            $('#' + dateId).datetimeinput({
-                formatString: this.dateFormat
-            });
-            $('#' + timeId).timeinput();
         },
 
         _renderTitle: function() {
@@ -329,7 +388,7 @@
         },
 
         _resetTitleLeft: function() {
-            if(this.monthDisplayed > this.month || this.yearDisplayed > this.year)
+            if(this.monthDisplayed > this.month || this.yearDisplayed > this.year || !this.disablePast)
                 $('#' + this.prevButton).removeClass('disabled');
             else
                 $('#' + this.prevButton).addClass('disabled');
@@ -439,7 +498,7 @@
             var value = converToDateValue(day, m, y);
             $('#' + rowId).append($('<td>')
                     .attr('id', this.cellId + value)
-                    .attr('class', c + ((value < this.dateValueToday) ? ' disabled ' : ''))
+                    .attr('class', c + ((value < this.dateValueToday && this.disablePast) ? ' disabled ' : ''))
                     .text(day)
                     .val(value)
 

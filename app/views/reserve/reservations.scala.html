@@ -11,7 +11,9 @@
     <script>
         $(document).ready(function() {
             $("#test").calendar({
-                selectionStartId : 'calendar_from'
+                startDateId: $('#test_input'),
+                endDateId: $('#test_input2'),
+                dateFormat: "yyyy-mm-dd"
             }) ;
         });
     </script>
@@ -122,6 +124,26 @@
                             <i class="fa fa-bar-chart-o fa-fw"></i> Custom Kalender
                         </div>
                         <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <label>Reservatie van: </label>
+                                    <input id="test_input" class="form-control" name="test" type="text">
+                                </div>
+                                <div class="col-xs-6">
+                                    <label>Tijdstip vanaf: </label>
+                                    <input id="time" class="form-control" name="test" type="text">
+                                </div>
+                            </div><br />
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <label>Reservatie tot: </label>
+                                    <input id="test_input2" class="form-control" name="test" type="text">
+                                </div>
+                                <div class="col-xs-6">
+                                    <label>Tijdstip tot: </label>
+                                    <input id="time2" class="form-control" name="test" type="text">
+                                </div>
+                            </div><br />
                             <div id="test">
                             </div>
                         </div>
