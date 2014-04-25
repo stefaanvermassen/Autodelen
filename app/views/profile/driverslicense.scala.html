@@ -1,4 +1,5 @@
 @(user: User, form: Form[Profile.EditDriversLicenseModel])
+@import controllers.util.FileType;
 @app("Rijbewijs wijzigen") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -14,7 +15,7 @@
                 <h1 class="page-header">Rijbewijs wijzigen</h1>
                 @flashes()
 
-                @helper.form(routes.Profile.editIdentityCardPost(user.getId), 'enctype -> "multipart/form-data") {
+                @helper.form(routes.Profile.editDriversLicensePost(user.getId), 'enctype -> "multipart/form-data") {
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <i class="fa fa-pencil"></i> Gegevens
@@ -52,8 +53,8 @@
                             <ul>
                             @for(file <- user.getDriverLicense.getFileGroup.getList){
                                 <li>
-                                    <a href="@routes.Profile.viewIdentityCardFile(user.getId, file.getId)">@file.getFileName</a>
-                                    <a href="@routes.Profile.deleteIdentityCardFile(user.getId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
+                                    <a href="@routes.Profile.viewFile(user.getId, file.getId, FileType.DRIVERSLICENSE.name)">@file.getFileName</a>
+                                    <a href="@routes.Profile.deleteFile(user.getId, file.getId, FileType.DRIVERSLICENSE.name)"><span class="glyphicon glyphicon-remove"></span></a>
                                 </li>
                             }
 
