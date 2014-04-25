@@ -509,7 +509,7 @@ public class InfoSessions extends Controller {
         return errors;
     }
 
-    private static String getTermsAndConditions(DataAccessContext context){
+    private static String getTermsAndConditions(DataAccessContext context) {
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate t = dao.getTemplate(MailType.TERMS);
         return t.getBody();
@@ -543,13 +543,16 @@ public class InfoSessions extends Controller {
             return redirect(routes.Dashboard.index());
         } else {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
-            if (form.hasErrors()) {
-                try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                if (form.hasErrors()) {
                     List<String> errors = checkApprovalConditions(user, context);
                     return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
+                } else {
+
+                    ApprovalDAO dao = context.getApprovalDAO();
+                   // dao.createApproval()
+                    return ok("received");
                 }
-            } else {
-                return ok("Received post");
             }
         }
     }

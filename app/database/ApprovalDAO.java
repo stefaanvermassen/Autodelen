@@ -15,6 +15,6 @@ public interface ApprovalDAO {
     public List<Approval> getPendingApprovals() throws DataAccessException;
     public List<Approval> getApprovals(User user) throws DataAccessException;
     public Approval getApproval(int approvalId) throws DataAccessException;
-    public Approval createApproval(User user, InfoSession session) throws DataAccessException;
+    public Approval createApproval(User user, InfoSession session, String userMessage) throws DataAccessException;
     public void updateApproval(Approval approval) throws DataAccessException;
 }

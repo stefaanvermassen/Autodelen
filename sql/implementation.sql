@@ -307,19 +307,22 @@ CREATE TABLE `approvals` (
   `approval_id` INT(11) NOT NULL AUTO_INCREMENT,
   `approval_user` INT(11) NOT NULL DEFAULT '0',
   `approval_admin` INT(11) NULL DEFAULT '0',
-  `approval_submission` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `approval_submission` DATETIME NOT NULL,
   `approval_date` DATETIME NULL DEFAULT NULL,
   `approval_status` ENUM('PENDING','ACCEPTED','DENIED') NOT NULL DEFAULT 'PENDING',
   `approval_infosession` INT(11) NULL DEFAULT NULL,
+  `approval_user_message` TEXT NULL,
+  `approval_admin_message` TEXT NULL,
   PRIMARY KEY (`approval_id`),
   INDEX `FK_approval_user` (`approval_user`),
   INDEX `FK_approval_admin` (`approval_admin`),
   INDEX `FK_approval_session` (`approval_infosession`),
-  CONSTRAINT `FK_approval_user` FOREIGN KEY (`approval_user`) REFERENCES `users` (`user_id`),
   CONSTRAINT `FK_approval_admin` FOREIGN KEY (`approval_admin`) REFERENCES `users` (`user_id`),
-  CONSTRAINT `FK_approval_session` FOREIGN KEY (`approval_infosession`) REFERENCES `infosessions` (`infosession_id`)
+  CONSTRAINT `FK_approval_session` FOREIGN KEY (`approval_infosession`) REFERENCES `infosessions` (`infosession_id`),
+  CONSTRAINT `FK_approval_user` FOREIGN KEY (`approval_user`) REFERENCES `users` (`user_id`)
 )
-ENGINE=InnoDB;
+  COLLATE='latin1_swedish_ci'
+  ENGINE=InnoDB;
 
 CREATE TABLE `settings` (
   `setting_id` INT(11) NOT NULL AUTO_INCREMENT,
