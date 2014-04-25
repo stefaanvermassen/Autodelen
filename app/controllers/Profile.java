@@ -10,6 +10,7 @@ import play.Logger;
 import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
+import controllers.util.Addresses;
 
 import javax.imageio.IIOException;
 import java.io.IOException;
@@ -20,42 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import static controllers.util.Addresses.getCountryList;
+import static controllers.util.Addresses.modifyAddress;
+
 public class Profile extends Controller {
-
-    private static List<String> COUNTRIES;
-    private static final Locale COUNTRY_LANGUAGE = new Locale("nl", "BE");
-
-    private static boolean nullOrEmpty(String s) {
-        return s == null || s.isEmpty();
-    }
-
-    public static class EditAddressModel { //TODO: unify with other models in controllers
-
-        public String city;
-        public String number;
-        public String street;
-        public String bus;
-        public String zipCode;
-        public String country;
-
-        public void populate(Address address) {
-            if (address == null) {
-                country = COUNTRY_LANGUAGE.getDisplayCountry(COUNTRY_LANGUAGE);
-                return;
-            }
-
-            city = address.getCity();
-            number = address.getNumber();
-            street = address.getStreet();
-            bus = address.getBus();
-            zipCode = address.getZip();
-            country = address.getCountry();
-        }
-
-        public boolean isEmpty() {
-            return nullOrEmpty(bus) && nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(number);
-        }
-    }
 
     public static class EditProfileModel {
         public String phone;
@@ -67,12 +36,12 @@ public class Profile extends Controller {
         public String identityCardNumber;
         public String nationalNumber;
 
-        public EditAddressModel domicileAddress;
-        public EditAddressModel residenceAddress;
+        public Addresses.EditAddressModel domicileAddress;
+        public Addresses.EditAddressModel residenceAddress;
 
         public EditProfileModel() {
-            this.domicileAddress = new EditAddressModel();
-            this.residenceAddress = new EditAddressModel();
+            this.domicileAddress = new Addresses.EditAddressModel();
+            this.residenceAddress = new Addresses.EditAddressModel();
         }
 
         public void populate(User user) {
@@ -96,23 +65,8 @@ public class Profile extends Controller {
         }
     }
 
-    /**
-     * Lazy loads a country list in current configured locale
-     *
-     * @return A list of all countries enabled in the Java locale
-     */
-    private static List<String> getCountryList() {
-        if (COUNTRIES == null) {
-            COUNTRIES = new ArrayList<>();
-            Locale[] locales = Locale.getAvailableLocales();
-            for (Locale obj : locales) {
-                if ((obj.getDisplayCountry() != null) && (!"".equals(obj.getDisplayCountry()))) {
-                    COUNTRIES.add(obj.getDisplayCountry(COUNTRY_LANGUAGE));
-                }
-            }
-            Collections.sort(COUNTRIES);
-        }
-        return COUNTRIES;
+    private static boolean nullOrEmpty(String s) {
+        return s == null || s.isEmpty();
     }
 
     /**
@@ -584,39 +538,7 @@ public class Profile extends Controller {
         return (int) (((float) total / 10) * 100); //10 records
     }
 
-    /**
-     * Modifies, creates or deletes an address in the database based on the provided form data and current address
-     *
-     * @param model   The submitted form data
-     * @param address The already-set address for the user
-     * @param dao     The DAO to edit addresses
-     * @return The changed or null if deleted
-     */
-    private static Address modifyAddress(EditAddressModel model, Address address, AddressDAO dao) {
-        if (address == null) {
-            // User entered new address in fields
-            address = dao.createAddress(model.country, model.zipCode, model.city, model.street, model.number, model.bus);
-        } else {
-            // User changed existing address
 
-            // Only call the database when there's actually some change
-            if ((model.country != null && model.country.equals(address.getCountry())) ||
-                    (model.zipCode != null && !model.zipCode.equals(address.getZip())) ||
-                    (model.city != null && !model.city.equals(address.getCity())) ||
-                    (model.street != null && !model.street.equals(address.getStreet())) ||
-                    (model.number != null && !model.number.equals(address.getNumber())) ||
-                    (model.bus != null && !model.bus.equals(address.getBus()))) {
-                address.setCountry(model.country);
-                address.setZip(model.zipCode);
-                address.setCity(model.city);
-                address.setStreet(model.street);
-                address.setNumber(model.number);
-                address.setBus(model.bus);
-                dao.updateAddress(address);
-            }
-        }
-        return address;
-    }
 
     /**
      * Method: POST
