@@ -174,7 +174,7 @@ public class JDBCApprovalDAO implements ApprovalDAO {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Approval(keys.getInt(1), user, null, new DateTime(), null, session, Approval.ApprovalStatus.PENDING);
+                return new Approval(keys.getInt(1), user, null, new DateTime(), null, session, Approval.ApprovalStatus.PENDING, userMessage, null);
             } catch(SQLException ex){
                 throw new DataAccessException("Failed to create approval.", ex);
             }
