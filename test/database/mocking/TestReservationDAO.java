@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import models.Car;
 import models.Reservation;
+import models.ReservationStatus;
 import models.User;
 
 import org.joda.time.DateTime;
@@ -59,18 +60,6 @@ public class TestReservationDAO implements ReservationDAO{
 			reservations.remove(reservation);
 		}
 	}
-
-	@Override
-	public List<Reservation> getReservationListForUser(int userId) throws DataAccessException {
-		List<Reservation> list = new ArrayList<>();
-		for(Reservation res : reservations){
-			if(res.getUser().getId()==userId){
-				list.add(res);
-			}
-		}
-		return list;
-	}
-
 	@Override
 	public List<Reservation> getReservationListForCar(int carID) throws DataAccessException {
 		List<Reservation> list = new ArrayList<>();
@@ -81,12 +70,22 @@ public class TestReservationDAO implements ReservationDAO{
 		}
 		return list;
 	}
-	
-	@Override
+
+    @Override
+    public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsOwner, boolean userIsLoaner) {
+        return 0;
+    }
+
+    @Override
+    public void updateTable() {
+
+    }
+
+    @Override
 	public int getAmountOfReservations(Filter filter)
 			throws DataAccessException {
-        if(!filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
-            int id = Integer.parseInt(filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
+        if(!filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
+            int id = Integer.parseInt(filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID));
             List<Reservation> list = new ArrayList<>();
             for(Reservation res : reservations){
                 if(res.getCar().getOwner().getId()==id || res.getUser().getId()== id){
@@ -102,8 +101,8 @@ public class TestReservationDAO implements ReservationDAO{
 	public List<Reservation> getReservationListPage(FilterField orderBy,
 			boolean asc, int page, int pageSize, Filter filter)
 			throws DataAccessException {
-        if(!filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
-            int id = Integer.parseInt(filter.getFieldIs(FilterField.RESERVATION_USER_OR_OWNER_ID));
+        if(!filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
+            int id = Integer.parseInt(filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID));
             List<Reservation> list = new ArrayList<>();
             for(Reservation res : reservations){
                 if(res.getCar().getOwner().getId()==id || res.getUser().getId()== id){

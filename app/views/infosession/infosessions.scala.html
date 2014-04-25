@@ -6,10 +6,10 @@
         var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
 
         // Show confirm message to subscribe to an infosession
-        function confirmSubscription(id){
-            if(confirm('U bent reeds ingeschreven voor een infosessie. Bent u zeker dat u deze wil wijzigen?')){
-                window.location = myJsRoutes.controllers.InfoSessions.enrollSession(id ).url;
-            }
+        function showConfirmationModal(id){
+            @* TODO: change link with partial? *@
+            $( "#infosessionid" ).attr("href", "/infosession/enroll?id=" + id);
+            $('#myModal').modal('show');
         }
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
@@ -37,17 +37,7 @@
             <div class="col-lg-12">
                 <h1 class="page-header">Infosessies</h1>
                 @flashes()
-                @if(isAdmin) {
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <a class="btn btn-default btn-sm" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
-                        </div>
-                    </div>
-                }
+
                 @if(enrolled != null) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -61,9 +51,6 @@
                         </div>
                     </div>
                 }
-
-                <!-- TODO: Hide this button when not needed -->
-                <a class="btn btn-success" href="@routes.InfoSessions.requestApproval">Goedkeuringsaanvraag indienen</a>
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -85,4 +72,22 @@
     }
 </div>
 <!-- /page-wrapper -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Infosessie wijzigen</h4>
+      </div>
+      <div class="modal-body">
+        Je hebt je reeds voor een andere infosessie ingeschreven. Ben je zeker dat je deze wilt wijzigen?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+        <a id="infosessionid" class="btn btn-success" href="">Ja, schrijf me in voor deze infosessie</a>
+      </div>
+    </div>
+  </div>
+</div>
 }

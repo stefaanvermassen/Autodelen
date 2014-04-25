@@ -1,8 +1,8 @@
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
     <script>
     var route = myJsRoutes.controllers.Notifications.showNotificationsPage;
-    var autoLoad = 1;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
@@ -29,23 +29,29 @@
                         </div>
                     }
                 }
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-comments"></i> Notificaties
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body noverticalpadding">
-                        <div id="resultsTable">
-                            <!-- Here comes the loaded timeline -->
+
+                <ul class="nav nav-tabs" id="myTab">
+                  <li id="tab_unread" name="0" class="active"><a href="#resultsPanel" data-toggle="tab">Ongelezen</a></li>
+                  <li id="tab_read" name="1"><a href="#resultsPanel" data-toggle="tab">Gelezen</a></li>
+                  <li class="hidden"><button id="searchButton"></button></li>
+                </ul>
+                <input id='hidden_input' name="notification_read" value="0" class="searchTextField hidden">
+
+                <div class="tab-content">
+                  <div class="tab-pane active" id="resultsPanel">
+                    <div class="panel panel-default tabpanel">
+                        <div class="panel-body">
+                            <div id="resultsTable">
+                                <!-- Here comes the loaded timeline -->
+                            </div>
                         </div>
                     </div>
-                        <!-- /.panel-body -->
+                  </div>
                 </div>
-                    <!-- /.panel -->
             </div>
-                <!-- /col-lg-12 -->
+            <!-- /col-lg-12 -->
         </div>
-            <!-- /row -->
+        <!-- /row -->
     </div>
     <!-- /page-wrapper -->
 }

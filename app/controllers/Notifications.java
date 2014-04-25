@@ -9,6 +9,8 @@ import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.notifiers.*;
+import views.html.notifiers.notifications;
+import views.html.notifiers.notificationspage;
 
 import java.util.List;
 
@@ -53,6 +55,24 @@ public class Notifications extends Controller {
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
             return notificationspage.render(list, page, amountOfResults, amountOfPages);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @param notificationId Id of the message that has to be marked as read
+     * @return message index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markNotificationAsRead(int notificationId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            NotificationDAO dao = context.getNotificationDAO();
+            dao.markNotificationAsRead(notificationId);
+            context.commit();
+            return redirect(routes.Notifications.showNotifications());
         } catch (DataAccessException ex) {
             throw ex;
         }

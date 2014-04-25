@@ -11,7 +11,8 @@ public enum UserRole {
     INFOSESSION_ADMIN("infosessie beheerder"),
     MAIL_ADMIN("mail beheerder"),
     PROFILE_ADMIN("profiel beheerder"),
-    RESERVATION_ADMIN("reservatie beheerder");
+    RESERVATION_ADMIN("reservatie beheerder"),
+    CAR_ADMIN("auto beheerder");
 
     // Enum implementation
     private String description;

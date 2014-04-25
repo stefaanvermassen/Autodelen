@@ -274,7 +274,7 @@ public class InfoSessions extends Controller {
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
                                     return ok(detail.render(session, enrolled,
-                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + session.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
+                                            coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + session.getTime().toString("dd-MM-yyyy") + " om " + session.getTime().toString("HH:mm"))));
                                 }
                             }
                     );
@@ -395,8 +395,8 @@ public class InfoSessions extends Controller {
                             dao.registerUser(session, user);
 
                             context.commit();
-                            flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd/MM/yyyy") + ".") :
-                                    "U bent van infosessie veranderd naar " + session.getTime().toString("dd/MM/yyyy"));
+                            flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                                    "U bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
                             Notifier.sendInfoSessionEnrolledMail(user, session);
                             return redirect(routes.InfoSessions.detail(sessionId));
                         } catch (DataAccessException ex) {
@@ -523,7 +523,7 @@ public class InfoSessions extends Controller {
                         new F.Function<F.Tuple<Double, Double>, Result>() {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
                                 return ok(infosessions.render(enrolled,
-                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak om " + enrolled.getTime().toString("yyyy-MM-dd HH:mm:ss"))));
+                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getTime().toString("dd-MM-yyyy") + " om " + enrolled.getTime().toString("HH:mm"))));
                             }
                         }
                 );
@@ -579,19 +579,10 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
     public static Result showSessionsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        System.out.println(searchString);
         FilterField filterField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        // If no from and until is specified: show infosessions from now until 100 years from now
-        // TODO: find better solution for ugly equals YYYY-MM-DD hh:mm
-        if(filter.getValue(FilterField.FROM).equals("") || filter.getValue(FilterField.FROM).equals("YYYY-MM-DD hh:mm")) {
-            filter.putValue(FilterField.FROM, DateTime.now().toString());
-        }
-        if(filter.getValue(FilterField.UNTIL).equals("") || filter.getValue(FilterField.UNTIL).equals("YYYY-MM-DD hh:mm")) {
-            filter.putValue(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
-        }
 
         return ok(sessionsList(page, filterField, asc, filter, true));
     }

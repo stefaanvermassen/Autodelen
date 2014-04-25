@@ -1,9 +1,15 @@
-@(messageList: java.util.List[Message])
-@import org.joda.time.format.DateTimeFormat
-@stylesheets = {
-    <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/messages.js")'></script>
+    <script>
+        var route = myJsRoutes.controllers.Messages.showReceivedMessagesPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
-@app("Berichten", stylesheets) {
+@stylesheets = {
+    <!-- <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet"> -->
+}
+@app("Berichten", stylesheets, scripts) {
 
 <div id="page-header-wrapper">
     <ol class="breadcrumb">
@@ -22,36 +28,24 @@
                     <a class="btn btn-default btn-sm" href="@routes.Messages.newMessage()">Nieuw bericht</a>
                 </div>
             </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-comments"></i> Berichten
+
+            <ul class="nav nav-tabs" id="myTab">
+              <li id="tab_received" class="active"><a href="#resultsPanel" data-toggle="tab">Ontvangen</a></li>
+              <li id="tab_sent"><a href="#resultsPanel" data-toggle="tab">Verzonden</a></li>
+              <li class="hidden"><button id="searchButton"></button></li>
+            </ul>
+
+            <div class="tab-content">
+              <div class="tab-pane active" id="resultsPanel">
+                <div class="panel panel-default tabpanel">
+                    <div class="panel-body">
+                        <div id="resultsTable">
+                            <!-- Here comes the loaded page -->
+                        </div>
+                    </div>
                 </div>
-                <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <ul class="chat">
-                    @for((message, index) <- messageList.zipWithIndex) {
-                        <li class="left clearfix">
-                            <span class="chat-img pull-left">
-                                <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle">
-                            </span>
-                            <div class="chat-body clearfix">
-                                <div class="header">
-                                    <strong class="primary-font">@message.getSubject</strong> 
-                                    <small class="pull-right text-muted">
-                                        <i class="fa fa-clock-o fa-fw"></i> @DateTimeFormat.forPattern("HH:mm dd/MM").print(message.getTimestamp)
-                                    </small>
-                                </div>
-                                <p>
-                                    @Html(message.getBody)
-                                </p>
-                            </div>
-                        </li>
-                    }
-                    </ul>
-                </div>
-                <!-- /.panel-body -->
+              </div>
             </div>
-            <!-- /.panel -->
         </div>
         <!-- /col-lg-12 -->
     </div>

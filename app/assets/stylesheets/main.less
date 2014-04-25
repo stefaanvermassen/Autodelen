@@ -1,3 +1,33 @@
+/* --- Notifications --- */
+.msg-avatar {
+	width: 30px;
+	height: 30px;
+	border: 1px solid #fff;
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+	box-shadow: 10 1px 3px rgba(0, 0, 0, 0.5);
+	margin-right:4px;
+}
+
+.msg-topbutton {
+	display:block;
+	margin-bottom:10px;
+}
+
+.msg-body {
+	margin-top:10px;
+}
+
+.chat li {
+	border: none;
+}
+.chat li.left .chat-body {
+	margin-left: 0px;
+}
+.chat-body {
+    padding: 14px;
+    border: 1px solid #d4d4d4;
+}
+
 /* --- Tabs --- */
 .tabpanel {
 	border-top:0px;
@@ -17,33 +47,20 @@
 	padding:0px;
 }
 
+.map > .alert {
+	margin-bottom: 0px;
+}
+
 /* --- Top Menu --- */
-
-.navbar-top-links li .dropdown-toggle {
+.impersonating {
+	background-color: red;
 	color: white;
-	background: #96c770; /* Fall-back for browsers that don't support rgba */
-    background: rgba(255, 255, 255, .2);
-}
-
-.navbar-top-links:hover li:hover .dropdown-toggle:hover {
-	background: #63943d; /* Fall-back for browsers that don't support rgba */
-    background: rgba(0, 0, 0, .2);
-}
-
-.navbar-top-links .open>a:focus {
-	background: #63943d; /* Fall-back for browsers that don't support rgba */
-    background: rgba(0, 0, 0, .2);
-}
-
-.navbar-top-links:hover li:hover .avatar:hover {
-	background: transparent;
-}
-.nav .open>.avatar:focus {
-	background: transparent;
+	text-align: center;
+	width: 100%;
+	padding: 3px 0px;
 }
 
 .navbar-static-top {
-	background-color: #7dba4d;
 	border: none;
 }
 
@@ -55,7 +72,6 @@
 .navbar-top-links > li > .avatar {
 	padding-right: 0px;
 	margin-right: 0px;
-	background-color: transparent;
 }
 
 .navbar-top-links > li {
@@ -67,17 +83,10 @@
 	height: 50px;
 }
 
-.navbar-default .navbar-brand {
-	color: white;
-}
-
-.navbar-default:hover .navbar-brand:hover{
-	color: white;
-}
-
 .avatar {
 	width: 50px;
 	height: 50px;
+	overflow:hidden;
 	display: inline-block;
 }
 
@@ -91,11 +100,13 @@
 	font-size: 9px;
 	top: 5px;
 	right: 12px;
-	color: white;
-	background-color: red;
 }
 
 /* --- Side Menu --- */
+.navbar-static-side ul li {
+	border-bottom: 1px solid #d6d6d6;
+}
+
 .navbar-static-side {
 	border-right: 1px solid #d6d6d6;
 	background-color: #f8f8f8;
@@ -278,6 +289,6 @@ body {
 
 @media (min-width: 768px){
 	.navbar-static-side {
-		height: calc(100% - 50px);
+		// height: calc(100% - 50px);
 	}
 }

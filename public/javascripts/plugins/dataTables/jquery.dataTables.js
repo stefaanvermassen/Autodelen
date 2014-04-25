@@ -336,7 +336,7 @@
 	 * Language compatibility - when certain options are given, and others aren't, we
 	 * need to duplicate the values over, in order to provide backwards compatibility
 	 * with older language files.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnLanguageCompat( oLanguage )
@@ -413,7 +413,7 @@
 	
 	/**
 	 * Browser feature detection for capabilities, quirks
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnBrowserDetect( settings )
@@ -465,7 +465,7 @@
 	
 	/**
 	 * Add a column to the list used for the table with default values
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {node} nTh The th element for this column
 	 *  @memberof DataTable#oApi
 	 */
@@ -516,7 +516,7 @@
 	
 	/**
 	 * Apply options for a column
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iCol column index to consider
 	 *  @param {object} oOptions object with sType, bVisible and bSearchable etc
 	 *  @memberof DataTable#oApi
@@ -616,7 +616,7 @@
 	/**
 	 * Adjust the table column widths for new data. Note: you would probably want to
 	 * do a redraw after calling this function!
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnAdjustColumnSizing ( settings )
@@ -646,7 +646,7 @@
 	/**
 	 * Covert the index of a visible column to the index in the data array (take account
 	 * of hidden columns)
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iMatch Visible column index to lookup
 	 *  @returns {int} i the data index
 	 *  @memberof DataTable#oApi
@@ -665,7 +665,7 @@
 	 * Covert the index of an index in the data array and convert it to the visible
 	 *   column index (take account of hidden columns)
 	 *  @param {int} iMatch Column index to lookup
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns {int} i the data index
 	 *  @memberof DataTable#oApi
 	 */
@@ -680,7 +680,7 @@
 	
 	/**
 	 * Get the number of visible columns
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns {int} i the number of visible columns
 	 *  @memberof DataTable#oApi
 	 */
@@ -692,7 +692,7 @@
 	
 	/**
 	 * Get an array of column indexes that match a given property
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {string} sParam Parameter in aoColumns to look for - typically
 	 *    bVisible or bSearchable
 	 *  @returns {array} Array of indexes with matched properties
@@ -769,7 +769,7 @@
 	 * Take the column definitions and static columns arrays and calculate how
 	 * they relate to column indexes. The callback function will then apply the
 	 * definition found for a column to a suitable configuration object.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {array} aoColDefs The aoColumnDefs array that is to be applied
 	 *  @param {array} aoCols The aoColumns array that defines columns individually
 	 *  @param {function} fn Callback function - takes two parameters, the calculated
@@ -846,7 +846,7 @@
 	 * Add a data array to the table, creating DOM node etc. This is the parallel to
 	 * _fnGatherData, but for adding rows from a Javascript source, rather than a
 	 * DOM source.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {array} aData data array to be added
 	 *  @param {node} [nTr] TR element to add to the table - optional. If not given,
 	 *    DataTables will create a row automatically
@@ -898,7 +898,7 @@
 	 * use this for reading data from a DOM sourced table, but it could be
 	 * used for an TR element. Note that if a TR is given, it is used (i.e.
 	 * it is not cloned).
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {array|node|jQuery} trs The TR element(s) to add to the table
 	 *  @returns {array} Array of indexes for the added rows
 	 *  @memberof DataTable#oApi
@@ -921,7 +921,7 @@
 	
 	/**
 	 * Take a TR element and convert it to an index in aoData
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {node} n the TR element to find
 	 *  @returns {int} index if the node is found, null if not
 	 *  @memberof DataTable#oApi
@@ -934,7 +934,7 @@
 	
 	/**
 	 * Take a TD element and convert it into a column data index (not the visible index)
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iRow The row number the TD/TH can be found in
 	 *  @param {node} n The TD/TH element to find
 	 *  @returns {int} index if the node is found, -1 if not
@@ -948,7 +948,7 @@
 	
 	/**
 	 * Get an array of data for a given row from the internal data cache
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iRow aoData row id
 	 *  @param {string} sSpecific data get type ('type' 'filter' 'sort')
 	 *  @param {array} aiColumns Array of column indexes to get data from
@@ -968,7 +968,7 @@
 	
 	/**
 	 * Get the data for a given cell from the internal cache, taking into account data mapping
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iRow aoData row id
 	 *  @param {int} iCol Column index
 	 *  @param {string} sSpecific data get type ('display', 'type' 'filter' 'sort')
@@ -1014,7 +1014,7 @@
 	
 	/**
 	 * Set the value for a specific cell, into the internal data cache
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iRow aoData row id
 	 *  @param {int} iCol Column index
 	 *  @param {*} val Value to set
@@ -1278,7 +1278,7 @@
 	
 	/**
 	 * Return an array with the full table data
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns array {array} aData Master data array
 	 *  @memberof DataTable#oApi
 	 */
@@ -1290,7 +1290,7 @@
 	
 	/**
 	 * Nuke the table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnClearTable( settings )
@@ -1335,7 +1335,7 @@
 	 * Mark cached data as invalid such that a re-read of the data will occur when
 	 * the cached data is next requested. Also update from the data source object.
 	 *
-	 * @param {object} settings DataTables settings object
+	 * @param {object} settings DataTables overview object
 	 * @param  {int}    rowIdx   Row index to invalidate
 	 * @memberof DataTable#oApi
 	 *
@@ -1386,7 +1386,7 @@
 	 * Build a data source object from an HTML row, reading the contents of the
 	 * cells that are in the row.
 	 *
-	 * @param {object} settings DataTables settings object
+	 * @param {object} settings DataTables overview object
 	 * @param {node} TR element from which to read data
 	 * @returns {object} Object with two parameters: `data` the data read, in
 	 *   document order, and `cells` and array of nodes (they can be useful to the
@@ -1450,7 +1450,7 @@
 	}
 	/**
 	 * Create a new TR element (and it's TD children) for a row
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {int} iRow Row to consider
 	 *  @param {node} [nTrIn] TR element to add to the table - optional. If not given,
 	 *    DataTables will create a row automatically
@@ -1562,7 +1562,7 @@
 	
 	/**
 	 * Create the HTML header for the table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnBuildHead( oSettings )
@@ -1646,7 +1646,7 @@
 	 * cell insert can cover multiple elements in the grid - which is tracks using the
 	 * aApplied array. Cell inserts in the grid will only occur where there isn't
 	 * already a cell in that position.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param array {objects} aoSource Layout array from _fnDetectHeader
 	 *  @param {boolean} [bIncludeHidden=false] If true then include the hidden columns in the calc,
 	 *  @memberof DataTable#oApi
@@ -1745,7 +1745,7 @@
 	
 	/**
 	 * Insert the required TR nodes into the table for display
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnDraw( oSettings )
@@ -1882,7 +1882,7 @@
 	
 	/**
 	 * Redraw the table - taking account of the various features which are enabled
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {boolean} [holdPosition] Keep the current paging position. By default
 	 *    the paging is reset to the first page
 	 *  @memberof DataTable#oApi
@@ -1916,7 +1916,7 @@
 	
 	/**
 	 * Add the options to the page HTML for the table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnAddOptionsHtml ( oSettings )
@@ -2151,7 +2151,7 @@
 	
 	/**
 	 * Get an array of unique th elements, one for each column
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {node} nHeader automatically detect the layout from this node - optional
 	 *  @param {array} aLayout thead/tfoot layout from _fnDetectHeader - optional
 	 *  @returns array {node} aReturn list of unique th's
@@ -2188,10 +2188,10 @@
 	
 	
 	/**
-	 * Create an Ajax call based on the table's settings, taking into account that
+	 * Create an Ajax call based on the table's overview, taking into account that
 	 * parameters can have multiple forms, and backwards compatibility.
 	 *
-	 * @param {object} oSettings dataTables settings object
+	 * @param {object} oSettings dataTables overview object
 	 * @param {array} data Data to send to the server, required by
 	 *     DataTables - may be augmented by developer callbacks
 	 * @param {function} fn Callback function to run when data is obtained
@@ -2295,7 +2295,7 @@
 		}
 		else
 		{
-			// Object to extend the base settings
+			// Object to extend the base overview
 			oSettings.jqXHR = $.ajax( $.extend( baseAjax, ajax ) );
 	
 			// Restore for next time around
@@ -2306,7 +2306,7 @@
 	
 	/**
 	 * Update the table using an Ajax call
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns {boolean} Block the table drawing or not
 	 *  @memberof DataTable#oApi
 	 */
@@ -2336,7 +2336,7 @@
 	 * arrays, or the 1.9- method with is name / value pairs. 1.9 method is used if
 	 * the sAjaxSource option is used in the initialisation, or the legacyAjax
 	 * option is set.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns {bool} block the table drawing or not
 	 *  @memberof DataTable#oApi
 	 */
@@ -2432,7 +2432,7 @@
 	
 	/**
 	 * Data the data from the server (nuking the old) and redraw the table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {object} json json data return from the server.
 	 *  @param {string} json.sEcho Tracking flag for DataTables to match requests
 	 *  @param {int} json.iTotalRecords Number of records in the data set, not accounting for filtering
@@ -2487,7 +2487,7 @@
 	 * Get the data from the JSON data source to use for drawing a table. Using
 	 * `_fnGetObjectDataFn` allows the data to be sourced from a property of the
 	 * source object, or from a processing function.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param  {object} json Data source object / array from the server
 	 *  @return {array} Array of data to use
 	 */
@@ -2512,7 +2512,7 @@
 	/**
 	 * Generate the node required for filtering text
 	 *  @returns {node} Filter control element
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnFeatureHtmlFilter ( settings )
@@ -2581,7 +2581,7 @@
 	
 	/**
 	 * Filter the table using both the global filter and column based filtering
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {object} oSearch search information
 	 *  @param {int} [iForce] force a research of the master array (1) or not (undefined or 0)
 	 *  @memberof DataTable#oApi
@@ -2632,7 +2632,7 @@
 	
 	/**
 	 * Apply custom filtering functions
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnFilterCustom( oSettings )
@@ -2665,7 +2665,7 @@
 	
 	/**
 	 * Filter the table on a per-column basis
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {string} sInput string to filter on
 	 *  @param {int} iColumn column to filter
 	 *  @param {bool} bRegex treat search string as a regular expression or not
@@ -2695,7 +2695,7 @@
 	
 	/**
 	 * Filter the data table based on user input and draw the table
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {string} input string to filter on
 	 *  @param {int} force optional - force a research of the master array (1) or not (undefined or 0)
 	 *  @param {bool} regex treat as a regular expression or not
@@ -2848,7 +2848,7 @@
 	
 	/**
 	 * Generate the node required for the info display
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns {node} Information element
 	 *  @memberof DataTable#oApi
 	 */
@@ -2884,7 +2884,7 @@
 	
 	/**
 	 * Update the information elements in the display
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnUpdateInfo ( settings )
@@ -2949,7 +2949,7 @@
 	
 	/**
 	 * Draw the table for the first time, adding all required features
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnInitialise ( settings )
@@ -3028,7 +3028,7 @@
 	
 	/**
 	 * Draw the table for the first time, adding all required features
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {object} [json] JSON from the server that completed the table, if using Ajax source
 	 *    with client-side processing (optional)
 	 *  @memberof DataTable#oApi
@@ -3061,7 +3061,7 @@
 	
 	/**
 	 * Generate the node required for user display length changing
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @returns {node} Display length feature node
 	 *  @memberof DataTable#oApi
 	 */
@@ -3121,7 +3121,7 @@
 	
 	/**
 	 * Generate the node required for default pagination
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @returns {node} Pagination feature node
 	 *  @memberof DataTable#oApi
 	 */
@@ -3178,8 +3178,8 @@
 	
 	
 	/**
-	 * Alter the display settings to change the page
-	 *  @param {object} settings DataTables settings object
+	 * Alter the display overview to change the page
+	 *  @param {object} settings DataTables overview object
 	 *  @param {string|int} action Paging action to take: "first", "previous",
 	 *    "next" or "last" or page number to jump to (integer)
 	 *  @param [bool] redraw Automatically draw the update or not
@@ -3253,7 +3253,7 @@
 	
 	/**
 	 * Generate the node required for the processing node
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @returns {node} Processing element
 	 *  @memberof DataTable#oApi
 	 */
@@ -3270,7 +3270,7 @@
 	
 	/**
 	 * Display or hide the processing indicator
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {bool} show Show the processing indicator (true) or not (false)
 	 *  @memberof DataTable#oApi
 	 */
@@ -3285,7 +3285,7 @@
 	
 	/**
 	 * Add any control elements for the table - specifically scrolling
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @returns {node} Node to add to the DOM
 	 *  @memberof DataTable#oApi
 	 */
@@ -3434,7 +3434,7 @@
 	 *   3. Apply the measurements to align the columns
 	 *   4. Clean up
 	 *
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnScrollDraw ( settings )
@@ -3758,7 +3758,7 @@
 	
 	/**
 	 * Calculate the width of columns for the table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnCalculateColumnWidths ( oSettings )
@@ -3978,7 +3978,7 @@
 	
 	/**
 	 * Adjust a table's width to take account of vertical scroll bar
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {node} n table node
 	 *  @memberof DataTable#oApi
 	 */
@@ -3999,7 +3999,7 @@
 	
 	/**
 	 * Get the widest node
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {int} colIdx column of interest
 	 *  @returns {node} widest table node
 	 *  @memberof DataTable#oApi
@@ -4020,7 +4020,7 @@
 	
 	/**
 	 * Get the maximum strlen for each data column
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {int} colIdx column of interest
 	 *  @returns {string} max string length for each column
 	 *  @memberof DataTable#oApi
@@ -4180,7 +4180,7 @@
 	
 	/**
 	 * Change the order of the table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 *  @todo This really needs split up!
 	 */
@@ -4351,7 +4351,7 @@
 	
 	/**
 	 * Function to run on user sort request
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {node} attachTo node to attach the handler to
 	 *  @param {int} colIdx column sorting index
 	 *  @param {boolean} [append=false] Append the requested sort to the existing
@@ -4419,7 +4419,7 @@
 	
 	/**
 	 * Attach a sort handler (click) to a node
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {node} attachTo node to attach the handler to
 	 *  @param {int} colIdx column sorting index
 	 *  @param {function} [callback] callback function
@@ -4454,7 +4454,7 @@
 	/**
 	 * Set the sorting classes on table's body, Note: it is safe to call this function
 	 * when bSort and bSortClasses are false
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnSortingClasses( settings )
@@ -4530,7 +4530,7 @@
 	
 	/**
 	 * Save the state of a table
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnSaveState ( oSettings )
@@ -4565,8 +4565,8 @@
 	
 	/**
 	 * Attempt to load a saved table state
-	 *  @param {object} oSettings dataTables settings object
-	 *  @param {object} oInit DataTables init object so we can override settings
+	 *  @param {object} oSettings dataTables overview object
+	 *  @param {object} oInit DataTables init object so we can override overview
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnLoadState ( oSettings, oInit )
@@ -4599,7 +4599,7 @@
 			return;
 		}
 	
-		// Number of columns have changed - all bets are off, no restore of settings
+		// Number of columns have changed - all bets are off, no restore of overview
 		if ( columns.length !== oData.aoSearchCols.length ) {
 			return;
 		}
@@ -4636,7 +4636,7 @@
 	
 	
 	/**
-	 * Return the settings object for a particular table
+	 * Return the overview object for a particular table
 	 *  @param {node} table table we are using as a dataTable
 	 *  @returns {object} Settings object - or null if not found
 	 *  @memberof DataTable#oApi
@@ -4654,7 +4654,7 @@
 	
 	/**
 	 * Log an error message
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {int} level log error messages, or display them to the user
 	 *  @param {string} msg error message
 	 *  @param {int} tn Technical note id to get more information about the error.
@@ -4795,7 +4795,7 @@
 	/**
 	 * Register a callback function. Easily allows a callback function to be added to
 	 * an array store of callback functions that can then all be called together.
-	 *  @param {object} oSettings dataTables settings object
+	 *  @param {object} oSettings dataTables overview object
 	 *  @param {string} sStore Name of the array storage for the callbacks in oSettings
 	 *  @param {function} fn Function to be called back
 	 *  @param {string} sName Identifying name for the callback (i.e. a label)
@@ -4818,7 +4818,7 @@
 	 * callback array store is done backwards! Further note that you do not want to
 	 * fire off triggers in time sensitive applications (for example cell creation)
 	 * as its slow.
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @param {string} callbackArr Name of the array storage for the callbacks in
 	 *      oSettings
 	 *  @param {string} event Name of the jQuery custom event to trigger. If null no
@@ -4892,7 +4892,7 @@
 	 * Detect the data source being used for the table. Used to simplify the code
 	 * a little (ajax) and to make it compress a little smaller.
 	 *
-	 *  @param {object} settings dataTables settings object
+	 *  @param {object} settings dataTables overview object
 	 *  @returns {string} Data source
 	 *  @memberof DataTable#oApi
 	 */
@@ -5534,8 +5534,8 @@
 		
 		
 		/**
-		 * Get the settings for a particular table for external manipulation
-		 *  @returns {object} DataTables settings object. See
+		 * Get the overview for a particular table for external manipulation
+		 *  @returns {object} DataTables overview object. See
 		 *    {@link DataTable.models.oSettings}
 		 *  @dtopt API
 		 *  @deprecated Since v1.10
@@ -5545,7 +5545,7 @@
 		 *      var oTable = $('#example').dataTable();
 		 *      var oSettings = oTable.fnSettings();
 		 *
-		 *      // Show an example parameter from the settings
+		 *      // Show an example parameter from the overview
 		 *      alert( oSettings._iDisplayStart );
 		 *    } );
 		 */
@@ -5881,7 +5881,7 @@
 				this.id = sId;
 			}
 			
-			/* Create the settings object for this table and set some of the default parameters */
+			/* Create the overview object for this table and set some of the default parameters */
 			var oSettings = $.extend( true, {}, DataTable.models.oSettings, {
 				"nTable":        this,
 				"oApi":          _that.internal,
@@ -5892,8 +5892,8 @@
 			} );
 			allSettings.push( oSettings );
 			
-			// Need to add the instance after the instance after the settings object has been added
-			// to the settings array, so we can self reference the table instance if more than one
+			// Need to add the instance after the instance after the overview object has been added
+			// to the overview array, so we can self reference the table instance if more than one
 			oSettings.oInstance = (_that.length===1) ? _that : $(this).dataTable();
 			
 			// Backwards compatibility, before we apply all the defaults
@@ -5916,7 +5916,7 @@
 			oInit = _fnExtend( $.extend( true, {}, defaults ), oInit );
 			
 			
-			// Map the initialisation options onto the settings object
+			// Map the initialisation options onto the overview object
 			_fnMap( oSettings.oFeatures, oInit, [
 				"bPaginate",
 				"bLengthChange",
@@ -6321,7 +6321,7 @@
 	 * Abstraction for `context` parameter of the `Api` constructor to allow it to
 	 * take several different forms for ease of use.
 	 *
-	 * Each of the input parameter types will be converted to a DataTables settings
+	 * Each of the input parameter types will be converted to a DataTables overview
 	 * object where possible.
 	 *
 	 * @param  {string|node|jQuery|object} mixed DataTable identifier. Can be one
@@ -6331,8 +6331,8 @@
 	 *     with be found and used.
 	 *   * `node` - `TABLE` node which has already been formed into a DataTable.
 	 *   * `jQuery` - A jQuery object of `TABLE` nodes.
-	 *   * `object` - DataTables settings object
-	 * @return {array|null} Matching DataTables settings objects. `null` or
+	 *   * `object` - DataTables overview object
+	 * @return {array|null} Matching DataTables overview objects. `null` or
 	 *   `undefined` is returned if no matching DataTable is found.
 	 * @ignore
 	 */
@@ -6345,7 +6345,7 @@
 		} );
 	
 		if ( mixed.nTable && mixed.oApi ) {
-			// DataTables settings object
+			// DataTables overview object
 			return [ mixed ];
 		}
 		else if ( mixed.nodeName && mixed.nodeName.toLowerCase() === 'table' ) {
@@ -6410,7 +6410,7 @@
 	 *     with be found and used.
 	 *   * `node` - `TABLE` node which has already been formed into a DataTable.
 	 *   * `jQuery` - A jQuery object of `TABLE` nodes.
-	 *   * `object` - DataTables settings object
+	 *   * `object` - DataTables overview object
 	 * @param {array} [data] Data to initialise the Api instance with.
 	 *
 	 * @example
@@ -6485,7 +6485,7 @@
 		concat:  __arrayProto.concat,
 	
 	
-		context: [], // array of table settings objects
+		context: [], // array of table overview objects
 	
 	
 		each: function ( fn )
@@ -6913,10 +6913,10 @@
 	
 	/**
 	 * Selector for HTML tables. Apply the given selector to the give array of
-	 * DataTables settings objects.
+	 * DataTables overview objects.
 	 *
 	 * @param {string|integer} [selector] jQuery selector string or integer
-	 * @param  {array} Array of DataTables settings objects to be filtered
+	 * @param  {array} Array of DataTables overview objects to be filtered
 	 * @return {array}
 	 * @ignore
 	 */
@@ -6935,7 +6935,7 @@
 		return $(nodes)
 			.filter( selector )
 			.map( function (i) {
-				// Need to translate back from the table node to the settings
+				// Need to translate back from the table node to the overview
 				var idx = $.inArray( this, nodes );
 				return a[ idx ];
 			} )
@@ -8576,7 +8576,7 @@
 				} );
 			}
 	
-			/* Remove the settings object from the settings array */
+			/* Remove the overview object from the overview array */
 			var idx = $.inArray( settings, DataTable.settings );
 			if ( idx !== -1 ) {
 				DataTable.settings.splice( idx, 1 );
@@ -8596,12 +8596,12 @@
 	DataTable.version = "1.10.0-dev";
 
 	/**
-	 * Private data store, containing all of the settings objects that are
+	 * Private data store, containing all of the overview objects that are
 	 * created for the tables on a given page.
 	 *
-	 * Note that the `DataTable.settings` object is aliased to
+	 * Note that the `DataTable.overview` object is aliased to
 	 * `jQuery.fn.dataTableExt` through which it may be accessed and
-	 * manipulated, or `jQuery.fn.dataTable.settings`.
+	 * manipulated, or `jQuery.fn.dataTable.overview`.
 	 *  @member
 	 *  @type array
 	 *  @default []
@@ -8661,7 +8661,7 @@
 	
 	/**
 	 * Template object for the way in which DataTables holds information about
-	 * each individual row. This is the object format used for the settings
+	 * each individual row. This is the object format used for the overview
 	 * aoData array.
 	 *  @namespace
 	 */
@@ -8752,7 +8752,7 @@
 	
 	/**
 	 * Template object for the column information object in DataTables. This object
-	 * is held in the settings aoColumns array and contains all the information that
+	 * is held in the overview aoColumns array and contains all the information that
 	 * DataTables needs about each individual column.
 	 *
 	 * Note that this object is related to {@link DataTable.defaults.column}
@@ -9191,7 +9191,7 @@
 		 * 2. _function_ - Callback function that must be executed when the required
 		 *    data has been obtained. That data should be passed into the callback
 		 *    as the only parameter
-		 * 3. _object_ - DataTables settings object for the table
+		 * 3. _object_ - DataTables overview object for the table
 		 *
 		 * Note that this supersedes `fnServerData` from DataTables 1.9-.
 		 *
@@ -9271,7 +9271,7 @@
 		 *   // Get the data from localStorage (could interface with a form for
 		 *   // adding, editing and removing rows).
 		 *   $('#example').dataTable( {
-		 *     "ajax": function (data, callback, settings) {
+		 *     "ajax": function (data, callback, overview) {
 		 *       callback(
 		 *         JSON.parse( localStorage.getItem('dataTablesData') )
 		 *       );
@@ -9806,7 +9806,7 @@
 		 * This function is called on every 'draw' event, and allows you to
 		 * dynamically modify any aspect you want about the created DOM.
 		 *  @type function
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *
 		 *  @dtopt Callbacks
 		 *  @name DataTable.defaults.drawCallback
@@ -9814,7 +9814,7 @@
 		 *  @example
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
-		 *        "drawCallback": function( settings ) {
+		 *        "drawCallback": function( overview ) {
 		 *          alert( 'DataTables has redrawn the table' );
 		 *        }
 		 *      } );
@@ -9922,7 +9922,7 @@
 		 * be times where you wish to customise the string further. This callback
 		 * allows you to do exactly that.
 		 *  @type function
-		 *  @param {object} oSettings DataTables settings object
+		 *  @param {object} oSettings DataTables overview object
 		 *  @param {int} start Starting position in data for the draw
 		 *  @param {int} end End position in data for the draw
 		 *  @param {int} max Total number of rows in the table (regardless of
@@ -9937,7 +9937,7 @@
 		 *
 		 *  @example
 		 *    $('#example').dataTable( {
-		 *      "infoCallback": function( settings, start, end, max, total, pre ) {
+		 *      "infoCallback": function( overview, start, end, max, total, pre ) {
 		 *        return start +" to "+ end;
 		 *      }
 		 *    } );
@@ -9951,7 +9951,7 @@
 		 * however, this does not hold true when using external language information
 		 * since that is obtained using an async XHR call.
 		 *  @type function
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *  @param {object} json The JSON object request from the server - only
 		 *    present if client-side Ajax sourced data is used
 		 *
@@ -9961,7 +9961,7 @@
 		 *  @example
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
-		 *        "initComplete": function(settings, json) {
+		 *        "initComplete": function(overview, json) {
 		 *          alert( 'DataTables has finished its initialisation.' );
 		 *        }
 		 *      } );
@@ -9975,7 +9975,7 @@
 		 * draw by returning false, any other return (including undefined) results in
 		 * the full draw occurring).
 		 *  @type function
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *  @returns {boolean} False will cancel the draw, anything else (including no
 		 *    return) will allow it to complete.
 		 *
@@ -9985,7 +9985,7 @@
 		 *  @example
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
-		 *        "preDrawCallback": function( settings ) {
+		 *        "preDrawCallback": function( overview ) {
 		 *          if ( $('#test').val() == 1 ) {
 		 *            return false;
 		 *          }
@@ -10040,7 +10040,7 @@
 		 *    to the server
 		 *  @param {function} callback to be called on completion of the data get
 		 *    process that will draw the data on the page.
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *
 		 *  @dtopt Callbacks
 		 *  @dtopt Server-side
@@ -10084,7 +10084,7 @@
 		 * but you might wish to use a server-side database or cookies.
 		 *  @type function
 		 *  @member
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} settings DataTables overview object
 		 *  @return {object} The DataTables state object to be loaded
 		 *
 		 *  @dtopt Callbacks
@@ -10094,7 +10094,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "stateSave": true,
-		 *        "stateLoadCallback": function (settings) {
+		 *        "stateLoadCallback": function (overview) {
 		 *          var o;
 		 *
 		 *          // Send an Ajax request to the server to get the data. Note that
@@ -10125,11 +10125,11 @@
 		/**
 		 * Callback which allows modification of the saved state prior to loading that state.
 		 * This callback is called when the table is loading state from the stored data, but
-		 * prior to the settings object being modified by the saved state. Note that for
+		 * prior to the overview object being modified by the saved state. Note that for
 		 * plug-in authors, you should use the `stateLoadParams` event to load parameters for
 		 * a plug-in.
 		 *  @type function
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *  @param {object} data The state object that is to be loaded
 		 *
 		 *  @dtopt Callbacks
@@ -10140,7 +10140,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "stateSave": true,
-		 *        "stateLoadParams": function (settings, data) {
+		 *        "stateLoadParams": function (overview, data) {
 		 *          data.oSearch.sSearch = "";
 		 *        }
 		 *      } );
@@ -10151,7 +10151,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "stateSave": true,
-		 *        "stateLoadParams": function (settings, data) {
+		 *        "stateLoadParams": function (overview, data) {
 		 *          return false;
 		 *        }
 		 *      } );
@@ -10162,9 +10162,9 @@
 	
 		/**
 		 * Callback that is called when the state has been loaded from the state saving method
-		 * and the DataTables settings object has been modified as a result of the loaded state.
+		 * and the DataTables overview object has been modified as a result of the loaded state.
 		 *  @type function
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *  @param {object} data The state object that was loaded
 		 *
 		 *  @dtopt Callbacks
@@ -10175,7 +10175,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "stateSave": true,
-		 *        "stateLoaded": function (settings, data) {
+		 *        "stateLoaded": function (overview, data) {
 		 *          alert( 'Saved filter was: '+data.oSearch.sSearch );
 		 *        }
 		 *      } );
@@ -10190,7 +10190,7 @@
 		 * but you might wish to use a server-side database or cookies.
 		 *  @type function
 		 *  @member
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} settings DataTables overview object
 		 *  @param {object} data The state object to be saved
 		 *
 		 *  @dtopt Callbacks
@@ -10200,7 +10200,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "stateSave": true,
-		 *        "stateSaveCallback": function (settings, data) {
+		 *        "stateSaveCallback": function (overview, data) {
 		 *          // Send an Ajax request to the server with the state object
 		 *          $.ajax( {
 		 *            "url": "/state_save",
@@ -10230,7 +10230,7 @@
 		 * other state properties or modification. Note that for plug-in authors, you should
 		 * use the `stateSaveParams` event to save parameters for a plug-in.
 		 *  @type function
-		 *  @param {object} settings DataTables settings object
+		 *  @param {object} overview DataTables overview object
 		 *  @param {object} data The state object to be saved
 		 *
 		 *  @dtopt Callbacks
@@ -10241,7 +10241,7 @@
 		 *    $(document).ready( function() {
 		 *      $('#example').dataTable( {
 		 *        "stateSave": true,
-		 *        "stateSaveParams": function (settings, data) {
+		 *        "stateSaveParams": function (overview, data) {
 		 *          data.oSearch.sSearch = "";
 		 *        }
 		 *      } );
@@ -11988,12 +11988,12 @@
 	
 	
 	/**
-	 * DataTables settings object - this holds all the information needed for a
+	 * DataTables overview object - this holds all the information needed for a
 	 * given table, including configuration, data and current application of the
 	 * table options. DataTables does not have a single instance for each DataTable
-	 * with the settings attached to that instance, but rather instances of the
+	 * with the overview attached to that instance, but rather instances of the
 	 * DataTable "class" are created on-the-fly as needed (typically by a
-	 * $().dataTable() call) and the settings object is then applied to that
+	 * $().dataTable() call) and the overview object is then applied to that
 	 * instance.
 	 *
 	 * Note that this object is related to {@link DataTable.defaults} but this
@@ -12001,7 +12001,7 @@
 	 * NOT be manipulated outside of DataTables. Any configuration should be done
 	 * through the initialisation options.
 	 *  @namespace
-	 *  @todo Really should attach the settings object to individual instances so we
+	 *  @todo Really should attach the overview object to individual instances so we
 	 *    don't need to create new instances on each $().dataTable() call (if the
 	 *    table already exists). It would also save passing oSettings around and
 	 *    into every single function. However, this is a very significant
@@ -12129,7 +12129,7 @@
 	
 	
 		/**
-		 * Scrolling settings for a table.
+		 * Scrolling overview for a table.
 		 *  @namespace
 		 */
 		"oScroll": {
@@ -12398,7 +12398,7 @@
 	
 	
 		/**
-		 * Callbacks for modifying the settings to be stored for state saving, prior to
+		 * Callbacks for modifying the overview to be stored for state saving, prior to
 		 * saving state.
 		 *  @type array
 		 *  @default []
@@ -12406,7 +12406,7 @@
 		"aoStateSaveParams": [],
 	
 		/**
-		 * Callbacks for modifying the settings that have been stored for state saving
+		 * Callbacks for modifying the overview that have been stored for state saving
 		 * prior to using the stored values to restore the state.
 		 *  @type array
 		 *  @default []
@@ -12414,7 +12414,7 @@
 		"aoStateLoadParams": [],
 	
 		/**
-		 * Callbacks for operating on the settings object once the saved state has been
+		 * Callbacks for operating on the overview object once the saved state has been
 		 * loaded
 		 *  @type array
 		 *  @default []
@@ -12709,7 +12709,7 @@
 		"oClasses": {},
 	
 		/**
-		 * Flag attached to the settings object so you can check in the draw
+		 * Flag attached to the overview object so you can check in the draw
 		 * callback if filtering has been done in the draw. Deprecated in favour of
 		 * events.
 		 *  @type boolean
@@ -12719,7 +12719,7 @@
 		"bFiltered": false,
 	
 		/**
-		 * Flag attached to the settings object so you can check in the draw
+		 * Flag attached to the overview object so you can check in the draw
 		 * callback if sorting has been done in the draw. Deprecated in favour of
 		 * events.
 		 *  @type boolean
@@ -12912,7 +12912,7 @@
 		 *
 		 * The `fnInit` function has the following input parameters:
 		 *
-		 * 1. `{object}` DataTables settings object: see
+		 * 1. `{object}` DataTables overview object: see
 		 *    {@link DataTable.models.oSettings}
 		 *
 		 * And the following return is expected:
@@ -12948,7 +12948,7 @@
 		 *
 		 * Searching functions have the following input parameters:
 		 *
-		 * 1. `{object}` DataTables settings object: see
+		 * 1. `{object}` DataTables overview object: see
 		 *    {@link DataTable.models.oSettings}
 		 * 2. `{array|object}` Data for the row to be processed (same as the
 		 *    original format that was passed in as the data source, or an array
@@ -12973,7 +12973,7 @@
 		 *    // fourth column (i.e. the data[3] index) based on two input values
 		 *    // from the end-user, matching the data in a certain range.
 		 *    $.fn.dataTable.ext.search.push(
-		 *      function( settings, data, dataIndex ) {
+		 *      function( overview, data, dataIndex ) {
 		 *        var min = document.getElementById('min').value * 1;
 		 *        var max = document.getElementById('max').value * 1;
 		 *        var version = data[3] == "-" ? 0 : data[3]*1;
@@ -13103,7 +13103,7 @@
 		 *
 		 * The functions defined take two parameters:
 		 *
-		 * 1. `{object}` DataTables settings object: see
+		 * 1. `{object}` DataTables overview object: see
 		 *    {@link DataTable.models.oSettings}
 		 * 2. `{int}` Target column index
 		 *
@@ -13115,7 +13115,7 @@
 		 *
 		 *  @example
 		 *    // Ordering using `input` node values
-		 *    $.fn.dataTable.ext.order['dom-text'] = function  ( settings, col )
+		 *    $.fn.dataTable.ext.order['dom-text'] = function  ( overview, col )
 		 *    {
 		 *      return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
 		 *        return $('input', td).val();
@@ -13855,7 +13855,7 @@
 	 *  @name DataTable#draw.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 */
 
 	/**
@@ -13864,7 +13864,7 @@
 	 *  @name DataTable#search.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 */
 
 	/**
@@ -13872,7 +13872,7 @@
 	 *  @name DataTable#page.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 */
 
 	/**
@@ -13880,7 +13880,7 @@
 	 *  @name DataTable#order.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 */
 
 	/**
@@ -13889,7 +13889,7 @@
 	 *  @name DataTable#init.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} oSettings DataTables settings object
+	 *  @param {object} oSettings DataTables overview object
 	 *  @param {object} json The JSON object request from the server - only
 	 *    present if client-side Ajax sourced data is used</li></ol>
 	 */
@@ -13902,29 +13902,29 @@
 	 *  @name DataTable#stateSaveParams.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} oSettings DataTables settings object
+	 *  @param {object} oSettings DataTables overview object
 	 *  @param {object} json The state information to be saved
 	 */
 
 	/**
 	 * State load event, fired when the table is loading state from the stored
-	 * data, but prior to the settings object being modified by the saved state
+	 * data, but prior to the overview object being modified by the saved state
 	 * - allowing modification of the saved state is required or loading of
 	 * state for a plug-in.
 	 *  @name DataTable#stateLoadParams.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} oSettings DataTables settings object
+	 *  @param {object} oSettings DataTables overview object
 	 *  @param {object} json The saved state information
 	 */
 
 	/**
 	 * State loaded event, fired when state has been loaded from stored data and
-	 * the settings object has been modified by the loaded data.
+	 * the overview object has been modified by the loaded data.
 	 *  @name DataTable#stateLoaded.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} oSettings DataTables settings object
+	 *  @param {object} oSettings DataTables overview object
 	 *  @param {object} json The saved state information
 	 */
 
@@ -13936,7 +13936,7 @@
 	 *  @name DataTable#processing.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} oSettings DataTables settings object
+	 *  @param {object} oSettings DataTables overview object
 	 *  @param {boolean} bShow Flag for if DataTables is doing processing or not
 	 */
 
@@ -13952,18 +13952,18 @@
 	 *  @name DataTable#xhr.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 *  @param {object} json JSON returned from the server
 	 *
 	 *  @example
 	 *     // Use a custom property returned from the server in another DOM element
-	 *     $('#table').dataTable().on('xhr.dt', function (e, settings, json) {
+	 *     $('#table').dataTable().on('xhr.dt', function (e, overview, json) {
 	 *       $('#status').html( json.status );
 	 *     } );
 	 *
 	 *  @example
 	 *     // Pre-process the data returned from the server
-	 *     $('#table').dataTable().on('xhr.dt', function (e, settings, json) {
+	 *     $('#table').dataTable().on('xhr.dt', function (e, overview, json) {
 	 *       for ( var i=0, ien=json.aaData.length ; i<ien ; i++ ) {
 	 *         json.aaData[i].sum = json.aaData[i].one + json.aaData[i].two;
 	 *       }
@@ -13978,7 +13978,7 @@
 	 *  @name DataTable#destroy.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 */
 
 	/**
@@ -13987,7 +13987,7 @@
 	 *  @name DataTable#length.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 *  @param {integer} len New length
 	 */
 
@@ -13996,7 +13996,7 @@
 	 *  @name DataTable#column-sizing.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 */
 
 	/**
@@ -14004,7 +14004,7 @@
 	 *  @name DataTable#column-visibility.dt
 	 *  @event
 	 *  @param {event} e jQuery event object
-	 *  @param {object} o DataTables settings object {@link DataTable.models.oSettings}
+	 *  @param {object} o DataTables overview object {@link DataTable.models.oSettings}
 	 *  @param {int} column Column index
 	 *  @param {bool} vis `false` if column now hidden, or `true` if visible
 	 */

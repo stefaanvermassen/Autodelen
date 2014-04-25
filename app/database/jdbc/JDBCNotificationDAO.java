@@ -22,11 +22,12 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getNumberOfUnreadNotificationsStatement;
     private PreparedStatement getNotificationListPageByUseridDescStatement;
     private PreparedStatement getGetAmountOfNotificationsStatement;
+    private PreparedStatement setReadStatement;
 
     public static final String NOTIFICATION_QUERY = "SELECT * FROM Notifications JOIN Users ON " +
             "notification_user_id= user_id";
 
-    public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? ";
+    public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? AND notification_read = ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -34,6 +35,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
             filter = new JDBCFilter();
         }
         ps.setString(start, filter.getValue(FilterField.USER_ID));
+        ps.setString(start+1, filter.getValue(FilterField.NOTIFICATION_READ));
     }
 
     public JDBCNotificationDAO(Connection connection) {
@@ -43,7 +45,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     public static Notification populateNotification(ResultSet rs) throws SQLException {
         Notification notification = new Notification(rs.getInt("notification_id"), JDBCUserDAO.populateUser(rs, false, false),
                 rs.getBoolean("notification_read"), rs.getString("notification_subject"), rs.getString("notification_body"),
-                new DateTime(rs.getTimestamp("notification_timestamp")));
+                new DateTime(rs.getTimestamp("notification_created_at")));
         return notification;
     }
 
@@ -51,7 +53,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
         if (createNotificationStatement == null) {
             createNotificationStatement = connection.prepareStatement("INSERT INTO Notifications (notification_user_id, " +
                     "notification_read, notification_subject,"
-                    + "notification_body, notification_timestamp) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    + "notification_body) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createNotificationStatement;
     }
@@ -59,14 +61,14 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
         if (getNotificationListByUseridStatement == null) {
             getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM Notifications JOIN Users ON " +
-                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_timestamp DESC;");
+                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_created_at DESC;");
         }
         return getNotificationListByUseridStatement;
     }
 
-    private PreparedStatement getNotificationListPageByUseridDescStatement() throws SQLException {
+    private PreparedStatement getNotificationListPageByTimestampDescStatement() throws SQLException {
         if(getNotificationListPageByUseridDescStatement == null) {
-            getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_timestamp desc LIMIT ?, ?");
+            getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_created_at desc LIMIT ?, ?");
         }
         return getNotificationListPageByUseridDescStatement;
     }
@@ -85,6 +87,13 @@ public class JDBCNotificationDAO implements NotificationDAO{
                     "notification_user_id= user_id" + FILTER_FRAGMENT);
         }
         return getGetAmountOfNotificationsStatement;
+    }
+
+    private PreparedStatement getSetReadStatement() throws SQLException {
+        if (setReadStatement == null) {
+            setReadStatement = connection.prepareStatement("UPDATE Notifications SET notification_read = ? WHERE notification_id = ?;");
+        }
+        return setReadStatement;
     }
 
 
@@ -121,12 +130,12 @@ public class JDBCNotificationDAO implements NotificationDAO{
     @Override
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getNotificationListPageByUseridDescStatement();
+            PreparedStatement ps = getNotificationListPageByTimestampDescStatement();
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(2, first);
-            ps.setInt(3, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getNotificationList(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of notifications", ex);
@@ -154,14 +163,13 @@ public class JDBCNotificationDAO implements NotificationDAO{
     }
 
     @Override
-    public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException {
+    public Notification createNotification(User user, String subject, String body) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateNotificationStatement();
             ps.setInt(1, user.getId());
             ps.setBoolean(2, false);
             ps.setString(3, subject);
             ps.setString(4,body);
-            ps.setTimestamp(5, new Timestamp(timestamp.getMillis()));
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating notification.");
@@ -170,12 +178,26 @@ public class JDBCNotificationDAO implements NotificationDAO{
                 keys.next(); //if this fails we want an exception anyway
                 DatabaseHelper.getCommunicationProvider().invalidateNotifications(user.getId());
                 DatabaseHelper.getCommunicationProvider().invalidateNotificationNumber(user.getId());
-                return new Notification(keys.getInt(1), user, false, subject, body, timestamp);
+                // new DateTime() is not exactly correct, if you want the exact timestamp, do a getNotification()
+                return new Notification(keys.getInt(1), user, false, subject, body, new DateTime());
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new notification.", ex);
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to create notification", e);
+        }
+    }
+
+    @Override
+    public void markNotificationAsRead(int notificationId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSetReadStatement();
+            ps.setBoolean(1, true);
+            ps.setInt(2,notificationId);
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating notification.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

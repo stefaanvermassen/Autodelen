@@ -1,17 +1,47 @@
-@(car : Car)
+@(car: Car)
 @import database.DatabaseHelper;
     @scripts = {
+        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+        <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
         <script>
-        $(document).ready(function() {
-            $( "#deleteButton" ).click(function() {
-                if(confirm("Ben je zeker dat je deze auto wil verwijderen?")){
-                    window.location = '@routes.Cars.removeCar(car.getId)';
-                }
-            });
-        });
-    </script>
+        var route = myJsRoutes.controllers.Cars.showCarCostsPage;
+        </script>
+        <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+        <script src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")' type="text/javascript"></script>
+        <script src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")' type="text/javascript"></script>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+        <script>
+        $ ( document ).ready ( function ( ) {
+        $ ( "#deleteButton" ).click ( function ( ) {
+        if ( confirm ( "Ben je zeker dat je deze auto wil verwijderen?" ) ) {
+        window.location = ' @routes.Cars.removeCar(car.getId) ';
+        }
+        } ) ;
+        } ) ;
+        </script>
+        <script>
+        function loadModal ( carId ) {
+        myJsRoutes.controllers.Cars.getCarCostModal ( carId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        </script>
     }
-@app("Details Auto", Html(""), scripts) {
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    }
+@app("Details Auto", stylesheets, scripts) {
+    @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -22,35 +52,53 @@
 
     <div id="page-wrapper">
         <div class="row">
-            <div class="col-lg-12">        
-            <h1 class="page-header">Auto's</h1>
-            @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
-                @flashes()
-                @if(isAdmin) {
+            <div class="col-lg-12">
+                <h1 class="page-header">Auto's</h1>
+                @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                    @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                        @flashes()
+                        @if(isAdmin || car.getOwner.getId == user.getId()) {
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                                </div>
+                                    <!-- /.panel-heading -->
+                                <div class="panel-body">
+                                    @if(car.getOwner.getId == user.getId()) {
+                                        <div class="alert alert-info alert-dismissable">
+                                            U bent eigenaar.
+                                        </div>
+                                    }
+                                    <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
+                                    <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+                @detailPartial(car)
+
+                @if(car.getOwner.getId == user.getId() || DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Autogebonden kosten
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
-                            <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Auto verwijderen</button>
+                            <p>Vul hier als eigenaar uw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.</p>
+                            <button class="btn btn-primary" onclick="loadModal(@car.getId)">Nieuwe kost</button>
+                            <p></p>
+
+                            <input name="car_id" value="@car.getId" class="searchTextField hidden">
+                            @carCostsPartial()
                         </div>
                     </div>
                 }
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen auto
-                </div>
-                    <!-- /.panel-heading -->
-                <div class="panel-body">
-                @detailPartial(car)
-            </div>
-            </div>
-            }
             </div>
         </div>
     </div>
     <!-- /page-wrapper -->
+    <div id="resultModal"></div>
+    }
 }

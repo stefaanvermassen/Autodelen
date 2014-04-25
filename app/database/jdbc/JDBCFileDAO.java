@@ -17,6 +17,7 @@ public class JDBCFileDAO implements FileDAO {
     private PreparedStatement getFileGroupStatement;
     private PreparedStatement getFileStatement;
     private PreparedStatement deleteFileStatement;
+    private PreparedStatement createFileGroupStatement;
 
     public JDBCFileDAO(Connection connection) {
         this.connection = connection;
@@ -28,6 +29,15 @@ public class JDBCFileDAO implements FileDAO {
         }
         return deleteFileStatement;
     }
+
+    private PreparedStatement getCreateFileGroupStatement() throws SQLException {
+        if(createFileGroupStatement == null){
+            createFileGroupStatement = connection.prepareStatement("INSERT INTO filegroups VALUES()", new String[]{"file_group_id"});
+        }
+        return createFileGroupStatement;
+    }
+
+
     private PreparedStatement getGetFileStatement() throws SQLException {
         if (getFileStatement == null) {
             getFileStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_id = ?");
@@ -123,6 +133,26 @@ public class JDBCFileDAO implements FileDAO {
     @Override
     public File createFile(String path, String fileName, String contentType) throws DataAccessException {
         return createFile(path, fileName, contentType, -1);
+    }
+
+    @Override
+    public FileGroup createFileGroup() throws DataAccessException {
+       // This is a really silly way of creating a filegroup with only indices. Should use MySQL COUNTER instead of TABLE (but breaks FK's)
+        try {
+            PreparedStatement ps = getCreateFileGroupStatement();
+            if (ps.executeUpdate() != 1)
+                throw new DataAccessException("New filegroup record failed. No rows affected.");
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (!keys.next())
+                    throw new DataAccessException("Failed to read keys for new filegroup record.");
+                return new FileGroup(keys.getInt(1));
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read filegroup id.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to create new filegroup.", ex);
+        }
     }
 
     @Override

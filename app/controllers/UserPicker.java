@@ -1,15 +1,17 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
-import database.DataAccessContext;
-import database.DataAccessException;
-import database.DatabaseHelper;
-import database.UserDAO;
+import database.*;
+import database.jdbc.JDBCFilter;
 import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import java.util.List;
+
 public class UserPicker extends Controller {
+
+    private static final int MAX_VISIBLE_RESULTS = 10;
 
     @RoleSecured.RoleAuthenticated()
     public static Result getList(String search) {
@@ -19,7 +21,10 @@ public class UserPicker extends Controller {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
                 String users = "";
-                for (User user : dao.searchUsers(search)) {
+                Filter filter = new JDBCFilter();
+                filter.putValue(FilterField.USER_NAME, search);
+                List<User> results = dao.getUserList(FilterField.USER_NAME, true, 1, MAX_VISIBLE_RESULTS, filter);
+                for (User user : results) {
                     String value = user.getFirstName() + " " + user.getLastName();
                     for (String part : search.split(" ")) {
                         value = value.replaceAll("(?i)\\b(" + part + ")", "<#>$1</#>");

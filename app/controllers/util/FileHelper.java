@@ -10,12 +10,19 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by Cedric on 4/11/2014.
@@ -38,29 +45,49 @@ public class FileHelper {
         } else uploadFolder = property;
     }
 
-    public static String saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {
-        File file = filePart.getFile();
-        String fileName = filePart.getFilename();
+    private static Path createPath(String fileName, String subfolder){
         if (fileName.contains("/") || fileName.contains("\\"))
             throw new RuntimeException("Filename contains slashes.");
 
         String uuid = UUID.randomUUID().toString();
         String newFileName = uuid + "-" + fileName;
 
-        Path path = Paths.get(uploadFolder, subfolder, newFileName);
+        return Paths.get(subfolder, newFileName);
+    }
+
+    public static Path saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {
+        Path path = createPath(filePart.getFilename(), subfolder);
+        Path absolutePath = Paths.get(uploadFolder).resolve(path.toString());
 
         // Create subdirectories if not exist
-        Files.createDirectories(path.getParent());
+        Files.createDirectories(absolutePath.getParent());
 
         // Copy or move upload data to our upload folder
-        File toFile = new File(path.toAbsolutePath().toString());
+        File file = filePart.getFile();
+        File toFile = absolutePath.toFile();
         if (MOVE_INSTEAD_OF_COPY)
             moveFile(file, toFile);
         else
             copyFile(file, toFile);
 
         Logger.debug("File (" + filePart.getContentType() + ") upload to " + path);
-        return Paths.get(subfolder, newFileName).toString();
+        return path;
+    }
+
+    public static Path saveResizedImage(Http.MultipartFormData.FilePart filePart, String subfolder, int maxWidth) throws IOException {
+        Path path = createPath(filePart.getFilename(), subfolder);
+        Path absolutePath = Paths.get(uploadFolder).resolve(path.toString());
+
+        // Create subdirectories if not exist
+        Files.createDirectories(absolutePath.getParent());
+
+        // Copy or move upload data to our upload folder
+        File file = filePart.getFile();
+        File toFile = absolutePath.toFile();
+        createResizedJpeg(file, toFile, maxWidth);
+
+        Logger.debug("File (%s - resized maxw=%d) uploaded to %s%n", filePart.getContentType(), maxWidth, path);
+        return path;
     }
 
     public static Result getFileStreamResult(FileDAO dao, int fileId){
@@ -105,9 +132,9 @@ public class FileHelper {
      * @param path The file path to delete
      * @returns Whether the delete operation was successfull
      */
-    public static boolean deleteFile(String path) throws IOException {
+    public static boolean deleteFile(Path path) throws IOException {
         try {
-            Path absPath = Paths.get(uploadFolder, path);
+            Path absPath = Paths.get(uploadFolder).resolve(path);
             Files.delete(absPath);
             return true;
         } catch (IOException ex) {
@@ -117,6 +144,34 @@ public class FileHelper {
 
     private static void moveFile(File sourceFile, File destFile) throws IOException {
         Files.move(java.nio.file.Paths.get(sourceFile.getAbsolutePath()), java.nio.file.Paths.get(destFile.getAbsolutePath()));
+    }
+
+    private static void createResizedJpeg(File sourceFile, File destFile, int maxWidth) throws IOException {
+        try(ImageInputStream iis = ImageIO.createImageInputStream(sourceFile)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            while(readers.hasNext()){
+                ImageReader reader = readers.next();
+                try {
+                    reader.setInput(iis, false); // We want to enforce a specific reader to keep the format
+                    if (reader.getNumImages(true) > 1) {
+                        throw new RuntimeException("Multi-image containers are disabled.");
+                    }
+
+                    BufferedImage sourceImage = reader.read(0); //no support for multi-image files??
+                    Image thumbnail = sourceImage.getScaledInstance(maxWidth, -1, Image.SCALE_SMOOTH);
+                    BufferedImage bufferedThumbnail = new BufferedImage(thumbnail.getWidth(null), thumbnail.getHeight(null), BufferedImage.TYPE_INT_RGB);
+                    bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
+                    ImageIO.write(bufferedThumbnail, reader.getFormatName(), new FileOutputStream(destFile, false));
+                    return;
+                } catch(IIOException ex){
+                    continue;
+                }
+            }
+            throw new RuntimeException("No image reader installed for given format.");
+        } catch(IOException ex){
+            //??
+            throw ex;
+        }
     }
 
     private static void copyFile(File sourceFile, File destFile) throws IOException {

@@ -1,31 +1,85 @@
 @(car: Car)
-<div class="row">
-    <div class="col-lg-4">
-        <div class="well">
-            <p>
-                <!-- TODO: mooie opmaak -->
-                <strong>Naam: </strong> @car.getName<br>
-                <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a><br>
-                <strong>Adres: </strong> @car.getLocation<br>
-                <strong>Merk: </strong> @car.getBrand<br>
-                <strong>Type: </strong> @car.getType<br>
-                <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee }<br>
-                <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee }<br>
-                <strong>Aantal zitplaatsen: </strong> @car.getSeats<br>
-                <strong>Aantal deuren: </strong> @car.getDoors<br>
-                <strong>Bouwjaar: </strong> @car.getYear<br>
-                <strong>Gemiddeld verbruik (per 100 km): </strong> @car.getFuelEconomy<br>
-                <strong>Geschatte huidige waarde: </strong> @car.getEstimatedValue<br>
-                <strong>Gemiddeld aantal kilometers (per jaar): </strong> @car.getOwnerAnnualKm<br>
-                <strong>Commentaar: </strong> <br> @car.getComments
-                    <!-- TODO: fuel, Comments, (Laatste aanpassing?) -->
-                @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-            </p>
+    @import controllers.Cars;
+    @import org.joda.time.format.DateTimeFormat
+    @import database.DatabaseHelper;
+@defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-header">
+
+                </div>
+                    <!-- /.panel-heading -->
+                <div class="panel-body">
+
+                    @if(car == null) {
+                        <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                    } else {
+                        <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                    }
+                        <!-- TODO: profile picture-->
+
+                    <h2>@car.getName</h2>
+                    <h3>@car.getBrand @car.getType</h3>
+                    <p> <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a></p>
+
+                <!-- /.panel-body -->
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="col-lg-8">
-        <div class="well">
-            Map placeholder
+        <div class="col-md-9">
+                <!-- /.panel -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Details
+                </div>
+                    <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Adres</h3>
+                        </div>
+                        <div class="panel-body">
+                            Map placeholder<br>
+                            <strong>Adres:</strong> @car.getLocation.toString
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Details</h3>
+                        </div>
+                        <div class="panel-body">
+                            <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
+                            <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
+                            <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                            <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                            <strong>Brandstof: </strong>  @{Cars.getReverseFuelMap().get(car.getFuel) } <br>
+                            <strong>Commentaar: </strong> <br> @car.getComments
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Geheime details (enkel zichtbaar door admin en eigenaar)</h3>
+                        </div>
+
+                        <div class="panel-body">
+
+                            <strong>Bouwjaar: </strong> @if(car.getYear == null) { Onbekend } else { @car.getYear }<br>
+                            <strong>Gemiddeld verbruik (per 100 km): </strong> @if(car.getFuelEconomy == null) { Onbekend } else { @car.getFuelEconomy }<br>
+                            <strong>Geschatte huidige waarde: </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
+                            <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { @car.getTechnicalCarDetails.getRegistration }<br>
+                            <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
+                        </div>
+                    </div>
+                        <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+                <!-- /.panel-default -->
         </div>
+            <!-- /col-md-9 -->
     </div>
-</div>
+}

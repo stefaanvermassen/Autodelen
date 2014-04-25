@@ -14,10 +14,8 @@ import java.sql.Date;
 import java.util.List;
 
 import database.FilterField;
-import models.Address;
-import models.Car;
-import models.CarFuel;
-import models.User;
+import models.*;
+import org.h2.command.Prepared;
 
 /**
  *
@@ -27,8 +25,10 @@ public class JDBCCarDAO implements CarDAO{
     
     private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
 
-    public static final String CAR_QUERY = "SELECT * FROM Cars INNER JOIN Addresses ON Addresses.address_id=Cars.car_location " +
-            "INNER JOIN Users ON Users.user_id=Cars.car_owner_user_id ";
+    public static final String CAR_QUERY = "SELECT * FROM Cars " +
+            "LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location " +
+            "LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id " +
+            "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details ";
 
     public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_brand LIKE ? AND Cars.car_gps >= ? " +
             "AND Cars.car_hook >= ? AND Cars.car_seats >= ? AND Addresses.address_zipcode LIKE ? " +
@@ -39,7 +39,7 @@ public class JDBCCarDAO implements CarDAO{
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = createCarFilter();
+            filter = new JDBCFilter();
         }
         ps.setString(start, filter.getValue(FilterField.CAR_NAME));
         ps.setString(start+1, filter.getValue(FilterField.CAR_BRAND));
@@ -51,25 +51,26 @@ public class JDBCCarDAO implements CarDAO{
         ps.setString(start+7, filter.getValue(FilterField.UNTIL));
     }
 
-
     private Connection connection;
     private PreparedStatement createCarStatement;
     private PreparedStatement updateCarStatement;
     private PreparedStatement getCarStatement;
     private PreparedStatement getCarsOfUserStatement;
     private PreparedStatement deleteCarStatement;
-    private PreparedStatement getGetCarListStatement;
     private PreparedStatement getGetCarListPageByNameAscStatement;
     private PreparedStatement getGetCarListPageByNameDescStatement;
     private PreparedStatement getGetCarListPageByBrandAscStatement;
     private PreparedStatement getGetCarListPageByBrandDescStatement;
     private PreparedStatement getGetAmountOfCarsStatement;
+    private PreparedStatement createTechnicalCarDetailsStatement;
+    private PreparedStatement updateTechnicalCarDetailsStatement;
+
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
     }
 
-    public static Car populateCar(ResultSet rs, boolean withAddress, boolean withUser) throws SQLException {
+    public static Car populateCar(ResultSet rs, boolean withRest) throws SQLException {
         // Extra check if car actually exists
         if(rs.getObject("car_id") != null) {
             Car car = new Car();
@@ -77,30 +78,40 @@ public class JDBCCarDAO implements CarDAO{
             car.setName(rs.getString("car_name"));
             car.setBrand(rs.getString("car_brand"));
             car.setType(rs.getString("car_type"));
-            car.setComments(rs.getString("car_comments"));
-            car.setDoors(rs.getInt("car_doors"));
-            car.setEstimatedValue(rs.getInt("car_estimated_value"));
-            car.setFuelEconomy(rs.getInt("car_fuel_economy"));
+            Integer seats = rs.getInt("car_seats");
+            if(!rs.wasNull())
+                car.setSeats(seats);
+            Integer doors = rs.getInt("car_doors");
+            if(!rs.wasNull())
+                car.setDoors(doors);
             car.setGps(rs.getBoolean("car_gps"));
             car.setHook(rs.getBoolean("car_hook"));
-            car.setOwnerAnnualKm(rs.getInt("car_owner_annual_km"));
-            car.setSeats(rs.getInt("car_seats"));
-            car.setYear(rs.getInt("car_year"));
-            Address location;
-            if(withAddress) {
+            Integer year = rs.getInt("car_year");
+            if(!rs.wasNull())
+                car.setYear(year);
+            Integer estimatedValue = rs.getInt("car_estimated_value");
+            if(!rs.wasNull())
+                car.setEstimatedValue(estimatedValue);
+            Integer fuelEconomy = rs.getInt("car_fuel_economy");
+            if(!rs.wasNull())
+                car.setFuelEconomy(fuelEconomy);
+            Integer ownerAnnualKm = rs.getInt("car_owner_annual_km");
+            if(!rs.wasNull())
+                car.setOwnerAnnualKm(ownerAnnualKm);
+            car.setComments(rs.getString("car_comments"));
+            Address location = null;
+            User user = null;
+            TechnicalCarDetails technicalCarDetails = null;
+            if(withRest) {
                 location = JDBCAddressDAO.populateAddress(rs);
-            } else {
-                location = null;
+                user = JDBCUserDAO.populateUser(rs, false, false);
+                rs.getInt("car_technical_details");
+                if(!rs.wasNull())
+                    technicalCarDetails = new TechnicalCarDetails(rs.getInt("details_id"), rs.getString("details_car_license_plate"), rs.getString("details_car_registration"), rs.getInt("details_car_chassis_number"));
             }
             car.setLocation(location);
-
-            User user;
-            if(withUser) {
-                user = JDBCUserDAO.populateUser(rs, false, false);
-            } else {
-                user = null;
-            }
             car.setOwner(user);
+            car.setTechnicalCarDetails(technicalCarDetails);
 
             car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
 
@@ -119,37 +130,41 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_name, car_type, car_brand, car_location, car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km, car_owner_user_id, car_comments) VALUES (?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_name, car_type, car_brand, car_location, " +
+                    "car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, " +
+                    "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
+                    "car_technical_details, car_owner_user_id, car_comments) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarStatement;
     }
     
     private PreparedStatement updateCarStatement() throws SQLException {
         if (updateCarStatement == null) {
-            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_name=?, car_type=? , car_brand=? , car_location=? , car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=?, car_owner_user_id=? , car_comments=? WHERE car_id = ?");
+            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
+                    "car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , " +
+                    "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
+                    "car_technical_details=?, car_owner_user_id=? , car_comments=? WHERE car_id = ?");
         }
         return updateCarStatement;
     }
     
     private PreparedStatement getCarStatement() throws SQLException {
         if (getCarStatement == null) {
-            getCarStatement = connection.prepareStatement("SELECT * FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE car_id=?");
+            getCarStatement = connection.prepareStatement("SELECT * FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location " +
+                    "LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id " +
+                    "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details WHERE car_id=?");
         }
         return getCarStatement;
     }
 
     private PreparedStatement getGetCarsOfUserStatement() throws SQLException {
         if (getCarsOfUserStatement == null) {
-            getCarsOfUserStatement = connection.prepareStatement("SELECT * FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id WHERE user_id=?");
+            getCarsOfUserStatement = connection.prepareStatement("SELECT * FROM Cars " +
+                    "LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location " +
+                    "LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id " +
+                    "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details WHERE user_id=?");
         }
         return getCarsOfUserStatement;
-    }
-
-    private PreparedStatement getGetCarListStatement() throws SQLException {
-        if(getGetCarListStatement == null) {
-            getGetCarListStatement = connection.prepareStatement(CAR_QUERY);
-        }
-        return getGetCarListStatement;
     }
 
 
@@ -182,13 +197,32 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
         if(getGetAmountOfCarsStatement == null) {
-            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location" + FILTER_FRAGMENT);
+            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars " +
+                    "LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location " +
+                            "LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id " +
+                            "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details " + FILTER_FRAGMENT);
         }
         return getGetAmountOfCarsStatement;
     }
+
+    private PreparedStatement createTechnicalCarDetailsStatement() throws SQLException {
+        if (createTechnicalCarDetailsStatement == null) {
+            createTechnicalCarDetailsStatement = connection.prepareStatement("INSERT INTO TechnicalCarDetails(details_car_license_plate, " +
+                    "details_car_registration, details_car_chassis_number) VALUES (?,?,?)", new String[] {"details_id"});
+        }
+        return createTechnicalCarDetailsStatement;
+    }
+
+    private PreparedStatement updateTechnicalCarDetailsStatement() throws SQLException {
+        if (updateTechnicalCarDetailsStatement == null) {
+            updateTechnicalCarDetailsStatement = connection.prepareStatement("UPDATE TechnicalCarDetails SET details_car_license_plate=?, " +
+                    "details_car_registration=?, details_car_chassis_number=? WHERE details_id = ?");
+        }
+        return updateTechnicalCarDetailsStatement;
+    }
     
     @Override
-    public Car createCar(String name, String brand, String type, Address location, int seats, int doors, int year, boolean gps, boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue, int ownerAnnualKm, User owner, String comments) throws DataAccessException {
+    public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, User owner, String comments) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement();
             ps.setString(1, name);
@@ -199,41 +233,117 @@ public class JDBCCarDAO implements CarDAO{
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
-            ps.setInt(5, seats);
-            ps.setInt(6, doors);
-            ps.setInt(7, year);
-            //Calendar cal = Calendar.getInstance();
-            //cal.set(year, 0,0);
-            //ps.setDate(6, new Date(cal.getTime().getTime()));
-
+            if(seats != null) {
+                ps.setInt(5, seats);
+            } else {
+                ps.setNull(5, Types.INTEGER);
+            }
+            if(doors != null) {
+                ps.setInt(6, doors);
+            } else {
+                ps.setNull(6, Types.INTEGER);
+            }
+            if(year != null) {
+                ps.setInt(7, year);
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
             ps.setBoolean(8, gps);
             ps.setBoolean(9, hook);
             ps.setString(10, fuel.toString());
-            ps.setInt(11, fuelEconomy);
-            ps.setInt(12, estimatedValue);
-            ps.setInt(13, ownerAnnualKm);
-            // Owner cannot be null according to SQL script so this will throw an Exception
-            if(owner != null) {
-                ps.setInt(14, owner.getId());
+            if(fuelEconomy != null) {
+                ps.setInt(11, fuelEconomy);
+            } else {
+                ps.setNull(11, Types.INTEGER);
+            }
+            if(estimatedValue!= null) {
+                ps.setInt(12, estimatedValue);
+            } else {
+                ps.setNull(12, Types.INTEGER);
+            }
+            if(ownerAnnualKm != null) {
+                ps.setInt(13, ownerAnnualKm);
+            } else {
+                ps.setNull(13, Types.INTEGER);
+            }
+            // TechnicalCarDetails is in seperate table
+            if(technicalCarDetails != null) {
+                createOrUpdatetechnicalCarDetails(technicalCarDetails);
+                ps.setInt(14, technicalCarDetails.getId());
             } else {
                 ps.setNull(14, Types.INTEGER);
             }
-            ps.setString(15, comments);
 
-            java.sql.Date sqlDate = new Date(new java.util.Date().getTime());
-            String currentDatetime = sqlDate.toString();
-            //ps.setDate(15,sqlDate);
+            // Owner cannot be null according to SQL script so this will throw an Exception
+            if(owner != null) {
+                ps.setInt(15, owner.getId());
+            } else {
+                ps.setNull(15, Types.INTEGER);
+            }
+            ps.setString(16, comments);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next();
-                return new Car(keys.getInt(1), name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments, currentDatetime);
+                int id = keys.getInt(1);
+                return new Car(id, name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, owner, comments);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new car.", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create new car.", ex);
+        }
+    }
+
+    private void createOrUpdatetechnicalCarDetails(TechnicalCarDetails technicalCarDetails) throws DataAccessException {
+        try {
+            if(technicalCarDetails.getId() == null) { // create
+                PreparedStatement ps = createTechnicalCarDetailsStatement();
+                if(technicalCarDetails.getLicensePlate() != null)
+                    ps.setString(1, technicalCarDetails.getLicensePlate());
+                else
+                    ps.setNull(1, Types.VARCHAR);
+                if(technicalCarDetails.getRegistration() != null)
+                    ps.setString(2, technicalCarDetails.getRegistration());
+                else
+                    ps.setNull(2, Types.VARCHAR);
+                if(technicalCarDetails.getChassisNumber() != null)
+                    ps.setInt(3, technicalCarDetails.getChassisNumber());
+                else
+                    ps.setNull(3, Types.INTEGER);
+
+                if(ps.executeUpdate() == 0)
+                    throw new DataAccessException("No rows were affected when creating technicalCarDetails.");
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    keys.next();
+                    int id = keys.getInt(1);
+                    technicalCarDetails.setId(id);
+                } catch (SQLException ex) {
+                    throw new DataAccessException("Failed to get primary key for new technicalCarDetails.", ex);
+                }
+            } else { // update
+                PreparedStatement ps = updateTechnicalCarDetailsStatement();
+                if(technicalCarDetails.getLicensePlate() != null)
+                    ps.setString(1, technicalCarDetails.getLicensePlate());
+                else
+                    ps.setNull(1, Types.VARCHAR);
+                if(technicalCarDetails.getRegistration() != null)
+                    ps.setString(2, technicalCarDetails.getRegistration());
+                else
+                    ps.setNull(2, Types.VARCHAR);
+                if(technicalCarDetails.getChassisNumber() != null)
+                    ps.setInt(3, technicalCarDetails.getChassisNumber());
+                else
+                    ps.setNull(3, Types.INTEGER);
+                ps.setInt(4, technicalCarDetails.getId());
+
+                if(ps.executeUpdate() == 0)
+                    throw new DataAccessException("No rows were affected when updating technicalCarDetails.");
+
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to create new TechnicalCarDetails");
         }
     }
 
@@ -249,28 +359,56 @@ public class JDBCCarDAO implements CarDAO{
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
-            ps.setInt(5, car.getSeats());
-            ps.setInt(6, car.getDoors());
-            //Calendar cal = Calendar.getInstance();
-            //cal.set(car.getYear(), 0,0);
-            //ps.setDate(6, new Date(cal.getTime().getTime()));
-            ps.setInt(7, car.getYear());
+            if(car.getSeats() != null) {
+                ps.setInt(5, car.getSeats());
+            } else {
+                ps.setNull(5, Types.INTEGER);
+            }
+            if(car.getDoors() != null) {
+                ps.setInt(6, car.getDoors());
+            } else {
+                ps.setNull(6, Types.INTEGER);
+            }
+            if(car.getYear() != null) {
+                ps.setInt(7, car.getYear());
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
             ps.setBoolean(8, car.isGps());
             ps.setBoolean(9, car.isHook());
             ps.setString(10, car.getFuel().toString());
-            ps.setInt(11, car.getFuelEconomy());
-            ps.setInt(12,car.getEstimatedValue());
-            ps.setInt(13,car.getOwnerAnnualKm());
-            // If Owner == null, this should throw an error on execution
-            if(car.getOwner() != null) {
-                ps.setInt(14,car.getOwner().getId());
+            if(car.getFuelEconomy() != null) {
+                ps.setInt(11, car.getFuelEconomy());
+            } else {
+                ps.setNull(11, Types.INTEGER);
+            }
+            if(car.getEstimatedValue()!= null) {
+                ps.setInt(12, car.getEstimatedValue());
+            } else {
+                ps.setNull(12, Types.INTEGER);
+            }
+            if(car.getOwnerAnnualKm() != null) {
+                ps.setInt(13, car.getOwnerAnnualKm());
+            } else {
+                ps.setNull(13, Types.INTEGER);
+            }
+
+            if(car.getTechnicalCarDetails() != null) {
+                createOrUpdatetechnicalCarDetails(car.getTechnicalCarDetails());
+                ps.setInt(14, car.getTechnicalCarDetails().getId());
             } else {
                 ps.setNull(14, Types.INTEGER);
             }
-            ps.setString(15,car.getComments());
-            //ps.setDate(15,new Date(new java.util.Date().getTime()));
 
-            ps.setInt(16, car.getId());
+            // If Owner == null, this should throw an error on execution
+            if(car.getOwner() != null) {
+                ps.setInt(15,car.getOwner().getId());
+            } else {
+                ps.setNull(15, Types.INTEGER);
+            }
+            ps.setString(16,car.getComments());
+
+            ps.setInt(17, car.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");
@@ -287,7 +425,7 @@ public class JDBCCarDAO implements CarDAO{
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
-                    return populateCar(rs, true, true);
+                    return populateCar(rs, true);
                 else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading car resultset", ex);
@@ -311,16 +449,6 @@ public class JDBCCarDAO implements CarDAO{
 		
 	}
 
-    @Override
-    public List<Car> getCarList() throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetCarListStatement();
-            return getCars(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
-        }
-    }
-
     /**
      * @param filter The filter to apply to
      * @return The amount of filtered cars
@@ -343,11 +471,6 @@ public class JDBCCarDAO implements CarDAO{
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
         }
-    }
-
-    @Override
-    public Filter createCarFilter() {
-        return new JDBCFilter();
     }
 
     /**
@@ -417,7 +540,7 @@ public class JDBCCarDAO implements CarDAO{
         List<Car> cars = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                cars.add(populateCar(rs, true, true));
+                cars.add(populateCar(rs, true));
             }
             return cars;
         } catch (SQLException ex) {

@@ -1,8 +1,6 @@
 package database.jdbc;
 
-import database.DataAccessException;
-import database.DatabaseHelper;
-import database.MessageDAO;
+import database.*;
 import models.Message;
 import models.User;
 import org.joda.time.DateTime;
@@ -18,12 +16,37 @@ public class JDBCMessageDAO implements MessageDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"message_id"};
 
+    private static final String MESSAGE_QUERY = "SELECT * FROM Messages " +
+            "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
+            "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id ";
+
+    public static final String FILTER_FRAGMENT = " WHERE message_to_user_id=? OR message_from_user_id=?";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = new JDBCFilter();
+        }
+        String receiver = filter.getValue(FilterField.MESSAGE_RECEIVER_ID);
+        if(receiver.equals("")) {
+            receiver = "-1";
+        }
+
+        String sender = filter.getValue(FilterField.MESSAGE_SENDER_ID);
+        if(sender.equals("")) {
+            sender = "-1";
+        }
+
+        ps.setString(start, receiver);
+        ps.setString(start+1, sender);
+    }
+
     private Connection connection;
     private PreparedStatement createMessageStatement;
-    private PreparedStatement getReceivedMessageListByUseridStatement;
-    private PreparedStatement getSentMessageListByUseridStatement;
     private PreparedStatement getNumberOfUnreadMessagesStatement;
     private PreparedStatement setReadStatement;
+    private PreparedStatement getMessageListPageByTimestampStatement;
+    private PreparedStatement getAmountOfMessagesStatement;
 
     public JDBCMessageDAO(Connection connection) {
         this.connection = connection;
@@ -32,29 +55,16 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement getCreateMessageStatement() throws SQLException {
         if (createMessageStatement == null) {
             createMessageStatement = connection.prepareStatement("INSERT INTO Messages (message_from_user_id, message_to_user_id, " +
-                    "message_read, message_subject, message_body, message_timestamp) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    "message_read, message_subject, message_body) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createMessageStatement;
     }
 
-    private PreparedStatement getGetReceivedMessageListByUseridStatement() throws SQLException {
-        if (getReceivedMessageListByUseridStatement == null) {
-            getReceivedMessageListByUseridStatement = connection.prepareStatement("SELECT * FROM Messages " +
-                    "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
-                    "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id " +
-                    "WHERE message_to_user_id=? ORDER BY message_timestamp DESC;");
+    private PreparedStatement getGetMessageListPageByTimestampStatement() throws SQLException {
+        if (getMessageListPageByTimestampStatement == null) {
+            getMessageListPageByTimestampStatement = connection.prepareStatement(MESSAGE_QUERY + FILTER_FRAGMENT + " ORDER BY message_created_at DESC LIMIT ?, ?");
         }
-        return getReceivedMessageListByUseridStatement;
-    }
-
-    private PreparedStatement getGetSentMessageListByUseridStatement() throws SQLException {
-        if (getSentMessageListByUseridStatement == null) {
-            getSentMessageListByUseridStatement = connection.prepareStatement("SELECT * FROM Messages " +
-                    "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
-                    "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id " +
-                    "WHERE message_from_user_id=? ORDER BY message_timestamp DESC;");
-        }
-        return getSentMessageListByUseridStatement;
+        return getMessageListPageByTimestampStatement;
     }
 
     private PreparedStatement getSetReadStatement() throws SQLException {
@@ -72,22 +82,54 @@ public class JDBCMessageDAO implements MessageDAO {
         return getNumberOfUnreadMessagesStatement;
     }
 
+    private PreparedStatement getGetAmountOfMessagesStatement() throws SQLException {
+        if(getAmountOfMessagesStatement == null) {
+            getAmountOfMessagesStatement = connection.prepareStatement("SELECT count(*) as amount_of_messages FROM Messages " +
+                    "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
+                    "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id "+ FILTER_FRAGMENT);
+        }
+        return getAmountOfMessagesStatement;
+    }
+
     public static Message populateMessage(ResultSet rs) throws SQLException {
         Message message = new Message(rs.getInt("message_id"), JDBCUserDAO.populateUser(rs, false, false, "Sender"),
                 JDBCUserDAO.populateUser(rs, false, false, "Receiver"), rs.getBoolean("message_read"),
                 rs.getString("message_subject"), rs.getString("message_body"),
-                new DateTime(rs.getTimestamp("message_timestamp")));
+                new DateTime(rs.getTimestamp("message_created_at")));
         return message;
     }
 
     @Override
-    public List<Message> getReceivedMessageListForUser(int userId) throws DataAccessException {
+    public int getAmountOfMessages(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetReceivedMessageListByUseridStatement();
-            ps.setInt(1, userId);
+            PreparedStatement ps = getGetAmountOfMessagesStatement();
+            fillFragment(ps, filter, 1);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_messages");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of messages", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of messages", ex);
+        }
+    }
+
+    @Override
+    public List<Message> getMessageList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetMessageListPageByTimestampStatement();
+
+            fillFragment(ps, filter, 1);
+            int first = (page-1)*pageSize;
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getMessageList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of messages", e);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of messages", ex);
         }
     }
 
@@ -112,7 +154,7 @@ public class JDBCMessageDAO implements MessageDAO {
     }
 
     @Override
-    public Message createMessage(User sender, User receiver, String subject, String body, DateTime timestamp) throws DataAccessException {
+    public Message createMessage(User sender, User receiver, String subject, String body) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateMessageStatement();
             ps.setInt(1, sender.getId());
@@ -120,7 +162,6 @@ public class JDBCMessageDAO implements MessageDAO {
             ps.setBoolean(3, false);
             ps.setString(4, subject);
             ps.setString(5,body);
-            ps.setTimestamp(6, new Timestamp(timestamp.getMillis()));
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating message.");
@@ -129,7 +170,8 @@ public class JDBCMessageDAO implements MessageDAO {
                 keys.next(); //if this fails we want an exception anyway
                 DatabaseHelper.getCommunicationProvider().invalidateMessages(receiver.getId());
                 DatabaseHelper.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
-                return new Message(keys.getInt(1), sender, receiver, false, subject, body, timestamp);
+                // new DateTime() is not exactly correct, if you want the exact timestamp, do a getMessage()
+                return new Message(keys.getInt(1), sender, receiver, false, subject, body, new DateTime());
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new message.", ex);
             }
@@ -140,10 +182,9 @@ public class JDBCMessageDAO implements MessageDAO {
 
     @Override
     public void markMessageAsRead(int messageID) throws DataAccessException {
-
         try {
             PreparedStatement ps = getSetReadStatement();
-            ps.setBoolean(1, false);
+            ps.setBoolean(1, true);
             ps.setInt(2,messageID);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating message.");

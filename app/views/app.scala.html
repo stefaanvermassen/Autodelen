@@ -1,6 +1,7 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
 @import org.joda.time.format.DateTimeFormat
 @import database.DatabaseHelper;
+@import database.providers.CommunicationProvider;
 @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
 
 <!DOCTYPE html>
@@ -21,6 +22,8 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
         @stylesheets @* To include stylesheets from external templates *@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet/less" type="text/css" href="@routes.Assets.at("stylesheets/less/colortheme.less")">
+        <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/colortheme.css")"> -->
     </head>
     <body>
         <div id="wrapper">
@@ -48,9 +51,9 @@
                         <ul class="dropdown-menu dropdown-messages">
                             @defining(DatabaseHelper.getCommunicationProvider().getMessages(user.getId())) { messages =>
                                 @for((message, index) <- messages.zipWithIndex) {
-                                    @if(index<3){
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
                                         <li>
-                                            <a href="#">
+                                            <a href="@routes.Messages.showMessages()">
                                                 <div>
                                                     @if(!message.isRead){
                                                         <strong>Dégage [ongelezen]</strong>
@@ -93,14 +96,14 @@
                         <ul class="dropdown-menu dropdown-messages">
                             @defining(DatabaseHelper.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
                                 @for((notification, index) <- notifications.zipWithIndex) {
-                                    @if(index<3){
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
                                         <li>
-                                            <a href="#">
+                                            <a href="@routes.Notifications.showNotifications()">
                                                 <div>
                                                     @if(!notification.getRead){
-                                                    <strong>Dégage [ongelezen]</strong>
+                                                    <strong>Dégage (ongelezen)</strong>
                                                         }else{
-                                                    <strong>Dégage</strong>
+                                                    Dégage
                                                         }
                                                     <span class="pull-right text-muted">
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
@@ -128,12 +131,14 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString
-                                @if("y".equals(session.get("impersonated"))){
+                                @if(session.get("impersonated") != null){
                                     <span class="badge badge-warning">I</span>
                                 }
                             </span>
-                           <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
-                            <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
+                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                                <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -151,6 +156,10 @@
                 <!-- /.navbar-top-links -->
             </nav>
             <!-- /.navbar-static-top -->
+
+            @if("y".equals(session.get("impersonated"))){
+                <div class="impersonating">You are impersonating @user.toString!</div>
+            }
 
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
@@ -179,14 +188,14 @@
                             </a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         }
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_OWNER)){
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
-                            <a href="@routes.Cars.showCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
                         </li>
                         }
 
@@ -200,7 +209,7 @@
                             }</a>
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i>Notificaties
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties
                             @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
                               @if(unread_number>0){
                                   <span class="sidenumber">@unread_number</span>
@@ -214,20 +223,42 @@
                             <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
                         </li>
 
+                        @if((DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN))){
+                            <li class="submenu">ADMIN</li>
+                        }
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN)){
-                        <li class="submenu">ADMIN</li>
                         <li @if(title == "Emailtemplates") {class="active"}>
                             <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
                         </li>
                         }
-                        <li @if(title == "Ritten (Admin)") {class="active"}>
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)){
+                            <li @if(title == "Ritten (Admin)") {class="active"}>
                             <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
-                        </li>
+                            </li>
+                        }
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
                         <li @if(title == "Gebruikers") {class="active"}>
                             <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
                         </li>
+                        }
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)){
+                            <li @if(title == "Infosessies (Admin)") {class="active"}>
+                            <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
+                            </li>
+                        }
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)){
+                            <li @if(title == "Auto's (Admin)") {class="active"}>
+                            <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
+                            </li>
+                            <li @if(title == "Autokosten (Admin)") {class="active"}>
+                                <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
+                            </li>
                         }
 
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
@@ -235,6 +266,11 @@
                         <li @if(title == "Gebruikersrollen") {class="active"}>
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
                         </li>
+
+                        <li>
+                            <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
+                        </li>
+
                         <li @if(title == "Rapportering") {class="active"}>
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
@@ -252,6 +288,7 @@
         <!-- /#wrapper -->
         @scripts
         <!-- Core Scripts - Include with every page -->
+        <script src="@routes.Assets.at("javascripts/less-1.7.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
 

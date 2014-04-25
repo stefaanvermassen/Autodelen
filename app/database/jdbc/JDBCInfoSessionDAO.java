@@ -84,7 +84,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getSetUserEnrollmentStatusForSession() throws SQLException {
         if (setUserEnrollmentStatusForSession == null) {
-            setUserEnrollmentStatusForSession = connection.prepareStatement("UPDATE infosessionenrollees SET enrollment_status = ? WHERE infosession_enrollee_id = ? AND infosession_id = ?");
+            setUserEnrollmentStatusForSession = connection.prepareStatement("UPDATE infosessionenrollees SET infosession_enrollment_status = ? WHERE infosession_enrollee_id = ? AND infosession_id = ?");
         }
         return setUserEnrollmentStatusForSession;
     }
@@ -112,7 +112,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     public PreparedStatement getGetAttendeesForSession() throws SQLException {
         if (getAttendeesForSession == null) {
-            getAttendeesForSession = connection.prepareStatement("SELECT user_id, user_firstname, user_email, user_lastname, enrollment_status " +
+            getAttendeesForSession = connection.prepareStatement("SELECT user_id, user_firstname, user_email, user_lastname, infosession_enrollment_status " +
                     "FROM infosessionenrollees INNER JOIN users ON user_id = infosession_enrollee_id WHERE infosession_id = ?");
         }
         return getAttendeesForSession;
@@ -259,7 +259,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                 try (ResultSet rs = ps2.executeQuery()) {
                     while (rs.next()) {
                         is.addEnrollee(new Enrollee(new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname")),
-                                Enum.valueOf(EnrollementStatus.class, rs.getString("enrollment_status"))));
+                                Enum.valueOf(EnrollementStatus.class, rs.getString("infosession_enrollment_status"))));
                     }
                 } catch (SQLException ex) {
                     throw new DataAccessException("Failed to get attendees for infosession", ex);
