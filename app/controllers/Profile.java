@@ -471,7 +471,9 @@ public class Profile extends Controller {
                     }
 
                     if((user.getIdentityCard().getRegistrationNr() != null && !user.getIdentityCard().getRegistrationNr().equals(model.nationalNumber)) ||
-                            user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber)) {
+                            (user.getIdentityCard().getRegistrationNr() == null && model.nationalNumber != null) ||
+                            (user.getIdentityCard().getId() == null && model.cardNumber != null) ||
+                            (user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber))) {
                         card.setRegistrationNr(model.nationalNumber);
                         card.setId(model.cardNumber);
                         updateUser = true;
@@ -601,7 +603,8 @@ public class Profile extends Controller {
                         }
                     }
 
-                    if(user.getDriverLicense().getId()!= null && !user.getDriverLicense().getId().equals(model.cardNumber)) {
+                    if(user.getDriverLicense().getId()!= null && !user.getDriverLicense().getId().equals(model.cardNumber) ||
+                            model.cardNumber != null && user.getDriverLicense().getId() == null) {
                         card.setId(model.cardNumber);
                         updateUser = true;
                     }
