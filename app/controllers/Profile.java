@@ -16,10 +16,6 @@ import javax.imageio.IIOException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
@@ -316,47 +312,30 @@ public class Profile extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result viewIdentityCardFile(int userId, int fileId){
-        return identityCardFileAction(userId, fileId, new FileAction() {
+        return FileHelper.genericFileAction(userId, fileId, new FileAction() {
             @Override
             public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
-                 return FileHelper.getFileStreamResult(dao, file.getId());
+                return FileHelper.getFileStreamResult(dao, file.getId());
+            }
+
+            @Override
+            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+                User currentUser = DatabaseHelper.getUserProvider().getUser();
+                if(!canEditProfile(user, currentUser))
+                    return null;
+
+                FileGroup files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                return files.getFileWithId(fileId);
+            }
+
+            @Override
+            public Result failAction(User user) {
+                return redirect(routes.Profile.editIdentityCard(user.getId()));
             }
         });
     }
 
-    private static Result identityCardFileAction(int userId, int fileId, FileAction action){
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO udao = context.getUserDAO();
-            FileDAO fdao = context.getFileDAO();
-            User user = udao.getUser(userId, true);
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            if (user == null || !canEditProfile(user, currentUser)) {
-                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
-            }
-
-            if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null){
-                FileGroup files = fdao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
-                models.File file = files.getFileWithId(fileId);
-                if(file != null){
-                    try {
-                        return action.process(file, fdao, context);
-                    } catch(IOException | DataAccessException ex){
-                        context.rollback();
-                        throw new RuntimeException(ex);
-                    }
-                } else {
-                    flash("danger", "Bestand niet gevonden.");
-                    return redirect(routes.Profile.editIdentityCard(userId));
-                }
-            } else {
-                flash("danger", "Deze gebruiker heeft geen bestanden voor identiteitskaart.");
-                return redirect(routes.Profile.editIdentityCard(userId));
-            }
-        } catch(DataAccessException ex){
-            throw ex;
-        }
-    }
 
     /**
      * Method: GET
@@ -367,7 +346,7 @@ public class Profile extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result deleteIdentityCardFile(final int userId, int fileId){
-        return identityCardFileAction(userId, fileId, new FileAction() {
+        return FileHelper.genericFileAction(userId, fileId, new FileAction() {
             @Override
             public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
                 dao.deleteFile(file.getId());
@@ -376,6 +355,21 @@ public class Profile extends Controller {
 
                 flash("success", file.getFileName() + " werd met succes verwijderd.");
                 return redirect(routes.Profile.editIdentityCard(userId));
+            }
+
+            @Override
+            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+                User currentUser = DatabaseHelper.getUserProvider().getUser();
+                if(!canEditProfile(user, currentUser))
+                    return null;
+
+                FileGroup files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                return files.getFileWithId(fileId);
+            }
+
+            @Override
+            public Result failAction(User user) {
+                return redirect(routes.Profile.editIdentityCard(user.getId()));
             }
         });
     }
@@ -465,6 +459,23 @@ public class Profile extends Controller {
             throw ex;
         }
     }
+
+    public static class EditDriversLicenseModel {
+        public String cardNumber;
+
+        public EditDriversLicenseModel() {
+        }
+
+        public EditDriversLicenseModel(String cardNumber) {
+            this.cardNumber = cardNumber;
+        }
+
+        public String validate() {
+            return null; //TODO: use validation list
+        }
+    }
+
+
 
     /**
      * Method: GET
