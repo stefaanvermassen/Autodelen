@@ -33,9 +33,6 @@ public class Profile extends Controller {
         public String lastName;
         public String email; // TODO: verification
 
-        public String identityCardNumber;
-        public String nationalNumber;
-
         public Addresses.EditAddressModel domicileAddress;
         public Addresses.EditAddressModel residenceAddress;
 
