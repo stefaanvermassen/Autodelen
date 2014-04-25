@@ -26,6 +26,7 @@ table.custom_calendar td {
     width: 14.28%;
     position: relative;
     border: solid 1px #d4d4d4;
+    background-clip: padding-box;
     text-align: right;
     color: #b3b3b3;
     padding-top: 1px;
@@ -42,13 +43,13 @@ table.custom_calendar td.current_month {
 }
 
 table.custom_calendar td.today {
-    background-color: #cdedc0;
+    background-color: #82e66e;
 }
 
 table.custom_calendar td.selected {
-    background-color: #f0f0ff;
+    background-color: #e3e0ff;
 }
 
 table.custom_calendar td.selected.disabled {
-    background-color: #ffeeff;
+    background-color: #ffd6d6;
 }

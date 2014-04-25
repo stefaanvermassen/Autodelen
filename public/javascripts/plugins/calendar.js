@@ -17,7 +17,9 @@
         return (year * 10000) + (month * 100) + day;
     }
 
-    function formateDateValue(dateValue) {
+    function formatDateValue(dateValue) {
+        if(dateValue == null)
+            return null;
         var year = getYear(dateValue);
         var month = getMonth(dateValue);
         var day = getDay(dateValue);
@@ -212,7 +214,7 @@
         },
 
         _setValueDatetimeinput: function(id, value) {
-            $('#' + id).datetimeinput('setValue', formateDateValue(value));
+            $('#' + id).datetimeinput('setValue', formatDateValue(value));
         },
 
         resetCalendar: function() {
@@ -280,13 +282,17 @@
                                     .attr('id', this.prevButton)
                                     .attr('class', 'btn btn-default')
                                     .attr('type', 'button')
-                                    .text('<<')
+                                    .append($('<span>')
+                                        .attr('class', 'glyphicon glyphicon-arrow-left')
+                                    )
                                 )
                                 .append($('<button>')
                                     .attr('id', this.nextButton)
                                     .attr('class', 'btn btn-default')
                                     .attr('type', 'button')
-                                    .text('>>')
+                                    .append($('<span>')
+                                        .attr('class', 'glyphicon glyphicon-arrow-right')
+                                    )
                                 )
                             )
                         )
@@ -303,7 +309,9 @@
                                     .attr('id', this.todayButton)
                                     .attr('class', 'btn btn-default')
                                     .attr('type', 'button')
-                                    .text('Vandaag')
+                                    .append($('<b>')
+                                        .text('Vandaag')
+                                    )
                                 )
                             )
                         )

@@ -144,8 +144,10 @@
         // EXTRA FUNCTIONS
 
         setValue: function(value) {
-            this.element.val(value);
-            this.validateInput();
+            if(this.validateInput(value))
+                this.element.val(value);
+            else
+                this.element.val(this.formatString);
         },
 
         /**
@@ -209,11 +211,11 @@
             this.element.val(this.formatString);
         },
 
-        validateInput: function() {
-            var num = parseInt(this.element.val().charAt(this.position), 10);
-            if(isNaN(num))
-                return false;
-            return true;
+        validateInput: function(value) {
+            if(value == null)
+                return null;
+            var num = parseInt(value, 10);
+            return !(isNaN(num));
         },
 
         /**
