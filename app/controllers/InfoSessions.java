@@ -71,6 +71,9 @@ public class InfoSessions extends Controller {
             if (time == null) {
                 error += "Gelieve het tijdsveld in te vullen. ";
             }
+            if(InfoSessionType.getTypeFromString(type) == InfoSessionType.OTHER && (type_alternative == null || type_alternative.equals(""))) {
+                error += "Gelieve een alternatief type in te geven of een ander type te selecteren. ";
+            }
             if("".equals(error)) return null;
             else return error;
         }

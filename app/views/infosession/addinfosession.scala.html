@@ -114,6 +114,7 @@
                                                     <div class="col-md-12">
                                                         @helper.select(form("type"), helper.options(typeList), '_label -> "Type")
                                                     </div>
+                                                    <!-- TODO: remove type_alternative if not OTHER selected -->
                                                     <label class="col-md-12" for="type_alternative">Specifieer type (in geval Andere)</label>
                                                     <div class="col-md-12">
                                                         <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" value="@form("type_alternative").value">
