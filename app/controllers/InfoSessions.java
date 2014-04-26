@@ -38,6 +38,7 @@ public class InfoSessions extends Controller {
         public InfoSessionType type;
 
         // Address fields
+        public String hostmail;
         public String address_city;
         public String address_zip;
         public String address_street;
@@ -107,6 +108,7 @@ public class InfoSessions extends Controller {
                 model.address_street = is.getAddress().getStreet();
                 model.address_number = is.getAddress().getNumber();
                 model.address_bus = is.getAddress().getBus();
+                model.hostmail = is.getHost().getEmail();
 
                 Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
                 return ok(addinfosession.render(editForm, sessionId));
@@ -166,7 +168,16 @@ public class InfoSessions extends Controller {
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 }
 
+                // Check the host field
+                UserDAO udao = context.getUserDAO();
+                User host = udao.getUser(editForm.get().hostmail);
+                if(host == null){
+                    editForm.reject("Infosessie gastheer bestaat niet.");
+                    return badRequest(addinfosession.render(editForm, sessionId));
+                }
+
                 try {
+
                     Address address = session.getAddress();
                     address.setCity(editForm.get().address_city);
                     address.setBus(editForm.get().address_bus);
@@ -182,6 +193,11 @@ public class InfoSessions extends Controller {
                     if (!session.getTime().equals(time)) {
                         session.setTime(time);
                         dao.updateInfosessionTime(session);
+                    }
+
+                    if(session.getHost().getId() != host.getId()){
+                        session.setHost(host);
+                        dao.updateInfosessionHost(session);
                     }
 
                     //TODO: update maxEnrollees, type SAVE (CHECK IF #ATTENDEES < NEW MAX!!!)
@@ -230,25 +246,6 @@ public class InfoSessions extends Controller {
             throw ex;
         }
     }
-
-    /*@RoleSecured.RoleAuthenticated()
-    public static Result detail(int sessionId) {
-
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            InfoSessionDAO dao = context.getInfoSessionDAO();
-            InfoSession session = dao.getInfoSession(sessionId, true);
-            if (session == null) {
-                flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
-                return redirect(routes.InfoSessions.showUpcomingSessions());
-            } else {
-                InfoSession enrolled = dao.getAttendingInfoSession(user);
-                return ok(detail.render(session, enrolled));
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
-            //TODO: log
-        }
-    }*/
 
     /**
      * Method: GET
@@ -432,6 +429,12 @@ public class InfoSessions extends Controller {
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
+                UserDAO udao = context.getUserDAO();
+                User host = udao.getUser(createForm.get().hostmail);
+                if(host == null){
+                    createForm.reject("De gastheer ID bestaat niet.");
+                    return badRequest(addinfosession.render(createForm, 0));
+                }
 
                 try {
                     User user = DatabaseHelper.getUserProvider().getUser();
@@ -440,7 +443,7 @@ public class InfoSessions extends Controller {
                     Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
 
                     //TODO: read InfoSessionType from form
-                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, user, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
+                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {
