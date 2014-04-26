@@ -130,11 +130,7 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>@user.toString
-                                @if(session.get("impersonated") != null){
-                                    <span class="badge badge-warning">I</span>
-                                }
-                            </span>
+                            <span>@user.toString</span>
                             @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
                                <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
                                 <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
@@ -157,7 +153,7 @@
             </nav>
             <!-- /.navbar-static-top -->
 
-            @if("y".equals(session.get("impersonated"))){
+            @if(session.get("impersonated") != null){
                 <div class="impersonating">You are impersonating @user.toString!</div>
             }
 

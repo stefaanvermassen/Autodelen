@@ -1,8 +1,8 @@
 package controllers.util;
 
 import controllers.Assets;
-import database.DataAccessContext;
-import database.FileDAO;
+import database.*;
+import models.*;
 import play.Logger;
 import play.api.Play;
 import play.api.mvc.MultipartFormData;
@@ -17,6 +17,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.io.File;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -193,6 +194,33 @@ public class FileHelper {
             if (destination != null) {
                 destination.close();
             }
+        }
+    }
+
+    public static Result genericFileAction(int userId, int fileId, FileAction action){
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+
+            if (user == null) {
+                return Controller.badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            models.File file = action.getFile(fileId, user, fdao, context);
+            if(file == null) {
+                Controller.flash("danger", "Bestand niet gevonden.");
+                return action.failAction(user);
+            } else {
+                try {
+                    return action.process(file, fdao, context);
+                } catch(IOException | DataAccessException ex){
+                    context.rollback();
+                    throw new RuntimeException(ex);
+                }
+            }
+        } catch(DataAccessException ex){
+            throw ex;
         }
     }
 }

@@ -63,6 +63,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement setTimeForSession;
     private PreparedStatement setUserEnrollmentStatusForSession;
     private PreparedStatement getGetAmountOfInfoSessionsStatement;
+    private PreparedStatement getLastInfoSessionForUserStatement;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
@@ -73,6 +74,20 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             deleteInfoSession = connection.prepareStatement("DELETE FROM InfoSessions WHERE infosession_id = ?");
         }
         return deleteInfoSession;
+    }
+
+    private PreparedStatement getGetLastInfoSessionForUserStatement() throws SQLException {
+        if(getLastInfoSessionForUserStatement == null){
+            getLastInfoSessionForUserStatement = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_enrollment_status status, ie.infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
+                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
+                    "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
+                    "JOIN users ON infosession_host_user_id = user_id " +
+                    "JOIN addresses ON infosession_address_id = address_id " +
+                    "LEFT JOIN ( SELECT COUNT(*) total, ie2.infosession_id FROM infosessionenrollees ie2 GROUP BY ie2.infosession_id) sub ON (ie.infosession_id = sub.infosession_id) " +
+                    "WHERE infosession_enrollee_id = ? ORDER BY infosession_timestamp DESC LIMIT 1");
+        }
+        return getLastInfoSessionForUserStatement;
     }
 
     private PreparedStatement getSetAddressForSession() throws SQLException {
@@ -140,14 +155,6 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         return createInfoSessionStatement;
     }
 
-    private PreparedStatement getGetInfoSessionsAfterStatement() throws SQLException {
-        if (getInfoSessionsAfterStatement == null) {
-            getInfoSessionsAfterStatement = connection.prepareStatement(INFOSESSION_QUERY + FILTER_FRAGMENT +
-                    "ORDER BY infosession_timestamp ASC");
-        }
-        return getInfoSessionsAfterStatement;
-    }
-
     private PreparedStatement getGetInfoSessionsAfterPageByDateAscStatement() throws SQLException {
         if (getInfoSessionsAfterPageByDateAscStatement == null) {
             // Also includes the # of attendees, this query is way too complex
@@ -187,7 +194,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
      * @throws SQLException
      */
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
-        return populateInfoSession(rs, false);
+        return populateInfoSession(rs, false, true);
     }
 
     /**
@@ -197,13 +204,22 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
      * @return An Infosession with the information from the resultset
      * @throws SQLException
      */
-    public static InfoSession populateInfoSession(ResultSet rs, boolean includesGoing) throws SQLException {
+    public static InfoSession populateInfoSession(ResultSet rs, boolean includesGoing, boolean withJoins) throws SQLException {
+        int id = rs.getInt("infosession_id");
+        InfoSessionType type = InfoSessionType.valueOf(rs.getString("infosession_type"));
+        DateTime timestamp = new DateTime(rs.getTimestamp("infosession_timestamp"));
+        Address address = null;
+        User host = null;
+        if(withJoins) {
+            address = JDBCAddressDAO.populateAddress(rs);
+            host = JDBCUserDAO.populateUser(rs, false, false);
+        }
+        int maxEnrollees = rs.getInt("infosession_max_enrollees");
+
         if (includesGoing) {
-            return new InfoSession(rs.getInt("infosession_id"), InfoSessionType.valueOf(rs.getString("infosession_type")), new DateTime(rs.getTimestamp("infosession_timestamp")),
-                    JDBCAddressDAO.populateAddress(rs), JDBCUserDAO.populateUser(rs, false, false), rs.getInt("going"), rs.getInt("infosession_max_enrollees"));
+            return new InfoSession(id, type, timestamp, address, host, rs.getInt("going"), maxEnrollees);
         } else {
-            return new InfoSession(rs.getInt("infosession_id"), InfoSessionType.valueOf(rs.getString("infosession_type")), new DateTime(rs.getTimestamp("infosession_timestamp")), JDBCAddressDAO.populateAddress(rs),
-                    JDBCUserDAO.populateUser(rs, false, false), rs.getInt("infosession_max_enrollees"));
+            return new InfoSession(id, type, timestamp, address, host, maxEnrollees);
         }
     }
 
@@ -445,7 +461,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next())
                     return null;
-                else return populateInfoSession(rs, true);
+                else return populateInfoSession(rs, true, true);
             } catch (SQLException ex) {
                 throw new DataAccessException("Invalid query for attending infosession.", ex);
             }
@@ -454,11 +470,31 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
     }
 
+    @Override
+    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetLastInfoSessionForUserStatement();
+            ps.setInt(1, user.getId());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                } else {
+                    return new Tuple(populateInfoSession(rs, true, true), Enum.valueOf(EnrollementStatus.class, rs.getString("status")));
+                }
+            } catch (SQLException ex) {
+                throw new DataAccessException("Invalid query for last infosession.", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to fetch last for user", ex);
+        }
+    }
+
     private List<InfoSession> getInfoSessions(PreparedStatement ps) {
         List<InfoSession> infosessions = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                infosessions.add(populateInfoSession(rs, true));
+                infosessions.add(populateInfoSession(rs, true, true));
             }
             return infosessions;
         } catch (SQLException ex) {

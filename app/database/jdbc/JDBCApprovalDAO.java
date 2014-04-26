@@ -16,7 +16,16 @@ import java.util.List;
  */
 public class JDBCApprovalDAO implements ApprovalDAO {
 
-    private static final String APPROVAL_FIELDS = "approval_id, approval_admin, approval_submission, approval_date, approval_infosession, approval_status";
+    private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, approval_date, approval_status, approval_infosession," +
+            "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email, " +
+            "admins.user_id, admins.user_password, admins.user_firstname, admins.user_lastname, admins.user_email, " +
+            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees ";
+
+    private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM Approvals " +
+            "LEFT JOIN Users users ON approval_user = users.user_id " +
+            "LEFT JOIN Users admins ON approval_admin = admins.user_id " +
+            "LEFT JOIN Infosessions ON approval_infosession = infosession_id ";
+
     private Connection connection;
 
     private PreparedStatement createApprovalStatement;
@@ -24,6 +33,7 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     private PreparedStatement getApprovalByUserStatement;
     private PreparedStatement getPendingUserApprovalStatement;
     private PreparedStatement getPendingApprovalStatement;
+    private PreparedStatement updateApprovalStatement;
 
     public JDBCApprovalDAO(Connection connection){
         this.connection = connection;
@@ -31,44 +41,53 @@ public class JDBCApprovalDAO implements ApprovalDAO {
 
     private PreparedStatement getGetPendingApprovalStatement() throws SQLException {
         if (getPendingApprovalStatement == null) {
-            getPendingApprovalStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_status = 'PENDING'");
+            getPendingApprovalStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_status = 'PENDING'");
         }
         return getPendingApprovalStatement;
     }
 
     private PreparedStatement getGetApprovalByUserStatement() throws SQLException {
         if(getApprovalByUserStatement == null){
-            getApprovalByUserStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_user = ?");
+            getApprovalByUserStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_user = ?");
         }
         return getApprovalByUserStatement;
     }
 
     private PreparedStatement getGetPendingUserApprovalStatement() throws SQLException {
         if(getPendingUserApprovalStatement == null){
-            getPendingUserApprovalStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'");
+            getPendingUserApprovalStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_user = ? AND approval_status = 'PENDING'");
         }
         return getPendingUserApprovalStatement;
     }
 
     private PreparedStatement getGetApprovalByIdStatement() throws SQLException {
         if(getApprovalByIdStatement == null){
-            getApprovalByIdStatement = connection.prepareStatement("SELECT " + APPROVAL_FIELDS + " FROM approvals WHERE approval_id = ?");
+            getApprovalByIdStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_id = ?");
         }
         return getApprovalByIdStatement;
     }
 
     private PreparedStatement getCreateApprovalStatement() throws SQLException {
         if(createApprovalStatement == null){
-            createApprovalStatement = connection.prepareStatement("INSERT INTO approvals(approval_user, approval_submission, approval_infosession, approval_status) VALUES(?,?,?,?)", new String[]{"approval_id"});
+            createApprovalStatement = connection.prepareStatement("INSERT INTO approvals(approval_user, approval_status, approval_infosession) " +
+                    "VALUES(?,?,?,?)", new String[]{"approval_id"});
         }
         return createApprovalStatement;
     }
 
+    private PreparedStatement getUpdateApprovalStatement() throws SQLException {
+        if(updateApprovalStatement == null){
+            updateApprovalStatement = connection.prepareStatement("UPDATE Approvals SET approval_user=?, approval_admin=?, " +
+                    "approval_date=?, approval_status=?, approval_infosession=? WHERE approval_id = ?");
+        }
+        return updateApprovalStatement;
+    }
+
     private Approval populateApproval(ResultSet rs) throws SQLException {
-        //TODO: include admin, user and infosession
-        return new Approval(rs.getInt("approval_id"), null, null, new DateTime(rs.getTimestamp("approval_submission").getTime()),
-                rs.getTimestamp("approval_date") != null ? new DateTime(rs.getTimestamp("approval_Date").getTime()) : null,
-                null);
+        return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUser(rs, false, false, "users"), JDBCUserDAO.populateUser(rs, false, false, "admins"),
+                new DateTime(rs.getTimestamp("approval_submission").getTime()),
+                rs.getTimestamp("approval_date") != null ? new DateTime(rs.getTimestamp("approval_date").getTime()) : null,
+                JDBCInfoSessionDAO.populateInfoSession(rs, false, false), Approval.ApprovalStatus.valueOf(rs.getString("approval_status")));
     }
 
     private List<Approval> getApprovalList(PreparedStatement ps){
@@ -134,26 +153,60 @@ public class JDBCApprovalDAO implements ApprovalDAO {
         }
     }
 
+    /**
+     * Creates a new PENDING approval with submission time as current time
+     * @param user
+     * @param session
+     * @return
+     */
     @Override
-    public Approval createApproval(User user, InfoSession session, DateTime time) {
+    public Approval createApproval(User user, InfoSession session) {
         try {
             PreparedStatement ps = getCreateApprovalStatement();
             ps.setInt(1, user.getId());
-            ps.setTimestamp(2, new Timestamp(time.getMillis()));
+            ps.setString(2, Approval.ApprovalStatus.PENDING.name());
             ps.setInt(3, session.getId());
-            ps.setString(4, Approval.ApprovalStatus.PENDING.name());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating approval request.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Approval(keys.getInt(1), user, null, time, null, session);
+                return new Approval(keys.getInt(1), user, null, new DateTime(), null, session, Approval.ApprovalStatus.PENDING);
             } catch(SQLException ex){
                 throw new DataAccessException("Failed to create approval.", ex);
             }
         } catch(SQLException ex){
             throw new DataAccessException("Failed to create approval request", ex);
+        }
+    }
+
+    /**
+     * Updates user, admin, reviewed time, infosession and status
+     * Does NOT update submission time
+     * @param approval
+     * @throws DataAccessException
+     */
+    @Override
+    public void updateApproval(Approval approval) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUpdateApprovalStatement();
+            ps.setInt(1, approval.getUser().getId());
+            if(approval.getAdmin() == null) ps.setNull(2, Types.INTEGER);
+            else ps.setInt(2, approval.getAdmin().getId());
+            if(approval.getReviewed() == null) ps.setNull(3, Types.TIMESTAMP);
+            else ps.setTimestamp(3, new Timestamp(approval.getReviewed().getMillis()));
+            ps.setString(4, approval.getStatus().toString());
+            if(approval.getSession() == null) ps.setNull(5, Types.INTEGER);
+            else ps.setInt(5, approval.getSession().getId());
+
+            ps.setInt(6, approval.getId());
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Approval update affected 0 rows.");
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update approval", ex);
         }
     }
 }

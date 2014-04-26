@@ -307,7 +307,7 @@ CREATE TABLE `approvals` (
   `approval_id` INT(11) NOT NULL AUTO_INCREMENT,
   `approval_user` INT(11) NOT NULL DEFAULT '0',
   `approval_admin` INT(11) NULL DEFAULT '0',
-  `approval_submission` DATETIME NOT NULL,
+  `approval_submission` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `approval_date` DATETIME NULL DEFAULT NULL,
   `approval_status` ENUM('PENDING','ACCEPTED','DENIED') NOT NULL DEFAULT 'PENDING',
   `approval_infosession` INT(11) NULL DEFAULT NULL,

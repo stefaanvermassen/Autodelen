@@ -75,6 +75,20 @@
                                     <a href="@routes.Profile.editIdentityCard(user.getId)">Wijzigen</a>
                                 </p>
                             </div>
+
+                            <div class="form-group">
+                                <label class="h4">Rijbewijs</label>
+                                <p class="form-control-static">
+                                    @if(user.getDriverLicense != null && user.getDriverLicense.getId != null && !user.getDriverLicense.getId.isEmpty) {
+                                        @user.getDriverLicense.getId
+                                    } else {
+                                        Niet gespecifieerd.
+                                    }
+                                    <br/>
+                                    <a href="@routes.Profile.editDriversLicense(user.getId)">Wijzigen</a>
+                                </p>
+                            </div>
+
                             <div class="form-group">
                                 <label class="h4">Contactverantwoordelijke</label>
                                 @defining(user.getContractManager) { manager =>

@@ -1,25 +1,18 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
-import controllers.util.ConfigurationHelper;
-import controllers.util.FileAction;
-import controllers.util.FileHelper;
+import controllers.util.*;
 import database.*;
 import models.*;
 import play.Logger;
 import play.data.Form;
 import play.mvc.*;
 import views.html.profile.*;
-import controllers.util.Addresses;
 
 import javax.imageio.IIOException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
@@ -32,9 +25,6 @@ public class Profile extends Controller {
         public String firstName;
         public String lastName;
         public String email; // TODO: verification
-
-        public String identityCardNumber;
-        public String nationalNumber;
 
         public Addresses.EditAddressModel domicileAddress;
         public Addresses.EditAddressModel residenceAddress;
@@ -318,48 +308,47 @@ public class Profile extends Controller {
      * @return
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result viewIdentityCardFile(int userId, int fileId){
-        return identityCardFileAction(userId, fileId, new FileAction() {
+    public static Result viewFile(int userId, int fileId, String stype){
+        final FileType type = Enum.valueOf(FileType.class, stype);
+
+        return FileHelper.genericFileAction(userId, fileId, new FileAction() {
             @Override
             public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
-                 return FileHelper.getFileStreamResult(dao, file.getId());
+                return FileHelper.getFileStreamResult(dao, file.getId());
+            }
+
+            @Override
+            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+                User currentUser = DatabaseHelper.getUserProvider().getUser();
+                if (!canEditProfile(user, currentUser))
+                    return null;
+
+                FileGroup files = null;
+                switch(type){
+                    case IDENTITYCARD:
+                        if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null)
+                            files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                    case DRIVERSLICENSE:
+                        if(user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null)
+                            files = dao.getFiles(user.getDriverLicense().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                }
+
+                if(files == null)
+                    return null;
+                else
+                    return files.getFileWithId(fileId);
+            }
+
+            @Override
+            public Result failAction(User user) {
+                return redirect(routes.Profile.editIdentityCard(user.getId()));
             }
         });
     }
 
-    private static Result identityCardFileAction(int userId, int fileId, FileAction action){
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO udao = context.getUserDAO();
-            FileDAO fdao = context.getFileDAO();
-            User user = udao.getUser(userId, true);
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
 
-            if (user == null || !canEditProfile(user, currentUser)) {
-                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
-            }
-
-            if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null){
-                FileGroup files = fdao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
-                models.File file = files.getFileWithId(fileId);
-                if(file != null){
-                    try {
-                        return action.process(file, fdao, context);
-                    } catch(IOException | DataAccessException ex){
-                        context.rollback();
-                        throw new RuntimeException(ex);
-                    }
-                } else {
-                    flash("danger", "Bestand niet gevonden.");
-                    return redirect(routes.Profile.editIdentityCard(userId));
-                }
-            } else {
-                flash("danger", "Deze gebruiker heeft geen bestanden voor identiteitskaart.");
-                return redirect(routes.Profile.editIdentityCard(userId));
-            }
-        } catch(DataAccessException ex){
-            throw ex;
-        }
-    }
 
     /**
      * Method: GET
@@ -369,8 +358,10 @@ public class Profile extends Controller {
      * @return A redirect to the identity card page overview
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result deleteIdentityCardFile(final int userId, int fileId){
-        return identityCardFileAction(userId, fileId, new FileAction() {
+    public static Result deleteFile(final int userId, int fileId, String stype){
+        final FileType type = Enum.valueOf(FileType.class, stype);
+
+        return FileHelper.genericFileAction(userId, fileId, new FileAction() {
             @Override
             public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
                 dao.deleteFile(file.getId());
@@ -378,7 +369,42 @@ public class Profile extends Controller {
                 context.commit();
 
                 flash("success", file.getFileName() + " werd met succes verwijderd.");
-                return redirect(routes.Profile.editIdentityCard(userId));
+                switch(type){
+                    case IDENTITYCARD:
+                        return redirect(routes.Profile.editIdentityCard(userId));
+                    case DRIVERSLICENSE:
+                        return redirect(routes.Profile.editDriversLicense(userId));
+                }
+                return badRequest("No action specified for type: " + type);
+            }
+
+            @Override
+            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+                User currentUser = DatabaseHelper.getUserProvider().getUser();
+                if (!canEditProfile(user, currentUser))
+                    return null;
+
+                FileGroup files = null;
+                switch(type){
+                    case IDENTITYCARD:
+                        if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null)
+                            files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                    case DRIVERSLICENSE:
+                        if(user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null)
+                            files = dao.getFiles(user.getDriverLicense().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                }
+
+                if(files == null)
+                    return null;
+                else
+                    return files.getFileWithId(fileId);
+            }
+
+            @Override
+            public Result failAction(User user) {
+                return redirect(routes.Profile.editIdentityCard(user.getId()));
             }
         });
     }
@@ -445,7 +471,9 @@ public class Profile extends Controller {
                     }
 
                     if((user.getIdentityCard().getRegistrationNr() != null && !user.getIdentityCard().getRegistrationNr().equals(model.nationalNumber)) ||
-                            user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber)) {
+                            (user.getIdentityCard().getRegistrationNr() == null && model.nationalNumber != null) ||
+                            (user.getIdentityCard().getId() == null && model.cardNumber != null) ||
+                            (user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber))) {
                         card.setRegistrationNr(model.nationalNumber);
                         card.setId(model.cardNumber);
                         updateUser = true;
@@ -468,6 +496,138 @@ public class Profile extends Controller {
             throw ex;
         }
     }
+
+    public static class EditDriversLicenseModel {
+        public String cardNumber;
+
+        public EditDriversLicenseModel() {
+        }
+
+        public EditDriversLicenseModel(String cardNumber) {
+            this.cardNumber = cardNumber;
+        }
+
+        public String validate() {
+            return null; //TODO: use validation list
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result editDriversLicense(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Dashboard.index());
+            }
+
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class);
+
+                if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null) { // get all uploaded files already
+                    FileDAO fdao = context.getFileDAO();
+                    user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+                }
+
+                if(user.getDriverLicense() != null) {
+                    form = form.fill(new EditDriversLicenseModel(user.getDriverLicense().getId()));
+                }
+
+                return ok(driverslicense.render(user, form));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    // TODO: a LOT of code overlap with identity card!!
+    @RoleSecured.RoleAuthenticated()
+    public static Result editDriversLicensePost(int userId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+
+            if (user == null || !canEditProfile(user, currentUser)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null) {
+                user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+            }
+
+            Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(driverslicense.render(user, form));
+            } else {
+                try {
+                    boolean updateUser = false; // Only perform a user update when we changed something (so not when adding a file to existing filegroup)
+
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    EditDriversLicenseModel model = form.get();
+
+                    DriverLicense card = user.getDriverLicense();
+                    if (card == null) {
+                        updateUser = true;
+                        card = new DriverLicense();
+                        user.setDriverLicense(card);
+                    }
+
+                    // Now check if we also have to create / add file to the group
+                    Http.MultipartFormData.FilePart newFile = body.getFile("file");
+                    if (newFile != null) {
+                        if(!FileHelper.isDocumentContentType(newFile.getContentType())){
+                            flash("danger", "Het documentstype dat u bijgevoegd heeft is niet toegestaan. (" + newFile.getContentType() + ").");
+                            return badRequest(driverslicense.render(user, form));
+                        } else {
+                            FileGroup group = card.getFileGroup();
+                            if (group == null) {
+                                // Create new filegroup
+                                group = fdao.createFileGroup();
+                                card.setFileGroup(group);
+                                updateUser = true;
+                            }
+
+                            // Now we add the file to the group
+                            Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.driverslicense"));
+                            models.File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
+                            group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        }
+                    }
+
+                    if(user.getDriverLicense().getId()!= null && !user.getDriverLicense().getId().equals(model.cardNumber) ||
+                            model.cardNumber != null && user.getDriverLicense().getId() == null) {
+                        card.setId(model.cardNumber);
+                        updateUser = true;
+                    }
+
+                    if(updateUser) {
+                        udao.updateUser(user, true);
+                    }
+                    context.commit();
+
+                    flash("success", "Uw rijbewijs werd succesvol bijgewerkt.");
+                    return ok(driverslicense.render(user, form));
+                } catch(DataAccessException | IOException ex){ //IO or database error causes a rollback
+                    context.rollback();
+                    throw new RuntimeException(ex); //unchecked
+                }
+            }
+
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+
 
     /**
      * Method: GET
