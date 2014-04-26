@@ -250,7 +250,7 @@ CREATE TABLE `Damages` (
 	`damage_car_ride_id` INT NOT NULL,
 	`damage_filegroup_id` INT NOT NULL,
 	`damage_description` TEXT NOT NULL,
-   	`damage_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   	`damage_created_at` DATETIME,
    	`damage_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_id`),
 	FOREIGN KEY (`damage_car_ride_id`) REFERENCES CarRides(`car_ride_car_reservation_id`),
@@ -430,6 +430,13 @@ CREATE TRIGGER Refuels_ins BEFORE INSERT ON Refuels FOR EACH ROW
 BEGIN
   IF new.refuel_created_at IS NULL THEN
     SET new.refuel_created_at = now();
+  END IF;
+END $$
+
+CREATE TRIGGER Damages_ins BEFORE INSERT ON Damages FOR EACH ROW
+BEGIN
+  IF new.damage_created_at IS NULL THEN
+    SET new.damage_created_at = now();
   END IF;
 END $$
 
