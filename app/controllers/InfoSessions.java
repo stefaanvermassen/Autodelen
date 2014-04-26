@@ -590,8 +590,18 @@ public class InfoSessions extends Controller {
         }
     }
 
+    public static class ApprovalAdminModel {
+        public String message;
+        public String newStatus;
+        public String contractManager;
+
+        public String validate(){
+            return null;
+        }
+    }
+
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
-    public static Result aprovalDetails(int approvalId){
+    public static Result approvalDetails(int approvalId){
         try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
             ApprovalDAO dao = context.getApprovalDAO();
             Approval ap = dao.getApproval(approvalId);
@@ -605,9 +615,20 @@ public class InfoSessions extends Controller {
                     InfoSession is = idao.getInfoSession(ap.getId(), true);
                     status = is.getEnrollmentStatus(ap.getUser());
                 }
-                return ok(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context)));
+                return ok(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context), Form.form(ApprovalAdminModel.class)));
             }
         }
+    }
+
+    /**
+     * Method: POST
+     * @param approvalId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    public static Result approvalAdminAction(int approvalId){
+        Form<ApprovalAdminModel> form = Form.form(ApprovalAdminModel.class).bindFromRequest();
+        return ok(form.toString());
     }
 
     /**
