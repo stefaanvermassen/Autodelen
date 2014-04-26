@@ -40,37 +40,40 @@
                                     <tr>
                                         <td>@refuel.getCarRide.getReservation.getCar.getName</td>
                                         <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(refuel.getCarRide.getReservation.getFrom)</td>
-                                        <td>@refuel.getAmount</td>
-                                        <td>
-                                            @refuel.getStatus match {
-                                                case RefuelStatus.CREATED => {
-                                                    <span class="fa fa-question-circle"></span>
-                                                }
-                                                case RefuelStatus.ACCEPTED => {
-                                                    <span class="fa fa-check-circle"></span>
-                                                }
-                                                case RefuelStatus.REFUSED => {
-                                                    <span class="fa fa-minus-circle"></span>
-                                                }
-                                                case RefuelStatus.REQUEST => {
-                                                    <span class="fa fa-question-circle"></span>
-                                                }
-                                                case _ => {}
-                                            }
-                                            @refuel.getStatus.getDescription
-                                        </td>
-                                        <td>
-                                            @if(refuel.getStatus == RefuelStatus.CREATED){
+                                        @if(refuel.getStatus == RefuelStatus.CREATED){
+                                            <td colspan="3">
                                                 <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-primary" href="">Upload bewijs</a>
+                                                    <a class="btn btn-primary" href="">@refuel.getStatus.getDescription</a>
                                                 </div>
 
-                                            }else{
+                                            </td>
+
+                                        }else{
+                                            <td>@refuel.getAmount</td>
+                                            <td>
+                                                @refuel.getStatus match {
+                                                    case RefuelStatus.ACCEPTED => {
+                                                        <span class="fa fa-check-circle"></span>
+                                                    }
+                                                    case RefuelStatus.REFUSED => {
+                                                        <span class="fa fa-minus-circle"></span>
+                                                    }
+                                                    case RefuelStatus.REQUEST => {
+                                                        <span class="fa fa-question-circle"></span>
+                                                    }
+                                                    case _ => {}
+                                                }
+                                                @refuel.getStatus.getDescription
+                                            </td>
+                                            <td>
                                                 <div class="btn-group btn-group-xs">
                                                     <a class="btn btn-primary" href="">Link</a>
                                                 </div>
-                                            }
-                                        </td>
+
+                                            </td>
+                                        }
+
+
                                     </tr>
                                 }
                             }

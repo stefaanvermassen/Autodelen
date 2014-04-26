@@ -4,7 +4,7 @@ package models;
  * Created by Stefaan Vermassen on 26/04/14.
  */
 public enum RefuelStatus {
-    CREATED("Gelieve een bewijs in te dienen"),
+    CREATED("Info verstrekken"),
     REQUEST("Wachten op goedkeuring"),
     ACCEPTED("Aanvraag goedgekeurd"),
     REFUSED("Aanvraag geweigerd");

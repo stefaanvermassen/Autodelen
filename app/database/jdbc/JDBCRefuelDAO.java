@@ -55,14 +55,22 @@ public class JDBCRefuelDAO implements RefuelDAO {
         if (getRefuelsForUserStatement == null) {
             getRefuelsForUserStatement = connection.prepareStatement("SELECT * FROM Refuels " +
                     "JOIN CarRides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-                    "JOIN Files ON refuel_file_id = file_id " +
-                    "JOIN CarReservations ON refuel_car_ride_id = reservation_id WHERE reservation_user_id = ? ");
+                    "JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
+                    "JOIN Cars ON reservation_car_id = car_id " +
+                    "JOIN Users ON reservation_user_id = user_id WHERE reservation_user_id = ? " +
+                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
+                    "WHEN 'ACCEPTED' THEN 4 END");
         }
         return getRefuelsForUserStatement;
     }
 
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
         Refuel refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), JDBCFileDAO.populateFile(rs), rs.getBigDecimal("refuel_amount"), RefuelStatus.valueOf(rs.getString("refuel_status")));
+        return refuel;
+    }
+
+    public static Refuel populateRefuelCreated(ResultSet rs) throws SQLException {
+        Refuel refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), RefuelStatus.valueOf(rs.getString("refuel_status")));
         return refuel;
     }
 
@@ -140,7 +148,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
         List<Refuel> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(populateRefuel(rs));
+                list.add(populateRefuelCreated(rs));
             }
             return list;
         }catch (SQLException e){

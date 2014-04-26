@@ -373,8 +373,9 @@ public class Drives extends Controller {
                 if(refueling > 0){
                     RefuelDAO refuelDAO = context.getRefuelDAO();
                     for(int i=0; i< refueling; i++){
-                        refuelDAO.createRefuel(ride);
+                        Refuel refuel = refuelDAO.createRefuel(ride);
                     }
+                    context.commit();
                 }
             } else if(isOwner) {
                 // Owner is allowed to adjust the information
