@@ -60,8 +60,10 @@ POST        /profile/changepicture                  controllers.Profile.profileP
 GET         /profile/picture                        controllers.Profile.getProfilePicture(userId: Int)
 GET         /profile/identitycard                   controllers.Profile.editIdentityCard(userId: Int)
 POST        /profile/identitycard                   controllers.Profile.editIdentityCardPost(userId: Int)
-GET         /profile/identitycard/deletefile        controllers.Profile.deleteIdentityCardFile(userId: Int, fileId: Int)
-GET         /profile/identitycard/file              controllers.Profile.viewIdentityCardFile(userId: Int, fileId: Int)
+GET         /profile/identitycard/deletefile        controllers.Profile.deleteFile(userId: Int, fileId: Int, group: String)
+GET         /profile/identitycard/file              controllers.Profile.viewFile(userId: Int, fileId: Int, group: String)
+GET         /profile/driverslicense                 controllers.Profile.editDriversLicense(userId: Int)
+POST        /profile/driverslicense                 controllers.Profile.editDriversLicensePost(userId: Int)
 
 # Users
 GET         /users                                  controllers.Users.showUsers()
@@ -100,6 +102,7 @@ POST        /infosession/edit                       controllers.InfoSessions.edi
 GET         /infosession/status                     controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 GET         /infosession/delete                     controllers.InfoSessions.removeSession(sessionId: Int)
 GET         /infosession/approval                   controllers.InfoSessions.requestApproval()
+POST        /infosession/approval                   controllers.InfoSessions.requestApprovalPost()
 
 # Settings
 # TODO: REMOVE THIS!!!
@@ -108,7 +111,7 @@ GET         /settings/sysvars/edit                  controllers.Settings.editSys
 POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost(id: Int)
 GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
 GET         /settings/sysvars/create                controllers.Settings.createSysvar()
-POST         /settings/sysvars/create                controllers.Settings.createSysvarPost()
+POST        /settings/sysvars/create                controllers.Settings.createSysvarPost()
 
 
 # Emailtemplates
@@ -135,6 +138,15 @@ GET         /cars/carcosts/page                     controllers.Cars.showCarCost
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
+
+#Refuels
+GET         /refuels                                controllers.Refuels.showRefuels()
+GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
+GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
+POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
+GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
+GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
+GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
 
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)

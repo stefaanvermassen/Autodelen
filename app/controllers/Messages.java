@@ -178,10 +178,12 @@ public class Messages extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result markMessageAsRead(int messageId) {
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
            MessageDAO dao = context.getMessageDAO();
            dao.markMessageAsRead(messageId);
             context.commit();
+            DatabaseHelper.getCommunicationProvider().invalidateMessages(user.getId());
             return redirect(routes.Messages.showMessages());
         } catch (DataAccessException ex) {
             throw ex;

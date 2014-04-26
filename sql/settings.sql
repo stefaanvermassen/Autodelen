@@ -1,1 +1,1 @@
-INSERT INTO `settings` (`setting_name`,`setting_value`) VALUES ("show_profile","false");
+INSERT INTO `settings` (`setting_name`,`setting_value`) VALUES ("show_profile","true");

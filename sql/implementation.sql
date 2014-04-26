@@ -203,7 +203,7 @@ CREATE TABLE `CarCosts` (
 	`car_cost_proof` INT,
 	`car_cost_amount` DECIMAL(19,4) NOT NULL,
 	`car_cost_description` TEXT,
-	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST',
+	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', #approved by car_admin
 	`car_cost_time` DATETIME,
 	`car_cost_mileage` DECIMAL(10,1),
 	`car_cost_created_at` DATETIME,
@@ -220,10 +220,41 @@ CREATE TABLE `CarRides` (
   `car_ride_status` BIT(1) NOT NULL DEFAULT 0, # approved by owner?
   `car_ride_start_mileage` DECIMAL(10,1),
   `car_ride_end_mileage` DECIMAL(10,1),
+  `car_ride_damage` BIT(1) NOT NULL DEFAULT 0,
+  `car_ride_refueling` INT NOT NULL,
   `car_ride_created_at` DATETIME,
   `car_ride_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`car_ride_car_reservation_id`),
   FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `Refuels` (
+	`refuel_id` INT NOT NULL AUTO_INCREMENT,
+	`refuel_car_ride_id` INT NOT NULL,
+	`refuel_file_id` INT,
+	`refuel_amount` DECIMAL(19,4),
+	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', #approved by owner
+   	`refuel_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`refuel_id`),
+	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES CarRides(`car_ride_car_reservation_id`),
+	FOREIGN KEY (`refuel_file_id`) REFERENCES Files(`file_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `Damages` (
+	`damage_id` INT NOT NULL AUTO_INCREMENT,
+	`damage_car_ride_id` INT NOT NULL,
+	`damage_filegroup_id` INT NOT NULL,
+	`damage_description` TEXT NOT NULL,
+   	`damage_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   	`damage_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`damage_id`),
+	FOREIGN KEY (`damage_car_ride_id`) REFERENCES CarRides(`car_ride_car_reservation_id`),
+	FOREIGN KEY (`damage_filegroup_id`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -307,7 +338,7 @@ CREATE TABLE `approvals` (
   `approval_id` INT(11) NOT NULL AUTO_INCREMENT,
   `approval_user` INT(11) NOT NULL DEFAULT '0',
   `approval_admin` INT(11) NULL DEFAULT '0',
-  `approval_submission` DATETIME NOT NULL,
+  `approval_submission` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `approval_date` DATETIME NULL DEFAULT NULL,
   `approval_status` ENUM('PENDING','ACCEPTED','DENIED') NOT NULL DEFAULT 'PENDING',
   `approval_infosession` INT(11) NULL DEFAULT NULL,

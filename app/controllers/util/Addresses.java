@@ -4,10 +4,7 @@ import database.AddressDAO;
 import models.Address;
 import play.mvc.Controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created by HannesM on 21/04/14.
@@ -56,13 +53,16 @@ public class Addresses extends Controller {
      */
     public static List<String> getCountryList() {
         if (COUNTRIES == null) {
-            COUNTRIES = new ArrayList<>();
+
+            Set<String> countries = new HashSet<>(); // remove duplicates
             Locale[] locales = Locale.getAvailableLocales();
             for (Locale obj : locales) {
                 if ((obj.getDisplayCountry() != null) && (!"".equals(obj.getDisplayCountry()))) {
-                    COUNTRIES.add(obj.getDisplayCountry(COUNTRY_LANGUAGE));
+                    countries.add(obj.getDisplayCountry(COUNTRY_LANGUAGE));
                 }
             }
+
+            COUNTRIES = new ArrayList<>(countries);
             Collections.sort(COUNTRIES);
         }
         return COUNTRIES;

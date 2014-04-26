@@ -130,11 +130,7 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
-                            <span>@user.toString
-                                @if(session.get("impersonated") != null){
-                                    <span class="badge badge-warning">I</span>
-                                }
-                            </span>
+                            <span>@user.toString</span>
                             @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
                                <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
                                 <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
@@ -157,7 +153,7 @@
             </nav>
             <!-- /.navbar-static-top -->
 
-            @if("y".equals(session.get("impersonated"))){
+            @if(session.get("impersonated") != null){
                 <div class="impersonating">You are impersonating @user.toString!</div>
             }
 
@@ -187,6 +183,9 @@
                                 }
                             </a>
                         </li>
+                        <li @if(title == "Tankbeurten") {class="active"}>
+                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
+                        </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
@@ -196,6 +195,9 @@
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
                             <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                        </li>
+                        <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
+                            <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
                         </li>
                         }
 

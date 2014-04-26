@@ -28,20 +28,24 @@ public class JDBCCarRideDAO implements CarRideDAO {
         carRide.setStatus(rs.getBoolean("car_ride_status"));
         carRide.setStartMileage(rs.getInt("car_ride_start_mileage"));
         carRide.setEndMileage(rs.getInt("car_ride_end_mileage"));
+        carRide.setDamaged(rs.getBoolean("car_ride_damage"));
+        carRide.setRefueling(rs.getInt("car_ride_refueling"));
 
         return carRide;
     }
 
     private PreparedStatement getCreateCarRideStatement() throws SQLException {
         if (createCarRideStatement == null) {
-            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id, car_ride_start_mileage, car_ride_end_mileage) VALUE (?, ?, ?)");
+            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id, car_ride_start_mileage, " +
+                    "car_ride_end_mileage, car_ride_damage, car_ride_refueling) VALUE (?, ?, ?, ?, ?)");
         }
         return createCarRideStatement;
     }
     private PreparedStatement getUpdateCarRideStatement() throws SQLException {
         if (updateCarRideStatement == null) {
-            updateCarRideStatement = connection.prepareStatement("UPDATE CarRides SET car_ride_status = ? , car_ride_start_mileage = ? , car_ride_end_mileage = ?"
-                    + " WHERE car_ride_car_reservation_id = ?");
+            updateCarRideStatement = connection.prepareStatement("UPDATE CarRides SET car_ride_status = ? , car_ride_start_mileage = ? , " +
+                    "car_ride_end_mileage = ? , car_ride_damage = ? , car_ride_refueling = ? " +
+                    "WHERE car_ride_car_reservation_id = ?");
         }
         return updateCarRideStatement;
     }
@@ -57,12 +61,14 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
 
     @Override
-    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage) throws DataAccessException {
+    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage, boolean damaged, int refueling) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateCarRideStatement();
             ps.setInt(1, reservation.getId());
             ps.setInt(2, startMileage);
             ps.setInt(3, endMileage);
+            ps.setBoolean(4, damaged);
+            ps.setInt(5, refueling);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car ride.");
@@ -98,8 +104,10 @@ public class JDBCCarRideDAO implements CarRideDAO {
             ps.setBoolean(1, carRide.isStatus());
             ps.setInt(2, carRide.getStartMileage());
             ps.setInt(3, carRide.getEndMileage());
+            ps.setBoolean(4, carRide.isDamaged());
+            ps.setInt(5, carRide.getRefueling());
 
-            ps.setInt(4, carRide.getReservation().getId());
+            ps.setInt(6, carRide.getReservation().getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Car Ride update affected 0 rows.");

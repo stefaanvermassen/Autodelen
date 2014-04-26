@@ -17,7 +17,6 @@
   INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_car_address");
   INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_reason");
 
-
   #-- Templates
   #INSERT INTO Templates(template_id, template_title, template_body) VALUES (?,?)
 
@@ -174,3 +173,9 @@
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_lastname";
   INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "password_reset_url";
+
+ #-- Algemene voorwaarden
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+    8,
+    "Algemene voorwaarden",
+    "TODO: Aanvullen algemene voorwaarden in templates", 0);
