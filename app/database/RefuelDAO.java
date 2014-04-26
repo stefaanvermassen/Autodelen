@@ -11,9 +11,9 @@ import java.util.List;
 public interface RefuelDAO {
 
     public Refuel createRefuel(CarRide carRide) throws DataAccessException;
-    public void acceptRefuel(Refuel refuel) throws DataAccessException;
-    public void rejectRefuel(Refuel refuel) throws DataAccessException;
-    public void deleteRefuel(Refuel refuel) throws DataAccessException;
+    public void acceptRefuel(int refuelId) throws DataAccessException;
+    public void rejectRefuel(int refuelId) throws DataAccessException;
+    public void deleteRefuel(int refuelId) throws DataAccessException;
     public Refuel getRefuel(int refuelId) throws DataAccessException;
     public void updateRefuel(Refuel refuel) throws DataAccessException;
     public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException;

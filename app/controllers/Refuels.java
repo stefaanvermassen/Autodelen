@@ -7,6 +7,7 @@ import database.*;
 import models.Refuel;
 import models.RefuelStatus;
 import models.User;
+import models.UserRole;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -57,7 +58,7 @@ public class Refuels extends Controller {
      *
      * @return index page containing all the refuel requests to a specific owner
      */
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result showOwnerRefuels() {
         User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -150,6 +151,50 @@ public class Refuels extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
         } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a refuel of a car is refused by the car owner.
+     *
+     * @param refuelId  The refuel being refused
+     * @return the refuel admin page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result refuseRefuel(int refuelId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            RefuelDAO dao = context.getRefuelDAO();
+            dao.rejectRefuel(refuelId);
+            context.commit();
+            //Todo: send notification!
+            flash("succes", "Tankbeurt succesvol geweigerd");
+            return redirect(routes.Refuels.showOwnerRefuels());
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a refuel of a car is accepted by the car owner.
+     *
+     * @param refuelId  The refuel being approved
+     * @return the refuel admin page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result approveRefuel(int refuelId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            RefuelDAO dao = context.getRefuelDAO();
+            dao.acceptRefuel(refuelId);
+            context.commit();
+            //Todo: send notification!
+            flash("succes", "Tankbeurt succesvol geaccepteerd");
+            return redirect(routes.Refuels.showOwnerRefuels());
+        }catch(DataAccessException ex) {
             throw ex;
         }
     }

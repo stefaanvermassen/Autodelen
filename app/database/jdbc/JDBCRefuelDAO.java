@@ -94,9 +94,9 @@ public class JDBCRefuelDAO implements RefuelDAO {
                     "JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
                     "JOIN Cars ON reservation_car_id = car_id " +
                     "JOIN Users ON car_owner_user_id = user_id " +
-                    "LEFT JOIN Files ON refuel_file_id=file_id WHERE car_owner_user_id = ? " +
-                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 4 END");
+                    "LEFT JOIN Files ON refuel_file_id=file_id WHERE car_owner_user_id = ? AND refuel_status <> 'CREATED' " +
+                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 1 WHEN 'REFUSED' THEN 3 " +
+                    "WHEN 'ACCEPTED' THEN 2 END");
         }
         return getRefuelsForOwnerStatement;
     }
@@ -135,11 +135,11 @@ public class JDBCRefuelDAO implements RefuelDAO {
     }
 
     @Override
-    public void acceptRefuel(Refuel refuel) throws DataAccessException {
+    public void acceptRefuel(int refuelId) throws DataAccessException {
         try {
             PreparedStatement ps = getStatusRefuelStatement();
             ps.setString(1, RefuelStatus.ACCEPTED.toString());
-            ps.setInt(2, refuel.getId());
+            ps.setInt(2, refuelId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("CarCost update affected 0 rows.");
         } catch (SQLException e){
@@ -148,11 +148,11 @@ public class JDBCRefuelDAO implements RefuelDAO {
     }
 
     @Override
-    public void rejectRefuel(Refuel refuel) throws DataAccessException {
+    public void rejectRefuel(int refuelId) throws DataAccessException {
         try {
             PreparedStatement ps = getStatusRefuelStatement();
             ps.setString(1, RefuelStatus.REFUSED.toString());
-            ps.setInt(2, refuel.getId());
+            ps.setInt(2, refuelId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("CarCost update affected 0 rows.");
         } catch (SQLException e){
@@ -161,10 +161,10 @@ public class JDBCRefuelDAO implements RefuelDAO {
     }
 
     @Override
-    public void deleteRefuel(Refuel refuel) throws DataAccessException {
+    public void deleteRefuel(int refuelId) throws DataAccessException {
         try {
             PreparedStatement ps = getDeleteRefuelStatement();
-            ps.setInt(1, refuel.getId());
+            ps.setInt(1, refuelId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when deleting refuel.");
         } catch (SQLException e){
