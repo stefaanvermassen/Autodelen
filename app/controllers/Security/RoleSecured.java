@@ -12,6 +12,7 @@ import play.mvc.*;
 import play.mvc.Http.*;
 
 import java.lang.annotation.*;
+import java.net.URLEncoder;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -55,26 +56,21 @@ public class RoleSecured {
 
                 // If user is null, redirect to login page
                 if(user == null) {
-                    return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
+                    return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
                 } else if(UserProvider.isBlocked(user)) {
                     ctx.flash().put("danger", "Deze account is not niet geactiveerd of geblokkeerd.");
-                    return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
+                    return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
                 }
 
                 Set<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
 
                 // If user has got one of the specified roles, delegate to the requested page
-                if(securedRoles.length == 0)
+                if(securedRoles.length == 0 || UserRoleProvider.hasSomeRole(roles, securedRoles)){
                     return delegate.call(ctx);
-                else {
-                    for(UserRole securedRole : securedRoles) {
-                        if(UserRoleProvider.hasRole(roles, securedRole)){ // This also takes care of SU = has all roles logic
-                            return delegate.call(ctx);
-                        }
-                    }
+                } else {
+                    // User is not authorized
+                    return F.Promise.pure((SimpleResult) unauthorized(views.html.unauthorized.render(securedRoles)));
                 }
-                // User is not authorized
-                return F.Promise.pure((SimpleResult) unauthorized(views.html.unauthorized.render(securedRoles)));
             }
             catch(Throwable t) {
                throw new RuntimeException(t);
