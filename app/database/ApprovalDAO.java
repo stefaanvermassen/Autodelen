@@ -13,6 +13,8 @@ public interface ApprovalDAO {
 
     public List<Approval> getPendingApprovals(User user) throws DataAccessException;
     public List<Approval> getPendingApprovals() throws DataAccessException;
+    public List<Approval> getApprovals(int page, int pageSize) throws DataAccessException;
+    public int getApprovalCount() throws DataAccessException;
     public List<Approval> getApprovals(User user) throws DataAccessException;
     public Approval getApproval(int approvalId) throws DataAccessException;
     public Approval createApproval(User user, InfoSession session, String userMessage) throws DataAccessException;

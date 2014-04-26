@@ -563,14 +563,30 @@ public class InfoSessions extends Controller {
                         context.commit();
 
                         flash("success", "Uw aanvraag werd succesvol ingediend.");
+                        return redirect(routes.Dashboard.index());
                     } catch (DataAccessException ex) {
                         context.rollback();
                         throw ex;
                     }
-
-                    return ok("received");
                 }
             }
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN}) //both infosession and profile admins can accept
+    public static Result pendingApprovalList(){
+        return ok(approvals.render());
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    public static Result pendingApprovalListPaged(int page){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            ApprovalDAO dao = context.getApprovalDAO();
+            List<Approval> approvalsList = dao.getApprovals(page, PAGE_SIZE);
+            int amountOfResults = dao.getApprovalCount();
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return ok(approvalpage.render(approvalsList, page, amountOfResults, amountOfPages));
         }
     }
 

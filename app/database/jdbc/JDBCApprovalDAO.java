@@ -34,9 +34,24 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     private PreparedStatement getPendingUserApprovalStatement;
     private PreparedStatement getPendingApprovalStatement;
     private PreparedStatement updateApprovalStatement;
+    private PreparedStatement getPagedApprovalsStatement;
+    private PreparedStatement countApprovalsStatement;
 
     public JDBCApprovalDAO(Connection connection){
         this.connection = connection;
+    }
+
+    private PreparedStatement getCountApprovalsStatement() throws SQLException {
+        if(countApprovalsStatement == null){
+            countApprovalsStatement = connection.prepareStatement("SELECT COUNT(*) FROM approvals");
+        }
+        return countApprovalsStatement;
+    }
+    private PreparedStatement getGetPagedApprovalsStatement() throws SQLException {
+        if(getPagedApprovalsStatement == null){
+            getPagedApprovalsStatement = connection.prepareStatement(APPROVAL_QUERY + " ORDER BY approval_submission DESC LIMIT ? OFFSET ?");
+        }
+        return getPagedApprovalsStatement;
     }
 
     private PreparedStatement getGetPendingApprovalStatement() throws SQLException {
@@ -69,7 +84,7 @@ public class JDBCApprovalDAO implements ApprovalDAO {
 
     private PreparedStatement getCreateApprovalStatement() throws SQLException {
         if(createApprovalStatement == null){
-            createApprovalStatement = connection.prepareStatement("INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message) " +
+            createApprovalStatement = connection.prepareStatement("INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message, approval_submission) " +
                     "VALUES(?,?,?,?,?)", new String[]{"approval_id"});
         }
         return createApprovalStatement;
@@ -137,6 +152,36 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     }
 
     @Override
+    public List<Approval> getApprovals(int page, int pageSize) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetPagedApprovalsStatement();
+            ps.setInt(1, pageSize);
+            ps.setInt(2, (page - 1) * pageSize);
+            return getApprovalList(ps);
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get paged approvals for user.", ex);
+        }
+    }
+
+    @Override
+    public int getApprovalCount() throws DataAccessException {
+        try {
+            PreparedStatement ps = getCountApprovalsStatement();
+            try(ResultSet rs = ps.executeQuery()){
+                if(rs.next())
+                    return rs.getInt(1);
+                else
+                    throw new DataAccessException("Failed to get approval count. Empty resultset.");
+
+            } catch(SQLException ex) {
+                throw new DataAccessException("Failed to get approval count.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to prepare count query.", ex);
+        }
+    }
+
+    @Override
     public Approval getApproval(int approvalId) throws DataAccessException {
         try {
             PreparedStatement ps = getGetApprovalByIdStatement();
@@ -163,6 +208,8 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public Approval createApproval(User user, InfoSession session, String userMessage) {
         try {
+            DateTime date = new DateTime();
+
             PreparedStatement ps = getCreateApprovalStatement();
             ps.setInt(1, user.getId());
             ps.setString(2, Approval.ApprovalStatus.PENDING.name());
@@ -171,14 +218,17 @@ public class JDBCApprovalDAO implements ApprovalDAO {
                 ps.setNull(3, Types.INTEGER);
             else
                 ps.setInt(3, session.getId());
+
             ps.setString(4, userMessage);
+
+            ps.setDate(5, new java.sql.Date(date.getMillis()));
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating approval request.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Approval(keys.getInt(1), user, null, new DateTime(), null, session, Approval.ApprovalStatus.PENDING, userMessage, null);
+                return new Approval(keys.getInt(1), user, null, date, null, session, Approval.ApprovalStatus.PENDING, userMessage, null);
             } catch(SQLException ex){
                 throw new DataAccessException("Failed to create approval.", ex);
             }

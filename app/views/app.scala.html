@@ -243,6 +243,14 @@
                             <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
                         </li>
                         }
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole)){
+                            <li @if(title == "Gebruikers") {class="active"}>
+                            <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
+                            </li>
+                        }
+
+
                         @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)){
                             <li @if(title == "Infosessies (Admin)") {class="active"}>
                             <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
