@@ -498,7 +498,7 @@ public class InfoSessions extends Controller {
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
         if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT)
-            errors.add("U bent nog niet aanwezig geweest op een infosessie.");
+            errors.add("Nog niet aanwezig geweest op een infosessie.");
         return errors;
     }
 
@@ -587,6 +587,26 @@ public class InfoSessions extends Controller {
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
             return ok(approvalpage.render(approvalsList, page, amountOfResults, amountOfPages));
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    public static Result aprovalDetails(int approvalId){
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+            ApprovalDAO dao = context.getApprovalDAO();
+            Approval ap = dao.getApproval(approvalId);
+            if(ap == null){
+                flash("danger", "Er is geen aanvraag met deze id.");
+                return redirect(routes.InfoSessions.pendingApprovalList());
+            } else {
+                EnrollementStatus status = EnrollementStatus.ABSENT;
+                if(ap.getSession() != null) {
+                    InfoSessionDAO idao = context.getInfoSessionDAO();
+                    InfoSession is = idao.getInfoSession(ap.getId(), true);
+                    status = is.getEnrollmentStatus(ap.getUser());
+                }
+                return ok(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context)));
+            }
         }
     }
 

@@ -106,6 +106,7 @@ GET         /infosession/approval                   controllers.InfoSessions.req
 POST        /infosession/approval                   controllers.InfoSessions.requestApprovalPost()
 GET         /infosession/approvals/page             controllers.InfoSessions.pendingApprovalListPaged(page: Int)
 GET         /infosession/approvals                  controllers.InfoSessions.pendingApprovalList()
+GET         /infosession/approval/details           controllers.InfoSessions.aprovalDetails(id: Int)
 
 # Settings
 # TODO: REMOVE THIS!!!

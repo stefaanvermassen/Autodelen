@@ -4,6 +4,7 @@
         <tr role="row">
             <th name="user_name" class="sortable" tabindex="0" >Naam</th>
             <th>Status</th>
+            <th>Ingediend</th>
             <th>Acties</th>
         </tr>
     </thead>
@@ -18,10 +19,17 @@
             @for(approval <- approvals) {
                 <tr>
                     <td>@approval.getUser.getFirstName @approval.getUser.getLastName</td>
-                    <td>@approval.getStatus.name</td>
+                    <td>
+                        @approval.getStatus match {
+                            case Approval.ApprovalStatus.PENDING => { <span class="label label-default">In afwachting</span> }
+                            case Approval.ApprovalStatus.DENIED => { <span class="label label-danger">Afgekeurd</span> }
+                            case Approval.ApprovalStatus.ACCEPTED => { <span class="label label-success">Goedgekeurd</span> }
+                        }
+                    </td>
+                    <td>@approval.getSubmitted.toString("dd-MM-YYYY")</td>
                     <td>
                         <div class="btn-group btn-group-xs">
-                            <a class="btn btn-primary" href="#">Bekijken</a>
+                            <a class="btn btn-primary" href="@routes.InfoSessions.aprovalDetails(approval.getId)">Bekijken</a>
                         </div>
                     </td>
                 </tr>

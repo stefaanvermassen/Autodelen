@@ -1,0 +1,72 @@
+@(user: User, approval: Approval, enrollStatus: EnrollementStatus, reasons: List[String] = null)
+
+@app("Goedkeuringsaanvraag") {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Goedkeuringsaanvraag</li>
+        </ol>
+    </div>
+
+    @defining(reasons != null && !reasons.isEmpty) { hasErrors =>
+        <div id="page-wrapper">
+            <div class="well">
+                @flashes()
+                @if(hasErrors) {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p>Er zijn mogelijks problemen met deze aanvraag:</p>
+                            <ul>
+                            @for(reason <- reasons) {
+                                <li>@reason</li>
+                            }
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Gebruiker</h3>
+                </div>
+                <div class="panel-body">
+                    <strong>Naam: </strong>@approval.getUser.getFirstName @approval.getUser.getLastName <br>
+                    <strong>Infosessie status: </strong>
+                    @if(approval.getSession == null) {
+                        <span class="label label-danger">Nooit ingeschreven</span>
+                    } else {
+                        @enrollStatus match {
+                            case EnrollementStatus.ABSENT => {
+                                <span class="label label-danger">Afwezig</span>
+                            }
+                            case EnrollementStatus.ENROLLED => {
+                                <span class="label label-warning">Ingeschreven</span>
+                            }
+                            case EnrollementStatus.PRESENT => {
+                                <span class="label label-success">Aanwezig</span>
+                            }
+                        }
+                        <a href="@routes.InfoSessions.detail(approval.getId)">Details</a>
+                    }
+                    <br>
+                    <a class="btn btn-default" href="@routes.Profile.index(user.getId)">Profiel bekijken</a>
+                </div>
+            </div>
+
+
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Aanvraag</h3>
+                </div>
+                <div class="panel-body">
+                    <h2>Blabla</h2>
+                </div>
+            </div>
+            </div>
+        </div>
+    }
+}
