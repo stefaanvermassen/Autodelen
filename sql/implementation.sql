@@ -163,10 +163,12 @@ ENGINE=InnoDB;
 CREATE TABLE `InfoSessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
 	`infosession_type` ENUM('NORMAL', 'OWNER', 'OTHER') NOT NULL DEFAULT 'NORMAL',
+	`infosession_type_alternative` VARCHAR(64),
 	`infosession_timestamp` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`infosession_address_id` INT NOT NULL,
 	`infosession_host_user_id` INT,
 	`infosession_max_enrollees` INT,
+	`infosession_comments` VARCHAR(256),
 	`infosession_created_at` DATETIME,
 	`infosession_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`infosession_id`),

@@ -18,14 +18,16 @@ public class InfoSession {
 
     private int id;
     private InfoSessionType type;
+    private String typeAlternative;
     private DateTime time;
     private Address address;
     private User host;
     private List<Enrollee> enrolled;
     private int maxEnrollees;
     private int enrolleeCount;
+    private String comments;
 
-    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, List<Enrollee> enrolled, int maxEnrollees) {
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, List<Enrollee> enrolled, int maxEnrollees, String comments) {
         this.id = id;
         this.type = type;
         this.time = time;
@@ -36,16 +38,17 @@ public class InfoSession {
         else
             this.enrolled = enrolled;
         this.maxEnrollees = maxEnrollees;
+        this.comments = comments;
     }
 
-    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int enrolleeCount, int maxEnrollees) {
-        this(id, type, time, address, host, null, maxEnrollees);
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int enrolleeCount, int maxEnrollees, String comments) {
+        this(id, type, time, address, host, null, maxEnrollees, comments);
         this.enrolled = null; //TODO: cleanup above constructor not to fix enrolled as null
         this.enrolleeCount = enrolleeCount;
     }
 
-    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int maxEnrollees) {
-        this(id, type, time, address, host, NO_ENROLLEES, maxEnrollees);
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int maxEnrollees, String comments) {
+        this(id, type, time, address, host, NO_ENROLLEES, maxEnrollees, comments);
     }
 
     /**
@@ -72,6 +75,14 @@ public class InfoSession {
 
     public void setType(InfoSessionType type) {
         this.type = type;
+    }
+
+    public String getTypeAlternative() {
+        return typeAlternative;
+    }
+
+    public void setTypeAlternative(String typeAlternative) {
+        this.typeAlternative = typeAlternative;
     }
 
     public DateTime getTime() {
@@ -129,5 +140,11 @@ public class InfoSession {
         this.maxEnrollees = maxEnrollees;
     }
 
+    public String getComments() {
+        return comments;
+    }
 
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
 }

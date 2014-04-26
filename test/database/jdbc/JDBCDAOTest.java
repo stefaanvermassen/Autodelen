@@ -692,7 +692,7 @@ public class JDBCDAOTest {
             int u5id = sc.nextInt();
             User u5 = users.get(u5id - 1);
 
-            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, host, address, time, 0);
+            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0);
             infoSessionDAO.registerUser(infoSession, u1);
             infoSessionDAO.registerUser(infoSession, u2);
             infoSessionDAO.registerUser(infoSession, u3);
@@ -741,7 +741,7 @@ public class JDBCDAOTest {
         int u5id = sc.nextInt();
         User u5 = users.get(u5id - 1);
 
-        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, host, address, time, 0);
+        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0);
         infoSessionDAO.registerUser(infoSession, u1);
         infoSessionDAO.registerUser(infoSession, u2);
         infoSessionDAO.registerUser(infoSession, u3);
@@ -797,8 +797,7 @@ public class JDBCDAOTest {
             Enrollee delete = infoSession.getEnrolled().get(0);
             infoSession.deleteEnrollee(delete);
 
-            infoSessionDAO.updateInfosessionTime(infoSession);
-            infoSessionDAO.updateInfoSessionAddress(infoSession);
+            infoSessionDAO.updateInfoSession(infoSession);
             infoSessionDAO.unregisterUser(infoSession, delete.getUser());
         }
         getInfoSessionTest();

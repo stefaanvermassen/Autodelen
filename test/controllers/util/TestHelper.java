@@ -95,7 +95,7 @@ public class TestHelper {
 	
 	public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int max){
 		InfoSessionDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getInfoSessionDAO();
-		InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, host, address, new DateTime(),100);
+		InfoSession session = dao.createInfoSession(type, "", host, address, time, max);
 		return session;
 	}
 	

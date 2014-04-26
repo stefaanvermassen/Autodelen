@@ -130,17 +130,17 @@ public class Cars extends Controller {
         public String validate() {
             String error = "";
             if("".equals(userEmail))
-                error += "Geef een eigenaar op.<br>";
+                error += "Geef een eigenaar op. ";
             if(address.isEmpty())
-                error += "Geef het adres op.<br>";
+                error += "Geef het adres op. ";
             if(name.length() <= 0)
-                error +=  "Geef de autonaam op.<br>";
+                error +=  "Geef de autonaam op. ";
             if(brand.length() <= 0)
-                error +=  "Geef het automerk op.<br>";
+                error +=  "Geef het automerk op. ";
             if(seats != null && seats < 2)
-                error +=  "Een auto heeft minstens 2 zitplaatsen.<br>";
+                error +=  "Een auto heeft minstens 2 zitplaatsen. ";
             if(doors != null && doors < 2)
-                error +=  "Een auto heeft minstens 2 deuren.<br>";
+                error +=  "Een auto heeft minstens 2 deuren. ";
 
             if("".equals(error)) return null;
             else return error;

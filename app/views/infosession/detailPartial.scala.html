@@ -4,7 +4,7 @@
         <div class="well">
             <p>
                 <strong>Host:</strong> <a href="@routes.Profile.index(infoSession.getHost.getId)">@infoSession.getHost.getFirstName @infoSession.getHost.getLastName</a><br>
-                <strong>Type:</strong> @infoSession.getType.getDescription<br>
+                <strong>Type:</strong> @infoSession.getType.getDescription @if(infoSession.getType.equals(InfoSessionType.OTHER)) { : @infoSession.getTypeAlternative } <br>
                 <strong>Datum:</strong> @infoSession.getTime.toString("dd-MM-yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>

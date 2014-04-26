@@ -18,7 +18,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private Connection connection;
 
-    private static String INFOSESSION_FIELDS = "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
+    private static String INFOSESSION_FIELDS = "infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
             "user_id, user_firstname, user_lastname, user_phone, user_email, user_status";
 
@@ -28,8 +28,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
 
     // Also includes the # of attendees, this query is way too complex
-    private static String INFOSESSION_QUERY = "SELECT IFNULL(sub.total, 0) going, ses.infosession_id infosession_id, ses.infosession_type infosession_type, " +
-            "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees," +
+    private static String INFOSESSION_QUERY = "SELECT IFNULL(sub.total, 0) going, ses.infosession_id infosession_id, ses.infosession_type infosession_type, ses.infosession_type_alternative infosession_type_alternative, " +
+            "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees, ses.infosession_comments infosession_comments, " +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
             "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
@@ -77,14 +77,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     
     private PreparedStatement getUpdateInfoSessionStatement() throws SQLException {
     	if(updateInfoSession==null){
-    		updateInfoSession = connection.prepareStatement("UPDATE InfoSessions SET infosession_type=?, infosession_max_enrollees=?, infosession_timestamp=?, infosession_address_id=?, infosession_host_user_id=? WHERE infosession_id=?");
+    		updateInfoSession = connection.prepareStatement("UPDATE InfoSessions SET infosession_type=?, infosession_type_alternative=?, infosession_max_enrollees=?, infosession_timestamp=?, infosession_address_id=?, infosession_host_user_id=?, infosession_comments=? WHERE infosession_id=?");
     	}
     	return updateInfoSession;
     }
 
     private PreparedStatement getGetLastInfoSessionForUserStatement() throws SQLException {
         if(getLastInfoSessionForUserStatement == null){
-            getLastInfoSessionForUserStatement = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_enrollment_status status, ie.infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
+            getLastInfoSessionForUserStatement = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_enrollment_status status, ie.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
                     "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
                     "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
@@ -105,7 +105,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getGetInfoSessionForUserStatement() throws SQLException {
         if (getInfosessionForUser == null) {
-            getInfosessionForUser = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees," +
+            getInfosessionForUser = connection.prepareStatement("SELECT IFNULL(sub.total, 0) going, ie.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
                     "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
                     "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
@@ -149,7 +149,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getCreateInfoSessionStatement() throws SQLException {
         if (createInfoSessionStatement == null) {
-            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_type, infosession_timestamp, infosession_address_id, infosession_host_user_id, infosession_max_enrollees) VALUES (?,?,?,?,?)",
+            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_type, infosession_type_alternative, infosession_timestamp, infosession_address_id, infosession_host_user_id, infosession_max_enrollees, infosession_comments) VALUES (?,?,?,?,?,?,?)",
                     new String[]{"infosession_id"});
         }
         return createInfoSessionStatement;
@@ -207,6 +207,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     public static InfoSession populateInfoSession(ResultSet rs, boolean includesGoing, boolean withJoins) throws SQLException {
         int id = rs.getInt("infosession_id");
         InfoSessionType type = InfoSessionType.valueOf(rs.getString("infosession_type"));
+        String typeAlternative = rs.getString("infosession_type_alternative");
         DateTime timestamp = new DateTime(rs.getTimestamp("infosession_timestamp"));
         Address address = null;
         User host = null;
@@ -216,11 +217,16 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
         }
         int maxEnrollees = rs.getInt("infosession_max_enrollees");
 
+        String commentaar = rs.getString("infosession_comments");
+        InfoSession infoSession;
         if (includesGoing) {
-            return new InfoSession(id, type, timestamp, address, host, rs.getInt("going"), maxEnrollees);
+            infoSession = new InfoSession(id, type, timestamp, address, host, rs.getInt("going"), maxEnrollees, commentaar);
         } else {
-            return new InfoSession(id, type, timestamp, address, host, maxEnrollees);
+            infoSession = new InfoSession(id, type, timestamp, address, host, maxEnrollees, commentaar);
         }
+        infoSession.setTypeAlternative(typeAlternative);
+
+        return infoSession;
     }
 
     @Override
@@ -229,24 +235,30 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     }
 
     @Override
-    public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int maxEnrollees) throws DataAccessException {
+    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException {
         if (host.getId() == 0 || address.getId() == 0)
             throw new DataAccessException("Tried to create infosession without database user / database address");
 
         try {
             PreparedStatement ps = getCreateInfoSessionStatement();
             ps.setString(1, type.name());
-            ps.setTimestamp(2, new Timestamp(time.getMillis())); //TODO: timezones?? convert to datetime see below
-            ps.setInt(3, address.getId());
-            ps.setInt(4, host.getId());
-            ps.setInt(5, maxEnrollees);
+            if(type.equals(InfoSessionType.OTHER)) {
+                ps.setString(2, typeAlternative);
+            } else {
+                ps.setNull(2, Types.VARCHAR);
+            }
+            ps.setTimestamp(3, new Timestamp(time.getMillis())); //TODO: timezones?? convert to datetime see below
+            ps.setInt(4, address.getId());
+            ps.setInt(5, host.getId());
+            ps.setInt(6, maxEnrollees);
+            ps.setString(7, comments);
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating infosession.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new InfoSession(keys.getInt(1), type, time, address, host, InfoSession.NO_ENROLLEES, maxEnrollees);
+                return new InfoSession(keys.getInt(1), type, time, address, host, InfoSession.NO_ENROLLEES, maxEnrollees, comments);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new infosession.", ex);
             }
@@ -466,11 +478,17 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 		try {
             PreparedStatement ps = getUpdateInfoSessionStatement();
             ps.setString(1,session.getType().toString());
-            ps.setInt(2, session.getMaxEnrollees());
-            ps.setTimestamp(3, new Timestamp(session.getTime().getMillis()));
-            ps.setInt(4, session.getAddress().getId());
-            ps.setInt(5, session.getHost().getId());
-            ps.setInt(6, session.getId());
+            if(session.getType().equals(InfoSessionType.OTHER)) {
+                ps.setString(2, session.getTypeAlternative());
+            } else {
+                ps.setNull(2, Types.VARCHAR);
+            }
+            ps.setInt(3, session.getMaxEnrollees());
+            ps.setTimestamp(4, new Timestamp(session.getTime().getMillis()));
+            ps.setInt(5, session.getAddress().getId());
+            ps.setInt(6, session.getHost().getId());
+            ps.setString(7, session.getComments());
+            ps.setInt(8, session.getId());
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("InfoSession update did not affect any row.");
         } catch (SQLException ex) {

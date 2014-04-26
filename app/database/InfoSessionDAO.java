@@ -17,7 +17,7 @@ public interface InfoSessionDAO {
 
     public Filter createInfoSessionFilter();
 
-    public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int maxEnrollees) throws DataAccessException;
+    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException;
     public InfoSession getInfoSession(int id, boolean withAttendees) throws DataAccessException;
     public int getAmountOfAttendees(int infosessionId) throws DataAccessException;
     public boolean deleteInfoSession(int id) throws DataAccessException;
