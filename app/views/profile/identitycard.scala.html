@@ -1,4 +1,6 @@
 @(user: User, form: Form[Profile.EditIdentityCardForm])
+@import controllers.util.FileType;
+
     @app("Identiteitskaart wijzigen") {
         <div id="page-header-wrapper">
             <ol class="breadcrumb">
@@ -53,8 +55,8 @@
                                     <ul>
                                      @for(file <- user.getIdentityCard.getFileGroup.getList){
                                         <li>
-                                            <a href="@routes.Profile.viewIdentityCardFile(user.getId, file.getId)">@file.getFileName</a>
-                                            <a href="@routes.Profile.deleteIdentityCardFile(user.getId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
+                                            <a href="@routes.Profile.viewFile(user.getId, file.getId,  FileType.IDENTITYCARD.name)">@file.getFileName</a>
+                                            <a href="@routes.Profile.deleteFile(user.getId, file.getId, FileType.IDENTITYCARD.name)"><span class="glyphicon glyphicon-remove"></span></a>
                                         </li>
                                     }
 

@@ -64,11 +64,13 @@ public class TestHelper {
     public  void addUserRole(User user, UserRole role) {
         UserRoleDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
         dao.addUserRole(user.getId(), role);
+        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
     }
 
     public  void removeUserRole(User user, UserRole role) {
         UserRoleDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
         dao.removeUserRole(user.getId(), role);
+        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
     }
 
     public Car createCar(String name, String brand, String type,
@@ -76,7 +78,7 @@ public class TestHelper {
                                 boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue,
                                 int ownerAnnualKm, User owner, String comments) {
         CarDAO dao = DatabaseHelper.getDataAccessProvider().getDataAccessContext().getCarDAO();
-        Car car = dao.createCar(name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, owner, comments);
+        Car car = dao.createCar(name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, owner, comments);
         return car;
     }
 

@@ -60,7 +60,7 @@
     <script>
         $ ("#create").click ( function () {
             $.ajax ( {
-                url : '/emailtemplate/edit',
+                url : '/dev/emailtemplate/edit',
                 type : 'POST',
                 data : { 'template_id':$ ( '#editor' ).data('status'), 'template_body' : $ ( '#editor' ).cleanHtml(), 'template_subject' : $ ( '#subject' ).val(), 'template_send_mail' : $("#sendMail").is(':checked') },
                 success: function(data, textStatus, request) {

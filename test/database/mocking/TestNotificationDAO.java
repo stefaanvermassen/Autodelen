@@ -41,15 +41,14 @@ public class TestNotificationDAO implements NotificationDAO{
 
     @Override
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        return null;
+        List<Notification> list = new ArrayList<>();
+        for(Notification notification : notifications){
+            if(notification.getUser().getId()==1){ // TODO: getUserId from filter
+                list.add(notification);
+            }
+        }
+        return list.subList((page-1)*pageSize, page*pageSize > list.size() ? list.size() : page*pageSize );
     }
-
-    @Override
-	public Notification createNotification(User user, String subject, String body, DateTime timestamp) throws DataAccessException {
-		Notification notification = new Notification(idCounter++, user, false, subject, body, timestamp);
-		notifications.add(notification);
-		return notification;
-	}
 
 	@Override
 	public int getNumberOfUnreadNotifications(int userId) throws DataAccessException {
@@ -61,5 +60,17 @@ public class TestNotificationDAO implements NotificationDAO{
 		}
 		return counter;
 	}
-	
+
+    @Override
+    public Notification createNotification(User user, String subject, String body) throws DataAccessException {
+        Notification notification = new Notification(idCounter++, user, false, subject, body, new DateTime());
+        notifications.add(notification);
+        return notification;
+    }
+
+    @Override
+    public void markNotificationAsRead(int notificationId) throws DataAccessException {
+        //TODO
+    }
+
 }
