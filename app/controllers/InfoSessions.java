@@ -471,41 +471,34 @@ public class InfoSessions extends Controller {
     }
 
     private static List<String> checkApprovalConditions(User user, DataAccessContext context) {
-
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
         user = udao.getUser(user.getId(), true); // gets the full user instead of small cached one
         if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) {
-            // TODO: fix identity card dao so this line is unnecessary
+            // TODO: fix identity card dao so these lines are unnecessary
             user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));
             user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));
         }
 
-        ApprovalDAO dao = context.getApprovalDAO();
         InfoSessionDAO idao = context.getInfoSessionDAO();
         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
-        List<Approval> approvals = dao.getPendingApprovals(user);//TODO: just request a COUNT instead of fetching the list
 
         List<String> errors = new ArrayList<>();
-        if (!approvals.isEmpty()) {
-            errors.add("Er is reeds een toelatingsprocedure in aanvraag.");
-        } else {
-            if (user.getAddressDomicile() == null)
-                errors.add("Domicilieadres ontbreekt.");
-            if (user.getAddressResidence() == null)
-                errors.add("Verblijfsadres ontbreekt.");
-            if (user.getIdentityCard() == null)
-                errors.add("Identiteitskaart ontbreekt.");
-            if (user.getIdentityCard() != null && (user.getIdentityCard().getFileGroup() == null || user.getIdentityCard().getFileGroup().size() == 0))
-                errors.add("Bewijsgegevens identiteitskaart ontbreken");
-            if (user.getDriverLicense() == null)
-                errors.add("Rijbewijs ontbreekt.");
-            if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
-                if (user.getCellphone() == null && user.getPhone() == null)
-                    errors.add("Telefoon/GSM ontbreekt.");
-            if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT)
-                errors.add("U bent nog niet aanwezig geweest op een infosessie.");
-        }
+        if (user.getAddressDomicile() == null)
+            errors.add("Domicilieadres ontbreekt.");
+        if (user.getAddressResidence() == null)
+            errors.add("Verblijfsadres ontbreekt.");
+        if (user.getIdentityCard() == null)
+            errors.add("Identiteitskaart ontbreekt.");
+        if (user.getIdentityCard() != null && (user.getIdentityCard().getFileGroup() == null || user.getIdentityCard().getFileGroup().size() == 0))
+            errors.add("Bewijsgegevens identiteitskaart ontbreken");
+        if (user.getDriverLicense() == null)
+            errors.add("Rijbewijs ontbreekt.");
+        if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
+            if (user.getCellphone() == null && user.getPhone() == null)
+                errors.add("Telefoon/GSM ontbreekt.");
+        if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT)
+            errors.add("U bent nog niet aanwezig geweest op een infosessie.");
         return errors;
     }
 
@@ -524,13 +517,20 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result requestApproval() {
         User user = DatabaseHelper.getUserProvider().getUser();
-        if (DatabaseHelper.getUserRoleProvider().isFullUser(user)) {
-            flash("warning", "U bent reeds een volwaardige gebruiker.");
-            return redirect(routes.Dashboard.index());
-        } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                List<String> errors = checkApprovalConditions(user, context);
-                return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context)));
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            if (DatabaseHelper.getUserRoleProvider().isFullUser(user)) {
+                flash("warning", "U bent reeds een volwaardige gebruiker.");
+                return redirect(routes.Dashboard.index());
+            } else {
+                ApprovalDAO dao = context.getApprovalDAO();
+                List<Approval> approvals = dao.getPendingApprovals(user);
+                if (!approvals.isEmpty()) {
+                    flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
+                    return redirect(routes.Dashboard.index());
+                } else {
+                    List<String> errors = checkApprovalConditions(user, context);
+                    return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context)));
+                }
             }
         }
     }
@@ -545,12 +545,29 @@ public class InfoSessions extends Controller {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 if (form.hasErrors()) {
-                    List<String> errors = checkApprovalConditions(user, context);
-                    return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
-                } else {
-
                     ApprovalDAO dao = context.getApprovalDAO();
-                   // dao.createApproval()
+                    List<Approval> approvals = dao.getPendingApprovals(user);
+                    if (!approvals.isEmpty()) {
+                        flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
+                        return redirect(routes.Dashboard.index());
+                    } else {
+                        List<String> errors = checkApprovalConditions(user, context);
+                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
+                    }
+                } else {
+                    ApprovalDAO dao = context.getApprovalDAO();
+                    InfoSessionDAO idao = context.getInfoSessionDAO();
+                    try {
+                        Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
+                        Approval app = dao.createApproval(user, lastSession.getFirst(), form.get().message);
+                        context.commit();
+
+                        flash("success", "Uw aanvraag werd succesvol ingediend.");
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
+                    }
+
                     return ok("received");
                 }
             }
