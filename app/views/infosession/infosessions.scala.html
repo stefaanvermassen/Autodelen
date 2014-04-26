@@ -4,12 +4,16 @@
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
         var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
+        var infoSessionId;
 
         // Show confirm message to subscribe to an infosession
         function showConfirmationModal(id){
-            @* TODO: change link with partial? *@
-            $( "#infosessionid" ).attr("href", "/infosession/enroll?id=" + id);
+            infoSessionId = id;
             $('#myModal').modal('show');
+        }
+
+        function changeInfoSession() {
+            window.location = myJsRoutes.controllers.InfoSessions.enrollSession(infoSessionId).url;
         }
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
@@ -85,7 +89,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
-        <a id="infosessionid" class="btn btn-success" href="">Ja, schrijf me in voor deze infosessie</a>
+        <button class="btn btn-success"  onClick="changeInfoSession()">Ja, schrijf me in voor deze infosessie</button>
       </div>
     </div>
   </div>
