@@ -5,6 +5,7 @@ import controllers.util.FormHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
+import database.providers.UserRoleProvider;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -18,7 +19,9 @@ import views.html.infosession.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Cedric on 2/21/14.
@@ -573,18 +576,19 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN}) //both infosession and profile admins can accept
-    public static Result pendingApprovalList(){
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    //both infosession and profile admins can accept
+    public static Result pendingApprovalList() {
         return ok(approvals.render());
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
-    public static Result pendingApprovalListPaged(int page){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result pendingApprovalListPaged(int page) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             List<Approval> approvalsList = dao.getApprovals(page, PAGE_SIZE);
             int amountOfResults = dao.getApprovalCount();
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
 
             return ok(approvalpage.render(approvalsList, page, amountOfResults, amountOfPages));
         }
@@ -602,88 +606,127 @@ public class InfoSessions extends Controller {
             DENY
         }
 
-        public Action getAction(){
+        public Action getAction() {
             return Enum.valueOf(Action.class, status);
         }
 
-        public String validate(){
-            if(getAction() == Action.ACCEPT && !sharer && !user){ //if the user is accepted, but no extra rules specified
+        public String validate() {
+            if (getAction() == Action.ACCEPT && !sharer && !user) { //if the user is accepted, but no extra rules specified
                 return "Gelieve aan te geven welke rechten deze gebruiker toegewezen krijgt.";
-            }
-            else return null;
+            } else return null;
         }
     }
 
-    private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminModel> form, boolean bad){
+    private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminModel> form, boolean bad) {
         EnrollementStatus status = EnrollementStatus.ABSENT;
-        if(ap.getSession() != null) {
+        if (ap.getSession() != null) {
             InfoSessionDAO idao = context.getInfoSessionDAO();
             InfoSession is = idao.getInfoSession(ap.getId(), true);
             status = is.getEnrollmentStatus(ap.getUser());
         }
 
-        if(!bad){
-            return ok(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context), form));
+        if (!bad) {
+            return ok(approvaladmin.render(ap, status, checkApprovalConditions(ap.getUser(), context), form));
         } else {
-            return badRequest(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context), form));
+            return badRequest(approvaladmin.render(ap, status, checkApprovalConditions(ap.getUser(), context), form));
         }
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
-    public static Result approvalDetails(int approvalId){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+    public static Result approvalDetails(int approvalId) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             Approval ap = dao.getApproval(approvalId);
-            if(ap == null){
+            if (ap == null) {
                 flash("danger", "Er is geen aanvraag met deze id.");
                 return redirect(routes.InfoSessions.pendingApprovalList());
             } else {
-               return approvalForm(ap, context, Form.form(ApprovalAdminModel.class), false);
+                ApprovalAdminModel model = new ApprovalAdminModel();
+                model.message = ap.getAdminMessage();
+                model.status = (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING
+                        ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
+                model.sharer = DatabaseHelper.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
+                model.user = DatabaseHelper.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
+
+                // Get the contact admin
+                UserDAO udao = context.getUserDAO();
+                ap.setUser(udao.getUser(ap.getUser().getId(), true));
+                model.contractManager = ap.getUser().getContractManager() != null ? ap.getUser().getContractManager().getEmail() : null;
+
+                return approvalForm(ap, context, Form.form(ApprovalAdminModel.class).fill(model), false);
             }
         }
     }
 
     /**
      * Method: POST
+     *
      * @param approvalId
      * @return
      */
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
-    public static Result approvalAdminAction(int approvalId){
+    public static Result approvalAdminAction(int approvalId) {
         Form<ApprovalAdminModel> form = Form.form(ApprovalAdminModel.class).bindFromRequest();
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             Approval ap = dao.getApproval(approvalId);
-            if(ap == null){
+            if (ap == null) {
                 flash("danger", "Er is geen aanvraag met deze id.");
                 return redirect(routes.InfoSessions.pendingApprovalList());
             } else {
-                if(form.hasErrors()){
+                if (form.hasErrors()) {
                     return approvalForm(ap, context, form, true);
                 }
 
                 ApprovalAdminModel m = form.get();
                 ApprovalAdminModel.Action action = m.getAction();
-                if(action == ApprovalAdminModel.Action.ACCEPT) {
-                    UserDAO udao = context.getUserDAO();
-                    User contactManager = udao.getUser(m.contractManager);
-                    if(contactManager == null){
-                        form.error("Gelieve een contactbeheerder op te geven.");
-                        return approvalForm(ap, context, form, true);
-                    } else {
-                        try {
+                try {
+                    ap.setAdmin(DatabaseHelper.getUserProvider().getUser());
+                    ap.setReviewed(new DateTime());
+                    ap.setAdminMessage(m.message);
+
+                    if (action == ApprovalAdminModel.Action.ACCEPT) {
+                        UserDAO udao = context.getUserDAO();
+                        User contactManager = udao.getUser(m.contractManager);
+                        if (contactManager == null) {
+                            form.reject("Gelieve een contactbeheerder op te geven.");
+                            return approvalForm(ap, context, form, true);
+                        } else {
+
+                            // Set approval status
                             ap.setStatus(Approval.ApprovalStatus.ACCEPTED);
+                            dao.updateApproval(ap);
 
+                            // Set contact admin
+                            User user = udao.getUser(ap.getUser().getId(), true);
+                            user.setContractManager(contactManager);
+                            udao.updateUser(user, true);
 
-                        } catch(DataAccessException ex){
-                            context.rollback();
-                            throw ex;
+                            // Add the new user roles
+                            UserRoleDAO roleDao = context.getUserRoleDAO();
+                            Set<UserRole> hasRoles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId());
+                            if (m.sharer && !hasRoles.contains(UserRole.CAR_OWNER))
+                                roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
+                            if (m.user && !hasRoles.contains(UserRole.CAR_USER))
+                                roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
+                            context.commit();
+
+                            DatabaseHelper.getUserRoleProvider().invalidateRoles(ap.getUser());
+                            flash("success", "De gebruikersrechten werden succesvol aangepast.");
+
+                            return redirect(routes.InfoSessions.pendingApprovalList());
                         }
+                    } else if (action == ApprovalAdminModel.Action.DENY) {
+                        //TODO Warning, if status was not pending, possibly have to remove user roles
+                        ap.setStatus(Approval.ApprovalStatus.DENIED);
+                        dao.updateApproval(ap);
+                        context.commit();
+                    } else {
+                        return badRequest("Unspecified.");
                     }
-                } else if(action == ApprovalAdminModel.Action.DENY) {
-
-                } else {
-                    return badRequest("Unspecified.");
+                } catch (DataAccessException ex) {
+                    context.rollback();
+                    throw ex;
                 }
 
 

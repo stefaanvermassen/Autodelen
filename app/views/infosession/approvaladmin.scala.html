@@ -1,4 +1,4 @@
-@(user: User, approval: Approval, enrollStatus: EnrollementStatus, reasons: List[String] = null, form: Form[InfoSessions.ApprovalAdminModel])
+@(approval: Approval, enrollStatus: EnrollementStatus, reasons: List[String] = null, form: Form[InfoSessions.ApprovalAdminModel])
     @stylesheets = {
         <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
 
@@ -19,7 +19,8 @@
             });
         </script>
     }
-@import models.Approval.ApprovalStatus;
+
+@import database.DatabaseHelper;
 @app("Goedkeuringsaanvraag", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -78,7 +79,7 @@
                     <textarea readonly rows="4" cols="50">@approval.getUserMessage</textarea>
                     <br>
 
-                    <a class="btn btn-default" href="@routes.Profile.index(user.getId)">Profiel bekijken</a>
+                    <a class="btn btn-default" href="@routes.Profile.index(approval.getUser.getId)">Profiel bekijken</a>
                 </div>
             </div>
 
@@ -109,8 +110,14 @@
                             <div class="form-group">
                                 <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
                                     <label for="userPickerBox">Contractverantwoordelijke:</label>
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
-                                    <input type="hidden" name="@form("contractManager").name" />
+                                        @defining(DatabaseHelper.getUserProvider.getUser(form("contractManager").value)) { manager =>
+                                            @if(manager != null){
+                                                <input type="text" value="@manager.getFirstName @manager.getLastName" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
+                                            } else {
+                                                <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
+                                            }
+                                        }
+                                    <input type="hidden" name="@form("contractManager").name" value="@form("contractManager").value"/>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>
