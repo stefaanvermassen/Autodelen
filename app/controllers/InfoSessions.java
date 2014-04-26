@@ -171,7 +171,7 @@ public class InfoSessions extends Controller {
                 // Check the host field
                 UserDAO udao = context.getUserDAO();
                 User host = udao.getUser(editForm.get().hostmail);
-                if(host == null){
+                if (host == null) {
                     editForm.reject("Infosessie gastheer bestaat niet.");
                     return badRequest(addinfosession.render(editForm, sessionId));
                 }
@@ -195,7 +195,7 @@ public class InfoSessions extends Controller {
                         dao.updateInfosessionTime(session);
                     }
 
-                    if(session.getHost().getId() != host.getId()){
+                    if (session.getHost().getId() != host.getId()) {
                         session.setHost(host);
                         dao.updateInfosessionHost(session);
                     }
@@ -374,43 +374,41 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
         User user = DatabaseHelper.getUserProvider().getUser();
-        if (user.getStatus() == UserStatus.REGISTERED) {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-                InfoSessionDAO dao = context.getInfoSessionDAO();
+        if (!DatabaseHelper.getUserRoleProvider().isFullUser(user)) {
+            flash("warning", "U bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
+        }
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
 
-                InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
-                InfoSession session = dao.getInfoSession(sessionId, true); //TODO: just add going subclause (like in getAttending requirement)
-                if (session == null) {
-                    flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
+            InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
+            InfoSession session = dao.getInfoSession(sessionId, true); //TODO: just add going subclause (like in getAttending requirement)
+            if (session == null) {
+                flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
+                return redirect(routes.InfoSessions.showUpcomingSessions());
+            } else {
+                if (session.getMaxEnrollees() != 0 && session.getEnrolleeCount() == session.getMaxEnrollees()) {
+                    flash("danger", "Deze infosessie zit reeds vol.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    if (session.getMaxEnrollees() != 0 && session.getEnrolleeCount() == session.getMaxEnrollees()) {
-                        flash("danger", "Deze infosessie zit reeds vol.");
-                        return redirect(routes.InfoSessions.showUpcomingSessions());
-                    } else {
-                        try {
-                            if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
-                                dao.unregisterUser(alreadyAttending, user);
-                            }
-                            dao.registerUser(session, user);
-
-                            context.commit();
-                            flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
-                                    "U bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
-                            Notifier.sendInfoSessionEnrolledMail(user, session);
-                            return redirect(routes.InfoSessions.detail(sessionId));
-                        } catch (DataAccessException ex) {
-                            context.rollback();
-                            throw ex;
+                    try {
+                        if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
+                            dao.unregisterUser(alreadyAttending, user);
                         }
+                        dao.registerUser(session, user);
+
+                        context.commit();
+                        flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                                "U bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
+                        Notifier.sendInfoSessionEnrolledMail(user, session);
+                        return redirect(routes.InfoSessions.detail(sessionId));
+                    } catch (DataAccessException ex) {
+                        context.rollback();
+                        throw ex;
                     }
                 }
-            } catch (DataAccessException ex) {
-                throw ex;
             }
-        } else {
-            flash("danger", "U bent reeds een geverifieerde gebruiker.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 
@@ -431,7 +429,7 @@ public class InfoSessions extends Controller {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
                 UserDAO udao = context.getUserDAO();
                 User host = udao.getUser(createForm.get().hostmail);
-                if(host == null){
+                if (host == null) {
                     createForm.reject("De gastheer ID bestaat niet.");
                     return badRequest(addinfosession.render(createForm, 0));
                 }
@@ -544,7 +542,7 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result requestApprovalPost() {
         User user = DatabaseHelper.getUserProvider().getUser();
-        if (DatabaseHelper.getUserRoleProvider().isFullUser(user)) {
+        if (DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
             flash("warning", "U bent reeds een volwaardige gebruiker.");
             return redirect(routes.Dashboard.index());
         } else {
@@ -624,7 +622,7 @@ public class InfoSessions extends Controller {
         EnrollementStatus status = EnrollementStatus.ABSENT;
         if (ap.getSession() != null) {
             InfoSessionDAO idao = context.getInfoSessionDAO();
-            InfoSession is = idao.getInfoSession(ap.getId(), true);
+            InfoSession is = idao.getInfoSession(ap.getSession().getId(), true);
             status = is.getEnrollmentStatus(ap.getUser());
         }
 
