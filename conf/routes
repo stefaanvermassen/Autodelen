@@ -30,9 +30,8 @@ GET         /drives/admin                           controllers.Drives.drivesAdm
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
 GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int)
+GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
 POST        /reserve/reservation                    controllers.Reserve.confirmReservation(cardId: Int)
-GET         /reserve/modal/car                      controllers.Reserve.getCarModal(carId: Int)
 
 
 # User pages
@@ -143,6 +142,15 @@ GET         /cars/carcosts/page                     controllers.Cars.showCarCost
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
+
+#Refuels
+GET         /refuels                                controllers.Refuels.showRefuels()
+GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
+GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
+POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
+GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
+GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
+GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
 
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)

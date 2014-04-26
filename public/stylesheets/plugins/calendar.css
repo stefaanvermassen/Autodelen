@@ -1,0 +1,56 @@
+table.custom_title {
+    width: 100%;
+}
+
+table.custom_title td.title_center {
+    text-align: center;
+}
+
+table.custom_title td.title_right {
+    text-align: right;
+}
+
+table.custom_calendar {
+    width: 100%;
+    background-color: #ffffff;
+}
+
+table.custom_calendar th {
+    width: 14.28%;
+    border: solid 1px #d4d4d4;
+    border-bottom-width: 2px;
+    text-align: center;
+    padding: 2px;
+}
+
+table.custom_calendar td {
+    width: 14.28%;
+    position: relative;
+    border: solid 1px #d4d4d4;
+    background-clip: padding-box;
+    text-align: right;
+    color: #b3b3b3;
+    padding-top: 1px;
+    padding-right: 5px;
+    padding-bottom: 8%;
+    user-select: none; /* CSS3 (little to no support) */
+    -ms-user-select: none; /* IE 10+ */
+    -moz-user-select: none; /* Gecko (Firefox) */
+    -webkit-user-select: none; /* Webkit (Safari, Chrome) */
+}
+
+table.custom_calendar td.current_month {
+    color: #000000;
+}
+
+table.custom_calendar td.today {
+    background-color: #82e66e;
+}
+
+table.custom_calendar td.selected {
+    background-color: #e3e0ff;
+}
+
+table.custom_calendar td.selected.disabled {
+    background-color: #ffd6d6;
+}

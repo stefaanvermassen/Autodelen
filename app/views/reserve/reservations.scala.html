@@ -1,44 +1,20 @@
+@(error: String)
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script src="@routes.Assets.at("javascripts/app/reservations.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/timeinput.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
     <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery-ui.js"))'></script>
-    <script src="@routes.Assets.at("javascripts/fullcalendar.js")" type="text/javascript"></script>
-    <script>
-        $(document).ready(function() {
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next',
-                    center: 'title',
-                    right: 'today'
-                }
-            });
-        });
-    </script>
-    <script>
-    function loadModal(carId) {
-        myJsRoutes.controllers.Reserve.getCarModal(carId).ajax({
-            success : function(html) {
-                $("#resultModal").html(html);
-                $('#detailsModal').modal('show');
-                
-            },
-            error : function() {
-                // TODO: make clearer
-                $("#resultModal").html("Er ging iets mis...");
-            }
-        });
-    }
-    </script>
+    <script src="@routes.Assets.at("javascripts/plugins/calendar.js")" type="text/javascript"></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fullcalendar.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fullcalendar.print.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/calendar.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/timeinput.css")">
 }
 @app("Reserveren", stylesheets, scripts) {
 
@@ -53,82 +29,98 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Reserveren</h1>
-                <div class="row">
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Filter
-                        </div>
-                        <div class="panel-body">
-                            <form role="form">
-                                <div class="form-group">
-                                    <div id="from" class="inline-block">
-                                        <label for="">Van</label>
-                                        <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_from">
-                                            <input id="input_from" name="from" class="form-control searchTextField" size="16" value="">
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                @if(!(error.equals(""))) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @error
+                    </div>
+                }
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Filter
+                    </div>
+                    <div class="panel-body">
+                        <div class="well">
+                            <div class="row">
+                                <div id="basicEnv" class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                                    <h4>Auto's zoeken</h4><hr />
+                                    <input id="input_from_value" class="hidden searchTextField" name="from" value="" />
+                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Reservatie van: </label><br />
+                                        <input id="input_from_date" class="form-control" name="test" type="text">
+                                    </div>
+                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Tijdstip van: </label><br />
+                                        <input id="input_from_time" class="form-control" name="test" type="text"><br />
+                                    </div>
+                                    <input id="input_to_value" class="hidden searchTextField" name="until" value="" />
+                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Reservatie tot: </label><br />
+                                        <input id="input_to_date" class="form-control" name="test" type="text">
+                                    </div>
+                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Tijdstip tot: </label><br />
+                                        <input id="input_to_time" class="form-control" name="test" type="text">
+                                    </div>
+                                    <div id="filterbuttons" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <br />
+                                        <div class="btn-group btn-group-sm">
+                                            <button id="searchButton" type="button" class="btn btn-success">Zoeken</button>
+                                            <a id="extraButton" type="button" class="btn btn-primary" data-toggle="collapse" href="#extraFiltering">
+                                                Meer filteropties</a>
                                         </div>
                                     </div>
-                                    <div id="until" class="inline-block">
-                                        <label for="">Tot</label>
-                                        <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="dd-MM-yyyy hh:mm p" data-link-field="input_until">
-                                            <input id="input_until" name="until" class="form-control searchTextField" size="16" value="">
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                </div>
+                                <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="col-lg-12">
+                                        <div id="test">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Autonaam</label>
-                                    <input id="name" class="searchTextField form-control" name="name" type="text" class="form-control" placeholder="Naam">
-                                </div>
-                                <div class="form-group">
-                                    <label>Postcode</label>
-                                    <input id="zipcode" class="searchTextField form-control" name="zipcode" type="number"  placeholder="Postcode">
-                                </div>
-                                <div class="form-group">
-                                    <label>Aantal zitplaatsen</label>
-                                    <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Min aantal plaatsen">
-                                </div>
-                                <div class="form-group">
-                                    <label for="">Extra</label>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">Gps aanwezig
-                                        </label>
+                            </div>
+                            <div id="extraFiltering" class="panel-collapse collapse">
+                                <div class="row">
+                                    <div id="extraEnv" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <h4>Extra filteropties</h4><hr />
+                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                            <label>Autonaam</label>
+                                            <input id="name" class="searchTextField form-control" name="name" type="text" class="form-control" placeholder="Naam"><br />
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                            <label>Postcode</label>
+                                            <input id="zipcode" class="searchTextField form-control" name="zipcode" type="number"  placeholder="Postcode"><br />
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                            <label>Aantal zitplaatsen</label>
+                                            <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Min aantal plaatsen"><br />
+                                        </div>
+                                        <input id="input_fuel" class="hidden searchTextField" name="fuel" value="All" />
+                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                            <label for="">Brandstof</label><br />
+                                            <select id="selectFuel" class="form-control">
+                                                <option value="All">Alle</option>
+                                                <option value="Petrol">Benzine</option>
+                                                <option value="Diesel">Diesel</option>
+                                                <option value="Biodiesel">Biodiesel</option>
+                                                <option value="Gas">LPG</option>
+                                                <option value="Hybrid">Hybride</option>
+                                                <option value="Electric">Elektrisch</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <label for="">Extra</label><br />
+                                            <label class="checkbox-inline" style="margin-left: 0px; margin-right: 10px">
+                                                <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">Gps aanwezig
+                                            </label>
+                                            <label class="checkbox-inline" style="margin-left: 0px; margin-right: 10px">
+                                                <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">Trekhaak aanwezig
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">
-                                            Trekhaak aanwezig
-                                        </label>
-                                    </div>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input id="lent" class="searchTextField" name="lent" type="checkbox" value="0">Reeds geleend
-                                        </label>
-                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <button id="searchButton" type="button" class="btn btn-success">Filter</button>
-                                    <button id="reset" type="button" class="btn btn-danger">Verwijder filtering</button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                     <!-- /.panel -->
-                </div>
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Kalender
-                        </div>
-                        <div class="panel-body">
-                            <div id='calendar'></div>
-                        </div>
-                    </div>
-                </div>
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
