@@ -58,6 +58,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement registerUserForSession;
     private PreparedStatement unregisterUserForSession;
     private PreparedStatement getAttendeesForSession;
+    private PreparedStatement getAmountOfAttendeesForSession;
     private PreparedStatement setUserEnrollmentStatusForSession;
     private PreparedStatement updateInfoSession;
     private PreparedStatement getGetAmountOfInfoSessionsStatement;
@@ -76,7 +77,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     
     private PreparedStatement getUpdateInfoSessionStatement() throws SQLException {
     	if(updateInfoSession==null){
-    		updateInfoSession = connection.prepareStatement("UPDATE InfoSessions SET infosession_type=?, infosession_max_enrollees=?, infosession_timestamp=?, infosession_address_id=? WHERE infosession_id=?");
+    		updateInfoSession = connection.prepareStatement("UPDATE InfoSessions SET infosession_type=?, infosession_max_enrollees=?, infosession_timestamp=?, infosession_address_id=?, infosession_host_user_id=? WHERE infosession_id=?");
     	}
     	return updateInfoSession;
     }
@@ -122,6 +123,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                     "FROM infosessionenrollees INNER JOIN users ON user_id = infosession_enrollee_id WHERE infosession_id = ?");
         }
         return getAttendeesForSession;
+    }
+
+    public PreparedStatement getGetAmountOfAttendeesForSession() throws SQLException {
+        if (getAmountOfAttendeesForSession == null) {
+            getAmountOfAttendeesForSession = connection.prepareStatement("SELECT COUNT(*) AS amount_of_attendees " +
+                    "FROM infosessionenrollees WHERE infosession_id = ?");
+        }
+        return getAmountOfAttendeesForSession;
     }
 
     private PreparedStatement getRegisterUserForSession() throws SQLException {
@@ -275,6 +284,25 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             return is;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch infosession by id.", ex);
+        }
+    }
+
+    @Override
+    public int getAmountOfAttendees(int infosessionId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfAttendeesForSession();
+            ps.setInt(1, infosessionId);
+            int amount;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    amount = rs.getInt("amount_of_attendees");
+                } else throw new DataAccessException("Could not get amount of attendees for infosession");
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading amount of attendees for infosession resultset", ex);
+            }
+            return amount;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get amount of attendees for infosession.", ex);
         }
     }
 
@@ -441,7 +469,8 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
             ps.setInt(2, session.getMaxEnrollees());
             ps.setTimestamp(3, new Timestamp(session.getTime().getMillis()));
             ps.setInt(4, session.getAddress().getId());
-            ps.setInt(5, session.getId());
+            ps.setInt(5, session.getHost().getId());
+            ps.setInt(6, session.getId());
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("InfoSession update did not affect any row.");
         } catch (SQLException ex) {
