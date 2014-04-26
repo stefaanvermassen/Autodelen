@@ -12,6 +12,7 @@ table.custom_title td.title_right {
 
 table.custom_calendar {
     width: 100%;
+    background-color: #ffffff;
 }
 
 table.custom_calendar th {

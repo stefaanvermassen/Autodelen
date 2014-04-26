@@ -81,7 +81,8 @@
         _focusin: function() {
             if(this.popoverFocused)
                 return;
-            this.element.before($('<div>')
+            console.log(this.element);
+            this.element.after($('<div>')
                 .attr('id', this.popoverId)
                 .attr('class', 'popover_input')
                 .css('bottom', this.element.outerHeight())
@@ -134,9 +135,15 @@
             var row = 0;
             var postfix = (hour == null) ? ':00' : '';
             var prefix = (hour != null) ? hour : '';
+            if(this.element.outerWidth()< 150)
+                var jump = 2;
+            else if(this.element.outerWidth() < 300)
+                var jump = 3;
+            else
+                var jump = 4;
             for(var i = 0; i < end; i += step) {
-                if(Math.floor(i/step) % 3 == 0) {
-                    row = Math.floor(i/step)/3;
+                if(Math.floor(i/step) % jump == 0) {
+                    row = Math.floor(i/step)/jump;
                     body.append($('<tr>')
                             .attr('id', this.rowId + row)
                     );
