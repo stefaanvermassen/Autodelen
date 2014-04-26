@@ -366,11 +366,18 @@ public class Drives extends Controller {
             }
             // Test if ride already exists
             CarRide ride = dao.getCarRide(reservationId);
-            if(ride == null)
+            if(ride == null){
+                int refueling = detailsForm.get().refueling;
                 ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage,
-                        detailsForm.get().damaged, detailsForm.get().refueling);
-            // Owner is allowed to adjust the information
-            else if(isOwner) {
+                        detailsForm.get().damaged, refueling);
+                if(refueling > 0){
+                    RefuelDAO refuelDAO = context.getRefuelDAO();
+                    for(int i=0; i< refueling; i++){
+                        refuelDAO.createRefuel(ride);
+                    }
+                }
+            } else if(isOwner) {
+                // Owner is allowed to adjust the information
                 ride.setStartMileage(detailsForm.get().startMileage);
                 ride.setEndMileage(detailsForm.get().endMileage);
                 dao.updateCarRide(ride);

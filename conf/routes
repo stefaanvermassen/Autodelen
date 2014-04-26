@@ -140,6 +140,9 @@ GET         /cars/carcosts/approved                 controllers.Cars.approveCarC
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
 
+#Refuels
+GET         /refuels                                controllers.Refuels.showRefuels()
+
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                              controllers.Maps.showMap()

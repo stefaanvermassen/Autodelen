@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface RefuelDAO {
 
-    public Refuel createRefuel(CarRide carRide, File proof, BigDecimal amount) throws DataAccessException;
+    public Refuel createRefuel(CarRide carRide) throws DataAccessException;
     public void acceptRefuel(Refuel refuel) throws DataAccessException;
     public void rejectRefuel(Refuel refuel) throws DataAccessException;
     public void deleteRefuel(Refuel refuel) throws DataAccessException;

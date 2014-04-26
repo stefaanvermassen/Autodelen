@@ -31,8 +31,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
 
     private PreparedStatement getCreateRefuelStatement() throws SQLException {
         if (createRefuelStatement == null) {
-            createRefuelStatement = connection.prepareStatement("INSERT INTO Refuels (refuel_car_ride_id, refuel_file_id, " +
-                    "refuel_amount) VALUES (?,?,?)", AUTO_GENERATED_KEYS);
+            createRefuelStatement = connection.prepareStatement("INSERT INTO Refuels (refuel_car_ride_id) VALUES (?)", AUTO_GENERATED_KEYS);
         }
         return createRefuelStatement;
     }
@@ -68,19 +67,17 @@ public class JDBCRefuelDAO implements RefuelDAO {
     }
 
     @Override
-    public Refuel createRefuel(CarRide carRide, File proof, BigDecimal amount) throws DataAccessException {
+    public Refuel createRefuel(CarRide carRide) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateRefuelStatement();
             ps.setInt(1, carRide.getReservation().getId());
-            ps.setInt(2, proof.getId());
-            ps.setBigDecimal(3, amount);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating refuel.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Refuel(keys.getInt(1), carRide, proof, amount, RefuelStatus.REQUEST);
+                return new Refuel(keys.getInt(1), carRide, RefuelStatus.CREATED);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for refuel.", ex);
             }

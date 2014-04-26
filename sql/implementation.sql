@@ -234,8 +234,8 @@ CREATE TABLE `Refuels` (
 	`refuel_id` INT NOT NULL AUTO_INCREMENT,
 	`refuel_car_ride_id` INT NOT NULL,
 	`refuel_file_id` INT,
-	`refuel_amount` DECIMAL(19,4) NOT NULL,
-	`refuel_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', #approved by owner
+	`refuel_amount` DECIMAL(19,4),
+	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', #approved by owner
    	`refuel_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
    	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),

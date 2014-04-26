@@ -20,6 +20,12 @@ public class Refuel {
         this.status = status;
     }
 
+    public Refuel(int id, CarRide carRide, RefuelStatus status) {
+        this.id = id;
+        this.carRide = carRide;
+        this.status = status;
+    }
+
     public int getId() {
         return id;
     }

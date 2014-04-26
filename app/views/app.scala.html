@@ -183,6 +183,9 @@
                                 }
                             </a>
                         </li>
+                        <li @if(title == "Tankbeurten") {class="active"}>
+                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-tasks fa-fw"></i> Tankbeurten</a>
+                        </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
