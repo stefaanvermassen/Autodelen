@@ -236,7 +236,7 @@ CREATE TABLE `Refuels` (
 	`refuel_file_id` INT,
 	`refuel_amount` DECIMAL(19,4),
 	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', #approved by owner
-   	`refuel_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   	`refuel_created_at` DATETIME,
    	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),
 	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES CarRides(`car_ride_car_reservation_id`),
@@ -423,6 +423,13 @@ CREATE TRIGGER CarCosts_ins BEFORE INSERT ON CarCosts FOR EACH ROW
 BEGIN
   IF new.car_cost_created_at IS NULL THEN
     SET new.car_cost_created_at = now();
+  END IF;
+END $$
+
+CREATE TRIGGER Refuels_ins BEFORE INSERT ON Refuels FOR EACH ROW
+BEGIN
+  IF new.refuel_created_at IS NULL THEN
+    SET new.refuel_created_at = now();
   END IF;
 END $$
 
