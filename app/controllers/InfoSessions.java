@@ -559,7 +559,7 @@ public class InfoSessions extends Controller {
                     InfoSessionDAO idao = context.getInfoSessionDAO();
                     try {
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
-                        Approval app = dao.createApproval(user, lastSession.getFirst(), form.get().message);
+                        Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
                         context.commit();
 
                         flash("success", "Uw aanvraag werd succesvol ingediend.");

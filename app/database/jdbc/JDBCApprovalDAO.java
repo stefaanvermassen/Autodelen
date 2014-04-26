@@ -166,7 +166,11 @@ public class JDBCApprovalDAO implements ApprovalDAO {
             PreparedStatement ps = getCreateApprovalStatement();
             ps.setInt(1, user.getId());
             ps.setString(2, Approval.ApprovalStatus.PENDING.name());
-            ps.setInt(3, session.getId());
+
+            if(session == null)
+                ps.setNull(3, Types.INTEGER);
+            else
+                ps.setInt(3, session.getId());
             ps.setString(4, userMessage);
 
             if(ps.executeUpdate() == 0)
