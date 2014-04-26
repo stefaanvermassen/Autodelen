@@ -1,22 +1,29 @@
-@(infoSession: InfoSession)
+@(infoSession: InfoSession, mapDetails: Maps.MapDetails = null)
 <div class="row">
     <div class="col-lg-4">
         <div class="well">
             <p>
-                <strong>Host:</strong> @infoSession.getHost.getFirstName @infoSession.getHost.getLastName<br>
+                <strong>Host:</strong> <a href="@routes.Profile.index(infoSession.getHost.getId)">@infoSession.getHost.getFirstName @infoSession.getHost.getLastName</a><br>
                 <strong>Type:</strong> @infoSession.getType.name()<br>
-                <strong>Datum:</strong> @infoSession.getTime.toString("dd/MM/yyyy")<br>
+                <strong>Datum:</strong> @infoSession.getTime.toString("dd-MM-yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
-                <strong>Maximum aantal deelnemers:</strong> @infoSession.getMaxEnrollees
+                @if(infoSession.getMaxEnrollees == 0){
+                    <strong># deelnemers:</strong> @infoSession.getEnrolleeCount (onbeperkt)
+                } else {
+                    <strong># deelnemers:</strong>
+                    @if(infoSession.getEnrolleeCount < infoSession.getMaxEnrollees) {
+                        @infoSession.getEnrolleeCount / @infoSession.getMaxEnrollees
+                    } else {
+                        Volzet (Max. @infoSession.getMaxEnrollees)
+                    }
+                }
             </p>
-            @* TODO: add map using OpenLayers & OpenStreetMap (webjars) *@
-
         </div>
     </div>
     <div class="col-lg-8">
-    <div class="well">
-            Map placeholder
-    </div>
+        <div class="well map">
+            @map(mapDetails)
+        </div>
     </div>
 </div>

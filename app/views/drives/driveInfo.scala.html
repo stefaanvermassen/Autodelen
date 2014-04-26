@@ -1,0 +1,31 @@
+@(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide, cancelButton: Boolean)
+@helper.form(routes.Drives.provideDriveInfo(reservation.getId), 'class -> "form-horizontal") {
+    <div class="well">
+        <div class="form-group">
+            <label>Kilometerstand voor de rit:</label>
+            @if(!infoForm.hasGlobalErrors && driveInfo != null) {
+                <input name="startMileage" class="form-control" type="number" placeholder="Kilometerstand" value="@driveInfo.getStartMileage">
+            } else {
+                <input name="startMileage" class="form-control" type="number" placeholder="Kilometerstand" value="@infoForm("startMileage").value">
+            }
+        </div>
+        <div class="form-group">
+            <label>Kilometerstand na de rit:</label>
+            @if(!infoForm.hasGlobalErrors && driveInfo != null) {
+                <input name="startMileage" class="form-control" type="number" placeholder="Kilometerstand" value="@driveInfo.getEndMileage">
+            } else {
+                <input name="endMileage" class="form-control" type="number" placeholder="Kilometerstand" value="@infoForm("endMileage").value">
+            }
+        </div>
+        <div class="form-group">
+            <label>Opmerkingen:</label>
+            <textarea name="remarks" class="form-control" type="text" placeholder="Opmerkingen">@infoForm("remarks").value</textarea>
+        </div>
+        <div id="infoButtons" class="form-group btn-group btn-group-xs">
+            <button type="submit" class="btn btn-success">Verstuur details</button>
+            @if(cancelButton) {
+                <button id="annulateAdjustInfo" type="button" class="btn btn-warning">Annuleren</button>
+            }
+        </div>
+    </div>
+}

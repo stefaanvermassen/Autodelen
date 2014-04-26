@@ -1,0 +1,112 @@
+@(user: User, completeness: Int = 0)
+
+@app("Profiel") {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Profiel</li>
+        </ol>
+    </div>
+    <div id="page-wrapper">
+        @flashes()
+        <h1 class="page-header">Profiel</h1>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="panel panel-default">
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                    @smallProfile(user)
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                    <!-- /.panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h2 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i> Details</h2>
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label class="h4">Domicilie-adres</label>
+                                @defining(user.getAddressDomicile) { address =>
+                                    @if(address != null) {
+                                        <p class="form-control-static">@address.getStreet @address.getNumber,
+                                            <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
+                                    } else {
+                                        <p>Niet gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                            <div class="form-group">
+                                <label class="h4">Verblijfsadres</label>
+                                @defining(user.getAddressResidence) { address =>
+                                    @if(address != null) {
+                                        <p class="form-control-static">@address.getStreet @address.getNumber,
+                                            <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
+                                    } else {
+                                        <p>Niet gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                            <div class="form-group">
+                                <label class="h4">Identiteitskaart</label>
+                                <p class="form-control-static">
+                                    @if(user.getIdentityCard != null && user.getIdentityCard.getRegistrationNr != null && !user.getIdentityCard.getRegistrationNr.isEmpty) {
+                                        @user.getIdentityCard.getRegistrationNr
+                                    } else {
+                                        Niet gespecifieerd.
+                                    }
+                                    <br/>
+                                    <a href="@routes.Profile.editIdentityCard(user.getId)">Wijzigen</a>
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h4">Rijbewijs</label>
+                                <p class="form-control-static">
+                                    @if(user.getDriverLicense != null && user.getDriverLicense.getId != null && !user.getDriverLicense.getId.isEmpty) {
+                                        @user.getDriverLicense.getId
+                                    } else {
+                                        Niet gespecifieerd.
+                                    }
+                                    <br/>
+                                    <a href="@routes.Profile.editDriversLicense(user.getId)">Wijzigen</a>
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h4">Contactverantwoordelijke</label>
+                                @defining(user.getContractManager) { manager =>
+                                    @if(manager != null) {
+                                        <p class="form-control-static"><a href="@routes.Profile.index(manager.getId)">@manager.getFirstName @manager.getLastName</a></p>
+                                    } else {
+                                        <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                        </form>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+}

@@ -10,23 +10,31 @@ package models;
  */
 public class DriverLicense {
     
-    private int id;
-    private String file;
+    private String id;
+    private FileGroup fileGroup;
 
-    public DriverLicense(int id, String file) {
-        this.id = id;
-        this.file = file;
+    public DriverLicense() {
     }
-    
-    public int getId() {
+
+    public DriverLicense(String id, FileGroup fileGroup) {
+        this.id = id;
+        this.fileGroup = fileGroup;
+    }
+
+
+    public String getId() {
         return id;
     }
-    public String getFile() {
-        return file;
+
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public FileGroup getFileGroup() {
+        return fileGroup;
     }
-    
+
+    public void setFileGroup(FileGroup fileGroup) {
+        this.fileGroup = fileGroup;
+    }
 }

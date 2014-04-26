@@ -33,6 +33,10 @@ public class JDBCDAOTest {
     private List<CarRide> carRides = new ArrayList<>();
     private List<InfoSession> infoSessions = new ArrayList<>();
 
+    /**
+     * Initializes the DAOs so they can be used in the test methods.
+     * @throws Exception
+     */
     @Before
     public void setUp() throws Exception {
         DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
@@ -46,6 +50,10 @@ public class JDBCDAOTest {
         infoSessionDAO = context.getInfoSessionDAO();
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of addresses
+     * @throws Exception
+     */
     @Test
     public void testAddressDAO() throws Exception {
         try {
@@ -58,6 +66,10 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of users
+     * @throws Exception
+     */
     @Test
     public void testUserDAO() throws Exception {
         try {
@@ -71,8 +83,9 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
-     * Also tests Users and Addresses
+    /**
+     * Tests creating, getting, updating and deleting of cars
+     * @throws Exception
      */
     @Test
     public void testCarDAO() throws Exception {
@@ -88,6 +101,10 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of cars, without addresses
+     * @throws Exception
+     */
     @Test
     public void testCarDAOWithoutAddresses() throws Exception {
         try {
@@ -102,6 +119,11 @@ public class JDBCDAOTest {
 
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of cars, without users
+     * It should not be possible to create a car without a user
+     * @throws Exception
+     */
     @Test
     public void testCarDAOWithoutUser() throws Exception {
         // Now let's try with User == null, but Cars.user_id cannot be null!
@@ -114,8 +136,10 @@ public class JDBCDAOTest {
             context.rollback();
         }
     }
-    /*
-     * Also tests Users and Cars
+
+    /**
+     * Tests creating, getting, updating and deleting of reservations
+     * @throws Exception
      */
     @Test
     public void testReservationDAO() throws Exception {
@@ -132,6 +156,10 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of carrides
+     * @throws Exception
+     */
     @Test
     public void testCarRideDAO() throws Exception {
         try {
@@ -147,6 +175,10 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of infosessions
+     * @throws Exception
+     */
     @Test
     public void testInfoSessionDAO() throws Exception {
         try {
@@ -161,6 +193,11 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Tests creating, getting, updating and deleting of infosessions, with same enrollees
+     * It should not be possible to enroll the same user twice in the same infosession
+     * @throws Exception
+     */
     @Test
     public void testInfoSessionDAOWithSameEnrollees() throws Exception {
         try {
@@ -173,7 +210,7 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
+    /**
      * Creates 100 random addresses in the database and in private List address
      */
     private void createAddresses() throws Exception {
@@ -195,7 +232,7 @@ public class JDBCDAOTest {
         sc.close();
     }
 
-    /*
+    /**
     * First createAddresses() has to be called
     */
     private void getAddressTest() throws Exception {
@@ -210,7 +247,7 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
+    /**
     * First createAddresses() has to be called
     */
     private void updateAddressTest() throws Exception {
@@ -224,7 +261,7 @@ public class JDBCDAOTest {
 
         getAddressTest();
     }
-    /*
+    /**
      * First createAddresses() has to be called
      */
     private void deleteAddressesTest() throws Exception {
@@ -243,7 +280,7 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
+    /**
      * Creates 100 random users in the database and in private List users
      */
     private void createUsers() throws Exception {
@@ -265,7 +302,7 @@ public class JDBCDAOTest {
         sc.close();
     }
 
-    /*
+    /**
      * First createUsers() has to be called
      */
     private void getUserByEmailTest() {
@@ -276,6 +313,9 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * First createUsers() has to be called
+     */
     private void getUserByIdTest(boolean withRest) {
         for(User user : users) {
             User returnUser = userDAO.getUser(user.getId(), withRest);
@@ -284,8 +324,8 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
-     * First createUsers() has to be called
+    /**
+     * First createUsers() and createAddresses() has to be called
      */
     private void updateUserTest() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_users.txt"));
@@ -326,7 +366,7 @@ public class JDBCDAOTest {
         getUserByIdTest(true);
     }
 
-    /*
+    /**
      * First createUsers() has to be called
      */
     private void deleteUserTest() {
@@ -337,6 +377,9 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Creates 100 random cars, without addresses, in the database and in private List cars
+     */
     private void createCarsWithoutAddresses() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
@@ -365,12 +408,16 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, user, comments);
             cars.add(car);
         }
         sc.close();
     }
 
+    /**
+     * Creates 1 random car in the database and in private List cars
+     * This should fail
+     */
     private void createCarWithoutUser() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
@@ -396,12 +443,13 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, user, comments);
         cars.add(car);
         sc.close();
     }
 
-    /*
+    /**
+     * Creates 100 random cars in the database and in private List cars
      * First createUsers() and createAddresses() has to be called
      */
     private void createCars() throws Exception {
@@ -431,12 +479,12 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, user, comments);
             cars.add(car);
         }
         sc.close();
     }
-    /*
+    /**
     * First createCars() has to be called
     */
     private void getCarTest() {
@@ -446,7 +494,7 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
+    /**
     * First createCars() has to be called
     */
     private void updateCarTest() {
@@ -459,7 +507,7 @@ public class JDBCDAOTest {
         }
         getCarTest();
     }
-    /*
+    /**
     * First createCars() has to be called
     */
     private void deleteCarsTest() {
@@ -478,8 +526,9 @@ public class JDBCDAOTest {
         }
     }
 
-    /*
-     * First createCars() and createAddresses() has to be called
+    /**
+     * Creates 100 random reservations in the database and in private List reservations
+     * First createCars() has to be called
      */
     private void createReservations() throws Exception {
     	Scanner sc = new Scanner(new File("test/database/random_reservations.txt"));
@@ -507,7 +556,10 @@ public class JDBCDAOTest {
     	}
     	sc.close();
     }
-    
+
+    /**
+     * First createReservations() has to be called
+     */
     private void getReservationTest() {
         for(Reservation reservation : reservations) {
             Reservation returnReservation = reservationDAO.getReservation(reservation.getId());
@@ -520,6 +572,9 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * First createReservations() has to be called
+     */
     private void updateReservationTest() {
         for(Reservation reservation : reservations) {
             reservation.setCar(cars.get((reservation.getCar().getId() + 1) % 100));
@@ -531,7 +586,10 @@ public class JDBCDAOTest {
         }
         getReservationTest();
     }
-    
+
+    /**
+     * First createReservations() has to be called
+     */
     private void deleteReservationsTest(){
     	Iterator<Reservation> i = reservations.iterator();
         while(i.hasNext()) {
@@ -548,14 +606,21 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * Creates 100 random reservations in the database and in private List reservations
+     * First createReservations() has to be called
+     */
     private void createCarRides() throws Exception {
         for(Reservation reservation : reservations) {
-            CarRide carRide = carRideDAO.createCarRide(reservation);
+            CarRide carRide = carRideDAO.createCarRide(reservation, 0, 0);
 
             carRides.add(carRide);
         }
     }
 
+    /**
+     * First createCarRides() has to be called
+     */
     private void getCarRideTest() {
         for(CarRide carRide : carRides) {
             CarRide returncarRide = carRideDAO.getCarRide(carRide.getReservation().getId());
@@ -568,6 +633,9 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * First createCarRides() has to be called
+     */
     private void updateCarRideTest() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_carrides.txt"));
         sc.useDelimiter("\\t|\\r\\n");
@@ -589,9 +657,10 @@ public class JDBCDAOTest {
         getCarRideTest();
     }
 
-    /*
-    * First createUsers() and createAddresses() has to be called
-    */
+    /**
+     * Creates 100 random infosessions in the database and in private List infosessions
+     * First createUsers() and createAddresses() has to be called
+     */
     private void createInfoSessions() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
         sc.useDelimiter("\\t|\\r\\n");
@@ -635,6 +704,11 @@ public class JDBCDAOTest {
         sc.close();
     }
 
+    /**
+     * Creates a random infosession in the database and in private List infosessions
+     * First createUsers() and createAddresses() has to be called
+     * This should fail
+     */
     private void createInfoSessionWithSameEnrollees() throws Exception {
         Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
         sc.useDelimiter("\\t|\\r\\n");
@@ -686,6 +760,9 @@ public class JDBCDAOTest {
     }
 
 
+    /**
+     * First createInfoSessions() has to be called
+     */
     private void getInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
             InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
@@ -709,6 +786,9 @@ public class JDBCDAOTest {
         }
     }
 
+    /**
+     * First createInfoSessions() has to be called
+     */
     private void updateInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
 
@@ -724,6 +804,9 @@ public class JDBCDAOTest {
         getInfoSessionTest();
     }
 
+    /**
+     * First createInfoSessions() has to be called
+     */
     private void deleteInfoSessionsTest(){
         Iterator<InfoSession> i = infoSessions.iterator();
         while(i.hasNext()) {

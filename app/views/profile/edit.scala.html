@@ -1,0 +1,123 @@
+@(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
+    @import database.DatabaseHelper;
+
+    @app("Profiel bewerken") {
+
+        <div id="page-header-wrapper">
+            <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+                <li><a href="@routes.Profile.indexWithoutId">Profiel</a></li>
+                <li class="active">Bewerken</li>
+            </ol>
+        </div>
+
+        <div id="page-wrapper">
+            <h1 class="page-header">Profiel bewerken</h1>
+            <div class="row">
+            @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
+                <div class="col-lg-3">
+                    @if(form.hasGlobalErrors) {
+                        <div class="alert alert-danger alert-dismissable">
+                            <strong>Error!</strong> @form.globalError.message
+                        </div>
+                    }
+                    <div class="panel panel-default">
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
+                            </div>
+                            <div class="form-group">
+                                <p class="form-control-static h2">
+                                    @helper.inputText(form("firstName"), '_label -> "Voornaam", 'placeholder -> "Voornaam")
+                                    @helper.inputText(form("lastName"), '_label -> "Familienaam", 'placeholder -> "Familienaam")
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <p class="form-control-static">
+                                    @helper.inputText(form("email"), '_label -> "Email", 'placeholder -> "Email", 'disabled -> true)
+                                    @helper.inputText(form("phone"), '_label -> "Telefoon", 'placeholder -> "Telefoon")
+                                    @helper.inputText(form("mobile"), '_label -> "GSM", 'placeholder -> "GSM")
+                                </p>
+                            </div>
+                        </div>
+                            <!-- /.panel-body -->
+                    </div>
+                </div>
+                <div class="col-md-9">
+                        <!-- /.panel -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Details
+                        </div>
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Domicilieadres</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        @helper.inputText(form("domicileAddress.street"), '_label -> "Straat", 'placeholder -> "Straat")
+                                        @helper.inputText(form("domicileAddress.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
+                                        @helper.inputText(form("domicileAddress.city"), '_label -> "Stad", 'placeholder -> "Stad")
+                                        @helper.inputText(form("domicileAddress.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
+                                        @helper.inputText(form("domicileAddress.bus"), '_label -> "Bus", 'placeholder -> "Bus")
+                                        @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Verblijfsadres</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        @helper.inputText(form("residenceAddress.street"), '_label -> "Straat", 'placeholder -> "Straat")
+                                        @helper.inputText(form("residenceAddress.number"), '_label -> "Nummer", 'placeholder -> "Nummer")
+                                        @helper.inputText(form("residenceAddress.city"), '_label -> "Stad", 'placeholder -> "Stad")
+                                        @helper.inputText(form("residenceAddress.zipCode"), '_label -> "Postcode", 'placeholder -> "Postcode")
+                                        @helper.inputText(form("residenceAddress.bus"), '_label -> "Bus", 'placeholder -> "Bus")
+                                        @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land")
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Overige</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <label class="h4">Rijksregisternummer</label>
+                                        <p class="form-control-static">xx.xx.xx-xxx.xx</p>
+
+                                        <label class="h4">Contactverantwoordelijke</label>
+                                        @defining(user.getContractManager) { manager =>
+                                            @if(manager != null) {
+                                                <p class="form-control-static">@manager.getFirstName @manager.getLastName</p>
+                                            } else {
+                                                <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
+                                            }
+                                        }
+                                        <!-- TODO: verantwoordelijke toewijzen -->
+                                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
+                                            <a href="#">Verantwoordelijke wijzigen (TODO)</a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>*@
+                            <div class="form-group">
+                                <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /col-lg-9 -->
+            }
+            </div>
+            <!-- /row -->
+        </div>
+    }

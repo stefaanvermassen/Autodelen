@@ -1,4 +1,5 @@
-@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0)
+@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0, countryList: List[String], typeList: List[String])
+@import database.DatabaseHelper;
 @* TODO: This file should be renamed since it's also used for editing *@
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
@@ -30,6 +31,7 @@
             });
         });
     </script>
+    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
 }
 
 @stylesheets = {
@@ -37,17 +39,17 @@
 }
 @app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
     <div id="page-header-wrapper">
-        <h1 class="page-header">Infosessies</h1>
         <ol class="breadcrumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Infosessies</a></li>
-            <li class="active">Nieuwe infosessies</li>
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
+            <li class="active">Nieuwe infosessie</li>
         </ol>
     </div>
 
     <div id="page-wrapper">
         <div class="row">
             <div class="col-lg-12">
+                <h1 class="page-header">Infosessies</h1>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart-o fa-fw"></i> @(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie")
@@ -62,80 +64,114 @@
                                             <strong>Error!</strong> @form.globalError.message
                                         </div>
                                     }
+                                    @flashes()
 
-                                    <!-- TODO: add dropdownbox for InfoSessionType-->
-                                    <fieldset>
-                                        <div class="form-group">
-                                            <div class="col-md-4">
-                                                <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
-                                                    <input class="form-control input-md" size="16" type="text" value="@form("time").value" placeholder="Tijdstip"readonly>
-                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Algemeen</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="host">Host</label>
+                                                    @if(form("userEmail").value){
+                                                        @defining(DatabaseHelper.getUserProvider().getUser(form("userEmail").value)) { user =>
+                                                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                                                <input type="hidden" name="userEmail" value="@user.getEmail" />
+                                                                <ul class="dropdown-menu" role="menu"></ul>
+                                                            </div>
+                                                        }
+                                                    }else{
+                                                        @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                                                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
+                                                                <input type="hidden" name="userEmail" value="@user.getEmail"/>
+                                                                <ul class="dropdown-menu" role="menu"></ul>
+                                                            </div>
+                                                        }
+                                                    }
                                                 </div>
-                                                <input type="text" class="hidden" id="time" name="time" value="@form("time").value" />
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <div class="col-md-12">
-                                                <input id="max_enrollees" name="max_enrollees" type="number" placeholder="Maximum aantal deelnemers (0 = onbeperkt)" class="form-control input-md" value="@form("max_enrollees").value">
-                                            </div>
-                                        </div>
-
-                                       <div class="form-group">
-                                            <div id="addressTypeRadios" class="col-md-4">
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" name="addresstype" id="hostAdressRadio" value="host" checked>
-                                                        Host adres
-                                                    </label>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="time">Tijdstip</label>
+                                                    <div class="col-md-4">
+                                                        <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
+                                                            <input class="form-control input-md" size="16" type="text" value="@form("time").value" placeholder="Tijdstip"readonly>
+                                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                        </div>
+                                                        <input type="text" class="hidden" id="time" name="time" value="@form("time").value" />
+                                                    </div>
                                                 </div>
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" name="addresstype" id="otherAdressRadio" value="other">
-                                                        Ander adres
-                                                    </label>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="max_enrollees">Maximum aantal deelnemers (0 = onbeperkt)</label>
+                                                    <div class="col-md-12">
+                                                        <input id="max_enrollees" name="max_enrollees" type="number"class="form-control input-md" value="@form("max_enrollees").value">
+                                                    </div>
                                                 </div>
-                                            </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-12">
+                                                        @helper.select(form("type"), helper.options(typeList), '_label -> "Type")
+                                                    </div>
+                                                </div>
+                                            </fieldset>
                                         </div>
+                                    </div>
 
-                                        <div class="form-group">
-                                            <div class="col-md-12">
-                                                <input id="address_street" name="address_street" type="text" placeholder="Straat" class="form-control input-md" value="@form("address_street").value">
-                                            </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Adres</h3>
                                         </div>
+                                        <div class="panel-body">
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.street">Straat</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.street" name="address.street" type="text" class="form-control input-md" value="@form("address.street").value">
+                                                    </div>
+                                                </div>
 
-                                        <div class="form-group">
-                                            <div class="col-md-12">
-                                                <input id="address_number" maxlength="9" name="address_number" type="text" placeholder="Nummer" class="form-control input-md" value="@form("address_number").value">
-                                            </div>
-                                        </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.number">Nummer</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" value="@form("address.number").value">
+                                                    </div>
+                                                </div>
 
-                                        <div class="form-group">
-                                            <div class="col-md-12">
-                                                <input id="address_bus" maxlength="3" name="address_bus" type="text" placeholder="Bus" class="form-control input-md" value="@form("address_bus").value">
-                                            </div>
-                                        </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.bus">Bus</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.bus" maxlength="3" name="address.bus" type="text" class="form-control input-md" value="@form("address.bus").value">
+                                                    </div>
+                                                </div>
 
-                                        <div class="form-group">
-                                            <div class="col-md-12">
-                                                <input id="address_zip" maxlength="11" name="address_zip" type="text" placeholder="Postcode" class="form-control input-md" value="@form("address_zip").value">
-                                            </div>
-                                        </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.zipCode">Postcode</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" value="@form("address.zipCode").value">
+                                                    </div>
+                                                </div>
 
-                                        <div class="form-group">
-                                            <div class="col-md-12">
-                                                <input id="address_city" name="address_city" type="text" placeholder="Plaats" class="form-control input-md" value="@form("address_city").value">
-                                            </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.city">Stad</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.city" name="address.city" type="text" class="form-control input-md" value="@form("address.city").value">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land")
+                                                </div>
+                                            </fieldset>
                                         </div>
+                                    </div>
 
-                                        <div class="form-group">
-                                            <label class="col-md-1 control-label" for="create"></label>
-                                            <div class="col-md-12">
-                                                <button type="submit" id="create" name="create" class="btn btn-block btn-success">@{ if(editId == 0) "Infosessie aanmaken" else "Wijzigingen opslaan" }</button>
-                                            </div>
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="create"></label>
+                                        <div class="col-md-12">
+                                            <button type="submit" id="create" name="create" class="btn btn-block btn-success">@{ if(editId == 0) "Infosessie aanmaken" else "Wijzigingen opslaan" }</button>
                                         </div>
-                                    </fieldset>
+                                    </div>
                                 }
                             </div>
                         </div>

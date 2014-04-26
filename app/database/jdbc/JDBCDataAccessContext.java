@@ -24,9 +24,15 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private AddressDAO addressDAO;
     private ReservationDAO reservationDAO;
     private CarDAO carDAO;
+    private CarCostDAO carCostDAO;
     private UserRoleDAO userRoleDAO;
     private TemplateDAO templateDAO;
     private CarRideDAO carRideDAO;
+    private NotificationDAO notificationDAO;
+    private MessageDAO messageDAO;
+    private ApprovalDAO approvalDAO;
+    private FileDAO fileDAO;
+    private SettingDAO settingDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -59,6 +65,22 @@ public class JDBCDataAccessContext implements DataAccessContext {
             templateDAO = new JDBCTemplateDAO(connection);
         }
         return templateDAO;
+    }
+
+    @Override
+    public NotificationDAO getNotificationDAO() {
+        if(notificationDAO == null){
+            notificationDAO = new JDBCNotificationDAO(connection);
+        }
+        return notificationDAO;
+    }
+
+    @Override
+    public MessageDAO getMessageDAO() {
+        if(messageDAO == null){
+            messageDAO = new JDBCMessageDAO(connection);
+        }
+        return messageDAO;
     }
 
     @Override
@@ -110,11 +132,20 @@ public class JDBCDataAccessContext implements DataAccessContext {
         return carDAO;
 	}
 
+    @Override
+    public CarCostDAO getCarCostDAO() {
+        if(carCostDAO == null){
+            carCostDAO = new JDBCCarCostDAO(connection);
+        }
+        return carCostDAO;
+    }
+
 	@Override
 	public ReservationDAO getReservationDAO() {
 		if(reservationDAO == null){
             reservationDAO = new JDBCReservationDAO(connection);
         }
+        reservationDAO.updateTable();
         return reservationDAO;
 	}
 
@@ -132,5 +163,29 @@ public class JDBCDataAccessContext implements DataAccessContext {
             carRideDAO = new JDBCCarRideDAO(connection);
         }
         return carRideDAO;
+    }
+
+    @Override
+    public ApprovalDAO getApprovalDAO() {
+        if(approvalDAO == null){
+            approvalDAO = new JDBCApprovalDAO(connection);
+        }
+        return approvalDAO;
+    }
+
+    @Override
+    public FileDAO getFileDAO() {
+        if(fileDAO == null){
+            fileDAO = new JDBCFileDAO(connection);
+        }
+        return fileDAO;
+    }
+
+    @Override
+    public SettingDAO getSettingDAO() {
+        if(settingDAO == null){
+            settingDAO = new JDBCSettingDAO(connection);
+        }
+        return settingDAO;
     }
 }

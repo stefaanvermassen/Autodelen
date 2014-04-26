@@ -35,6 +35,12 @@
                 } else {
                     $('#voiceBtn').hide();
                 }
+                if($ ( '#sendMail' ).data('status')){
+                $("#sendMail").attr('checked', true);
+                }
+                if(!$ ( '#sendMail' ).data('enabled')){
+                    $("#sendMail").attr('disabled', true);
+            }
             };
 
             function showErrorAlert (reason, detail) {
@@ -54,9 +60,9 @@
     <script>
         $ ("#create").click ( function () {
             $.ajax ( {
-                url : '/emailtemplate/edit',
+                url : '/dev/emailtemplate/edit',
                 type : 'POST',
-                data : { 'template_id':$ ( '#editor' ).data('status'), 'template_body' : $ ( '#editor' ).cleanHtml() },
+                data : { 'template_id':$ ( '#editor' ).data('status'), 'template_body' : $ ( '#editor' ).cleanHtml(), 'template_subject' : $ ( '#subject' ).val(), 'template_send_mail' : $("#sendMail").is(':checked') },
                 success: function(data, textStatus, request) {
                     // data.redirect contains the string URL to redirect to
                     window.location.href = data;
@@ -68,11 +74,9 @@
 @app("Emailtemplate bewerken",stylesheets, scripts) {
 
 <div id="page-header-wrapper">
-    <h1 class="page-header">Emailtemplate bewerken</h1>
     <ol class="breadcrumb">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Beheerder</a></li>
-        <li><a href="#">Emailtemplates</a></li>
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        <li><a href="@routes.EmailTemplates.showExistingTemplates">Emailtemplates</a></li>
         <li class="active">Emailtemplate bewerken</li>
     </ol>
 </div>
@@ -80,12 +84,27 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
+            <h1 class="page-header">Emailtemplate bewerken</h1>
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart-o fa-fw"></i> Bewerken
                 </div>
                 <!-- /.panel-heading -->
+
+
                 <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-1 control-label" for="subject">Onderwerp</label>
+                        <div class="col-md-12">
+                            <input id="subject" name="subject" type="text" placeholder="subject" class="form-control input-md" value="@template.getSubject">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <input type="checkbox" name="sendMail" id="sendMail" value="sendMail" data-status="@template.getSendMail" data-enabled="@template.getSendMailChangeable">Verzend als mail
+                        </div>
+                    </div>
                     <div id="alerts"></div>
                     <div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
                         <div class="btn-group">

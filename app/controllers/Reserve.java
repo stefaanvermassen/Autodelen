@@ -1,48 +1,91 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
+import database.FilterField;
+import database.jdbc.JDBCFilter;
 import models.*;
+import notifiers.Notifier;
 import org.joda.time.DateTime;
+import org.joda.time.IllegalFieldValueException;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import views.html.reserve.*;
-import views.html.reserve.reserve2;
+import views.html.reserve.reservationspage;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Controller responsible to display and filter cars for reservation and to enable a user to reserve a car.
+ *
+ */
 public class Reserve extends Controller {
 
-    private static final DateTimeFormatter DATEFORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    // The number of cars displayed in the table of the index page
+    private static final int PAGE_SIZE = 10;
 
+    // Formatter to translate a string to a datetime
+    private static final DateTimeFormatter DATEFORMATTER =
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+
+    /**
+     * Class implementing a model wrapped in a form.
+     * This model is used during the form submission when a user submits
+     * a reservation for a car.
+     * The user is obligated to provide information about the reservation:
+     * - the start date and time
+     * - the end date and time
+     */
     public static class ReservationModel {
+        // Date and time from which the user wants to loan the car
         public String from;
+        // Date and time the user will return the car to the owner
         public String until;
 
+        /**
+         * @return the start datetime of the reservation
+         */
         public DateTime getTimeFrom() {
-            return DATEFORMATTER.parseDateTime(from);
+            return DATEFORMATTER.parseDateTime(from).withSecondOfMinute(0);
         }
 
+        /**
+         * @return the end datetime of the reservation
+         */
         public DateTime getTimeUntil() {
-            return DATEFORMATTER.parseDateTime(until);
+            return DATEFORMATTER.parseDateTime(until).withSecondOfMinute(0);
         }
 
+        /**
+         * Validates the form:
+         * - the start date and time, and the end date and time are specified
+         * - the start date and time of a reservation is before the end date and time
+         * - the start date is after the date of today
+         * @return an error string or null
+         */
         public String validate() {
             DateTime now = DateTime.now();
-            DateTime from = getTimeFrom();
-            DateTime until = getTimeFrom();
-            if("".equals(from) || "".equals(until)) {
+            DateTime dateFrom = null;
+            DateTime dateUntil = null;
+            try {
+                dateFrom = getTimeFrom();
+                dateUntil = getTimeUntil();
+            } catch(IllegalArgumentException ex) {
+                if(dateFrom == null)
+                    return "Ongeldig datum: van = " + from;
+                else
+                    return "Ongeldig datum: tot = " + until;
+            }
+            if("".equals(dateFrom) || "".equals(dateUntil)) {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
-            } else if(from.isAfter(until)) {
+            } else if(dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
                 return "De einddatum kan niet voor de begindatum liggen!";
-            } else if(from.isBefore(now)) {
+            } else if(dateFrom.isBefore(now)) {
                 return "Een reservatie die plaats vindt voor vandaag is ongeldig";
             }
             return null;
@@ -50,46 +93,87 @@ public class Reserve extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    public static Result getCarModal(int id){
+        // TODO: hide from other users (badRequest)
+
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(id);
+            if(car == null){
+                return badRequest("Fail."); //TODO: error in flashes?
+            } else {
+                return ok(reservationDetailsPartial.render(car));
+            }
+        } catch(DataAccessException ex){
+            throw ex; //log?
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @return the reservation index page containing all cars
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result index() {
         return ok(showIndex());
     }
 
+    /**
+     * @return The html context of the reservations index page
+     */
     public static Html showIndex() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            CarDAO dao = context.getCarDAO();
-            List<Car> cars = dao.getCarList();
-            return reserve.render(cars);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        return reservations.render();
     }
 
-    @RoleSecured.RoleAuthenticated()
+    /**
+     * Method: GET
+     *
+     * Render the details page of a future reservation for a car where the user is able to
+     * confirm the reservation and specify the start and end of the reservation
+     *
+     * @param carId the id of the car for which the reservationsdetails ought to be rendered
+     * @return the details page of a future reservation for a car
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result reserve(int carId) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
+            if (car == null) {
+                flash("danger", "De reservatie van deze auto is onmogelijk: auto onbestaand!");
+                return badRequest(showIndex());
+            }
 
             ReservationDAO rdao = context.getReservationDAO();
             List<Reservation> reservations = rdao.getReservationListForCar(carId);
-            // Clean up: delete all reservations that belong to the past
-            DateTime now = DateTime.now();
-            for(Reservation reservation : reservations) {
-                DateTime from = DATEFORMATTER.parseDateTime(reservation.getFrom().toString("yyyy-MM-dd HH:mm:ss"));
-                DateTime until = DATEFORMATTER.parseDateTime(reservation.getTo().toString("yyyy-MM-dd HH:mm:ss"));
-                if(!from.isAfter(now) && !until.isAfter(now)) {
-                    rdao.deleteReservation(reservation);
-                }
+            Iterator<Reservation> it = reservations.iterator();
+            while(it.hasNext())
+            {
+                Reservation reservation = it.next();
+                if(reservation.getStatus() == ReservationStatus.REFUSED
+                        || reservation.getStatus() == ReservationStatus.CANCELLED)
+                    it.remove();
             }
 
-            return ok(reserve2.render(Form.form(ReservationModel.class), car, reservations));
+            return ok(reservationDetails.render(Form.form(ReservationModel.class), car, reservations));
         } catch(DataAccessException ex) {
             throw ex;
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    /**
+     * Method: POST
+     *
+     * Confirmation of a reservation. The reservation is validated.
+     * If the reservation is valid, the reservation is created and the owner is
+     * informed of the request for a reservation.
+     *
+     * @param carId The id of the car for which the reservation is being confirmed
+     * @return the user is redirected to the drives page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result confirmReservation(int carId) {
         // Get the car object to test whether the operation is legal
         Car car;
@@ -105,42 +189,84 @@ public class Reserve extends Controller {
             // Request the form
             Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
             if(reservationForm.hasErrors()) {
-                return badRequest(reserve2.render(reservationForm, car, reservations));
+                return badRequest(reservationDetails.render(reservationForm, car, reservations));
             }
             try {
                 // Test whether the reservation is valid
                 DateTime from = reservationForm.get().getTimeFrom();
                 DateTime until = reservationForm.get().getTimeUntil();
                 for(Reservation reservation : reservations) {
-                    if(!from.isAfter(reservation.getTo()) && !until.isBefore(reservation.getFrom())) {
+                    if((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
+                            (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
                         reservationForm.reject("De reservatie overlapt met een reeds bestaande reservatie!");
-                        return badRequest(reserve2.render(reservationForm, car, reservations));
+                        return badRequest(reservationDetails.render(reservationForm, car, reservations));
                     }
                 }
 
                 // Create the reservation
-                User user = DatabaseHelper.getUserProvider().getUser(session("email"));
+                User user = DatabaseHelper.getUserProvider().getUser();
                 Reservation reservation = rdao.createReservation(from, until, car, user);
                 context.commit();
 
                 if (reservation != null) {
-                    // TODO: temporary test here if loaner is owner, later adjust
                     if(car.getOwner().getId() == user.getId()) {
                         reservation.setStatus(ReservationStatus.ACCEPTED);
                         rdao.updateReservation(reservation);
                         context.commit();
+                    } else {
+                        Notifier.sendReservationApproveRequestMail(car.getOwner(), reservation);
                     }
-                    return redirect(
-                            routes.Drives.index() // redirect to drives list
-                    );
+                    return redirect(routes.Drives.index());
                 } else {
                     reservationForm.error("De reservatie kon niet aangemaakt worden. Contacteer de administrator");
-                    return badRequest(reserve2.render(reservationForm, car, reservations));
+                    return badRequest(reservationDetails.render(reservationForm, car, reservations));
                 }
             } catch(DataAccessException ex) {
                 throw ex;
             }
         } catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    // Partial
+
+    /**
+     * Method: GET
+     *
+     * Method to render a partial page containing an amount of cars for reservation that ought to be displayed
+     * corresponding a:
+     * - a search string
+     * - the number of cars to be rendered per page
+     * - the page that's being rendered
+     *
+     * @param page the page to be rendered
+     * @param ascInt boolean int, if 1 the records are ordered ascending
+     * @param orderBy the string designating the filterfield on which to order
+     * @param searchString the string containing all search information
+     * @return the requested page of cars for reservation
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+
+            FilterField field = FilterField.stringToField(orderBy);
+
+            boolean asc = Pagination.parseBoolean(ascInt);
+            Filter filter = Pagination.parseFilter(searchString);
+
+            if(field == null) {
+                field = FilterField.CAR_NAME;
+            }
+
+            List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfCars(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return ok(reservationspage.render(listOfCars, page, amountOfResults, amountOfPages));
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }

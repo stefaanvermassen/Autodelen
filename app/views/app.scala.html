@@ -1,7 +1,8 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
-
+@import org.joda.time.format.DateTimeFormat
 @import database.DatabaseHelper;
-@defining(DatabaseHelper.getUserProvider().getUser(session.get("email"))) { user =>
+@import database.providers.CommunicationProvider;
+@defining(DatabaseHelper.getUserProvider().getUser()) { user =>
 
 <!DOCTYPE html>
 <html>
@@ -21,8 +22,8 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
         @stylesheets @* To include stylesheets from external templates *@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-
-        <!-- Page-Level Plugin CSS - Main -->
+        <link rel="stylesheet/less" type="text/css" href="@routes.Assets.at("stylesheets/less/colortheme.less")">
+        <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/colortheme.css")"> -->
     </head>
     <body>
         <div id="wrapper">
@@ -34,55 +35,48 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="@routes.Application.index">Zelensis</a>
+                    <a class="navbar-brand" href="@routes.Dashboard.index">Zelensis</a>
                 </div>
                 <!-- /.navbar-header -->
-
                 <ul class="nav navbar-top-links navbar-right">
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-envelope fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                            <i class="fa fa-envelope fa-fw"></i>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="topnumber">@unread_number</span>
+                                }
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
+                            @defining(DatabaseHelper.getCommunicationProvider().getMessages(user.getId())) { messages =>
+                                @for((message, index) <- messages.zipWithIndex) {
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
+                                        <li>
+                                            <a href="@routes.Messages.showMessages()">
+                                                <div>
+                                                    @if(!message.isRead){
+                                                        <strong>Dégage [ongelezen]</strong>
+                                                    }else{
+                                                        <strong>Dégage</strong>
+                                                    }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(message.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { message_body =>
+                                                    <div>@Html(message_body.substring(0,math.min(80,message_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
                             <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <strong>John Smith</strong>
-                                        <span class="pull-right text-muted">
-                                            <em>Yesterday</em>
-                                        </span>
-                                    </div>
-                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#">
-                                    <strong>Read All Messages</strong>
+                                <a class="text-center" href="@routes.Messages.showMessages()">
+                                    <strong>Bekijk alle berichten</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -92,151 +86,60 @@
                     <!-- /.dropdown -->
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-tasks fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                            <i class="fa fa-bell fa-fw"></i>
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="topnumber">@unread_number</span>
+                              }
+                            }
                         </a>
-                        <ul class="dropdown-menu dropdown-tasks">
+                        <ul class="dropdown-menu dropdown-messages">
+                            @defining(DatabaseHelper.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
+                                @for((notification, index) <- notifications.zipWithIndex) {
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
+                                        <li>
+                                            <a href="@routes.Notifications.showNotifications()">
+                                                <div>
+                                                    @if(!notification.getRead){
+                                                    <strong>Dégage (ongelezen)</strong>
+                                                        }else{
+                                                    Dégage
+                                                        }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
+                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
                             <li>
-                                <a href="#">
-                                    <div>
-                                        <p>
-                                            <strong>Task 1</strong>
-                                            <span class="pull-right text-muted">40% Complete</span>
-                                        </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
-                                                <span class="sr-only">40% Complete (success)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p>
-                                            <strong>Task 2</strong>
-                                            <span class="pull-right text-muted">20% Complete</span>
-                                        </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
-                                                <span class="sr-only">20% Complete</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p>
-                                            <strong>Task 3</strong>
-                                            <span class="pull-right text-muted">60% Complete</span>
-                                        </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
-                                                <span class="sr-only">60% Complete (warning)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <p>
-                                            <strong>Task 4</strong>
-                                            <span class="pull-right text-muted">80% Complete</span>
-                                        </p>
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
-                                                <span class="sr-only">80% Complete (danger)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#">
-                                    <strong>See All Tasks</strong>
+                                <a class="text-center" href="@routes.Notifications.showNotifications()">
+                                    <strong>Bekijk alle notificaties</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
                         </ul>
-                        <!-- /.dropdown-tasks -->
+                        <!-- /.dropdown-messages -->
                     </li>
-                    <!-- /.dropdown -->
                     <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-alerts">
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <i class="fa fa-comment fa-fw"></i> New Comment
-                                        <span class="pull-right text-muted small">4 minutes ago</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <i class="fa fa-twitter fa-fw"></i> 3 New Followers
-                                        <span class="pull-right text-muted small">12 minutes ago</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <i class="fa fa-envelope fa-fw"></i> Message Sent
-                                        <span class="pull-right text-muted small">4 minutes ago</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <i class="fa fa-tasks fa-fw"></i> New Task
-                                        <span class="pull-right text-muted small">4 minutes ago</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a href="#">
-                                    <div>
-                                        <i class="fa fa-upload fa-fw"></i> Server Rebooted
-                                        <span class="pull-right text-muted small">4 minutes ago</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li>
-                                <a class="text-center" href="#">
-                                    <strong>See All Alerts</strong>
-                                    <i class="fa fa-angle-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- /.dropdown-alerts -->
-                    </li>
-                    <!-- /.dropdown -->
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                        <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
+                            <span>@user.toString</span>
+                            @if(DatabaseHelper.getSettingProvider.getBoolOrDefault("show_profile", true)) {
+                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                                <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            }
                         </a>
                         <ul class="dropdown-menu dropdown-user">
-                            <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                            <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
                             </li>
-                            <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                            <li><a href="@routes.Settings.index"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
                             </li>
                             <li class="divider"></li>
                             <li><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
@@ -250,69 +153,124 @@
             </nav>
             <!-- /.navbar-static-top -->
 
+            @if(session.get("impersonated") != null){
+                <div class="impersonating">You are impersonating @user.toString!</div>
+            }
+
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
-                    <div class="avatar"><img class="img-circle" src="@routes.Assets.at("images/avatar.jpg")" alt="profile picture"></div>
                     <ul class="nav" id="side-menu">
-                        <li class="sidebar-search">
-                            <div class="input-group custom-search-form">
-                                <input type="text" class="form-control" placeholder="Zoek...">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </span>
-                            </div>
-                            <!-- /input-group -->
-                        </li>
-                        <li class="active">
+                        <li class="submenu">LENER</li>
+                        <li @if(title == "Dashboard") {class="active"}>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
-                        <li>
-                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i> Ritten</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Messages.index"><i class="fa fa-envelope fa-fw"></i> Berichten</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Profile.index"><i class="fa fa-user fa-fw"></i> Profiel</a>
-                        </li>
-                        <li>
-                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
-                        </li>
-                        <li>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-gears fa-fw"></i> Emailtemplates</a>
-                        </li>
-                        <li>
+                        <li @if(title == "Infosessies") {class="active"}>
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
-                        <li>
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Eigenaar<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="@routes.Cars.showCars()">Auto's</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_USER)){
+                        <li @if(title == "Reserveren") {class="active"}>
+                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
-                        <li>
-                            <a href="#"><i class="fa fa-wrench fa-fw"></i> Superuser<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="@routes.UserRoles.index()">Gebruikersrollen</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
+                        <li @if(title == "Ritten") {class="active"}>
+                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i>
+                                Ritten
+                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
+                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
                         </li>
+                        <li @if(title == "Afrekeningen") {class="active"}>
+                            <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
+                        </li>
+                        }
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_OWNER)){
+                        <li class="submenu">EIGENAAR</li>
+                        <li @if(title == "Auto's") {class="active"}>
+                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                        </li>
+                        }
+
+                        <li class="submenu">ACCOUNT</li>
+                        <li @if(title == "Berichten") {class="active"}>
+                            <a href="@routes.Messages.showMessages()"><i class="fa fa-comments fa-fw"></i> Berichten
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="sidenumber">@unread_number</span>
+                                }
+                            }</a>
+                        </li>
+                        <li @if(title == "Notificaties") {class="active"}>
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties
+                            @defining(DatabaseHelper.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="sidenumber">@unread_number</span>
+                              }
+                            }</a>
+                        </li>
+                        <li @if(title == "Profiel") {class="active"}>
+                            <a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                        </li>
+                        <li @if(title == "Instellingen") {class="active"}>
+                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
+                        </li>
+
+                        @if((DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN) ||
+                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN))){
+                            <li class="submenu">ADMIN</li>
+                        }
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN)){
+                        <li @if(title == "Emailtemplates") {class="active"}>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
+                        </li>
+                        }
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)){
+                            <li @if(title == "Ritten (Admin)") {class="active"}>
+                            <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
+                            </li>
+                        }
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
+                        <li @if(title == "Gebruikers") {class="active"}>
+                            <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
+                        </li>
+                        }
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)){
+                            <li @if(title == "Infosessies (Admin)") {class="active"}>
+                            <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
+                            </li>
+                        }
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)){
+                            <li @if(title == "Auto's (Admin)") {class="active"}>
+                            <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
+                            </li>
+                            <li @if(title == "Autokosten (Admin)") {class="active"}>
+                                <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
+                            </li>
+                        }
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
+                        <li class="submenu">SUPERUSER</li>
+                        <li @if(title == "Gebruikersrollen") {class="active"}>
+                            <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
+                        </li>
+
                         <li>
+                            <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
+                        </li>
+
+                        <li @if(title == "Rapportering") {class="active"}>
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
+                        }
                     </ul>
                     <!-- /#side-menu -->
                 </div>
@@ -326,6 +284,7 @@
         <!-- /#wrapper -->
         @scripts
         <!-- Core Scripts - Include with every page -->
+        <script src="@routes.Assets.at("javascripts/less-1.7.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
 

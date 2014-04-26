@@ -14,8 +14,8 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
 
         <!-- SB Admin CSS - Include with every page -->
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/font-awesome.min.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/stylesheets/sb-admin.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
 
         <!-- Page-Level Plugin CSS - Main -->
     </head>
@@ -29,13 +29,7 @@
                                 <h3 class="panel-title">Account activeren</h3>
                             </div>
                             <div class="panel-body">
-				                @if(!flash.isEmpty()) {
-				                    @for((msgKey, msgValue) <- flash) {
-				                        <div class="alert alert-@msgKey">
-				                            @msgValue
-				                        </div>
-				                    }
-				                }
+				                @flashes()
                                 <p>@if(newActivation) { Je gebruikersaccount werd succesvol aangemaakt. } else { Er werd een nieuwe mail gestuurd. }
                                     Je kan je account activeren aan de hand van de email die zodadelijk zal aankrijgen!</p>
 								<a class="btn btn-success btn-block" href="@routes.Login.register_verification(userId, verification)">TODO: EMAIL IPV KNOP - Verifieer</a>

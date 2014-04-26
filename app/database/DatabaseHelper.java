@@ -1,6 +1,7 @@
 package database;
 
-import database.jdbc.JDBCDataAccessProvider;
+import database.providers.CommunicationProvider;
+import database.providers.SettingProvider;
 import database.providers.UserProvider;
 import database.providers.UserRoleProvider;
 import play.Logger;
@@ -14,6 +15,8 @@ public class DatabaseHelper {
     private static DataAccessProvider accessProvider;
     private static UserProvider userProvider;
     private static UserRoleProvider userRoleProvider;
+    private static CommunicationProvider communicationProvider;
+    private static SettingProvider settingProvider;
 
     public static UserProvider getUserProvider() {
         if (userProvider == null) {
@@ -22,11 +25,25 @@ public class DatabaseHelper {
         return userProvider;
     }
 
+    public static SettingProvider getSettingProvider(){
+        if(settingProvider == null){
+            settingProvider = new SettingProvider(getDataAccessProvider());
+        }
+        return settingProvider;
+    }
+
     public static UserRoleProvider getUserRoleProvider() {
         if (userRoleProvider == null) {
             userRoleProvider = new UserRoleProvider(getDataAccessProvider(), getUserProvider());
         }
         return userRoleProvider;
+    }
+
+    public static CommunicationProvider getCommunicationProvider() {
+        if (communicationProvider == null) {
+            communicationProvider = new CommunicationProvider(getDataAccessProvider(), getUserProvider());
+        }
+        return communicationProvider;
     }
 
     public static void setDataAccessProvider(DataAccessProvider provider) {
