@@ -1,6 +1,15 @@
 @(user: User, approval: Approval, enrollStatus: EnrollementStatus, reasons: List[String] = null)
+    @stylesheets = {
+        <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
 
-@app("Goedkeuringsaanvraag") {
+    }
+    @scripts = {
+        <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
+        <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+
+    }
+
+@app("Goedkeuringsaanvraag", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -51,19 +60,31 @@
                         }
                         <a href="@routes.InfoSessions.detail(approval.getId)">Details</a>
                     }
+
                     <br>
+                    <strong>Opmerkingen:</strong><br>
+                    <textarea readonly rows="4" cols="50">@approval.getUserMessage</textarea>
+                    <br>
+
                     <a class="btn btn-default" href="@routes.Profile.index(user.getId)">Profiel bekijken</a>
                 </div>
             </div>
 
 
 
-            <div class="panel panel-primary">
+            <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Aanvraag</h3>
                 </div>
                 <div class="panel-body">
-                    <h2>Blabla</h2>
+                    <div class="row">
+                    <strong>Contactverantwoordelijke:</strong><br>
+                        <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
+                             <input type="text" data-toggle="dropdown" class="form-control input-md" />
+                                <input type="hidden" name="useremail" />
+                            <ul class="dropdown-menu" role="menu"></ul>
+                        </div>
+                    </div>
                 </div>
             </div>
             </div>
