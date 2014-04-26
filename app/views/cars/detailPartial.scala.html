@@ -1,7 +1,7 @@
 @(car: Car)
-    @import controllers.Cars;
-    @import org.joda.time.format.DateTimeFormat
-    @import database.DatabaseHelper;
+@import controllers.Cars;
+@import org.joda.time.format.DateTimeFormat
+@import database.DatabaseHelper;
 @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
     <div class="row">
         <div class="col-lg-3">
@@ -17,13 +17,13 @@
                     } else {
                         <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
                     }
-                        <!-- TODO: profile picture-->
+                    <!-- TODO: profile picture-->
 
-                    <h2>@car.getName</h2>
-                    <h3>@car.getBrand @car.getType</h3>
-                    <p> <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a></p>
+                <h2>@car.getName</h2>
+                <h3>@car.getBrand @car.getType</h3>
+                <p> <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a></p>
 
-                <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                     </div>
                         <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
                 </div>
-                <!-- /.panel-body -->
+                    <!-- /.panel-body -->
             </div>
                 <!-- /.panel-default -->
         </div>
