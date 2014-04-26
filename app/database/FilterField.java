@@ -9,7 +9,7 @@ package database;
  */
 public enum FilterField {
 
-    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true),
+    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true),
     CAR_COST_STATUS(false), CAR_COST_DATE(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
@@ -57,6 +57,9 @@ public enum FilterField {
                 break;
             case "hook":
                 field = CAR_HOOK;
+                break;
+            case "fuel":
+                field = CAR_FUEL;
                 break;
             case "from":
                 field = FROM;
