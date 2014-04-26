@@ -48,6 +48,18 @@ public class InfoSession {
         this(id, type, time, address, host, NO_ENROLLEES, maxEnrollees);
     }
 
+    public EnrollementStatus getEnrollmentStatus(User user){
+        if(this.enrolled == NO_ENROLLEES)
+            throw new RuntimeException("Please use the fully populated object.");
+
+        for(Enrollee er : this.enrolled){
+            if(er.getUser().getId() == user.getId()){
+                return er.getStatus();
+            }
+        }
+        return EnrollementStatus.ABSENT;
+    }
+
     /**
      * Gets the current amount of enrollees
      * @return When an enrollee list was provided this returns the size, otherwise it uses a cached count result

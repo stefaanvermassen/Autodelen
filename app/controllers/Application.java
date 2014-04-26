@@ -36,6 +36,7 @@ public class Application extends Controller {
                         routes.javascript.InfoSessions.enrollSession(),
                         routes.javascript.Drives.showDrivesPage(),
                         routes.javascript.Maps.getMap(),
+                        routes.javascript.InfoSessions.pendingApprovalListPaged(),
                         routes.javascript.Reserve.reserve()
                 )
         );

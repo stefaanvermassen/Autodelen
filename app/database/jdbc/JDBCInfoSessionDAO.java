@@ -63,10 +63,19 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement setTimeForSession;
     private PreparedStatement setUserEnrollmentStatusForSession;
     private PreparedStatement getGetAmountOfInfoSessionsStatement;
+    private PreparedStatement setInfosessionHostStatement;
     private PreparedStatement getLastInfoSessionForUserStatement;
 
     public JDBCInfoSessionDAO(Connection connection) {
         this.connection = connection;
+    }
+
+
+    private PreparedStatement getSetInfosessionHostStatement() throws SQLException {
+        if (setInfosessionHostStatement == null) {
+            setInfosessionHostStatement = connection.prepareStatement("UPDATE infosessions SET infosession_host_user_id = ? WHERE infosession_id = ?");
+        }
+        return setInfosessionHostStatement;
     }
 
     private PreparedStatement getDeleteInfoSessionStatement() throws SQLException {
@@ -391,6 +400,23 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
                 throw new DataAccessException("Address update for InfoSession did not affect any row.");
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update address for infosession.", ex);
+        }
+    }
+
+    @Override
+    public void updateInfosessionHost(InfoSession session) throws DataAccessException {
+        if (session.getId() == 0)
+            throw new DataAccessException("Cannot update time field on unsaved session.");
+
+        try {
+            PreparedStatement ps = getSetInfosessionHostStatement();
+            ps.setInt(1, session.getHost().getId());
+            ps.setInt(2, session.getId());
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating host on infosession.");
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update infosession host.", ex);
         }
     }
 

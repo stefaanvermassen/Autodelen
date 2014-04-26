@@ -3,6 +3,7 @@
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
 
 @* Source: https://github.com/smalot/bootstrap-datetimepicker, released under Apache v2 license *@
     <script>
@@ -35,6 +36,8 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
+
+@import database.DatabaseHelper;
 @app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -73,6 +76,21 @@
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 </div>
                                                 <input type="text" class="hidden" id="time" name="time" value="@form("time").value" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
+                                                <label for="userPickerBox">Host:</label>
+                                                @defining(DatabaseHelper.getUserProvider.getUser(form("hostmail").value)) { host =>
+                                                    @if(host != null){
+                                                        <input type="text" value="@host.getFirstName @host.getLastName" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
+                                                    } else {
+                                                        <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
+                                                    }
+                                                }
+                                                <input type="hidden" name="@form("hostmail").name" value="@form("hostmail").value"/>
+                                                <ul class="dropdown-menu" role="menu"></ul>
                                             </div>
                                         </div>
 
