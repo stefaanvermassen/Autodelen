@@ -140,6 +140,15 @@ GET         /cars/carcosts/approved                 controllers.Cars.approveCarC
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
 
+#Refuels
+GET         /refuels                                controllers.Refuels.showRefuels()
+GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
+GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
+POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
+GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
+GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
+GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
+
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                              controllers.Maps.showMap()
