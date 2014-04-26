@@ -142,6 +142,7 @@ GET         /cars/carcosts/proof                    controllers.Cars.getProof(pr
 
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()
+GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
 GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
 POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)

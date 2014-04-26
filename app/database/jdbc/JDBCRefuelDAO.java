@@ -24,6 +24,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
     private PreparedStatement statusRefuelStatement;
     private PreparedStatement deleteRefuelStatement;
     private PreparedStatement getRefuelsForUserStatement;
+    private PreparedStatement getRefuelsForOwnerStatement;
     private PreparedStatement getRefuelStatement;
     private PreparedStatement updateRefuelStatement;
 
@@ -84,6 +85,20 @@ public class JDBCRefuelDAO implements RefuelDAO {
                     "WHEN 'ACCEPTED' THEN 4 END");
         }
         return getRefuelsForUserStatement;
+    }
+
+    private PreparedStatement getGetRefuelsForOwnerStatement() throws SQLException {
+        if (getRefuelsForOwnerStatement == null) {
+            getRefuelsForOwnerStatement = connection.prepareStatement("SELECT * FROM Refuels " +
+                    "JOIN CarRides ON refuel_car_ride_id = car_ride_car_reservation_id " +
+                    "JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
+                    "JOIN Cars ON reservation_car_id = car_id " +
+                    "JOIN Users ON car_owner_user_id = user_id " +
+                    "LEFT JOIN Files ON refuel_file_id=file_id WHERE car_owner_user_id = ? " +
+                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
+                    "WHEN 'ACCEPTED' THEN 4 END");
+        }
+        return getRefuelsForOwnerStatement;
     }
 
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
@@ -195,6 +210,17 @@ public class JDBCRefuelDAO implements RefuelDAO {
     public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getGetRefuelsForUserStatement();
+            ps.setInt(1, userId);
+            return getRefuelList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
+        }
+    }
+
+    @Override
+    public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetRefuelsForOwnerStatement();
             ps.setInt(1, userId);
             return getRefuelList(ps);
         } catch (SQLException e){

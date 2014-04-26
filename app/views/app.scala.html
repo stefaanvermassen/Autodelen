@@ -184,7 +184,7 @@
                             </a>
                         </li>
                         <li @if(title == "Tankbeurten") {class="active"}>
-                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-tasks fa-fw"></i> Tankbeurten</a>
+                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
@@ -195,6 +195,9 @@
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
                             <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                        </li>
+                        <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
+                            <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
                         </li>
                         }
 

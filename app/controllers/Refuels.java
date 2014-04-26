@@ -13,6 +13,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import views.html.refuels.editmodal;
 import views.html.refuels.refuels;
+import views.html.refuels.refuelsOwner;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,7 +38,7 @@ public class Refuels extends Controller {
     /**
      * Method: GET
      *
-     * @return index page containing all the refuel requests
+     * @return index page containing all the refuel requests from a specific user
      */
     @RoleSecured.RoleAuthenticated()
     public static Result showRefuels() {
@@ -46,6 +47,23 @@ public class Refuels extends Controller {
             RefuelDAO dao = context.getRefuelDAO();
             List<Refuel> refuelList = dao.getRefuelsForUser(user.getId());
             return ok(refuels.render(refuelList));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the refuel requests to a specific owner
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result showOwnerRefuels() {
+        User user = DatabaseHelper.getUserProvider().getUser();
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            RefuelDAO dao = context.getRefuelDAO();
+            List<Refuel> refuelList = dao.getRefuelsForOwner(user.getId());
+            return ok(refuelsOwner.render(refuelList));
         } catch (DataAccessException ex) {
             throw ex;
         }
