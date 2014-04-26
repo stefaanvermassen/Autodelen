@@ -592,11 +592,40 @@ public class InfoSessions extends Controller {
 
     public static class ApprovalAdminModel {
         public String message;
-        public String newStatus;
+        public String status;
         public String contractManager;
+        public boolean sharer;
+        public boolean user;
+
+        public enum Action {
+            ACCEPT,
+            DENY
+        }
+
+        public Action getAction(){
+            return Enum.valueOf(Action.class, status);
+        }
 
         public String validate(){
-            return null;
+            if(getAction() == Action.ACCEPT && !sharer && !user){ //if the user is accepted, but no extra rules specified
+                return "Gelieve aan te geven welke rechten deze gebruiker toegewezen krijgt.";
+            }
+            else return null;
+        }
+    }
+
+    private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminModel> form, boolean bad){
+        EnrollementStatus status = EnrollementStatus.ABSENT;
+        if(ap.getSession() != null) {
+            InfoSessionDAO idao = context.getInfoSessionDAO();
+            InfoSession is = idao.getInfoSession(ap.getId(), true);
+            status = is.getEnrollmentStatus(ap.getUser());
+        }
+
+        if(!bad){
+            return ok(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context), form));
+        } else {
+            return badRequest(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context), form));
         }
     }
 
@@ -609,13 +638,7 @@ public class InfoSessions extends Controller {
                 flash("danger", "Er is geen aanvraag met deze id.");
                 return redirect(routes.InfoSessions.pendingApprovalList());
             } else {
-                EnrollementStatus status = EnrollementStatus.ABSENT;
-                if(ap.getSession() != null) {
-                    InfoSessionDAO idao = context.getInfoSessionDAO();
-                    InfoSession is = idao.getInfoSession(ap.getId(), true);
-                    status = is.getEnrollmentStatus(ap.getUser());
-                }
-                return ok(approvaladmin.render(ap.getUser(), ap, status, checkApprovalConditions(ap.getUser(), context), Form.form(ApprovalAdminModel.class)));
+               return approvalForm(ap, context, Form.form(ApprovalAdminModel.class), false);
             }
         }
     }
@@ -628,6 +651,44 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     public static Result approvalAdminAction(int approvalId){
         Form<ApprovalAdminModel> form = Form.form(ApprovalAdminModel.class).bindFromRequest();
+        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            ApprovalDAO dao = context.getApprovalDAO();
+            Approval ap = dao.getApproval(approvalId);
+            if(ap == null){
+                flash("danger", "Er is geen aanvraag met deze id.");
+                return redirect(routes.InfoSessions.pendingApprovalList());
+            } else {
+                if(form.hasErrors()){
+                    return approvalForm(ap, context, form, true);
+                }
+
+                ApprovalAdminModel m = form.get();
+                ApprovalAdminModel.Action action = m.getAction();
+                if(action == ApprovalAdminModel.Action.ACCEPT) {
+                    UserDAO udao = context.getUserDAO();
+                    User contactManager = udao.getUser(m.contractManager);
+                    if(contactManager == null){
+                        form.error("Gelieve een contactbeheerder op te geven.");
+                        return approvalForm(ap, context, form, true);
+                    } else {
+                        try {
+                            ap.setStatus(Approval.ApprovalStatus.ACCEPTED);
+
+
+                        } catch(DataAccessException ex){
+                            context.rollback();
+                            throw ex;
+                        }
+                    }
+                } else if(action == ApprovalAdminModel.Action.DENY) {
+
+                } else {
+                    return badRequest("Unspecified.");
+                }
+
+
+            }
+        }
         return ok(form.toString());
     }
 
