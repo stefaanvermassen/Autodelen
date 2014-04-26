@@ -14,5 +14,7 @@ public interface RefuelDAO {
     public void acceptRefuel(Refuel refuel) throws DataAccessException;
     public void rejectRefuel(Refuel refuel) throws DataAccessException;
     public void deleteRefuel(Refuel refuel) throws DataAccessException;
+    public Refuel getRefuel(int refuelId) throws DataAccessException;
+    public void updateRefuel(Refuel refuel) throws DataAccessException;
     public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException;
 }
