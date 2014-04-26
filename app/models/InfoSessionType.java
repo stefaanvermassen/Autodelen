@@ -18,4 +18,13 @@ public enum InfoSessionType {
     public String getDescription(){
         return description;
     }
+
+    public static InfoSessionType getTypeFromString(String s) {
+        for(InfoSessionType t : values()) {
+            if(t.getDescription().equals(s)) {
+                return t;
+            }
+        }
+        return null;
+    }
 }

@@ -53,40 +53,19 @@ public class Cars extends Controller {
     private static final int PAGE_SIZE = 10;
     private static final int PAGE_SIZE_CAR_COSTS = 10;
 
-    private static Map<String, CarFuel> fuelMap;
-    private static Map<CarFuel, String> reverseFuelMap;
     private static List<String> fuelList;
-
-    public static Map<String, CarFuel> getFuelMap() {
-        if(fuelMap == null) {
-            fuelMap = new HashMap<>();
-            fuelMap.put("Biodiesel", CarFuel.BIODIESEL);
-            fuelMap.put("Diesel", CarFuel.DIESEL);
-            fuelMap.put("Electrisch", CarFuel.ELECTRIC);
-            fuelMap.put("Gas", CarFuel.GAS);
-            fuelMap.put("Hybride", CarFuel.HYBRID);
-            fuelMap.put("Benzine", CarFuel.PETROL);
-        }
-        return fuelMap;
-    }
-
-    public static Map<CarFuel,String> getReverseFuelMap() {
-        if(reverseFuelMap == null) {
-            reverseFuelMap = new HashMap<>();
-            for(String s : getFuelMap().keySet()) {
-                reverseFuelMap.put(getFuelMap().get(s),s);
-            }
-        }
-        return reverseFuelMap;
-    }
 
     public static List<String> getFuelList() {
         if(fuelList == null) {
             fuelList = new ArrayList<>();
-            fuelList.addAll(getFuelMap().keySet());
+            CarFuel[] types = CarFuel.values();
+            for(CarFuel f : types) {
+                fuelList.add(f.getDescription());
+            }
         }
         return fuelList;
     }
+
 
     public static class CarModel {
 
@@ -126,7 +105,7 @@ public class Cars extends Controller {
             year = car.getYear();
             gps = car.isGps();
             hook = car.isHook();
-            fuel = getReverseFuelMap().get(car.getFuel());
+            fuel = car.getFuel().getDescription();
             fuelEconomy = car.getFuelEconomy();
             estimatedValue = car.getEstimatedValue();
             ownerAnnualKm = car.getOwnerAnnualKm();
@@ -285,7 +264,7 @@ public class Cars extends Controller {
                         technicalCarDetails = new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber);
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                            model.year, model.gps, model.hook, getFuelMap().get(model.fuel), model.fuelEconomy, model.estimatedValue,
+                            model.year, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
                             model.ownerAnnualKm, technicalCarDetails, owner, model.comments);
 
                     context.commit();
@@ -380,7 +359,7 @@ public class Cars extends Controller {
                     car.setSeats(model.seats);
                 car.setGps(model.gps);
                 car.setHook(model.hook);
-                car.setFuel(getFuelMap().get(model.fuel));
+                car.setFuel(CarFuel.getFuelFromString(model.fuel));
                 if(model.year != null)
                     car.setYear(model.year);
                 else

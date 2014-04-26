@@ -37,34 +37,15 @@ public class InfoSessions extends Controller {
 
     private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
 
-    private static Map<String, InfoSessionType> typeMap;
-    private static Map<InfoSessionType, String> reverseTypeMap;
-    private static List<String> typeList;
+    private static List<String> typeList = null;
 
-    public static Map<String, InfoSessionType> getTypeMap() {
-        if(typeMap == null) {
-            typeMap = new HashMap<>();
-            typeMap.put("Autoleners", InfoSessionType.NORMAL);
-            typeMap.put("Autoeigenaars", InfoSessionType.OWNER);
-            typeMap.put("Andere", InfoSessionType.OTHER);
-        }
-        return typeMap;
-    }
-
-    public static Map<InfoSessionType,String> getReverseTypeMap() {
-        if(reverseTypeMap == null) {
-            reverseTypeMap = new HashMap<>();
-            for(String s : getTypeMap().keySet()) {
-                reverseTypeMap.put(getTypeMap().get(s),s);
-            }
-        }
-        return reverseTypeMap;
-    }
-
-    public static List<String> getTypeList() {
+    private static List<String> getTypeList() {
         if(typeList == null) {
             typeList = new ArrayList<>();
-            typeList.addAll(getTypeMap().keySet());
+            InfoSessionType[] types = InfoSessionType.values();
+            for(InfoSessionType t : types) {
+                typeList.add(t.getDescription());
+            }
         }
         return typeList;
     }
@@ -73,7 +54,7 @@ public class InfoSessions extends Controller {
         public String userEmail;
         public DateTime time;
         public Integer max_enrollees;
-        public String type = getReverseTypeMap().get(InfoSessionType.NORMAL);
+        public String type;
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public static int getInt(Integer i) {
@@ -95,14 +76,12 @@ public class InfoSessions extends Controller {
             userEmail = i.getHost().getEmail();
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
-            type = getReverseTypeMap().get(i.getType());
+            type = i.getType().getDescription();
 
             address.populate(i.getAddress());
         }
 
     }
-
-    //TODO: allow infosessions to be created by another use than the hoster
 
     /**
      * Method: GET
@@ -116,7 +95,7 @@ public class InfoSessions extends Controller {
         if (user.getAddressDomicile() != null) {
             InfoSessionCreationModel model = new InfoSessionCreationModel();
             model.address.populate(user.getAddressDomicile());
-
+            model.type = InfoSessionType.NORMAL.getDescription();
             editForm = editForm.fill(model);
         }
         return ok(addinfosession.render(editForm, 0, getCountryList(), getTypeList()));
@@ -218,7 +197,7 @@ public class InfoSessions extends Controller {
                     }
 
                     // type
-                    session.setType(getTypeMap().get(editForm.get().type));
+                    session.setType(InfoSessionType.getTypeFromString(editForm.get().type));
 
                     // host
                     User host = DatabaseHelper.getUserProvider().getUser(editForm.get().userEmail);
@@ -481,7 +460,7 @@ public class InfoSessions extends Controller {
 
                     User host = DatabaseHelper.getUserProvider().getUser(createForm.get().userEmail);
 
-                    InfoSession session = dao.createInfoSession(getTypeMap().get(createForm.get().type), host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
+                    InfoSession session = dao.createInfoSession(InfoSessionType.getTypeFromString(createForm.get().type), host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
                     context.commit();
 
                     if (session != null) {
