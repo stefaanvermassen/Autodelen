@@ -578,7 +578,6 @@ public class InfoSessions extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
-    //both infosession and profile admins can accept
     public static Result pendingApprovalList() {
         return ok(approvals.render());
     }
@@ -722,6 +721,9 @@ public class InfoSessions extends Controller {
                         ap.setStatus(Approval.ApprovalStatus.DENIED);
                         dao.updateApproval(ap);
                         context.commit();
+                        flash("success", "De aanvraag werd met succes afgekeurd.");
+
+                        return redirect(routes.InfoSessions.pendingApprovalList());
                     } else {
                         return badRequest("Unspecified.");
                     }
@@ -733,7 +735,6 @@ public class InfoSessions extends Controller {
 
             }
         }
-        return ok(form.toString());
     }
 
     /**
