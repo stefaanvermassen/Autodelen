@@ -195,7 +195,7 @@
   "Beste %user_firstname% %user_lastname%,<br>
 
   Gefeliciteerd! Uw lidmaatschap bij Dégage werd zonet bevestgd.<br>
-  %opmerkingen%
+  %comment%
   <br>
   Met vriendelijke groeten,<br>
   Dégage", 1);
@@ -215,7 +215,7 @@
   "Beste %user_firstname% %user_lastname%,<br>
 
   Uw lidmaatschap bij Dégage werd zonet geweigerd.<br>
-  %opmerkingen%
+  %comment%
   <br>
   Met vriendelijke groeten,<br>
   Dégage", 1);
