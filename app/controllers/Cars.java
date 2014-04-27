@@ -607,6 +607,7 @@ public class Cars extends Controller {
                                             flash("danger", "Failed to add the carcost to the database. Contact administrator.");
                                             return redirect(routes.Cars.detail(carId));
                                         }
+                                        Notifier.sendCarCostRequest(carCost);
                                         flash("success", "Uw autokost werd toegevoegd.");
                                         return redirect(routes.Cars.detail(carId));
                                     } catch (DataAccessException ex) {

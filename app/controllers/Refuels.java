@@ -159,6 +159,7 @@ public class Refuels extends Controller {
                                     refuel.setProof(file);
                                     dao.updateRefuel(refuel);
                                     context.commit();
+                                    Notifier.sendRefuelRequest(refuel.getCarRide().getReservation().getCar().getOwner(), refuel);
                                     flash("success", "Uw tankbeurt wordt voorgelegd aan de auto-eigenaar.");
                                     return redirect(routes.Refuels.showRefuels());
                                 } catch (DataAccessException ex) {

@@ -47,7 +47,7 @@
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "verification_url";
 
   #--Welkom
-  INSERT INTO Templates(template_id, template_title, template_body) VALUES (
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail) VALUES (
   2,
   "Welkom",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -55,7 +55,7 @@
   Welkom bij Dégage!<br>
   <br>
   Met vriendelijke groeten,<br>
-  Dégage");
+  Dégage", 0);
 
   INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Welkom" AND template_tag_body = "user_firstname";
@@ -182,10 +182,10 @@
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "password_reset_url";
 
  #-- Algemene voorwaarden
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable, template_send_mail) VALUES (
     8,
     "Algemene voorwaarden",
-    "TODO: Aanvullen algemene voorwaarden in templates", 0);
+    "TODO: Aanvullen algemene voorwaarden in templates", 0, 0);
 
   #--Lidmaatschap bevestigd
 
@@ -383,7 +383,7 @@
 
   #--Autokost aanvraag
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable, template_send_mail) VALUES (
   17,
   "Autokost aanvraag",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -398,7 +398,7 @@
   %car_cost_time%
   <br>
   Met vriendelijke groeten,<br>
-  Dégage", 1);
+  Dégage", 0,0);
 
   INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_firstname";
