@@ -64,6 +64,7 @@ CREATE TABLE `Users` (
 	`user_contract_manager_id` INT,
 	`user_image_id` INT,
 	`user_created_at` DATETIME,
+	`user_last_notified` DATETIME,
 	`user_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
@@ -387,6 +388,9 @@ CREATE TRIGGER Users_ins BEFORE INSERT ON Users FOR EACH ROW
 BEGIN
   IF new.user_created_at IS NULL THEN
     SET new.user_created_at = now();
+  END IF;
+  IF new.user_last_notified IS NULL THEN
+    SET new.user_last_notified = now();
   END IF;
 END $$
 

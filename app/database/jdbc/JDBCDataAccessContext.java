@@ -29,6 +29,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private TemplateDAO templateDAO;
     private CarRideDAO carRideDAO;
     private RefuelDAO refuelDAO;
+    private SchedulerDAO schedulerDAO;
     private NotificationDAO notificationDAO;
     private MessageDAO messageDAO;
     private ApprovalDAO approvalDAO;
@@ -172,6 +173,14 @@ public class JDBCDataAccessContext implements DataAccessContext {
             refuelDAO = new JDBCRefuelDAO(connection);
         }
         return refuelDAO;
+    }
+
+    @Override
+    public SchedulerDAO getSchedulerDAO() {
+        if(schedulerDAO == null){
+            schedulerDAO = new JDBCSchedulerDAO(connection);
+        }
+        return schedulerDAO;
     }
 
     @Override

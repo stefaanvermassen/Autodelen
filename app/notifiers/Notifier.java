@@ -57,6 +57,31 @@ public class Notifier extends Mailer {
         }
     }
 
+    public static void sendMembershipStatusChanged(User user, boolean approved, String comment) {
+        String mail = "";
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template;
+            if(approved){
+                template = dao.getTemplate(MailType.MEMBERSHIP_APPROVED);
+            }else{
+                template = dao.getTemplate(MailType.MEMBERSHIP_REFUSED);
+            }
+            mail = replaceUserTags(user, template.getBody());
+            mail = mail.replace("%comment%", comment);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
     public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
         String mail = "";
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -161,6 +186,28 @@ public class Notifier extends Mailer {
 
         if (!play.api.Play.isDev(play.api.Play.current())) {
             send(mail);
+        }
+    }
+
+    public static void sendReminderMail(User user) {
+        String mail = "";
+        setSubject("Ongelezen berichten");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.REMINDER_MAIL);
+            mail = replaceUserTags(user, template.getBody());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+        send(mail);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            SchedulerDAO dao = context.getSchedulerDAO();
+            dao.setReminded(user);
+            context.commit();
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 

@@ -17,6 +17,13 @@
   INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_car_address");
   INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_reason");
 
+  INSERT INTO TemplateTags(template_tag_body) VALUE ("comment");
+
+  INSERT INTO TemplateTags(template_tag_body) VALUE ("car_name");
+  INSERT INTO TemplateTags(template_tag_body) VALUE ("amount");
+  INSERT INTO TemplateTags(template_tag_body) VALUE ("car_cost_description");
+  INSERT INTO TemplateTags(template_tag_body) VALUE ("car_cost_time");
+
   #-- Templates
   #INSERT INTO Templates(template_id, template_title, template_body) VALUES (?,?)
 
@@ -179,3 +186,173 @@
     8,
     "Algemene voorwaarden",
     "TODO: Aanvullen algemene voorwaarden in templates", 0);
+
+  #--Lidmaatschap bevestigd
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  9,
+  "Lidmaatschap bevestigd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Gefeliciteerd! Uw lidmaatschap bij Dégage werd zonet bevestgd.<br>
+  %comment%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "comment";
+
+  #--Lidmaatschap geweigerd
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  10,
+  "Lidmaatschap geweigerd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw lidmaatschap bij Dégage werd zonet geweigerd.<br>
+  %comment%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "comment";
+
+  #--Autokost bevestigd
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  11,
+  "Autokost bevestigd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw autokost werd zonet bevestigd door een admin.<br>
+  %car_name%
+  <br>
+  %car_cost_description%
+  <br>
+  %amount%
+  <br>
+  %car_cost_time%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_name";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_cost_description";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "amount";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_cost_time";
+
+  #--Autokost geweigerd
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  12,
+  "Autokost geweigerd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw autokost werd helaas geweigerd door een admin.<br>
+  %car_name%
+  <br>
+  %car_cost_description%
+  <br>
+  %amount%
+  <br>
+  %car_cost_time%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_name";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_cost_description";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "amount";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_cost_time";
+
+
+  #--Tankbeurt bevestigd
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  13,
+  "Tankbeurt bevestigd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw tankbeurt werd zonet bevestigd door de auto-eigenaar.<br>
+  %car_name%
+  <br>
+  %amount%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "car_name";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "amount";
+
+
+   #--Tankbeurt geweigerd
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  14,
+  "Tankbeurt geweigerd",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Uw tankbeurt werd helaas geweigerd door de auto-eigenaar.<br>
+  %car_name%
+  <br>
+  %amount%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "car_name";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "amount";
+
+  #-- Reminder mail
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  15,
+  "Ongelezen berichten",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  U heeft ongelezen berichten. Gelieve in te loggen op uw Dégage-account.<br>
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 0);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_lastname";
