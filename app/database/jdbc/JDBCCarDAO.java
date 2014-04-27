@@ -117,11 +117,24 @@ public class JDBCCarDAO implements CarDAO{
                 location = JDBCAddressDAO.populateAddress(rs);
                 user = JDBCUserDAO.populateUser(rs, false, false);
                 rs.getInt("car_technical_details");
-                if(!rs.wasNull())
-                    technicalCarDetails = new TechnicalCarDetails(rs.getInt("details_id"), rs.getString("details_car_license_plate"), new FileGroup(rs.getInt("details_car_registration")), rs.getInt("details_car_chassis_number"));
+                if(!rs.wasNull()) {
+                    FileGroup registration = new FileGroup(rs.getInt("details_car_registration"));
+                    if(rs.wasNull()) registration = null;
+
+                    Integer chassisNr = rs.getInt("details_car_chassis_number");
+                    if(rs.wasNull()) chassisNr = null;
+                    technicalCarDetails = new TechnicalCarDetails(rs.getInt("details_id"), rs.getString("details_car_license_plate"), registration, chassisNr);
+                }
                 rs.getInt("car_insurance");
-                if(!rs.wasNull())
-                    insurance = new CarInsurance(rs.getInt("insurance_id"), new DateTime(rs.getDate("insurance_expiration")), rs.getInt("insurance_bonus_malus"), rs.getInt("insurance_contract_id"));
+                if(!rs.wasNull()) {
+                    DateTime expiration = new DateTime(rs.getDate("insurance_expiration"));
+                    if(rs.wasNull()) expiration = null;
+                    Integer bonusMalus = rs.getInt("insurance_bonus_malus");
+                    if(rs.wasNull()) bonusMalus = null;
+                    Integer contractId = rs.getInt("insurance_contract_id");
+                    if(rs.wasNull()) contractId = null;
+                    insurance = new CarInsurance(rs.getInt("insurance_id"), expiration, bonusMalus, contractId);
+                }
             }
             car.setLocation(location);
             car.setOwner(user);
