@@ -82,6 +82,56 @@ public class Notifier extends Mailer {
         }
     }
 
+    public static void sendCarCostStatusChanged(User user, CarCost carCost, boolean approved) {
+        String mail = "";
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template;
+            if(approved){
+                template = dao.getTemplate(MailType.CARCOST_APPROVED);
+            }else{
+                template = dao.getTemplate(MailType.CARCOST_REFUSED);
+            }
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceCarCostTags(carCost, mail);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    public static void sendRefuelStatusChanged(User user, Refuel refuel, boolean approved) {
+        String mail = "";
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template;
+            if(approved){
+                template = dao.getTemplate(MailType.REFUEL_APPROVED);
+            }else{
+                template = dao.getTemplate(MailType.REFUEL_REFUSED);
+            }
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceRefuelTags(refuel, mail);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
     public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
         String mail = "";
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
@@ -230,6 +280,21 @@ public class Notifier extends Mailer {
         template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
         template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));
         //TODO: reservation_url
+        return template;
+    }
+
+    private static String replaceCarCostTags(CarCost carCost, String template) {
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
+        template = template.replace("%car_cost_time%", fmt.print(carCost.getTime()));
+        template = template.replace("%car_name%", carCost.getCar().getName());
+        template = template.replace("%amount%", carCost.getAmount().toPlainString() + " euro");
+        template = template.replace("%car_cost_description%", carCost.getDescription());
+        return template;
+    }
+
+    private static String replaceRefuelTags(Refuel refuel, String template) {
+        template = template.replace("%car_name%", refuel.getCarRide().getReservation().getCar().getName());
+        template = template.replace("%amount%", refuel.getAmount().toPlainString() + " euro");
         return template;
     }
 
