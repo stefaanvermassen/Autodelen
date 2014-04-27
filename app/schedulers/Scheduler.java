@@ -14,7 +14,7 @@ public abstract class Scheduler implements Runnable{
     public void schedule(FiniteDuration repeatDuration){
         Akka.system().scheduler().schedule(
                 Duration.create(0, TimeUnit.MILLISECONDS), //Initial delay 0 milliseconds
-                repeatDuration,     //Frequency 30 minutes
+                repeatDuration,     //Frequency
                 this,
                 Akka.system().dispatcher()
         );

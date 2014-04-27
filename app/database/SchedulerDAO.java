@@ -10,4 +10,5 @@ import java.util.List;
 public interface SchedulerDAO {
 
     public List<User> getReminderEmailList(int maxMessages) throws DataAccessException;
+    public void setReminded(User user) throws DataAccessException;
 }

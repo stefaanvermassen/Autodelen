@@ -18,7 +18,7 @@ public class SendUnreadNotificationsMailScheduler extends Scheduler{
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             SchedulerDAO dao = context.getSchedulerDAO();
             //Todo: number_of_unread_messages from system_variable
-            List<User> emailList = dao.getReminderEmailList(2);
+            List<User> emailList = dao.getReminderEmailList(0);
             context.commit();
             for(User user : emailList){
                 Notifier.sendReminderMail(user);

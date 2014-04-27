@@ -176,7 +176,14 @@ public class Notifier extends Mailer {
         } catch (DataAccessException ex) {
             throw ex;
         }
-            send(mail);
+        send(mail);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            SchedulerDAO dao = context.getSchedulerDAO();
+            dao.setReminded(user);
+            context.commit();
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     private static String replaceUserTags(User user, String template) {

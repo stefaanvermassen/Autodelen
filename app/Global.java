@@ -10,11 +10,15 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.*;
 import play.data.format.Formatters;
+import scala.concurrent.duration.Duration;
+import schedulers.Scheduler;
+import schedulers.SendUnreadNotificationsMailScheduler;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class Global extends GlobalSettings {
 
@@ -57,6 +61,8 @@ public class Global extends GlobalSettings {
         } catch(IOException ex){
             Logger.error("Could not load database properties: " + ex.getMessage());
         }
+        Scheduler scheduler = new SendUnreadNotificationsMailScheduler();
+        scheduler.schedule(Duration.create(1, TimeUnit.HOURS));
     }
 
     public void onStop(Application app) {

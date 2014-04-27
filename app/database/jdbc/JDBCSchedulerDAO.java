@@ -4,11 +4,9 @@ import database.DataAccessException;
 import database.SchedulerDAO;
 import models.Refuel;
 import models.User;
+import org.joda.time.DateTime;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +17,7 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
 
     private Connection connection;
     private PreparedStatement getReminderEmailListStatement;
+    private PreparedStatement setRemindedStatement;
 
     public JDBCSchedulerDAO(Connection connection) {
         this.connection = connection;
@@ -42,6 +41,15 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
         return getReminderEmailListStatement;
     }
 
+    private PreparedStatement getSetRemindedStatement() throws SQLException {
+        if (setRemindedStatement == null) {
+            setRemindedStatement = connection.prepareStatement("UPDATE Users SET user_last_notified = ? WHERE user_id = ?");
+        }
+        return setRemindedStatement;
+    }
+
+
+
     @Override
     public List<User> getReminderEmailList(int maxMessages) throws DataAccessException {
         try {
@@ -51,6 +59,19 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
             return getEmailList(ps);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the email list.", e);
+        }
+    }
+
+    @Override
+    public void setReminded(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSetRemindedStatement();
+            ps.setTimestamp(1, new Timestamp(new DateTime().getMillis()));
+            ps.setInt(2,user.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating user.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
