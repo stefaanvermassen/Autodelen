@@ -3,6 +3,7 @@ package database.jdbc;
 import database.DataAccessException;
 import database.SchedulerDAO;
 import models.Refuel;
+import models.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,14 +36,14 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
                     "ON o.notification_user_id = p.user_id GROUP BY p.user_id) a " +
                     "LEFT JOIN (SELECT * FROM Messages WHERE message_read=0) b " +
                     "ON a.user_id = b.message_to_user_id GROUP BY a.user_id) AS Reminder " +
-                    "WHERE (number_of_notifications > 0 OR number_of_messages > 0) " +
+                    "WHERE (number_of_notifications > ? OR number_of_messages > ?) " +
                     "AND user_last_notified < DATE_SUB(NOW(),INTERVAL 7 DAY)");
         }
         return getReminderEmailListStatement;
     }
 
     @Override
-    public List<String> getReminderEmailList(int maxMessages) throws DataAccessException {
+    public List<User> getReminderEmailList(int maxMessages) throws DataAccessException {
         try {
             PreparedStatement ps = getGetReminderEmailListStatement();
             ps.setInt(1, maxMessages);
@@ -53,11 +54,11 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
         }
     }
 
-    private List<String> getEmailList(PreparedStatement ps) throws DataAccessException {
-        List<String> list = new ArrayList<>();
+    private List<User> getEmailList(PreparedStatement ps) throws DataAccessException {
+        List<User> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(rs.getString("user_email"));
+                list.add(JDBCUserDAO.populateUser(rs, false, false, "Reminder"));
             }
             return list;
         }catch (SQLException e){

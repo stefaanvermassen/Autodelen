@@ -164,6 +164,21 @@ public class Notifier extends Mailer {
         }
     }
 
+    public static void sendReminderMail(User user) {
+        String mail = "";
+        setSubject("Ongelezen berichten");
+        addRecipient(user.getEmail());
+        addFrom(NOREPLY);
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.REMINDER_MAIL);
+            mail = replaceUserTags(user, template.getBody());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+            send(mail);
+    }
+
     private static String replaceUserTags(User user, String template) {
         template = template.replace("%user_firstname%", user.getFirstName());
         template = template.replace("%user_lastname%", user.getLastName());

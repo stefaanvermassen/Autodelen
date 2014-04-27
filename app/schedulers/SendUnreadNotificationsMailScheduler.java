@@ -2,6 +2,9 @@ package schedulers;
 
 import controllers.routes;
 import database.*;
+import models.Notification;
+import models.User;
+import notifiers.Notifier;
 
 import java.util.List;
 
@@ -10,15 +13,15 @@ import java.util.List;
  */
 public class SendUnreadNotificationsMailScheduler extends Scheduler{
 
-    /*Send mail to user if he has more than 3 unread messages or notifications   */
     @Override
     public void run() {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             SchedulerDAO dao = context.getSchedulerDAO();
-            List<String> emailList = dao.getReminderEmailList(2);
+            //Todo: number_of_unread_messages from system_variable
+            List<User> emailList = dao.getReminderEmailList(2);
             context.commit();
-            for(String emailAdres : emailList){
-                //todo: notifier
+            for(User user : emailList){
+                Notifier.sendReminderMail(user);
             }
         }catch(DataAccessException ex) {
             throw ex;

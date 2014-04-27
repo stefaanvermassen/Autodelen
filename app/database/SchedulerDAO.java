@@ -1,5 +1,7 @@
 package database;
 
+import models.User;
+
 import java.util.List;
 
 /**
@@ -7,5 +9,5 @@ import java.util.List;
  */
 public interface SchedulerDAO {
 
-    public List<String> getReminderEmailList(int maxMessages) throws DataAccessException;
+    public List<User> getReminderEmailList(int maxMessages) throws DataAccessException;
 }
