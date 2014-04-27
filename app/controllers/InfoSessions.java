@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Addresses;
 import controllers.util.FormHelper;
 import controllers.util.Pagination;
 import database.*;
@@ -14,13 +15,20 @@ import play.data.Form;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.infosession.addinfosession;
 import views.html.infosession.*;
+
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static controllers.util.Addresses.getCountryList;
+import static controllers.util.Addresses.modifyAddress;
+import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -32,35 +40,60 @@ public class InfoSessions extends Controller {
 
     private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
 
+    private static List<String> typeList = null;
+
+    private static List<String> getTypeList() {
+        if(typeList == null) {
+            typeList = new ArrayList<>();
+            InfoSessionType[] types = InfoSessionType.values();
+            for(InfoSessionType t : types) {
+                typeList.add(t.getDescription());
+            }
+        }
+        return typeList;
+    }
+
     public static class InfoSessionCreationModel {
+        public String userEmail;
         public DateTime time;
         public Integer max_enrollees;
-        public InfoSessionType type;
-
-        // Address fields
-        public String hostmail;
-        public String address_city;
-        public String address_zip;
-        public String address_street;
-        public String address_number;
-        public String address_bus;
+        public String type;
+        public String type_alternative;
+        public String comments;
+        public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public static int getInt(Integer i) {
             return i == null ? 0 : i;
         }
 
         public String validate() {
-            if (time == null) {
-                return "Gelieve het tijdsveld in te vullen";
-            } else if (DateTime.now().isAfter(time)) {
-                return "Je kan enkel een infosessie plannen na de huidige datum.";
+            String error = "";
+            if(userEmail == null || userEmail.equals("")) {
+                error += "Gelieve een host te selecteren. ";
             }
-            return null;
+            if (time == null) {
+                error += "Gelieve het tijdsveld in te vullen. ";
+            }
+            if(InfoSessionType.getTypeFromString(type) == InfoSessionType.OTHER && (type_alternative == null || type_alternative.equals(""))) {
+                error += "Gelieve een alternatief type in te geven of een ander type te selecteren. ";
+            }
+            if("".equals(error)) return null;
+            else return error;
+        }
+
+        public void populate(InfoSession i) {
+            if(i == null) return;
+
+            userEmail = i.getHost().getEmail();
+            time = i.getTime();
+            max_enrollees = i.getMaxEnrollees();
+            type = i.getType().getDescription();
+            type_alternative = i.getTypeAlternative();
+            comments = i.getComments();
+            address.populate(i.getAddress());
         }
 
     }
-
-    //TODO: allow infosessions to be created by another use than the hoster
 
     /**
      * Method: GET
@@ -70,18 +103,14 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result newSession() {
         User user = DatabaseHelper.getUserProvider().getUser();
+        Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class);
 
-        if (user.getAddressDomicile() != null) {
-            InfoSessionCreationModel model = new InfoSessionCreationModel();
-            model.address_city = user.getAddressDomicile().getCity();
-            model.address_zip = user.getAddressDomicile().getZip();
-            model.address_street = user.getAddressDomicile().getStreet();
-            model.address_number = user.getAddressDomicile().getNumber();
-            model.address_bus = user.getAddressDomicile().getBus();
-
-            Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-            return ok(addinfosession.render(editForm, 0));
-        } else return ok(addinfosession.render(Form.form(InfoSessionCreationModel.class), 0));
+        InfoSessionCreationModel model = new InfoSessionCreationModel();
+        model.userEmail = user.getEmail();
+        model.address.populate(user.getAddressDomicile());
+        model.type = InfoSessionType.NORMAL.getDescription();
+        editForm = editForm.fill(model);
+        return ok(addinfosession.render(editForm, 0, getCountryList(), getTypeList()));
     }
 
     /**
@@ -100,18 +129,10 @@ public class InfoSessions extends Controller {
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 InfoSessionCreationModel model = new InfoSessionCreationModel();
-                model.type = is.getType();
-                model.time = is.getTime();
-                model.max_enrollees = is.getMaxEnrollees();
-                model.address_city = is.getAddress().getCity();
-                model.address_zip = is.getAddress().getZip();
-                model.address_street = is.getAddress().getStreet();
-                model.address_number = is.getAddress().getNumber();
-                model.address_bus = is.getAddress().getBus();
-                model.hostmail = is.getHost().getEmail();
+                model.populate(is);
 
                 Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-                return ok(addinfosession.render(editForm, sessionId));
+                return ok(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
             }
         } catch (DataAccessException ex) {
             throw ex;
@@ -158,7 +179,7 @@ public class InfoSessions extends Controller {
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
-            return badRequest(addinfosession.render(editForm, sessionId));
+            return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -170,37 +191,46 @@ public class InfoSessions extends Controller {
 
                 // Check the host field
                 UserDAO udao = context.getUserDAO();
-                User host = udao.getUser(editForm.get().hostmail);
+                User host = udao.getUser(editForm.get().userEmail);
+
                 if (host == null) {
                     editForm.reject("Infosessie gastheer bestaat niet.");
-                    return badRequest(addinfosession.render(editForm, sessionId));
+                    return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
                 }
+                session.setHost(host);
 
                 try {
-
-                    Address address = session.getAddress();
-                    address.setCity(editForm.get().address_city);
-                    address.setBus(editForm.get().address_bus);
-                    address.setNumber(editForm.get().address_number);
-                    address.setStreet(editForm.get().address_street);
-                    address.setZip(editForm.get().address_zip);
-
+                    // update address
                     AddressDAO adao = context.getAddressDAO();
-                    adao.updateAddress(address);
+                    Address newAddress = modifyAddress(editForm.get().address, session.getAddress(), adao);
+                    session.setAddress(newAddress);
 
-                    // Now we update the time
+                    // update time
                     DateTime time = editForm.get().time.withSecondOfMinute(0);
-                    if (!session.getTime().equals(time)) {
-                        session.setTime(time);
-                        dao.updateInfosessionTime(session);
+                    session.setTime(time);
+
+                    // check if amountOfAttendees < new max
+                    int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
+                    if(editForm.get().max_enrollees != 0 && editForm.get().max_enrollees < amountOfAttendees) {
+                        flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
+                        return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+                    } else {
+                        session.setMaxEnrollees(editForm.get().max_enrollees);
                     }
 
-                    if (session.getHost().getId() != host.getId()) {
-                        session.setHost(host);
-                        dao.updateInfosessionHost(session);
+                    // type
+                    InfoSessionType type = InfoSessionType.getTypeFromString(editForm.get().type);
+                    session.setType(type);
+                    String typeAlternative = null;
+                    if(type.equals(InfoSessionType.OTHER)) {
+                        typeAlternative = editForm.get().type_alternative;
                     }
+                    session.setTypeAlternative(typeAlternative);
 
-                    //TODO: update maxEnrollees, type SAVE (CHECK IF #ATTENDEES < NEW MAX!!!)
+                    // comments
+                    session.setComments(editForm.get().comments);
+
+                    dao.updateInfoSession(session);
                     context.commit();
                     flash("success", "Uw wijzigingen werden succesvol toegepast.");
                     return redirect(routes.InfoSessions.detail(sessionId));
@@ -423,25 +453,30 @@ public class InfoSessions extends Controller {
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(addinfosession.render(createForm, 0));
+            return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
         } else {
             try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
-                UserDAO udao = context.getUserDAO();
-                User host = udao.getUser(createForm.get().hostmail);
-                if (host == null) {
-                    createForm.reject("De gastheer ID bestaat niet.");
-                    return badRequest(addinfosession.render(createForm, 0));
-                }
 
                 try {
-                    User user = DatabaseHelper.getUserProvider().getUser();
-
                     AddressDAO adao = context.getAddressDAO();
-                    Address address = adao.createAddress("Belgium", createForm.get().address_zip, createForm.get().address_city, createForm.get().address_street, createForm.get().address_number, createForm.get().address_bus);
+                    Address address = modifyAddress(createForm.get().address, null, adao);
 
-                    //TODO: read InfoSessionType from form
-                    InfoSession session = dao.createInfoSession(InfoSessionType.NORMAL, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees)); //TODO: allow other hosts
+                    InfoSessionType type = InfoSessionType.getTypeFromString(createForm.get().type);
+                    String typeAlternative = null;
+                    if(type.equals(InfoSessionType.OTHER)) {
+                        typeAlternative = createForm.get().type_alternative;
+                    }
+
+                    UserDAO udao = context.getUserDAO();
+                    User host = udao.getUser(createForm.get().userEmail);
+                    if (host == null) {
+                        createForm.reject("De gastheer ID bestaat niet.");
+                        return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
+                    }
+
+                    InfoSession session = dao.createInfoSession(type, typeAlternative, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments); //TODO: allow other hosts
+
                     context.commit();
 
                     if (session != null) {
@@ -450,7 +485,7 @@ public class InfoSessions extends Controller {
                         );
                     } else {
                         createForm.error("Failed to create session in database. Contact administrator.");
-                        return badRequest(addinfosession.render(createForm, 0));
+                        return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
                     }
                 } catch (DataAccessException ex) {
                     context.rollback();

@@ -87,15 +87,28 @@ CREATE TABLE `UserRoles` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
+CREATE TABLE `CarInsurances` (
+	`insurance_id` INT NOT NULL AUTO_INCREMENT,
+	`insurance_expiration` DATETIME,
+	`insurance_contract_id` INT, # Polisnr
+	`insurance_bonus_malus` INT,
+	`insurance_created_at` DATETIME,
+	`insurance_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`insurance_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
 CREATE TABLE `TechnicalCarDetails` (
 	`details_id` INT NOT NULL AUTO_INCREMENT,
 	`details_car_license_plate` VARCHAR(64),
-	`details_car_registration` VARCHAR(64),
+	`details_car_registration` INT,
 	`details_car_chassis_number` INT(17),
 	`details_created_at` DATETIME,
 	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`details_id`),
-	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`)
+	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`),
+	FOREIGN KEY (`details_car_registration`) REFERENCES FileGroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -117,6 +130,7 @@ CREATE TABLE `Cars` (
 	`car_estimated_value` INT,
 	`car_owner_annual_km` INT,
 	`car_technical_details` INT,
+	`car_insurance` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
 	`car_images_id` INT,
@@ -126,21 +140,8 @@ CREATE TABLE `Cars` (
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES Users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES Addresses(`address_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_images_id`) REFERENCES FileGroups(`file_group_id`),
-	FOREIGN KEY (`car_technical_details`) REFERENCES TechnicalCarDetails(`details_id`)
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
-
-CREATE TABLE `CarInsurances` (
-	`insurance_id` INT NOT NULL AUTO_INCREMENT,
-	`insurance_car_id` INT NOT NULL,
-	`insurance_expiration` DATE NOT NULL,
-	`insurance_contract_id` INT NOT NULL DEFAULT '0', # Polisnr
-	`insurance_bonus_malus` INT NOT NULL DEFAULT '0',
-	`insurance_created_at` DATETIME,
-	`insurance_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`insurance_id`),
-	FOREIGN KEY (`insurance_car_id`) REFERENCES Cars(`car_id`) ON DELETE CASCADE
+	FOREIGN KEY (`car_technical_details`) REFERENCES TechnicalCarDetails(`details_id`),
+	FOREIGN KEY (`car_insurance`) REFERENCES CarInsurances(`insurance_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -164,10 +165,12 @@ ENGINE=InnoDB;
 CREATE TABLE `InfoSessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
 	`infosession_type` ENUM('NORMAL', 'OWNER', 'OTHER') NOT NULL DEFAULT 'NORMAL',
+	`infosession_type_alternative` VARCHAR(64),
 	`infosession_timestamp` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`infosession_address_id` INT NOT NULL,
 	`infosession_host_user_id` INT,
 	`infosession_max_enrollees` INT,
+	`infosession_comments` VARCHAR(256),
 	`infosession_created_at` DATETIME,
 	`infosession_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`infosession_id`),

@@ -3,13 +3,7 @@ package database.mocking;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import models.Address;
-import models.Enrollee;
-import models.EnrollementStatus;
-import models.InfoSession;
-import models.InfoSessionType;
-import models.User;
+import models.*;
 
 import org.joda.time.DateTime;
 
@@ -34,7 +28,7 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
 	public InfoSession getInfoSession(int id, boolean withAttendees) throws DataAccessException {
 		for(InfoSession session : sessions){
 			if(session.getId()==id){
-				InfoSession newSession = new InfoSession(session.getId(), session.getType(), session.getTime(), session.getAddress(), session.getHost(), session.getMaxEnrollees());
+				InfoSession newSession = new InfoSession(session.getId(), session.getType(), session.getTime(), session.getAddress(), session.getHost(), session.getMaxEnrollees(), session.getComments());
 				if(withAttendees){
 					List<Enrollee> enrolled = new ArrayList<>();
 					for(Enrollee enrollee : session.getEnrolled()){
@@ -48,7 +42,12 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
 		return null;
 	}
 
-	@Override
+    @Override
+    public int getAmountOfAttendees(int infosessionId) throws DataAccessException {
+        return 0;
+    }
+
+    @Override
 	public boolean deleteInfoSession(int id) throws DataAccessException {
 		for(InfoSession session : sessions){
 			if(session.getId()==id){
@@ -57,11 +56,6 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public void updateInfoSessionAddress(InfoSession session) throws DataAccessException {
-		// is ok
 	}
 
 	@Override
@@ -111,16 +105,26 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
 		return null;
 	}
 
-	@Override
+    @Override
+    public void updateInfoSession(InfoSession session) throws DataAccessException {
+
+    }
+
+    @Override
+    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(User user) throws DataAccessException {
+        return null;
+    }
+
+    @Override
 	public Filter createInfoSessionFilter() {
 		return new JDBCFilter();
 	}
 
 	@Override
-	public InfoSession createInfoSession(InfoSessionType type, User host,
-			Address address, DateTime time, int maxEnrollees)
+	public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, User host,
+			Address address, DateTime time, int maxEnrollees, String commentaar)
 			throws DataAccessException {
-		InfoSession session = new InfoSession(idCounter++, type, time, address, host, maxEnrollees);
+		InfoSession session = new InfoSession(idCounter++, type, time, address, host, maxEnrollees, commentaar);
 		sessions.add(session);
 		return session;
 	}
@@ -134,12 +138,5 @@ public class TestInfoSessionDAO implements InfoSessionDAO {
     public List<InfoSession> getInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         return null;
     }
-
-	@Override
-	public void updateInfosessionTime(InfoSession session)
-			throws DataAccessException {
-		// ok
-		
-	}
 
 }

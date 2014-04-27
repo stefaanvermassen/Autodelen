@@ -13,7 +13,7 @@
     <tbody>
         @for(session <- sessions) {
             <tr @if(enrolled != null && session.getId == enrolled.getId) {class="info"}>
-            <td>@session.getType.getDescription</td> <!-- TODO: mooi weergeven met icoontje ofzo -->
+            <td>@session.getType.getDescription  @if(session.getType.equals(InfoSessionType.OTHER)) { : @session.getTypeAlternative }</td> <!-- TODO: mooi weergeven met icoontje ofzo -->
             <td>@session.getTime.toString("dd-MM-yyyy HH:mm")</td>
             @if(session.getMaxEnrollees != 0) {
                 @if(session.getEnrolleeCount == session.getMaxEnrollees) {
