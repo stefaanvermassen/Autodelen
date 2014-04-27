@@ -356,3 +356,59 @@
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_firstname";
   INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_lastname";
+
+  #--Tankbeurt aanvraag
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  16,
+  "Tankbeurt aanvraag",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Er werd zonet een tankbeurt ingegeven voor uw wagen. Gelieve deze zo snel mogelijk goed te keuren.<br>
+  %car_name%
+  <br>
+  %amount%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "car_name";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "amount";
+
+  #--Autokost aanvraag
+
+  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  17,
+  "Autokost aanvraag",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  Er werd zonet een autokost ingegeven voor de volgende wagen. Gelieve deze zo snel mogelijk goed te keuren.<br>
+  %car_name%
+  <br>
+  %car_cost_description%
+  <br>
+  %amount%
+  <br>
+  %car_cost_time%
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_firstname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_lastname";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_name";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_description";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "amount";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_time";

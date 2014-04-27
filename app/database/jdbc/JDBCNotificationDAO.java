@@ -3,6 +3,7 @@ package database.jdbc;
 import database.*;
 import models.Notification;
 import models.User;
+import models.UserRole;
 import org.joda.time.DateTime;
 
 import java.sql.*;
