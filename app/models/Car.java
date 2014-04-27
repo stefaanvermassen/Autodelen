@@ -25,14 +25,15 @@ public class Car {
     private Integer estimatedValue;
     private Integer ownerAnnualKm;
     private TechnicalCarDetails technicalCarDetails;
+    private CarInsurance insurance;
     private User owner;
     private String comments;
 
     public Car() {
-        this(0, null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null);
+        this(0, null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null, null);
     }
 
-    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, User owner, String comments) {
+    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -48,6 +49,7 @@ public class Car {
         this.estimatedValue = estimatedValue;
         this.ownerAnnualKm = ownerAnnualKm;
         this.technicalCarDetails = technicalCarDetails;
+        this.insurance = insurance;
         this.owner = owner;
         this.comments = comments;
     }
@@ -168,6 +170,14 @@ public class Car {
         this.technicalCarDetails = technicalCarDetails;
     }
 
+    public CarInsurance getInsurance() {
+        return insurance;
+    }
+
+    public void setInsurance(CarInsurance insurance) {
+        this.insurance = insurance;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -208,6 +218,8 @@ public class Car {
         if (seats != null ? !seats.equals(car.seats) : car.seats != null) return false;
         if (technicalCarDetails != null ? !technicalCarDetails.equals(car.technicalCarDetails) : car.technicalCarDetails != null)
             return false;
+        if (insurance != null ? !insurance.equals(car.insurance) : car.insurance != null)
+            return false;
         if (type != null ? !type.equals(car.type) : car.type != null) return false;
         if (year != null ? !year.equals(car.year) : car.year != null) return false;
 
@@ -231,6 +243,7 @@ public class Car {
         result = 31 * result + (estimatedValue != null ? estimatedValue.hashCode() : 0);
         result = 31 * result + (ownerAnnualKm != null ? ownerAnnualKm.hashCode() : 0);
         result = 31 * result + (technicalCarDetails != null ? technicalCarDetails.hashCode() : 0);
+        result = 31 * result + (insurance != null ? insurance.hashCode() : 0);
         result = 31 * result + (owner != null ? owner.getId() : 0);
         result = 31 * result + (comments != null ? comments.hashCode() : 0);
         return result;

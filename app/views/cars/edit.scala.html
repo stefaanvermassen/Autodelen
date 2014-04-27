@@ -2,11 +2,30 @@
 @import database.DatabaseHelper;
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
-
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 @scripts = {
+
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
     <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
     <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+    <script>
+        $(document).ready(function() {
+
+            $('#datepicker').datetimepicker({
+                weekStart: 1,
+                language: 'nl',
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                startDate: new Date()
+            });
+        });
+    </script>
 
 }
 
@@ -235,7 +254,7 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
                                             <div class="col-md-12">
-                                                <input id="registration" name="registration" type="text" class="form-control input-md" value="@form("registration").value">
+                                               Fileupload placeholder
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -247,7 +266,43 @@
                                     </fieldset>
                                 </div>
                             </div>
-                            <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
+                        </div>
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Verzekering</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="expiration">Vervaldatum</label>
+                                            <div class="col-md-4">
+                                                <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="expiration">
+                                                    <input class="form-control input-md" size="16" type="text" value="@form("expiration").value"readonly>
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                </div>
+                                                <input type="text" class="hidden" id="expiration" name="expiration" value="@form("expiration").value" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="bonusMalus">Bonus Malus</label>
+                                            <div class="col-md-12">
+                                                <input id="bonusMalus" name="bonusMalus" type="number" class="form-control input-md" value="@form("bonusMalus").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="polisNr">Polis nummer</label>
+                                            <div class="col-md-12">
+                                                <input id="polisNr" name="polisNr" type="number" class="form-control input-md" value="@form("polisNr").value">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                                <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
                         </div>
                         <div class="form-group">
                             @if(car == null) {
