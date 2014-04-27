@@ -38,7 +38,8 @@ public class JDBCRefuelDAO implements RefuelDAO {
                     "JOIN CarRides ON refuel_car_ride_id = car_ride_car_reservation_id " +
                     "JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
                     "JOIN Cars ON reservation_car_id = car_id " +
-                    "JOIN Users ON reservation_user_id = user_id WHERE refuel_id = ? ");
+                    "JOIN Users ON reservation_user_id = user_id " +
+                    "LEFT JOIN FILES ON refuel_file_id = file_id WHERE refuel_id = ? ");
         }
         return getRefuelStatement;
     }
