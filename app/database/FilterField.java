@@ -11,6 +11,7 @@ public enum FilterField {
 
     CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true),
     CAR_COST_STATUS(false), CAR_COST_DATE(true),
+    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_NOT_STATUS(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
     INFOSESSION_DATE(true), INFOSESSION_TYPE(false),

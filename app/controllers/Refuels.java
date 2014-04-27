@@ -3,18 +3,22 @@ package controllers;
 import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
+import controllers.util.Pagination;
 import database.*;
+import database.providers.UserRoleProvider;
 import models.Refuel;
 import models.RefuelStatus;
 import models.User;
 import models.UserRole;
 import notifiers.Notifier;
+import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import views.html.refuels.editmodal;
 import views.html.refuels.refuels;
+import views.html.refuels.refuelspage;
 import views.html.refuels.refuelsOwner;
 
 import java.io.IOException;
@@ -26,6 +30,8 @@ import java.util.List;
  * Created by Stefaan Vermassen on 26/04/14.
  */
 public class Refuels extends Controller {
+
+    private static final int PAGE_SIZE = 10;
 
     public static class RefuelModel {
 
@@ -44,15 +50,60 @@ public class Refuels extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result showRefuels() {
+        return ok(refuels.render());
+    }
+
+    public static Result showUserRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
         User user = DatabaseHelper.getUserProvider().getUser();
+        filter.putValue(FilterField.REFUEL_USER_ID, user.getId() + "");
+
+        // TODO: Check if admin or car owner/user
+
+        return ok(refuelList(page, field, asc, filter));
+
+    }
+
+    public static Result showOwnerRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        User user = DatabaseHelper.getUserProvider().getUser();
+        filter.putValue(FilterField.REFUEL_OWNER_ID, user.getId() + "");
+        filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
+
+        // TODO: Check if admin or car owner/user
+
+        return ok(refuelList(page, field, asc, filter));
+
+    }
+
+    private static Html refuelList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
-            List<Refuel> refuelList = dao.getRefuelsForUser(user.getId());
-            return ok(refuels.render(refuelList));
+
+            if(orderBy == null) {
+                orderBy = FilterField.REFUEL_NOT_STATUS; // not neccessary, but orderBy cannot be null
+            }
+            List<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfRefuels(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return refuelspage.render(listOfResults, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }
     }
+
 
     /**
      * Method: GET
@@ -61,14 +112,7 @@ public class Refuels extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result showOwnerRefuels() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            RefuelDAO dao = context.getRefuelDAO();
-            List<Refuel> refuelList = dao.getRefuelsForOwner(user.getId());
-            return ok(refuelsOwner.render(refuelList));
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        return ok(refuelsOwner.render());
     }
 
     /**
