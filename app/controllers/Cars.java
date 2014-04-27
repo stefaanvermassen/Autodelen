@@ -371,8 +371,12 @@ public class Cars extends Controller {
                 car.setType(model.type);
                 if(model.doors != null)
                     car.setDoors(model.doors);
+                else
+                    car.setDoors(null);
                 if(model.seats != null)
                     car.setSeats(model.seats);
+                else
+                    car.setSeats((null));
                 car.setGps(model.gps);
                 car.setHook(model.hook);
                 car.setFuel(CarFuel.getFuelFromString(model.fuel));
