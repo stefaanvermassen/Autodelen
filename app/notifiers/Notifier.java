@@ -144,7 +144,6 @@ public class Notifier extends Mailer {
             List<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
             mail = replaceCarCostTags(carCost, template.getBody());
             for(User u: carAdminList){
-                System.out.println(u.getFirstName());
                 mail = replaceUserTags(u, mail);
                 notificationDAO.createNotification(u, template.getSubject(), mail);
             }
