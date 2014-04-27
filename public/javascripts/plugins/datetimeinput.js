@@ -3,10 +3,10 @@
  * Datetimeinput v2
  * =========================================
  *
- * This script contains an extra plugin to JQuery named datetimeinput.
- * It links a datetimepicker object to an element, giving it several extra functionalities:
- * - Input validation
- * - Restriction of input tokens to numbers only
+ * This script contains an extra plugin to JQuery named datetimeinput
+ * giving an input field several extra functionalities:
+ * - input validation of a date, time or datetime
+ * - restriction of input tokens to numbers only
  *
  * An datetimeinput can be creating whilst handing it several specific options. Though these
  * options are not yet implemented, the functionality is already added to the datetimeinput object.
