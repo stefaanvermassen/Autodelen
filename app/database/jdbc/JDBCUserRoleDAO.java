@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
+import models.User;
 import models.UserRole;
 import database.DataAccessException;
 import database.UserRoleDAO;
@@ -16,6 +19,7 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 	private PreparedStatement insertUserRolesStatement;
     private PreparedStatement removeUserRolesStatement;
     private PreparedStatement getUserRolesStatement;
+    private PreparedStatement getUsersByRoleStatement;
     
 	public JDBCUserRoleDAO(Connection connection) {
 		this.connection = connection;
@@ -41,6 +45,13 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
     	}
     	return getUserRolesStatement;
     }
+
+    private PreparedStatement getGetUsersByRoleStatement() throws SQLException {
+        if(getUsersByRoleStatement == null){
+            getUsersByRoleStatement = connection.prepareStatement("SELECT * FROM UserRoles JOIN Users ON userrole_userid = userrole_userid WHERE userrole_role = ? OR userrole_role = 'SUPER_USER'");
+        }
+        return getUsersByRoleStatement;
+    }
     
 	@Override
 	public EnumSet<UserRole> getUserRoles(int userId) throws DataAccessException {
@@ -62,7 +73,26 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 		
 	}
 
-	@Override
+    @Override
+    public List<User> getUsersByRole(UserRole userRole) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetUsersByRoleStatement();
+            ps.setString(1, userRole.name());
+            List<User> userList = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()){
+                while(rs.next()){
+                    userList.add(JDBCUserDAO.populateUser(rs, false, false, "Users"));
+                }
+                return userList;
+            } catch (SQLException ex){
+                throw new DataAccessException("Error reading resultset",ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get overview",ex);
+        }
+    }
+
+    @Override
 	public void addUserRole(int userId, UserRole role) throws DataAccessException {
 		try {
 			PreparedStatement ps = getInsertUserRolesStatement();

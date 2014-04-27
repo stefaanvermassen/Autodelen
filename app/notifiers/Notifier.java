@@ -9,6 +9,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
 
+import java.util.List;
+
 
 /**
  * Created by Stefaan Vermassen on 16/02/14.
@@ -117,6 +119,46 @@ public class Notifier extends Mailer {
             }else{
                 template = dao.getTemplate(MailType.REFUEL_REFUSED);
             }
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceRefuelTags(refuel, mail);
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            notificationDAO.createNotification(user, template.getSubject(), mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    public static void sendCarCostRequest(CarCost carCost) {
+        String mail = "";
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
+            UserRoleDAO userRoleDAO = context.getUserRoleDAO();
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            List<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
+            mail = replaceCarCostTags(carCost, template.getBody());
+            for(User u: carAdminList){
+                System.out.println(u.getFirstName());
+                mail = replaceUserTags(u, mail);
+                notificationDAO.createNotification(u, template.getSubject(), mail);
+            }
+
+        }catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    public static void sendRefuelRequest(User user, Refuel refuel) {
+        String mail = "";
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.REFUEL_REQUEST);
             mail = replaceUserTags(user, template.getBody());
             mail = replaceRefuelTags(refuel, mail);
             NotificationDAO notificationDAO = context.getNotificationDAO();
