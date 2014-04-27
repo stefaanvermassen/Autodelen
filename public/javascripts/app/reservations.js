@@ -22,7 +22,7 @@ $(document).ready(function() {
     var inputFrom = $('#input_from_date');
     var inputTo = $('#input_to_date');
 
-    $("#test").calendar({
+    $("#calendar").calendar({
         startDateId: inputFrom,
         endDateId: inputTo,
         dateFormat: format
@@ -48,13 +48,19 @@ $(document).ready(function() {
     });
 
     $('#extraFiltering').on('shown.bs.collapse', function (e) {
-        $('html, body').animate({scrollTop: $(this).offset().top + -50}, 1000);
+        $('html, body').animate({scrollTop: $(this).offset().top - 50}, 1000);
     });
 
-    $('#searchButton').on('mousedown', function() {
+    var search = $('#searchButton');
+
+    search.on('mousedown', function() {
         $('#input_from_value').val($('#input_from_date').val() + ' ' + $('#input_from_time').val());
         $('#input_to_value').val($('#input_to_date').val() + ' ' + $('#input_to_time').val());
         $('#input_fuel').val($('#selectFuel').find('option:selected').val());
+    });
+
+    search.on('mouseup', function() {
+        $('html, body').animate({scrollTop: $('#resultsTable').offset().top - 50}, 1000);
     });
 
 });

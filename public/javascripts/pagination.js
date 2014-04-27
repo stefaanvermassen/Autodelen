@@ -101,7 +101,6 @@ function importSearchTextFields() {
         }
     }
     var searchString = createSearchString(fields, values);
-    console.log(searchString);
     return searchString;
 }
 
