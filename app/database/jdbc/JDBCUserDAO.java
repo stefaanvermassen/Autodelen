@@ -242,6 +242,9 @@ public class JDBCUserDAO implements UserDAO {
 
     @Override
     public User getUser(String email) {
+        if(email == null || email.isEmpty())
+            return null;
+
         try {
             PreparedStatement ps = getUserByEmailStatement();
             ps.setString(1, email);

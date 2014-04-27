@@ -4,57 +4,70 @@
 // Javascript route
 var route = myJsRoutes.controllers.Reserve.showCarsPage;
 
-$(document).ready(function() {
-    // Specify dates today and later
-    var now = new Date();
-    var later = new Date();
-    later.setMinutes(later.getMinutes() + 5);
-    // First datetimepicker
-    $('#datetimepickerfrom').datetimepicker({
-        weekStart: 1,
-        language: 'nl',
-        todayBtn: 0,
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-        linkFormat: "yyyy-mm-dd HH:ii",
-        startDate: now // current date and time
-    });
-    $('#datetimepickeruntil').datetimepicker({
-        weekStart: 1,
-        language: 'nl',
-        todayBtn: 0,
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-        linkFormat: "yyyy-mm-dd HH:ii",
-        startDate: later // date and time to five minutes later than now
-    });
-    $("#input_from").datetimeinput();
-    $("#input_until").datetimeinput();
-});
+function loadModal(carId) {
+    myJsRoutes.controllers.Reserve.reserve(carId, $('#input_from_value' ).val(), $('#input_to_value' ).val()).ajax({
+        success : function(html) {
+            $("#resultModal").html(html);
+            $('#detailsModal').modal('show');
 
+        },
+        error : function() {
+            $("#resultModal").html("De reservatie kan niet worden uitgevoerd, probeer later opnieuw");
+        }
+    });
+}
+
+$(document).ready(function() {
+    var format = "yyyy-mm-dd";
+    var inputFrom = $('#input_from_date');
+    var inputTo = $('#input_to_date');
+
+    $("#calendar").calendar({
+        startDateId: inputFrom,
+        endDateId: inputTo,
+        dateFormat: format
+    }) ;
+
+    inputFrom.datetimeinput({
+        formatString: format
+    });
+    inputTo.datetimeinput({
+        formatString: format
+    });
+    $('#input_from_time').timeinput();
+    $('#input_to_time').timeinput();
+
+    $('#extraButton').on('click', function() {
+        if(!$('#extraFiltering').hasClass('in')) {
+            $('#extraEnv').append($('#filterbuttons'));
+            $('#extraButton').html('Minder filteropties');
+        } else {
+            $('#basicEnv').append($('#filterbuttons'));
+            $('#extraButton').html('Meer filteropties');
+        }
+    });
+
+    $('#extraFiltering').on('shown.bs.collapse', function (e) {
+        $('html, body').animate({scrollTop: $(this).offset().top - 50}, 1000);
+    });
+
+    var search = $('#searchButton');
+
+    search.on('mousedown', function() {
+        $('#input_from_value').val($('#input_from_date').val() + ' ' + $('#input_from_time').val());
+        $('#input_to_value').val($('#input_to_date').val() + ' ' + $('#input_to_time').val());
+        $('#input_fuel').val($('#selectFuel').find('option:selected').val());
+    });
+
+    search.on('mouseup', function() {
+        $('html, body').animate({scrollTop: $('#resultsTable').offset().top - 50}, 1000);
+    });
+
+});
 
 // Adjust the value of a checkbox to it's state (checked or unchecked)
 $('input[type=checkbox]').each(function () {
     $(this).on('change', function() {
         this.value = this.checked ? 1 : 0;
     })
-});
-
-$('#reset').on('click', function() {
-    $('#name').val('');
-    $('#zipcode').val('');
-    $('#seats').val('');
-    $("#input_from").datetimeinput("resetDatetimeinput");
-    $("#input_until").datetimeinput("resetDatetimeinput");
-    $('input[type=checkbox]').each(function () {
-       $(this).attr('checked', false);
-       $(this).val(0);
-    });
-    $('#searchButton').click();
 });

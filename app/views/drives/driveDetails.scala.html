@@ -141,7 +141,7 @@
                                 </div>
                             </div>
                             @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                @views.html.drives.driveInfo(infoForm, reservation, driveInfo, false);
+                                @views.html.drives.driveInfo(infoForm, reservation, driveInfo, false)
                             }
                             @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) &&
                                     driveInfo != null) {

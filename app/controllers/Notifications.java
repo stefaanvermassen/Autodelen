@@ -68,10 +68,12 @@ public class Notifications extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result markNotificationAsRead(int notificationId) {
+        User user = DatabaseHelper.getUserProvider().getUser();
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             NotificationDAO dao = context.getNotificationDAO();
             dao.markNotificationAsRead(notificationId);
             context.commit();
+            DatabaseHelper.getCommunicationProvider().invalidateNotifications(user.getId());
             return redirect(routes.Notifications.showNotifications());
         } catch (DataAccessException ex) {
             throw ex;

@@ -20,8 +20,10 @@ public class Approval {
     private DateTime reviewed;
     private InfoSession session;
     private ApprovalStatus status;
+    private String userMessage;
+    private String adminMessage;
 
-    public Approval(int id, User user, User admin, DateTime submitted, DateTime reviewed, InfoSession session, ApprovalStatus status) {
+    public Approval(int id, User user, User admin, DateTime submitted, DateTime reviewed, InfoSession session, ApprovalStatus status, String userMessage, String adminMessage) {
         this.id = id;
         this.user = user;
         this.admin = admin;
@@ -29,11 +31,30 @@ public class Approval {
         this.reviewed = reviewed;
         this.session = session;
         this.status = status;
+        this.userMessage = userMessage;
+        this.adminMessage = adminMessage;
     }
 
     public int getId(){
         return id;
     }
+
+    public String getUserMessage() {
+        return userMessage;
+    }
+
+    public void setUserMessage(String userMessage) {
+        this.userMessage = userMessage;
+    }
+
+    public String getAdminMessage() {
+        return adminMessage;
+    }
+
+    public void setAdminMessage(String adminMessage) {
+        this.adminMessage = adminMessage;
+    }
+
 
     public User getUser() {
         return user;

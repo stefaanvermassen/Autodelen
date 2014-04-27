@@ -62,6 +62,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement setUserEnrollmentStatusForSession;
     private PreparedStatement updateInfoSession;
     private PreparedStatement getGetAmountOfInfoSessionsStatement;
+    private PreparedStatement setInfosessionHostStatement;
     private PreparedStatement getLastInfoSessionForUserStatement;
 
     public JDBCInfoSessionDAO(Connection connection) {

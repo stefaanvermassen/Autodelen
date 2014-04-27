@@ -23,6 +23,7 @@ public class Application extends Controller {
                         routes.javascript.Cars.showCarsPage(),
                         routes.javascript.Cars.showCarCostsPage(),
                         routes.javascript.Cars.getCarCostModal(),
+                        routes.javascript.Refuels.provideRefuelInfo(),
                         routes.javascript.InfoSessions.showUpcomingSessionsPage(),
                         routes.javascript.InfoSessions.showSessionsPage(),
                         routes.javascript.Reserve.showCarsPage(),
@@ -35,7 +36,8 @@ public class Application extends Controller {
                         routes.javascript.InfoSessions.enrollSession(),
                         routes.javascript.Drives.showDrivesPage(),
                         routes.javascript.Maps.getMap(),
-                        routes.javascript.Reserve.getCarModal()
+                        routes.javascript.InfoSessions.pendingApprovalListPaged(),
+                        routes.javascript.Reserve.reserve()
                 )
         );
     }

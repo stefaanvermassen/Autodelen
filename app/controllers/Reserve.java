@@ -15,8 +15,11 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import views.html.reserve.*;
+import views.html.reserve.reservationDetailsPartial;
+import views.html.reserve.reservations;
 import views.html.reserve.reservationspage;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -69,7 +72,6 @@ public class Reserve extends Controller {
          * @return an error string or null
          */
         public String validate() {
-            DateTime now = DateTime.now();
             DateTime dateFrom = null;
             DateTime dateUntil = null;
             try {
@@ -81,33 +83,13 @@ public class Reserve extends Controller {
                 else
                     return "Ongeldig datum: tot = " + until;
             }
-            if("".equals(dateFrom) || "".equals(dateUntil)) {
+            if("".equals(dateFrom) || "".equals(dateUntil))
                 return "Gelieve zowel een begin als einddatum te selecteren!";
-            } else if(dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
+            else if(dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil))
                 return "De einddatum kan niet voor de begindatum liggen!";
-            } else if(dateFrom.isBefore(now)) {
-                return "Een reservatie die plaats vindt voor vandaag is ongeldig";
-            }
             return null;
         }
 
-    }
-
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
-    public static Result getCarModal(int id){
-        // TODO: hide from other users (badRequest)
-
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
-            CarDAO dao = context.getCarDAO();
-            Car car = dao.getCar(id);
-            if(car == null){
-                return badRequest("Fail."); //TODO: error in flashes?
-            } else {
-                return ok(reservationDetailsPartial.render(car));
-            }
-        } catch(DataAccessException ex){
-            throw ex; //log?
-        }
     }
 
     /**
@@ -124,7 +106,7 @@ public class Reserve extends Controller {
      * @return The html context of the reservations index page
      */
     public static Html showIndex() {
-        return reservations.render();
+        return reservations.render("");
     }
 
     /**
@@ -134,32 +116,23 @@ public class Reserve extends Controller {
      * confirm the reservation and specify the start and end of the reservation
      *
      * @param carId the id of the car for which the reservationsdetails ought to be rendered
+     * @param from the string containing the date and time of the start of the reservation
+     * @param until the string containing the date and time of the end of the reservation
      * @return the details page of a future reservation for a car
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
-    public static Result reserve(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+    public static Result reserve(int carId, String from, String until){
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
             if (car == null) {
                 flash("danger", "De reservatie van deze auto is onmogelijk: auto onbestaand!");
                 return badRequest(showIndex());
+            } else {
+                return ok(reservationDetailsPartial.render(car, from, until, Form.form(ReservationModel.class)));
             }
-
-            ReservationDAO rdao = context.getReservationDAO();
-            List<Reservation> reservations = rdao.getReservationListForCar(carId);
-            Iterator<Reservation> it = reservations.iterator();
-            while(it.hasNext())
-            {
-                Reservation reservation = it.next();
-                if(reservation.getStatus() == ReservationStatus.REFUSED
-                        || reservation.getStatus() == ReservationStatus.CANCELLED)
-                    it.remove();
-            }
-
-            return ok(reservationDetails.render(Form.form(ReservationModel.class), car, reservations));
-        } catch(DataAccessException ex) {
-            throw ex;
+        } catch(DataAccessException ex){
+            throw ex; //log?
         }
     }
 
@@ -185,21 +158,20 @@ public class Reserve extends Controller {
                 return badRequest(showIndex());
             }
             ReservationDAO rdao = context.getReservationDAO();
-            List<Reservation> reservations = rdao.getReservationListForCar(carId);
+            List<Reservation> res = rdao.getReservationListForCar(carId);
             // Request the form
             Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
             if(reservationForm.hasErrors()) {
-                return badRequest(reservationDetails.render(reservationForm, car, reservations));
+                return badRequest(reservations.render(reservationForm.globalError().message()));
             }
             try {
                 // Test whether the reservation is valid
                 DateTime from = reservationForm.get().getTimeFrom();
                 DateTime until = reservationForm.get().getTimeUntil();
-                for(Reservation reservation : reservations) {
+                for(Reservation reservation : res) {
                     if((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                             (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
-                        reservationForm.reject("De reservatie overlapt met een reeds bestaande reservatie!");
-                        return badRequest(reservationDetails.render(reservationForm, car, reservations));
+                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!"));
                     }
                 }
 
@@ -217,10 +189,8 @@ public class Reserve extends Controller {
                         Notifier.sendReservationApproveRequestMail(car.getOwner(), reservation);
                     }
                     return redirect(routes.Drives.index());
-                } else {
-                    reservationForm.error("De reservatie kon niet aangemaakt worden. Contacteer de administrator");
-                    return badRequest(reservationDetails.render(reservationForm, car, reservations));
-                }
+                } else
+                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator"));
             } catch(DataAccessException ex) {
                 throw ex;
             }
@@ -259,13 +229,19 @@ public class Reserve extends Controller {
             if(field == null) {
                 field = FilterField.CAR_NAME;
             }
+            try {
+                DATEFORMATTER.parseDateTime(filter.getValue(FilterField.FROM));
+                DATEFORMATTER.parseDateTime(filter.getValue(FilterField.UNTIL));
+            } catch(IllegalArgumentException ex) {
+                return ok(reservationspage.render(new ArrayList<Car>(), page, 0, 0, false));
+            }
 
             List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
 
             int amountOfResults = dao.getAmountOfCars(filter);
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
-            return ok(reservationspage.render(listOfCars, page, amountOfResults, amountOfPages));
+            return ok(reservationspage.render(listOfCars, page, amountOfResults, amountOfPages, true));
         } catch (DataAccessException ex) {
             throw ex;
         }

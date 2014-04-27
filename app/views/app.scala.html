@@ -167,7 +167,7 @@
                         <li @if(title == "Infosessies") {class="active"}>
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_USER)){
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.CAR_USER)){
                         <li @if(title == "Reserveren") {class="active"}>
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
@@ -183,15 +183,21 @@
                                 }
                             </a>
                         </li>
+                        <li @if(title == "Tankbeurten") {class="active"}>
+                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
+                        </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Receipts.index"><i class="fa fa-tasks fa-fw"></i> Afrekeningen</a>
                         </li>
                         }
 
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_OWNER)){
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.CAR_OWNER)){
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
                             <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                        </li>
+                        <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
+                            <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
                         </li>
                         }
 
@@ -219,36 +225,39 @@
                             <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
                         </li>
 
-                        @if((DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN) ||
-                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN) ||
-                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN) ||
-                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN) ||
-                                DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN))){
+                        @if(DatabaseHelper.getUserRoleProvider.isAdmin(user)){
                             <li class="submenu">ADMIN</li>
-                        }
 
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.MAIL_ADMIN)){
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.MAIL_ADMIN)){
                         <li @if(title == "Emailtemplates") {class="active"}>
                             <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
                         </li>
                         }
 
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)){
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.RESERVATION_ADMIN)){
                             <li @if(title == "Ritten (Admin)") {class="active"}>
                             <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
                             </li>
                         }
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)){
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.PROFILE_ADMIN)){
                         <li @if(title == "Gebruikers") {class="active"}>
                             <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
                         </li>
                         }
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)){
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasSomeRole(user, Array(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN) )){
+                            <li>
+                                <a href="@routes.InfoSessions.pendingApprovalList"><i class="fa fa-file fa-fw"></i> Goedkeuring gebruikers</a>
+                            </li>
+                        }
+
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.INFOSESSION_ADMIN)){
                             <li @if(title == "Infosessies (Admin)") {class="active"}>
                             <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
                             </li>
                         }
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)){
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.CAR_ADMIN)){
                             <li @if(title == "Auto's (Admin)") {class="active"}>
                             <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
                             </li>
@@ -257,7 +266,7 @@
                             </li>
                         }
 
-                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.SUPER_USER)){
+                        @if(DatabaseHelper.getUserRoleProvider.hasRole(user, UserRole.SUPER_USER)){
                         <li class="submenu">SUPERUSER</li>
                         <li @if(title == "Gebruikersrollen") {class="active"}>
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
@@ -271,6 +280,7 @@
                             <a href="http://zelensis.ugent.be/verslagen/"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
                         }
+                                }
                     </ul>
                     <!-- /#side-menu -->
                 </div>

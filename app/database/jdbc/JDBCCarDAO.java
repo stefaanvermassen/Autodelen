@@ -16,13 +16,17 @@ import java.util.List;
 import database.FilterField;
 import models.*;
 import org.h2.command.Prepared;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
  * @author Laurent
  */
 public class JDBCCarDAO implements CarDAO{
-    
+
+    private static final DateTimeFormatter DATEFORMATTER =
+            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
     private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
 
     public static final String CAR_QUERY = "SELECT * FROM Cars " +
@@ -31,7 +35,7 @@ public class JDBCCarDAO implements CarDAO{
             "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details ";
 
     public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_brand LIKE ? AND Cars.car_gps >= ? " +
-            "AND Cars.car_hook >= ? AND Cars.car_seats >= ? AND Addresses.address_zipcode LIKE ? " +
+            "AND Cars.car_hook >= ? AND Cars.car_seats >= ? AND Addresses.address_zipcode LIKE ? AND Cars.car_fuel LIKE ? " +
             "AND Cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM Cars INNER JOIN Carreservations " +
             "ON Carreservations.reservation_car_id = Cars.car_id " +
             "WHERE ? < CarReservations.reservation_to  AND ? >  CarReservations.reservation_from)";
@@ -47,8 +51,12 @@ public class JDBCCarDAO implements CarDAO{
         ps.setString(start+3, filter.getValue(FilterField.CAR_HOOK));
         ps.setString(start+4, filter.getValue(FilterField.CAR_SEATS));
         ps.setString(start+5, filter.getValue(FilterField.ZIPCODE));
-        ps.setString(start+6, filter.getValue(FilterField.FROM));
-        ps.setString(start+7, filter.getValue(FilterField.UNTIL));
+        String fuel = filter.getValue(FilterField.CAR_FUEL);
+        if(fuel.equals("All") || fuel.equals(""))
+            fuel = "%%";
+        ps.setString(start+6, fuel);
+        ps.setString(start+7, filter.getValue(FilterField.FROM));
+        ps.setString(start+8, filter.getValue(FilterField.UNTIL));
     }
 
     private Connection connection;
@@ -510,8 +518,8 @@ public class JDBCCarDAO implements CarDAO{
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(9, first);
-            ps.setInt(10, pageSize);
+            ps.setInt(10, first);
+            ps.setInt(11, pageSize);
             return getCars(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
