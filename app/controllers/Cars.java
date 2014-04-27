@@ -87,8 +87,13 @@ public class Cars extends Controller {
 
         // TechnicalCarDetails
         public String licensePlate;
-        public String registration;
+        // public String registration; // TODO: file inschrijvingsbewijs
         public Integer chassisNumber;
+
+        // Insurance
+        public DateTime expiration;
+        public Integer bonusMalus;
+        public Integer polisNr;
 
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
@@ -113,8 +118,13 @@ public class Cars extends Controller {
 
             if(car.getTechnicalCarDetails() != null) {
                 licensePlate = car.getTechnicalCarDetails().getLicensePlate();
-                registration = car.getTechnicalCarDetails().getRegistration();
                 chassisNumber = car.getTechnicalCarDetails().getChassisNumber();
+            }
+
+            if(car.getInsurance() != null) {
+                expiration = new DateTime(car.getInsurance().getExpiration());
+                bonusMalus = car.getInsurance().getBonusMalus();
+                polisNr = car.getInsurance().getPolisNr();
             }
 
             address.populate(car.getLocation());
@@ -259,13 +269,19 @@ public class Cars extends Controller {
                         owner = DatabaseHelper.getUserProvider().getUser(model.userEmail);
                     }
                     TechnicalCarDetails technicalCarDetails = null;
-                    if((model.licensePlate != null && !model.licensePlate.equals("")) || (model.registration != null && !model.registration.equals(""))
+                    // TODO: registration
+                    if((model.licensePlate != null && !model.licensePlate.equals(""))
                             || (model.chassisNumber != null && model.chassisNumber != 0)) {
-                        technicalCarDetails = new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber);
+                        technicalCarDetails = new TechnicalCarDetails(model.licensePlate, null, model.chassisNumber);
+                    }
+                    CarInsurance insurance = null;
+                    if((model.expiration != null || (model.polisNr != null && model.polisNr != 0))
+                            || (model.bonusMalus != null && model.bonusMalus != 0)) {
+                        insurance = new CarInsurance(model.expiration, model.bonusMalus, model.polisNr);
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, technicalCarDetails, owner, model.comments);
+                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments);
 
                     context.commit();
 
@@ -376,24 +392,42 @@ public class Cars extends Controller {
                     car.setOwnerAnnualKm(model.ownerAnnualKm);
                 else
                     car.setOwnerAnnualKm(null);
+                // TODO: registration
                 if(car.getTechnicalCarDetails() == null) {
-                    if((model.licensePlate != null && !model.licensePlate.equals("")) || (model.registration != null && !model.registration.equals(""))
+                    if((model.licensePlate != null && !model.licensePlate.equals(""))
                             || (model.chassisNumber != null && model.chassisNumber != 0))
-                        car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, model.registration, model.chassisNumber));
+                        car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, null, model.chassisNumber));
                 }
                 else {
                     if(model.licensePlate != null && !model.licensePlate.equals(""))
                         car.getTechnicalCarDetails().setLicensePlate(model.licensePlate);
                     else
                         car.getTechnicalCarDetails().setLicensePlate(null);
-                    if(model.registration != null && !model.registration.equals(""))
-                        car.getTechnicalCarDetails().setRegistration(model.registration);
-                    else
+
                         car.getTechnicalCarDetails().setRegistration(null);
                     if(model.chassisNumber != null && model.chassisNumber != 0)
                         car.getTechnicalCarDetails().setChassisNumber(model.chassisNumber);
                     else
                         car.getTechnicalCarDetails().setChassisNumber(null);
+                }
+                if(car.getInsurance() == null) {
+                    if((model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)
+                            || (model.polisNr != null && model.polisNr != 0))
+                        car.setInsurance(new CarInsurance(model.expiration, model.bonusMalus, model.polisNr));
+                }
+                else {
+                    if(model.expiration != null)
+                        car.getInsurance().setExpiration(model.expiration);
+                    else
+                        car.getInsurance().setExpiration(null);
+                    if(model.bonusMalus != null && model.bonusMalus != 0)
+                        car.getInsurance().setBonusMalus(model.bonusMalus);
+                    else
+                        car.getInsurance().setBonusMalus(null);
+                    if(model.polisNr != null && model.polisNr != 0)
+                        car.getInsurance().setPolisNr(model.polisNr);
+                    else
+                        car.getInsurance().setPolisNr(null);
                 }
                 AddressDAO adao = context.getAddressDAO();
                 Address address = car.getLocation();

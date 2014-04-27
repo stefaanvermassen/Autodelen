@@ -37,7 +37,7 @@ public class TestCarDAO implements CarDAO{
 				return new Car(car.getId(),car.getName(), car.getBrand(),car.getType(), car.getLocation(),car.getSeats(),
 						car.getDoors(),car.getYear(),car.isGps(),car.isHook(),car.getFuel(),
 						car.getFuelEconomy(),car.getEstimatedValue(),car.getOwnerAnnualKm(),
-						car.getTechnicalCarDetails(), car.getOwner(),car.getComments());
+						car.getTechnicalCarDetails(), car.getInsurance(), car.getOwner(),car.getComments());
 				}
 		}
 		return null;
@@ -52,9 +52,9 @@ public class TestCarDAO implements CarDAO{
 	public Car createCar(String name, String brand, String type,
 			Address location, Integer seats, Integer doors, Integer year, boolean gps,
 			boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue,
-            Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, User owner, String comments)
+            Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments)
 			throws DataAccessException {
-		Car car = new Car(idCounter++,name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, owner, comments);
+		Car car = new Car(idCounter++,name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
 		cars.add(car);
 		return car;
 	}
