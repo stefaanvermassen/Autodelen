@@ -50,7 +50,9 @@ public class JDBCCarCostDAO implements CarCostDAO {
 
     private PreparedStatement getGetCarCostStatement() throws SQLException {
         if (getCarCostStatement == null) {
-            getCarCostStatement = connection.prepareStatement("SELECT * FROM CarCosts JOIN Cars ON car_cost_car_id = car_id WHERE car_cost_id=?");
+            getCarCostStatement = connection.prepareStatement("SELECT * FROM CarCosts JOIN Cars ON car_cost_car_id = car_id " +
+                    "JOIN Users ON car_owner_user_id = user_id LEFT JOIN Addresses ON user_address_domicile_id = address_id " +
+                    "LEFT JOIN TechnicalCarDetails ON car_technical_details = details_id WHERE car_cost_id=?");
         }
         return getCarCostStatement;
     }
@@ -184,7 +186,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
-                    return populateCarCost(rs, JDBCCarDAO.populateCar(rs, false));
+                    return populateCarCost(rs, JDBCCarDAO.populateCar(rs, true));
                 else return null;
             }catch (SQLException e){
                 throw new DataAccessException("Error reading reservation resultset", e);

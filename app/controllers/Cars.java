@@ -706,7 +706,7 @@ public class Cars extends Controller {
             carCost.setStatus(CarCostStatus.ACCEPTED);
             dao.updateCarCost(carCost);
             context.commit();
-            //Todo: send notification!
+            Notifier.sendCarCostStatusChanged(carCost.getCar().getOwner(), carCost, true);
 
             flash("succes", "Autokost succesvol geaccepteerd");
             if(returnToDetail==0){
@@ -737,7 +737,7 @@ public class Cars extends Controller {
             carCost.setStatus(CarCostStatus.REFUSED);
             dao.updateCarCost(carCost);
             context.commit();
-            //Todo: send notification!
+            Notifier.sendCarCostStatusChanged(carCost.getCar().getOwner(), carCost, false);
             if(returnToDetail==0){
                 flash("succes", "Autokost succesvol geweigerd");
                 return redirect(routes.Cars.showCarCosts());

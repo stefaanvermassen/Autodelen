@@ -8,6 +8,7 @@ import models.Refuel;
 import models.RefuelStatus;
 import models.User;
 import models.UserRole;
+import notifiers.Notifier;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -168,8 +169,9 @@ public class Refuels extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
             dao.rejectRefuel(refuelId);
+            Refuel refuel = dao.getRefuel(refuelId);
             context.commit();
-            //Todo: send notification!
+            Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, false);
             flash("succes", "Tankbeurt succesvol geweigerd");
             return redirect(routes.Refuels.showOwnerRefuels());
         }catch(DataAccessException ex) {
@@ -190,8 +192,9 @@ public class Refuels extends Controller {
         try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
             dao.acceptRefuel(refuelId);
+            Refuel refuel = dao.getRefuel(refuelId);
             context.commit();
-            //Todo: send notification!
+            Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, true);
             flash("succes", "Tankbeurt succesvol geaccepteerd");
             return redirect(routes.Refuels.showOwnerRefuels());
         }catch(DataAccessException ex) {
