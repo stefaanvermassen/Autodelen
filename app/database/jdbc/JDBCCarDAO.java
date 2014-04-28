@@ -127,13 +127,15 @@ public class JDBCCarDAO implements CarDAO{
                 }
                 rs.getInt("car_insurance");
                 if(!rs.wasNull()) {
+                    String name = rs.getString("insurance_name");
+                    if(rs.wasNull()) name = null;
                     DateTime expiration = new DateTime(rs.getDate("insurance_expiration"));
                     if(rs.wasNull()) expiration = null;
                     Integer bonusMalus = rs.getInt("insurance_bonus_malus");
                     if(rs.wasNull()) bonusMalus = null;
                     Integer contractId = rs.getInt("insurance_contract_id");
                     if(rs.wasNull()) contractId = null;
-                    insurance = new CarInsurance(rs.getInt("insurance_id"), expiration, bonusMalus, contractId);
+                    insurance = new CarInsurance(rs.getInt("insurance_id"), name, expiration, bonusMalus, contractId);
                 }
             }
             car.setLocation(location);
@@ -231,15 +233,15 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement createInsuranceStatement() throws SQLException {
         if (createInsuranceStatement == null) {
-            createInsuranceStatement = connection.prepareStatement("INSERT INTO CarInsurances(insurance_expiration, " +
-                    "insurance_contract_id, insurance_bonus_malus) VALUES (?,?,?)", new String[] {"insurance_id"});
+            createInsuranceStatement = connection.prepareStatement("INSERT INTO CarInsurances(insurance_name, insurance_expiration, " +
+                    "insurance_contract_id, insurance_bonus_malus) VALUES (?,?,?,?)", new String[] {"insurance_id"});
         }
         return createInsuranceStatement;
     }
 
     private PreparedStatement updateInsuranceStatement() throws SQLException {
         if (updateInsuranceStatement == null) {
-            updateInsuranceStatement = connection.prepareStatement("UPDATE CarInsurances SET insurance_expiration=?, " +
+            updateInsuranceStatement = connection.prepareStatement("UPDATE CarInsurances SET insurance_name=?, insurance_expiration=?, " +
                     "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?");
         }
         return updateInsuranceStatement;
@@ -401,18 +403,22 @@ public class JDBCCarDAO implements CarDAO{
         try {
             if(insurance.getId() == null) { // create
                 PreparedStatement ps = createInsuranceStatement();
+                if(insurance.getName() != null)
+                    ps.setString(1, insurance.getName());
+                else
+                    ps.setNull(1, Types.VARCHAR);
                 if(insurance.getExpiration() != null)
-                    ps.setTimestamp(1, new Timestamp(insurance.getExpiration().getMillis()));
+                    ps.setTimestamp(2, new Timestamp(insurance.getExpiration().getMillis()));
                 else
-                    ps.setNull(1, Types.TIMESTAMP);
+                    ps.setNull(2, Types.TIMESTAMP);
                 if(insurance.getPolisNr() != null)
-                    ps.setInt(2, insurance.getPolisNr());
-                else
-                    ps.setNull(2, Types.INTEGER);
-                if(insurance.getBonusMalus() != null)
-                    ps.setInt(3, insurance.getBonusMalus());
+                    ps.setInt(3, insurance.getPolisNr());
                 else
                     ps.setNull(3, Types.INTEGER);
+                if(insurance.getBonusMalus() != null)
+                    ps.setInt(4, insurance.getBonusMalus());
+                else
+                    ps.setNull(4, Types.INTEGER);
 
                 if(ps.executeUpdate() == 0)
                     throw new DataAccessException("No rows were affected when creating carInsurance.");
@@ -425,20 +431,24 @@ public class JDBCCarDAO implements CarDAO{
                 }
             } else { // update
                 PreparedStatement ps = updateInsuranceStatement();
+                if(insurance.getName() != null)
+                    ps.setString(1, insurance.getName());
+                else
+                    ps.setNull(1, Types.VARCHAR);
                 if(insurance.getExpiration() != null)
-                    ps.setTimestamp(1, new Timestamp(insurance.getExpiration().getMillis()));
+                    ps.setTimestamp(2, new Timestamp(insurance.getExpiration().getMillis()));
                 else
-                    ps.setNull(1, Types.TIMESTAMP);
+                    ps.setNull(2, Types.TIMESTAMP);
                 if(insurance.getPolisNr() != null)
-                    ps.setInt(2, insurance.getPolisNr());
-                else
-                    ps.setNull(2, Types.INTEGER);
-                if(insurance.getBonusMalus() != null)
-                    ps.setInt(3, insurance.getBonusMalus());
+                    ps.setInt(3, insurance.getPolisNr());
                 else
                     ps.setNull(3, Types.INTEGER);
+                if(insurance.getBonusMalus() != null)
+                    ps.setInt(4, insurance.getBonusMalus());
+                else
+                    ps.setNull(4, Types.INTEGER);
 
-                ps.setInt(4, insurance.getId());
+                ps.setInt(5, insurance.getId());
 
                 if(ps.executeUpdate() == 0)
                     throw new DataAccessException("No rows were affected when updating carInsurance.");

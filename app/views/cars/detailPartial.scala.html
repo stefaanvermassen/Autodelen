@@ -72,6 +72,7 @@
                             <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
                             <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { File placeholder }<br>
                             <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
+                            <strong>Verzekeraar: </strong> @if(car.getInsurance == null || car.getInsurance.getName == null) { Onbekend } else { @car.getInsurance.getName }<br>
                             <strong>Verzekering vervaldatum: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @car.getInsurance.getExpiration }<br>
                             <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus== null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
                             <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr== null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>

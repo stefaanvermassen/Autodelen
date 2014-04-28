@@ -89,6 +89,7 @@ ENGINE=InnoDB;
 
 CREATE TABLE `CarInsurances` (
 	`insurance_id` INT NOT NULL AUTO_INCREMENT,
+	`insurance_name` VARCHAR(64),
 	`insurance_expiration` DATETIME,
 	`insurance_contract_id` INT, # Polisnr
 	`insurance_bonus_malus` INT,
@@ -187,6 +188,17 @@ CREATE TABLE `InfoSessionEnrollees` ( # Wie is ingeschreven?
 	PRIMARY KEY (`infosession_id`, `infosession_enrollee_id`),
 	FOREIGN KEY (`infosession_enrollee_id`) REFERENCES Users(`user_id`),
 	FOREIGN KEY (`infosession_id`) REFERENCES InfoSessions(`infosession_id`) ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `CarAvailabilities` (
+	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
+	`car_availability_car_id` INT NOT NULL,
+	`car_availability_from` DATETIME NOT NULL,
+	`car_availability_to` DATETIME NOT NULL,
+	PRIMARY KEY (`car_availability_id`),
+	FOREIGN KEY (`car_availability_car_id`) REFERENCES Cars(`car_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

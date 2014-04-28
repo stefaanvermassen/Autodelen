@@ -9,16 +9,18 @@ import java.util.List;
 public class CarInsurance {
 
 	private Integer id;
+    private String name;
 	private DateTime expiration;
 	private Integer bonusMalus;
 	private Integer polisNr;
 
-    public CarInsurance(DateTime expiration, Integer bonusMalus, Integer polisNr) {
-        this(null, expiration, bonusMalus, polisNr);
+    public CarInsurance(String name, DateTime expiration, Integer bonusMalus, Integer polisNr) {
+        this(null, name, expiration, bonusMalus, polisNr);
     }
 	
-	public CarInsurance(Integer id, DateTime expiration, Integer bonusMalus, Integer polisNr) {
+	public CarInsurance(Integer id, String name, DateTime expiration, Integer bonusMalus, Integer polisNr) {
 		this.id=id;
+        this.name = name;
 		this.expiration = expiration;
 		this.bonusMalus = bonusMalus;
 		this.polisNr = polisNr;
@@ -53,4 +55,12 @@ public class CarInsurance {
 	public void setId(Integer id) {
 		this.id = id;
 	}
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

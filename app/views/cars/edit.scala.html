@@ -275,6 +275,12 @@
                                 <div class="panel-body">
                                     <fieldset>
                                         <div class="form-group">
+                                            <label class="col-md-12" for="insuranceName">Verzekeraar</label>
+                                            <div class="col-md-12">
+                                                <input id="insuranceName" name="insuranceName" type="text" class="form-control input-md" value="@form("insuranceName").value">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
                                             <label class="col-md-12" for="expiration">Vervaldatum</label>
                                             <div class="col-md-4">
                                                 <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="expiration">

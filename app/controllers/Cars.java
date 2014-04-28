@@ -91,6 +91,7 @@ public class Cars extends Controller {
         public Integer chassisNumber;
 
         // Insurance
+        public String insuranceName;
         public DateTime expiration;
         public Integer bonusMalus;
         public Integer polisNr;
@@ -122,7 +123,9 @@ public class Cars extends Controller {
             }
 
             if(car.getInsurance() != null) {
-                expiration = new DateTime(car.getInsurance().getExpiration());
+                insuranceName = car.getInsurance().getName();
+                if(car.getInsurance().getExpiration() != null)
+                    expiration = new DateTime(car.getInsurance().getExpiration());
                 bonusMalus = car.getInsurance().getBonusMalus();
                 polisNr = car.getInsurance().getPolisNr();
             }
@@ -275,9 +278,9 @@ public class Cars extends Controller {
                         technicalCarDetails = new TechnicalCarDetails(model.licensePlate, null, model.chassisNumber);
                     }
                     CarInsurance insurance = null;
-                    if((model.expiration != null || (model.polisNr != null && model.polisNr != 0))
+                    if((model.insuranceName != null && !model.insuranceName.equals("")) || (model.expiration != null || (model.polisNr != null && model.polisNr != 0))
                             || (model.bonusMalus != null && model.bonusMalus != 0)) {
-                        insurance = new CarInsurance(model.expiration, model.bonusMalus, model.polisNr);
+                        insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
@@ -415,11 +418,15 @@ public class Cars extends Controller {
                         car.getTechnicalCarDetails().setChassisNumber(null);
                 }
                 if(car.getInsurance() == null) {
-                    if((model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)
+                    if(model.insuranceName != null && !model.insuranceName.equals("") || (model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)
                             || (model.polisNr != null && model.polisNr != 0))
-                        car.setInsurance(new CarInsurance(model.expiration, model.bonusMalus, model.polisNr));
+                        car.setInsurance(new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr));
                 }
                 else {
+                    if(model.insuranceName != null && !model.insuranceName.equals(""))
+                        car.getInsurance().setName(model.insuranceName);
+                    else
+                        car.getInsurance().setName(null);
                     if(model.expiration != null)
                         car.getInsurance().setExpiration(model.expiration);
                     else
