@@ -90,7 +90,8 @@ public class Maps extends Controller {
                         .setQueryParameter("street", address.getNumber() + " " + address.getStreet())
                         .setQueryParameter("city", address.getCity())
                         .setQueryParameter("country", "Belgium")
-                        .setQueryParameter("postalcode", address.getZip())
+                        // TODO: uncomment postalcode line, it's only commented for test data purposes
+                        // .setQueryParameter("postalcode", address.getZip())
                         .setQueryParameter("format", "json").get().map(
                                 new Function<WS.Response, F.Tuple<Double, Double>>() {
                                     public F.Tuple<Double, Double> apply(WS.Response response) {
