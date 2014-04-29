@@ -50,6 +50,8 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement createReservationStatement;
     private PreparedStatement updateReservationStatement;
     private PreparedStatement getReservationStatement;
+    private PreparedStatement getNextReservationStatement;
+    private PreparedStatement getPreviousReservationStatement;
     private PreparedStatement deleteReservationStatement;
     private PreparedStatement getReservationListByCaridStatement;
     private PreparedStatement getGetReservationListPageByFromAscStatement;
@@ -95,6 +97,22 @@ public class JDBCReservationDAO implements ReservationDAO{
             getReservationStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id WHERE reservation_id=?");
         }
         return getReservationStatement;
+    }
+
+    private PreparedStatement getGetNextReservationStatement() throws SQLException {
+        if (getNextReservationStatement == null) {
+            getNextReservationStatement = connection.prepareStatement(RESERVATION_QUERY +
+                    " WHERE reservation_from >= ? AND reservation_id != ? ORDER BY reservation_to ASC LIMIT 1");
+        }
+        return getNextReservationStatement;
+    }
+
+    private PreparedStatement getGetPreviousReservationStatement() throws SQLException {
+        if (getPreviousReservationStatement == null) {
+            getPreviousReservationStatement = connection.prepareStatement(RESERVATION_QUERY +
+                    " WHERE reservation_to <= ? AND reservation_id != ? ORDER BY reservation_to DESC LIMIT 1");
+        }
+        return getPreviousReservationStatement;
     }
 
     private PreparedStatement getGetReservationListPageByFromAscStatement(String match) throws SQLException {
@@ -194,6 +212,38 @@ public class JDBCReservationDAO implements ReservationDAO{
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to get reservation", e);
+        }
+    }
+
+    @Override
+    public Reservation getNextReservation(Reservation reservation) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetNextReservationStatement();
+            ps.setTimestamp(1, new Timestamp(reservation.getTo().getMillis()));
+            ps.setInt(2, reservation.getId());
+            try(ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return populateReservation(rs);
+                return null;
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while retrieve the reservation following reservation with id" + reservation.getId(), ex);
+        }
+    }
+
+    @Override
+    public Reservation getPreviousReservation(Reservation reservation) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetPreviousReservationStatement();
+            ps.setTimestamp(1, new Timestamp(reservation.getFrom().getMillis()));
+            ps.setInt(2, reservation.getId());
+            try(ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return populateReservation(rs);
+                return null;
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while retrieve the reservation following reservation with id" + reservation.getId(), ex);
         }
     }
     
