@@ -31,7 +31,8 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     public static final String FILTER_FRAGMENT = " WHERE (car_owner_user_id=? OR reservation_user_id=? ) ";
 
-    public static final String MATCH_PASSED = " reservation_status != 'ACCEPTED' AND reservation_status != 'REQUEST' ";
+    public static final String MATCH_PASSED = " reservation_status != '" + ReservationStatus.ACCEPTED.toString() +
+            "' AND reservation_status != '" + ReservationStatus.REQUEST.toString() + "' ";
 
     public static final String MATCH_STATUS = " reservation_status = ? ";
 
@@ -102,7 +103,8 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getGetNextReservationStatement() throws SQLException {
         if (getNextReservationStatement == null) {
             getNextReservationStatement = connection.prepareStatement(RESERVATION_QUERY +
-                    " WHERE reservation_from >= ? AND reservation_id != ? ORDER BY reservation_to ASC LIMIT 1");
+                    " WHERE reservation_from >= ? AND reservation_id != ? AND CarReservations.reservation_status = '"
+                    + ReservationStatus.ACCEPTED.toString() + "' ORDER BY reservation_to ASC LIMIT 1");
         }
         return getNextReservationStatement;
     }
@@ -110,7 +112,8 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getGetPreviousReservationStatement() throws SQLException {
         if (getPreviousReservationStatement == null) {
             getPreviousReservationStatement = connection.prepareStatement(RESERVATION_QUERY +
-                    " WHERE reservation_to <= ? AND reservation_id != ? ORDER BY reservation_to DESC LIMIT 1");
+                    " WHERE reservation_to <= ? AND reservation_id != ? AND CarReservations.reservation_status = '"
+                    + ReservationStatus.ACCEPTED.toString() + "' ORDER BY reservation_to DESC LIMIT 1");
         }
         return getPreviousReservationStatement;
     }
@@ -161,7 +164,7 @@ public class JDBCReservationDAO implements ReservationDAO{
             PreparedStatement ps = getCreateReservationStatement();
             ps.setInt(1, user.getId());
             ps.setInt(2, car.getId());
-            ps.setString(3,"REQUEST");
+            ps.setString(3, ReservationStatus.REQUEST.toString());
             ps.setTimestamp(4, new Timestamp(from.getMillis()));
             ps.setTimestamp(5, new Timestamp(to.getMillis()));
 
