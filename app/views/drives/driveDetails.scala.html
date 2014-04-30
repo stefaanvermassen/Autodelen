@@ -1,7 +1,7 @@
 @(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RefuseModel],
         infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
-        car: Car, owner: User, loaner: User)
-@import providers.DataProvider
+        car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
+@import providers.DataProvider;
 
 @scripts = {
     <script type="text/javascript" src="@routes.Assets.at("javascripts/app/driveDetails.js")"></script>
@@ -112,7 +112,7 @@
                                                 <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />
                                                 <strong>GSM:</strong> @if(owner.getCellphone != null && !owner.getCellphone.isEmpty){ @owner.getCellphone } else { onbekend }
                                             } else {
-                                                @if(reservation.getStatus != ReservationStatus.REQUEST || reservation.getStatus != ReservationStatus.CANCELLED) {
+                                                @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
                                                     <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
                                                 }
                                                 @if(reservation.getStatus != ReservationStatus.REQUEST) {
@@ -138,6 +138,77 @@
                                     <!-- /well -->
                                     </div>
                                 <!-- /col-lg-6 -->
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                    <!-- col-lg-6 -->
+                                <div class="col-lg-6">
+                                        <!-- well -->
+                                    <div class="well">
+                                        <strong>Ontlener voor u</strong><hr />
+                                        <p>
+                                        @if((owner.getId == userId ||
+                                                reservation.getStatus != ReservationStatus.REFUSED ||
+                                                reservation.getStatus != ReservationStatus.REQUEST ||
+                                                reservation.getStatus != ReservationStatus.CANCELLED) &&
+                                                previousLoaner != null
+                                        ) {
+                                            <strong>Naam:</strong> <a href="@routes.Profile.index(previousLoaner.getId)">@previousLoaner.getLastName, @previousLoaner.getFirstName</a><br />
+                                            <strong>E-mail:</strong> @previousLoaner.getEmail <br />
+                                            <strong>Tel:</strong> @if(previousLoaner.getPhone != null && !previousLoaner.getPhone.isEmpty){ @previousLoaner.getPhone } else { onbekend } <br />
+                                            <strong>GSM:</strong> @if(previousLoaner.getCellphone != null && !previousLoaner.getCellphone.isEmpty){ @previousLoaner.getCellphone } else { onbekend }
+                                        } else {
+                                            @if(previousLoaner == null) {
+                                                <i class="fa fa-info"></i>: Geen voorafgaande reservatie voor deze auto.
+                                            }    else {
+                                                @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
+                                                    <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
+                                                }
+                                                @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                                                    <i class="fa fa-info"></i>
+                                                    : Deze informatie is pas beschikbaar na goedkeuring.
+                                                }
+                                            }
+                                        }
+                                        </p>
+                                            <!-- /well -->
+                                    </div>
+                                        <!-- /col-lg-6 -->
+                                </div>
+                                    <!-- col-lg-6 -->
+                                <div class="col-lg-6">
+                                        <!-- well -->
+                                    <div class="well">
+                                        <strong>Ontlener na u</strong><hr />
+                                        <p>
+                                        @if((owner.getId == userId ||
+                                                reservation.getStatus != ReservationStatus.REFUSED ||
+                                                reservation.getStatus != ReservationStatus.REQUEST ||
+                                                reservation.getStatus != ReservationStatus.CANCELLED) &&
+                                                nextLoaner != null
+                                        ) {
+                                            <strong>Naam:</strong> <a href="@routes.Profile.index(nextLoaner.getId)">@nextLoaner.getLastName, @nextLoaner.getFirstName</a><br />
+                                            <strong>E-mail:</strong> @nextLoaner.getEmail <br />
+                                            <strong>Tel:</strong> @if(nextLoaner.getPhone != null && !nextLoaner.getPhone.isEmpty){ @nextLoaner.getPhone } else { onbekend } <br />
+                                            <strong>GSM:</strong> @if(nextLoaner.getCellphone != null && !nextLoaner.getCellphone.isEmpty){ @nextLoaner.getCellphone } else { onbekend }
+                                        } else {
+                                            @if(nextLoaner == null) {
+                                                <i class="fa fa-info"></i>: Geen volgende reservatie voor deze auto.
+                                            } else {
+                                                @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
+                                                    <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
+                                                }
+                                                @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                                                    <i class="fa fa-info"></i>
+                                                    : Deze informatie is pas beschikbaar na goedkeuring.
+                                                }
+                                            }
+                                        }
+                                        </p>
+                                            <!-- /well -->
+                                    </div>
+                                        <!-- /col-lg-6 -->
                                 </div>
                             </div>
                             @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
