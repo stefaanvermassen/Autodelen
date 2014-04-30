@@ -1,5 +1,5 @@
 @(user: User, editable: Boolean = true)
-@import database.DataProvider;
+@import providers.DataProvider;
 <!-- TODO: These are no form groups! -->
 <div class="form-group">
     <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">

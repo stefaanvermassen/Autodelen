@@ -1,5 +1,5 @@
 @(form: play.data.Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0, countryList: List[String], typeList: List[String])
-@import database.DataProvider;
+@import providers.DataProvider;
 @* TODO: This file should be renamed since it's also used for editing *@
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>

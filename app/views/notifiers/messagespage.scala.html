@@ -1,6 +1,6 @@
 @(messageList: java.util.List[Message], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import org.joda.time.format.DateTimeFormat
-@import database.DataProvider;
+@import providers.DataProvider;
 <ul class="chat">
     @for((message, index) <- messageList.zipWithIndex) {
         <li>

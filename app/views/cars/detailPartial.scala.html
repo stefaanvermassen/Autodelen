@@ -1,7 +1,7 @@
 @(car: Car)
 @import controllers.Cars;
 @import org.joda.time.format.DateTimeFormat
-@import database.DataProvider;
+@import providers.DataProvider;
 @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
     <div class="row">
         <div class="col-lg-3">

@@ -1,5 +1,5 @@
 @(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
-@import database.DataProvider;
+@import providers.DataProvider;
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">

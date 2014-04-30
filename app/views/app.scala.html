@@ -1,6 +1,6 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
 @import org.joda.time.format.DateTimeFormat
-@import database.DataProvider;
+@import providers.DataProvider;
 @import providers.CommunicationProvider;
 @defining(DataProvider.getUserProvider().getUser()) { user =>
 

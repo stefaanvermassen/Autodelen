@@ -1,7 +1,7 @@
 @(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RefuseModel],
         infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
         car: Car, owner: User, loaner: User)
-@import database.DataProvider
+@import providers.DataProvider
 
 @scripts = {
     <script type="text/javascript" src="@routes.Assets.at("javascripts/app/driveDetails.js")"></script>
