@@ -181,7 +181,21 @@ public class Drives extends Controller {
             CarRide driveInfo = null;
             if(reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus() == ReservationStatus.FINISHED)
                 driveInfo = ddao.getCarRide(reservationId);
-            return driveDetails.render(adjustForm, refuseForm, detailsForm, reservation, driveInfo, car, owner, loaner);
+
+            Reservation nextReservation = rdao.getNextReservation(reservation);
+            if(nextReservation != null)
+                nextReservation = nextReservation.getFrom().isBefore(reservation.getTo().plusDays(1)) ? nextReservation : null;
+            User nextLoaner = nextReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
+                    udao.getUser(nextReservation.getUser().getId(), true) : null;
+
+            Reservation previousReservation = rdao.getPreviousReservation(reservation);
+            if(previousReservation != null)
+                previousReservation = previousReservation.getTo().isAfter(reservation.getFrom().minusDays(1)) ? previousReservation : null;
+            User previousLoaner = previousReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
+                    udao.getUser(previousReservation.getUser().getId(), true) : null;
+
+            return driveDetails.render(adjustForm, refuseForm, detailsForm, reservation, driveInfo, car, owner, loaner,
+                    previousLoaner, nextLoaner);
         } catch(DataAccessException ex) {
             throw ex;
         }
