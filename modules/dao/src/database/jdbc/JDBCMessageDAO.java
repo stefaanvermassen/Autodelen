@@ -168,8 +168,7 @@ public class JDBCMessageDAO implements MessageDAO {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                DatabaseHelper.getCommunicationProvider().invalidateMessages(receiver.getId());
-                DatabaseHelper.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
+
                 // new DateTime() is not exactly correct, if you want the exact timestamp, do a getMessage()
                 return new Message(keys.getInt(1), sender, receiver, false, subject, body, new DateTime());
             } catch (SQLException ex) {

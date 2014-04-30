@@ -177,8 +177,6 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                DatabaseHelper.getCommunicationProvider().invalidateNotifications(user.getId());
-                DatabaseHelper.getCommunicationProvider().invalidateNotificationNumber(user.getId());
                 // new DateTime() is not exactly correct, if you want the exact timestamp, do a getNotification()
                 return new Notification(keys.getInt(1), user, false, subject, body, new DateTime());
             } catch (SQLException ex) {
