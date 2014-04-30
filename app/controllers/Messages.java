@@ -153,6 +153,8 @@ public class Messages extends Controller {
                     User sender = DataProvider.getUserProvider().getUser();
                     User receiver = DataProvider.getUserProvider().getUser(createForm.get().useremail);
                     Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
+                    DataProvider.getCommunicationProvider().invalidateMessages(receiver.getId()); // invalidate the message
+                    DataProvider.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
                     if (mes != null) {
                         return redirect(
                                 routes.Messages.showMessages() // return to infosession list
