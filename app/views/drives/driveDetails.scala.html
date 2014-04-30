@@ -1,7 +1,7 @@
 @(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RefuseModel],
         infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
         car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
-@import database.DatabaseHelper
+@import providers.DataProvider;
 
 @scripts = {
     <script type="text/javascript" src="@routes.Assets.at("javascripts/app/driveDetails.js")"></script>
@@ -29,7 +29,7 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 @app("Rit details", stylesheets, scripts) {
-    @defining(DatabaseHelper.getUserProvider.getUser.getId) { userId =>
+    @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
         <div id="page-header-wrapper">
             <ol class="breadcrumb">
                 <li><a href="@routes.Dashboard.index">Dashboard</a></li>

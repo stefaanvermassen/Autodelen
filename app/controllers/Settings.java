@@ -9,6 +9,7 @@ import org.joda.time.DateTime;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.settings.*;
 
 import java.util.List;
@@ -51,8 +52,8 @@ public class Settings extends Controller {
     @Deprecated
     @RoleSecured.RoleAuthenticated()
     public static Result instantAdmin() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserRoleDAO dao = context.getUserRoleDAO();
             Set<UserRole> roles = dao.getUserRoles(user.getId());
             if (roles.contains(UserRole.SUPER_USER)) {
@@ -62,7 +63,7 @@ public class Settings extends Controller {
                 try {
                     dao.addUserRole(user.getId(), UserRole.SUPER_USER);
                     context.commit();
-                    DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
+                    DataProvider.getUserRoleProvider().invalidateRoles(user);
                     roles.add(UserRole.SUPER_USER);
 
                     flash("success", "U heeft nu superuserrechten. Gelieve je extra rechten aan te duiden.");
@@ -79,7 +80,7 @@ public class Settings extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result sysvarsOverview() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
             List<Setting> settings = dao.getSettings();
             return ok(sysvars.render(settings));
@@ -88,7 +89,7 @@ public class Settings extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result editSysvar(int id) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
             Setting setting = dao.getSetting(id);
             if (setting == null) {
@@ -103,7 +104,7 @@ public class Settings extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result editSysvarPost(int id) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
 
             Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
@@ -130,7 +131,7 @@ public class Settings extends Controller {
         if (form.hasErrors() || form.get().name == null) {
             return badRequest(createsysvar.render(form));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 SettingDAO dao = context.getSettingDAO();
                 EditSettingModel model = form.get();
                 dao.createSettingAfterDate(model.name, model.value, model.after);

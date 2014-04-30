@@ -1,4 +1,4 @@
-package database.providers;
+package providers;
 
 import controllers.util.Pagination;
 import database.*;

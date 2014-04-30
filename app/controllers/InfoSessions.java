@@ -6,7 +6,8 @@ import controllers.util.FormHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.providers.UserRoleProvider;
+import providers.DataProvider;
+import providers.UserRoleProvider;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -102,7 +103,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result newSession() {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class);
 
         InfoSessionCreationModel model = new InfoSessionCreationModel();
@@ -121,7 +122,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result editSession(int sessionId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession is = dao.getInfoSession(sessionId, false);
             if (is == null) {
@@ -147,7 +148,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result removeSession(int sessionId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             try {
                 if (dao.getInfoSession(sessionId, false) == null) {
@@ -181,7 +182,7 @@ public class InfoSessions extends Controller {
         if (editForm.hasErrors()) {
             return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
                 InfoSession session = dao.getInfoSession(sessionId, false);
                 if (session == null) {
@@ -252,8 +253,8 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result unenrollSession() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
 
             InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
@@ -286,8 +287,8 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> detail(int sessionId) {
-        final User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        final User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             final InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession session = dao.getInfoSession(sessionId, true);
             if (session == null) {
@@ -332,7 +333,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result removeUserFromSession(int sessionId, int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession is = dao.getInfoSession(sessionId, false);
             if (is == null) {
@@ -368,7 +369,7 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
 
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession is = dao.getInfoSession(sessionId, false);
@@ -403,11 +404,11 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        if (!DatabaseHelper.getUserRoleProvider().isFullUser(user)) {
+        User user = DataProvider.getUserProvider().getUser();
+        if (!DataProvider.getUserRoleProvider().isFullUser(user)) {
             flash("warning", "U bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
         }
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
 
             InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
@@ -455,7 +456,7 @@ public class InfoSessions extends Controller {
         if (createForm.hasErrors()) {
             return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
 
                 try {
@@ -555,9 +556,9 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result requestApproval() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
-            if (DatabaseHelper.getUserRoleProvider().isFullUser(user)) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            if (DataProvider.getUserRoleProvider().isFullUser(user)) {
                 flash("warning", "U bent reeds een volwaardige gebruiker.");
                 return redirect(routes.Dashboard.index());
             } else {
@@ -576,13 +577,13 @@ public class InfoSessions extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result requestApprovalPost() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        if (DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
+        User user = DataProvider.getUserProvider().getUser();
+        if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
             flash("warning", "U bent reeds een volwaardige gebruiker.");
             return redirect(routes.Dashboard.index());
         } else {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 if (form.hasErrors()) {
                     ApprovalDAO dao = context.getApprovalDAO();
                     List<Approval> approvals = dao.getPendingApprovals(user);
@@ -619,7 +620,7 @@ public class InfoSessions extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     public static Result pendingApprovalListPaged(int page) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             List<Approval> approvalsList = dao.getApprovals(page, PAGE_SIZE);
             int amountOfResults = dao.getApprovalCount();
@@ -669,7 +670,7 @@ public class InfoSessions extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     public static Result approvalDetails(int approvalId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             Approval ap = dao.getApproval(approvalId);
             if (ap == null) {
@@ -680,8 +681,8 @@ public class InfoSessions extends Controller {
                 model.message = ap.getAdminMessage();
                 model.status = (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING
                         ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
-                model.sharer = DatabaseHelper.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
-                model.user = DatabaseHelper.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
+                model.sharer = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
+                model.user = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
 
                 // Get the contact admin
                 UserDAO udao = context.getUserDAO();
@@ -702,7 +703,7 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     public static Result approvalAdminAction(int approvalId) {
         Form<ApprovalAdminModel> form = Form.form(ApprovalAdminModel.class).bindFromRequest();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             Approval ap = dao.getApproval(approvalId);
             if (ap == null) {
@@ -716,7 +717,7 @@ public class InfoSessions extends Controller {
                 ApprovalAdminModel m = form.get();
                 ApprovalAdminModel.Action action = m.getAction();
                 try {
-                    ap.setAdmin(DatabaseHelper.getUserProvider().getUser());
+                    ap.setAdmin(DataProvider.getUserProvider().getUser());
                     ap.setReviewed(new DateTime());
                     ap.setAdminMessage(m.message);
 
@@ -739,14 +740,14 @@ public class InfoSessions extends Controller {
 
                             // Add the new user roles
                             UserRoleDAO roleDao = context.getUserRoleDAO();
-                            Set<UserRole> hasRoles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId());
+                            Set<UserRole> hasRoles = DataProvider.getUserRoleProvider().getRoles(user.getId());
                             if (m.sharer && !hasRoles.contains(UserRole.CAR_OWNER))
                                 roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
                             if (m.user && !hasRoles.contains(UserRole.CAR_USER))
                                 roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
                             context.commit();
 
-                            DatabaseHelper.getUserRoleProvider().invalidateRoles(ap.getUser());
+                            DataProvider.getUserRoleProvider().invalidateRoles(ap.getUser());
                             flash("success", "De gebruikersrechten werden succesvol aangepast.");
 
                             return redirect(routes.InfoSessions.pendingApprovalList());
@@ -780,8 +781,8 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> showUpcomingSessions() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             final InfoSession enrolled = dao.getAttendingInfoSession(user);
 
@@ -872,8 +873,8 @@ public class InfoSessions extends Controller {
      */
     private static Html sessionsList(int page, FilterField orderBy, boolean asc, Filter filter, boolean admin) {
         // TODO: not use boolean admin
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             InfoSession enrolled = dao.getAttendingInfoSession(user);
             if (orderBy == null) {

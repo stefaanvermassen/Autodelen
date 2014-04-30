@@ -6,6 +6,7 @@ import database.jdbc.JDBCFilter;
 import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class UserPicker extends Controller {
         search = search.trim();
         if (search != "") {
             search = search.replaceAll("\\s+", " ");
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
                 String users = "";
                 Filter filter = new JDBCFilter();

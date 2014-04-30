@@ -6,7 +6,8 @@ import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.providers.UserRoleProvider;
+import providers.DataProvider;
+import providers.UserRoleProvider;
 import models.*;
 import controllers.Security.RoleSecured;
 
@@ -170,8 +171,8 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result showUserCars() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             // Doesn't need to be paginated, because a single user will never have a lot of cars
             List<Car> listOfCars = dao.getCarsOfUser(user.getId());
@@ -206,7 +207,7 @@ public class Cars extends Controller {
 
     private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
             if(orderBy == null) {
@@ -254,19 +255,19 @@ public class Cars extends Controller {
         if (carForm.hasErrors()) {
             return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 try {
-                    User user = DatabaseHelper.getUserProvider().getUser();
+                    User user = DataProvider.getUserProvider().getUser();
                     CarModel model = carForm.get();
                     AddressDAO adao = context.getAddressDAO();
                     Address address = modifyAddress(model.address, null, adao);
 
                     User owner = user;
-                    if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
-                            || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                    if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                            || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                         // User is permitted to add cars for other users
-                        owner = DatabaseHelper.getUserProvider().getUser(model.userEmail);
+                        owner = DataProvider.getUserProvider().getUser(model.userEmail);
                     }
                     TechnicalCarDetails technicalCarDetails = null;
                     // TODO: registration
@@ -311,7 +312,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCar(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
@@ -319,8 +320,8 @@ public class Cars extends Controller {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
-                User currentUser = DatabaseHelper.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                User currentUser = DataProvider.getUserProvider().getUser();
+                if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
@@ -345,7 +346,7 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCarPost(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
@@ -358,8 +359,8 @@ public class Cars extends Controller {
                 return badRequest(carList());
             }
 
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
-            if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+            User currentUser = DataProvider.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                 flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
@@ -445,11 +446,11 @@ public class Cars extends Controller {
 
                 car.setComments(model.comments);
 
-                User user = DatabaseHelper.getUserProvider().getUser();
-                if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
-                        || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                User user = DataProvider.getUserProvider().getUser();
+                if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                        || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                     // User is permitted to add cars for other users
-                    car.setOwner(DatabaseHelper.getUserProvider().getUser(model.userEmail));
+                    car.setOwner(DataProvider.getUserProvider().getUser(model.userEmail));
                 }
 
                 dao.updateCar(car);
@@ -473,7 +474,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
     public static Result detail(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
@@ -497,7 +498,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated(UserRole.CAR_ADMIN)
     public static Result removeCar(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             try {
                 Car car = dao.getCar(carId);
@@ -507,8 +508,8 @@ public class Cars extends Controller {
                 } else {
 
                     //TODO: this is repeat code, unify with above controllers as extra check
-                    User currentUser = DatabaseHelper.getUserProvider().getUser();
-                    if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                    User currentUser = DataProvider.getUserProvider().getUser();
+                    if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                         flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
                         return badRequest(carList());
                     }
@@ -551,7 +552,7 @@ public class Cars extends Controller {
     public static Result getCarCostModal(int id){
         // TODO: hide from other users (badRequest)
 
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(id);
             if(car == null){
@@ -572,7 +573,7 @@ public class Cars extends Controller {
     public static Result addNewCarCost(int carId) {
         Form<CarCostModel> carCostForm = Form.form(CarCostModel.class).bindFromRequest();
         if (carCostForm.hasErrors()) {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
                 flash("danger", "Kost toevoegen mislukt.");
@@ -582,7 +583,7 @@ public class Cars extends Controller {
             }
 
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarCostDAO dao = context.getCarCostDAO();
                 try {
                     CarCostModel model = carCostForm.get();
@@ -654,8 +655,8 @@ public class Cars extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         // Check if admin or car owner
-        User user = DatabaseHelper.getUserProvider().getUser();
-        UserRoleProvider userRoleProvider = DatabaseHelper.getUserRoleProvider();
+        User user = DataProvider.getUserProvider().getUser();
+        UserRoleProvider userRoleProvider = DataProvider.getUserRoleProvider();
         if(!userRoleProvider.hasRole(user, UserRole.CAR_ADMIN) || !userRoleProvider.hasRole(user, UserRole.SUPER_USER)) {
             String carIdString = filter.getValue(FilterField.CAR_ID);
             int carId;
@@ -664,7 +665,7 @@ public class Cars extends Controller {
             } else {
                 carId = Integer.parseInt(carIdString);
             }
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO carDAO = context.getCarDAO();
                 List<Car> listOfCars = carDAO.getCarsOfUser(user.getId());
                 // Check if carId in cars
@@ -690,7 +691,7 @@ public class Cars extends Controller {
     }
 
     private static Html carCostList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
 
             if(orderBy == null) {
@@ -718,7 +719,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result approveCarCost(int carCostId, int returnToDetail) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
             CarCost carCost = dao.getCarCost(carCostId);
             carCost.setStatus(CarCostStatus.ACCEPTED);
@@ -749,7 +750,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result refuseCarCost(int carCostId, int returnToDetail) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
             CarCost carCost = dao.getCarCost(carCostId);
             carCost.setStatus(CarCostStatus.REFUSED);
@@ -770,7 +771,7 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result getProof(int proofId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
         } catch (DataAccessException ex) {
             throw ex;

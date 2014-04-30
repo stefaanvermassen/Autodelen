@@ -1,4 +1,4 @@
-package database.providers;
+package providers;
 
 import database.*;
 import models.User;
@@ -28,7 +28,7 @@ public class UserRoleProvider {
         return getRoles(userId, true);
     }
 
-    //TODO: leave this helper function here, or move to the main databasehelper? Decoupling...
+    //TODO: leave this helper function here, or move to the main DataProvider? Decoupling...
     public boolean hasRole(String email, UserRole role) {
         User user = userProvider.getUser(email);
         if (user == null)

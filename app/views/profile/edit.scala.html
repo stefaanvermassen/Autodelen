@@ -1,5 +1,5 @@
 @(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
-    @import database.DatabaseHelper;
+    @import providers.DataProvider;
 
     @app("Profiel bewerken") {
 
@@ -103,7 +103,7 @@
                                             }
                                         }
                                         <!-- TODO: verantwoordelijke toewijzen -->
-                                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
+                                        @if(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
                                             <a href="#">Verantwoordelijke wijzigen (TODO)</a>
                                         }
                                     </div>

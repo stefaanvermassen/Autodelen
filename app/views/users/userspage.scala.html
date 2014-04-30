@@ -1,6 +1,6 @@
 @(users: List[User], page : Int, amountOfResults : Int, amountOfPages : Int)
-@import database.DatabaseHelper;
-@import database.providers.UserProvider;
+@import providers.DataProvider;
+@import providers.UserProvider;
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
     <thead>
         <tr role="row">
@@ -16,7 +16,7 @@
                 </td>
             </tr>
         } else {
-            @defining(DatabaseHelper.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)) { isAdmin =>
+            @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)) { isAdmin =>
                 @for(user <- users) {
                     <tr>
                         <td>@user.getFirstName @user.getLastName</td>
@@ -26,7 +26,7 @@
                                 @if(isAdmin) {
                                     <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Bewerk</a>
                                 }
-                                @if(DatabaseHelper.getUserRoleProvider.hasRole(UserRole.SUPER_USER) && !UserProvider.isBlocked(user)){
+                                @if(DataProvider.getUserRoleProvider.hasRole(UserRole.SUPER_USER) && !UserProvider.isBlocked(user)){
                                     <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">Impersoneer</a>
                                 }
                             </div>

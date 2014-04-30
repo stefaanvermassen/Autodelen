@@ -20,7 +20,7 @@
         </script>
     }
 
-@import database.DatabaseHelper;
+@import providers.DataProvider;
 @app("Goedkeuringsaanvraag", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -110,7 +110,7 @@
                             <div class="form-group">
                                 <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
                                     <label for="userPickerBox">Contractverantwoordelijke:</label>
-                                        @defining(DatabaseHelper.getUserProvider.getUser(form("contractManager").value)) { manager =>
+                                        @defining(DataProvider.getUserProvider.getUser(form("contractManager").value)) { manager =>
                                             @if(manager != null){
                                                 <input type="text" value="@manager.getFirstName @manager.getLastName" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
                                             } else {

@@ -4,7 +4,6 @@ import controllers.Security.RoleSecured;
 import database.AddressDAO;
 import database.DataAccessContext;
 import database.DataAccessException;
-import database.DatabaseHelper;
 import models.Address;
 import play.data.*;
 import play.libs.F;
@@ -15,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import static play.libs.F.Function;
 import static play.libs.F.Promise;
 
+import providers.DataProvider;
 import views.html.maps.*;
 
 import play.mvc.*;
@@ -82,7 +82,7 @@ public class Maps extends Controller {
      * @return A promise with the longtitude and latitude
      */
     public static Promise<F.Tuple<Double, Double>> getLatLongPromise(int addressId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             AddressDAO dao = context.getAddressDAO();
             Address address = dao.getAddress(addressId);
             if(address != null ){
