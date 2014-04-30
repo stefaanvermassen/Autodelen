@@ -4,7 +4,6 @@ import database.DataAccessContext;
 import database.DataAccessException;
 import database.FileDAO;
 import models.File;
-import models.FileGroup;
 import models.User;
 import play.mvc.Result;
 

@@ -1,6 +1,6 @@
 @(messageList: java.util.List[Message], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import org.joda.time.format.DateTimeFormat
-@import database.DatabaseHelper;
+@import database.DataProvider;
 <ul class="chat">
     @for((message, index) <- messageList.zipWithIndex) {
         <li>
@@ -18,7 +18,7 @@
                     </p>
                 </div>
                 @* TODO: antwoordlogica *@
-                @defining(DatabaseHelper.getUserProvider.getUser.getId) { userId =>
+                @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
                     @if(message.getReceiver.getId == userId) {
                         @if(!message.isRead) {
                             <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>

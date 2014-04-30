@@ -3,7 +3,6 @@ package controllers;
 import controllers.Security.RoleSecured;
 import database.DataAccessContext;
 import database.DataAccessException;
-import database.DatabaseHelper;
 import database.UserDAO;
 import models.User;
 import models.UserStatus;
@@ -16,6 +15,7 @@ import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.login.*;
 
 
@@ -83,7 +83,7 @@ public class Login extends Controller {
      */
     public static Result login(String redirect) {
         // Allow a force login when the user doesn't exist anymore
-        User user = DatabaseHelper.getUserProvider().getUser(false);
+        User user = DataProvider.getUserProvider().getUser(false);
         if (user == null && !session().isEmpty()) {
             session().clear();
         }
@@ -108,7 +108,7 @@ public class Login extends Controller {
     public static Result requestNewEmailVerificationProcess(String email) {
         //TODO: prevent people from spamming this URL as this might DDOS the mailserver (CRSF token and POST instead of GET)
 
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(email);
             if (user == null) {
@@ -154,7 +154,7 @@ public class Login extends Controller {
         if (resetForm.hasErrors()) {
             return badRequest(singlemailform.render(resetForm));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
                 User user = dao.getUser(resetForm.get().email);
                 if (user == null) {
@@ -191,7 +191,7 @@ public class Login extends Controller {
      * @return A status page whether reset was successfull or not
      */
     public static Result resetPassword(int userId, String uuid) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, false);
             if (user == null) {
@@ -223,7 +223,7 @@ public class Login extends Controller {
         if (resetForm.hasErrors()) {
             return badRequest(pwreset.render(resetForm, userId, uuid));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
                 User user = dao.getUser(userId, true);
                 if (user == null) {
@@ -238,7 +238,7 @@ public class Login extends Controller {
                         dao.updateUser(user, true);
                         context.commit();
 
-                        DatabaseHelper.getUserProvider().invalidateUser(user);
+                        DataProvider.getUserProvider().invalidateUser(user);
                         flash("success", "Uw wachtwoord werd succesvol gewijzigd.");
                         LoginModel model = new LoginModel();
                         model.email = user.getEmail();
@@ -266,7 +266,7 @@ public class Login extends Controller {
         if (loginForm.hasErrors()) {
             return badRequest(login.render(loginForm, redirect));
         } else {
-            User user = DatabaseHelper.getUserProvider().getUser(loginForm.get().email);
+            User user = DataProvider.getUserProvider().getUser(loginForm.get().email);
             boolean goodCredentials = user != null && BCrypt.checkpw(loginForm.get().password, user.getPassword());
 
             if (goodCredentials) {
@@ -280,7 +280,7 @@ public class Login extends Controller {
                     return badRequest(login.render(loginForm, redirect));
                 } else {
                     session().clear();
-                    DatabaseHelper.getUserProvider().createUserSession(user);
+                    DataProvider.getUserProvider().createUserSession(user);
                     if (redirect != null) {
                         return redirect(redirect);
                     } else {
@@ -302,7 +302,7 @@ public class Login extends Controller {
      * @return Page to register to
      */
     public static Result register() {
-        if (DatabaseHelper.getUserProvider().getUser() == null) {
+        if (DataProvider.getUserProvider().getUser() == null) {
             return ok(
                     register.render(Form.form(RegisterModel.class))
             );
@@ -333,7 +333,7 @@ public class Login extends Controller {
      */
     public static Result register_verification(int userId, String uuid) {
 
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
             if (user == null) {
@@ -351,7 +351,7 @@ public class Login extends Controller {
 
                     dao.updateUser(user, true);
                     context.commit();
-                    DatabaseHelper.getUserProvider().invalidateUser(user);
+                    DataProvider.getUserProvider().invalidateUser(user);
 
                     flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
                     LoginModel model = new LoginModel();
@@ -379,12 +379,12 @@ public class Login extends Controller {
             return badRequest(register.render(registerForm));
         } else {
             session().clear();
-            User otherUser = DatabaseHelper.getUserProvider().getUser(registerForm.get().email);
+            User otherUser = DataProvider.getUserProvider().getUser(registerForm.get().email);
             if (otherUser != null) {
                 registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
                 return badRequest(register.render(registerForm));
             } else {
-                try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+                try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                     UserDAO dao = context.getUserDAO();
                     try {
                         User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
@@ -415,10 +415,10 @@ public class Login extends Controller {
      * @return Redirect to index page
      */
     public static Result logout() {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         if(user != null) {
-            DatabaseHelper.getUserProvider().invalidateUser(user);
-            DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
+            DataProvider.getUserProvider().invalidateUser(user);
+            DataProvider.getUserRoleProvider().invalidateRoles(user);
         }
 
         if(session("impersonated") != null){

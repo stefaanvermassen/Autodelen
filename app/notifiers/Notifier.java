@@ -1,6 +1,5 @@
 package notifiers;
 
-
 import controllers.routes;
 import database.*;
 import models.*;
@@ -8,6 +7,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
+import providers.DataProvider;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class Notifier extends Mailer {
         setSubject("Verifieer uw Dégage-account");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
             mail = replaceUserTags(user, template.getBody());
@@ -42,7 +42,7 @@ public class Notifier extends Mailer {
 
     public static void sendWelcomeMail(User user) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.WELCOME);
             mail = replaceUserTags(user, template.getBody());
@@ -61,7 +61,7 @@ public class Notifier extends Mailer {
 
     public static void sendMembershipStatusChanged(User user, boolean approved, String comment) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template;
             if(approved){
@@ -86,7 +86,7 @@ public class Notifier extends Mailer {
 
     public static void sendCarCostStatusChanged(User user, CarCost carCost, boolean approved) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template;
             if(approved){
@@ -111,7 +111,7 @@ public class Notifier extends Mailer {
 
     public static void sendRefuelStatusChanged(User user, Refuel refuel, boolean approved) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template;
             if(approved){
@@ -136,7 +136,7 @@ public class Notifier extends Mailer {
 
     public static void sendCarCostRequest(CarCost carCost) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
             UserRoleDAO userRoleDAO = context.getUserRoleDAO();
@@ -155,7 +155,7 @@ public class Notifier extends Mailer {
 
     public static void sendRefuelRequest(User user, Refuel refuel) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.REFUEL_REQUEST);
             mail = replaceUserTags(user, template.getBody());
@@ -175,7 +175,7 @@ public class Notifier extends Mailer {
 
     public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
             mail = replaceUserTags(user, template.getBody());
@@ -195,7 +195,7 @@ public class Notifier extends Mailer {
 
     public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
             mail = replaceUserTags(user, template.getBody());
@@ -217,7 +217,7 @@ public class Notifier extends Mailer {
 
     public static void sendReservationApprovedByOwnerMail(User user, Reservation carReservation) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             CarDAO cdao = context.getCarDAO();
             Car car = cdao.getCar(carReservation.getCar().getId());
@@ -241,7 +241,7 @@ public class Notifier extends Mailer {
 
     public static void sendReservationRefusedByOwnerMail(User user, Reservation carReservation, String reason) {
         String mail = "";
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
             mail = replaceUserTags(user, template.getBody());
@@ -265,7 +265,7 @@ public class Notifier extends Mailer {
         setSubject("Uw wachtwoord opnieuw instellen");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.PASSWORD_RESET);
             mail = replaceUserTags(user, template.getBody());
@@ -285,7 +285,7 @@ public class Notifier extends Mailer {
         setSubject("Ongelezen berichten");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.REMINDER_MAIL);
             mail = replaceUserTags(user, template.getBody());
@@ -293,7 +293,7 @@ public class Notifier extends Mailer {
             throw ex;
         }
         send(mail);
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             SchedulerDAO dao = context.getSchedulerDAO();
             dao.setReminded(user);
             context.commit();

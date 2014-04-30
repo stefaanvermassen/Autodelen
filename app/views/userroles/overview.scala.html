@@ -1,4 +1,4 @@
-@import database.DatabaseHelper;
+@import database.DataProvider;
 
     @scripts = {
         <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -31,7 +31,7 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <p><a class="btn btn-default" href="@routes.UserRoles.edit(DatabaseHelper.getUserProvider.getUser().getId)">
+                        <p><a class="btn btn-default" href="@routes.UserRoles.edit(DataProvider.getUserProvider.getUser().getId)">
                             Eigen rollen bewerken</a></p>
                     </div>
                         <!-- /.panel-body -->

@@ -12,6 +12,7 @@ import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
@@ -56,7 +57,7 @@ public class Messages extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showReceivedMessagesPage(int page, int ascInt, String orderBy, String searchString) {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
@@ -68,7 +69,7 @@ public class Messages extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showSentMessagesPage(int page, int ascInt, String orderBy, String searchString) {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
@@ -79,7 +80,7 @@ public class Messages extends Controller {
     }
 
     private static Html messageList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             MessageDAO dao = context.getMessageDAO();
             List<Message> messageList = dao.getMessageList(orderBy, asc, page, PAGE_SIZE, filter);
 
@@ -112,7 +113,7 @@ public class Messages extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result reply(int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
             if (user == null) {
@@ -145,12 +146,12 @@ public class Messages extends Controller {
             return badRequest(addmessage.render(createForm));
         } else {
 
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 MessageDAO dao = context.getMessageDAO();
 
                 try {
-                    User sender = DatabaseHelper.getUserProvider().getUser();
-                    User receiver = DatabaseHelper.getUserProvider().getUser(createForm.get().useremail);
+                    User sender = DataProvider.getUserProvider().getUser();
+                    User receiver = DataProvider.getUserProvider().getUser(createForm.get().useremail);
                     Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
                     if (mes != null) {
                         return redirect(
@@ -178,12 +179,12 @@ public class Messages extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result markMessageAsRead(int messageId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
            MessageDAO dao = context.getMessageDAO();
            dao.markMessageAsRead(messageId);
             context.commit();
-            DatabaseHelper.getCommunicationProvider().invalidateMessages(user.getId());
+            DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
             return redirect(routes.Messages.showMessages());
         } catch (DataAccessException ex) {
             throw ex;

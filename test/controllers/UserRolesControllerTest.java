@@ -25,7 +25,7 @@ import org.junit.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import database.DataAccessContext;
-import database.DatabaseHelper;
+import database.DataProvider;
 import database.UserRoleDAO;
 
 public class UserRolesControllerTest {
@@ -41,7 +41,7 @@ public class UserRolesControllerTest {
 	public void setUp(){
 		helper = new TestHelper();
 		helper.setTestProvider();
-		DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
 		userRoleDAO = context.getUserRoleDAO();
 		admin = helper.createRegisteredUser("admin@test.com", "1234piano", "Pol", "Thijs",  new UserRole[]{UserRole.SUPER_USER});
 		Address address = new Address("Belgium","9000", "Gent", "Sterre", "S2", "bib");

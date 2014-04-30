@@ -6,6 +6,7 @@ import models.EmailTemplate;
 import models.UserRole;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.emailtemplates.edit;
 import views.html.emailtemplates.emailtemplates;
 import views.html.emailtemplates.emailtemplatespage;
@@ -32,7 +33,7 @@ public class EmailTemplates extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showExistingTemplatesPage(int page, int ascInt, String orderBy, String searchString) {
         // We don't use the page, ascInt, orderBy, searchString, because there aren't many templates
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             List<EmailTemplate> templates = dao.getAllTemplates();
             // Always 1 page
@@ -52,7 +53,7 @@ public class EmailTemplates extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showTemplate(int templateId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(templateId);
             if (template == null) {
@@ -74,7 +75,7 @@ public class EmailTemplates extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result editTemplate() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             final Map<String, String[]> values = request().body().asFormUrlEncoded();
             String templateBody = values.get("template_body")[0];

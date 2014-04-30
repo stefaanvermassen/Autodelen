@@ -1,15 +1,12 @@
-package database;
+package providers;
 
-import database.providers.CommunicationProvider;
-import database.providers.SettingProvider;
-import database.providers.UserProvider;
-import database.providers.UserRoleProvider;
+import database.DataAccessProvider;
 import play.Logger;
 
 /**
  * Created by Cedric on 2/16/14.
  */
-public class DatabaseHelper {
+public class DataProvider {
 
     //TODO: this class needs a decent implementation or alternative
     private static DataAccessProvider accessProvider;

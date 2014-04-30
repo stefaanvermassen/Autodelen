@@ -8,6 +8,7 @@ import models.UserRole;
 import play.api.templates.Html;
 import play.mvc.*;
 
+import providers.DataProvider;
 import scala.Tuple2;
 import views.html.userroles.*;
 
@@ -46,7 +47,7 @@ public class UserRoles extends Controller {
     }
 
     private static Html userList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
 
             if(orderBy == null) {
@@ -71,7 +72,7 @@ public class UserRoles extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result edit(int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
             User user = udao.getUser(userId, true);
             if (user == null) {
@@ -115,7 +116,7 @@ public class UserRoles extends Controller {
     @SuppressWarnings("unchecked")
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result editPost(int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
             User user = udao.getUser(userId, true);
             if (user == null) {
@@ -160,7 +161,7 @@ public class UserRoles extends Controller {
                         context.commit();
 
                         // Invalidate the cache for a page refresh
-                        DatabaseHelper.getUserRoleProvider().invalidateRoles(user);
+                        DataProvider.getUserRoleProvider().invalidateRoles(user);
 
                         flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
                         return ok(editroles.render(getUserRolesStatus(newRoles), user));

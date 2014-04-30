@@ -1,8 +1,8 @@
 @(car: Car)
 @import controllers.Cars;
 @import org.joda.time.format.DateTimeFormat
-@import database.DatabaseHelper;
-@defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+@import database.DataProvider;
+@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
     <div class="row">
         <div class="col-lg-3">
             <div class="panel panel-default">

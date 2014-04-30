@@ -122,7 +122,7 @@ public class Reserve extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result reserve(int carId, String from, String until){
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
             if (car == null) {
@@ -150,7 +150,7 @@ public class Reserve extends Controller {
     public static Result confirmReservation(int carId) {
         // Get the car object to test whether the operation is legal
         Car car;
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             car = dao.getCar(carId);
             if (car == null) {
@@ -176,7 +176,7 @@ public class Reserve extends Controller {
                 }
 
                 // Create the reservation
-                User user = DatabaseHelper.getUserProvider().getUser();
+                User user = DataProvider.getUserProvider().getUser();
                 Reservation reservation = rdao.createReservation(from, until, car, user);
                 context.commit();
 
@@ -218,7 +218,7 @@ public class Reserve extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
             FilterField field = FilterField.stringToField(orderBy);

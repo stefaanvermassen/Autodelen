@@ -1,4 +1,4 @@
-import database.DatabaseHelper;
+import database.DataProvider;
 import database.mocking.TestDataAccessProvider;
 import org.junit.*;
 
@@ -22,7 +22,7 @@ public class IntegrationTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DatabaseHelper.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
+                DataProvider.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
 
             }
         });
