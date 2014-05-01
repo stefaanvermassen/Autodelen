@@ -7,7 +7,6 @@ import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
 import providers.DataProvider;
-import providers.UserRoleProvider;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -20,16 +19,12 @@ import views.html.infosession.addinfosession;
 import views.html.infosession.*;
 
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
-import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -531,6 +526,8 @@ public class InfoSessions extends Controller {
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
         if (user.getDriverLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
+        if(user.isPayedDeposit())
+            errors.add("Lidgeld nog niet betaald.");
         if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
