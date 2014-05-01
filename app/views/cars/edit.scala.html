@@ -1,5 +1,5 @@
 @(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
-@import database.DatabaseHelper;
+@import providers.DataProvider;
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
@@ -62,12 +62,12 @@
                             }
                             <!-- TODO: profile picture-->
                         </div>
-                        @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                        @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
                             @if(isAdmin) {
                                 <div class="form-group">
                                     <label class="col-md-1 control-label" for="receiver">Eigenaar</label>
                                         @if(form("userEmail").value){
-                                            @defining(DatabaseHelper.getUserProvider().getUser(form("userEmail").value)) { user =>
+                                            @defining(DataProvider.getUserProvider().getUser(form("userEmail").value)) { user =>
                                                 <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
                                                     <input type="hidden" name="userEmail" value="@user.getEmail" />
@@ -75,7 +75,7 @@
                                                 </div>
                                             }
                                         }else{
-                                            @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                                            @defining(DataProvider.getUserProvider().getUser()) { user =>
                                                 <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
                                                     <input type="hidden" name="userEmail" value="@user.getEmail"/>

@@ -1,19 +1,22 @@
 package controllers.Security;
 
 import controllers.routes;
-import database.DatabaseHelper;
-import database.providers.UserProvider;
-import database.providers.UserRoleProvider;
+import providers.DataProvider;
 import models.User;
 import models.UserRole;
-import models.UserStatus;
 import play.libs.F;
-import play.mvc.*;
-import play.mvc.Http.*;
+import play.mvc.Action;
+import play.mvc.Http.Context;
+import play.mvc.SimpleResult;
+import play.mvc.With;
+import providers.UserProvider;
+import providers.UserRoleProvider;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.URLEncoder;
-import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -52,7 +55,7 @@ public class RoleSecured {
         public F.Promise<SimpleResult> call(Context ctx) {
             try {
                 UserRole[] securedRoles = configuration.value();
-                User user = DatabaseHelper.getUserProvider().getUser(ctx.session(), true); // get user from session
+                User user = DataProvider.getUserProvider().getUser(ctx.session(), true); // get user from session
 
                 // If user is null, redirect to login page
                 if(user == null) {
@@ -62,7 +65,7 @@ public class RoleSecured {
                     return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
                 }
 
-                Set<UserRole> roles = DatabaseHelper.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
+                Set<UserRole> roles = DataProvider.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
 
                 // If user has got one of the specified roles, delegate to the requested page
                 if(securedRoles.length == 0 || UserRoleProvider.hasSomeRole(roles, securedRoles)){

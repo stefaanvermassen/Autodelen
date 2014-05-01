@@ -8,6 +8,7 @@ import models.User;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.notifiers.*;
 import views.html.notifiers.notifications;
 import views.html.notifiers.notificationspage;
@@ -33,7 +34,7 @@ public class Notifications extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result showNotificationsPage(int page, int ascInt, String orderBy, String searchString) {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
@@ -46,7 +47,7 @@ public class Notifications extends Controller {
     }
 
     private static Html notificationList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             NotificationDAO dao = context.getNotificationDAO();
 
             List<Notification> list = dao.getNotificationList(orderBy, asc, page, PAGE_SIZE, filter);
@@ -68,12 +69,12 @@ public class Notifications extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result markNotificationAsRead(int notificationId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             NotificationDAO dao = context.getNotificationDAO();
             dao.markNotificationAsRead(notificationId);
             context.commit();
-            DatabaseHelper.getCommunicationProvider().invalidateNotifications(user.getId());
+            DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
             return redirect(routes.Notifications.showNotifications());
         } catch (DataAccessException ex) {
             throw ex;

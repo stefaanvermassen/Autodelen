@@ -1,8 +1,6 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
-import database.DatabaseHelper;
-import models.User;
 import play.mvc.*;
 
 import views.html.*;

@@ -1,14 +1,17 @@
 package controllers.util;
 
-import controllers.Assets;
-import database.*;
-import models.*;
+import database.DataAccessContext;
+import database.DataAccessException;
+import database.FileDAO;
+import database.UserDAO;
+import models.User;
+import models.UserRole;
 import play.Logger;
 import play.api.Play;
-import play.api.mvc.MultipartFormData;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import providers.DataProvider;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -17,13 +20,14 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.io.File;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Cedric on 4/11/2014.
@@ -198,7 +202,7 @@ public class FileHelper {
     }
 
     public static Result genericFileAction(int userId, int fileId, FileAction action){
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO udao = context.getUserDAO();
             FileDAO fdao = context.getFileDAO();
             User user = udao.getUser(userId, true);

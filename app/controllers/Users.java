@@ -9,6 +9,7 @@ import controllers.Security.RoleSecured;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.users.*;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class Users extends Controller {
     }
 
     private static Html userList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
 
             if(orderBy == null) {
@@ -66,12 +67,12 @@ public class Users extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result impersonate(int userId){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, false);
             if(user != null){
                 String originalEmail = session("email"); //TODO: migrate to userprovider also
-                DatabaseHelper.getUserProvider().createUserSession(user);
+                DataProvider.getUserProvider().createUserSession(user);
                 session("impersonated", originalEmail);
                 return redirect(routes.Dashboard.index());
             } else {

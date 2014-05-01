@@ -5,7 +5,8 @@ import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
-import database.providers.UserRoleProvider;
+import providers.DataProvider;
+import providers.UserRoleProvider;
 import models.Refuel;
 import models.RefuelStatus;
 import models.User;
@@ -60,7 +61,7 @@ public class Refuels extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         filter.putValue(FilterField.REFUEL_USER_ID, user.getId() + "");
 
         // TODO: Check if admin or car owner/user
@@ -76,7 +77,7 @@ public class Refuels extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         filter.putValue(FilterField.REFUEL_OWNER_ID, user.getId() + "");
         filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
 
@@ -87,7 +88,7 @@ public class Refuels extends Controller {
     }
 
     private static Html refuelList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
 
             if(orderBy == null) {
@@ -136,7 +137,7 @@ public class Refuels extends Controller {
             return redirect(routes.Refuels.showRefuels());
 
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 RefuelDAO dao = context.getRefuelDAO();
                 try {
                     RefuelModel model = refuelForm.get();
@@ -194,7 +195,7 @@ public class Refuels extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result getProof(int proofId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
         } catch (DataAccessException ex) {
             throw ex;
@@ -211,7 +212,7 @@ public class Refuels extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result refuseRefuel(int refuelId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
             dao.rejectRefuel(refuelId);
             Refuel refuel = dao.getRefuel(refuelId);
@@ -234,7 +235,7 @@ public class Refuels extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result approveRefuel(int refuelId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
             dao.acceptRefuel(refuelId);
             Refuel refuel = dao.getRefuel(refuelId);

@@ -1,10 +1,11 @@
 package schedulers;
 
-import controllers.routes;
-import database.*;
-import models.Notification;
+import database.DataAccessContext;
+import database.DataAccessException;
+import database.SchedulerDAO;
 import models.User;
 import notifiers.Notifier;
+import providers.DataProvider;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class SendUnreadNotificationsMailScheduler extends Scheduler{
 
     @Override
     public void run() {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             SchedulerDAO dao = context.getSchedulerDAO();
             //Todo: number_of_unread_messages from system_variable
             List<User> emailList = dao.getReminderEmailList(0);

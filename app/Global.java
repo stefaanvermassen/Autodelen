@@ -10,6 +10,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.*;
 import play.data.format.Formatters;
+import providers.DataProvider;
 import scala.concurrent.duration.Duration;
 import schedulers.Scheduler;
 import schedulers.SendUnreadNotificationsMailScheduler;
@@ -24,7 +25,7 @@ public class Global extends GlobalSettings {
 
     // Tests if all templates are in the database, and if the database works
     private void testDatabase(){
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             TemplateDAO dao = context.getTemplateDAO();
             StringBuilder sb = new StringBuilder();
             for(MailType type : MailType.values()){
@@ -40,7 +41,7 @@ public class Global extends GlobalSettings {
 
     public void onStart(Application app) {
         try {
-            DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
+            DataProvider.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
             testDatabase();
 
             // Register datetime formatter

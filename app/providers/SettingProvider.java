@@ -1,4 +1,4 @@
-package database.providers;
+package providers;
 
 import database.DataAccessContext;
 import database.DataAccessProvider;
