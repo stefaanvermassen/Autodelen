@@ -19,7 +19,7 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
             "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email, " +
             "admins.user_id, admins.user_password, admins.user_firstname, admins.user_lastname, admins.user_email, " +
-            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees ";
+            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_type_alternative, infosession_comments ";
 
     private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM Approvals " +
             "LEFT JOIN Users users ON approval_user = users.user_id " +
