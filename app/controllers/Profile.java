@@ -30,6 +30,8 @@ public class Profile extends Controller {
         public Addresses.EditAddressModel domicileAddress;
         public Addresses.EditAddressModel residenceAddress;
 
+        public boolean paidDeposit;
+
         public EditProfileModel() {
             this.domicileAddress = new Addresses.EditAddressModel();
             this.residenceAddress = new Addresses.EditAddressModel();
@@ -47,6 +49,7 @@ public class Profile extends Controller {
 
             this.domicileAddress.populate(user.getAddressDomicile());
             this.residenceAddress.populate(user.getAddressResidence());
+            this.paidDeposit = user.isPayedDeposit();
         }
 
         public String validate() {
@@ -715,7 +718,9 @@ public class Profile extends Controller {
             User user = dao.getUser(userId, true);
             User currentUser = DataProvider.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
+            boolean isProfileAdmin = DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN);
+
+            if (currentUser.getId() != user.getId() && !isProfileAdmin) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 
@@ -731,6 +736,11 @@ public class Profile extends Controller {
                     user.setCellphone(model.mobile);
                     user.setFirstName(model.firstName);
                     user.setLastName(model.lastName);
+
+                    // Admins can change the payment status
+                    if(isProfileAdmin){
+                        user.setPayedDeposit(model.paidDeposit);
+                    }
 
                     // Because of constraints with FK we have to set them to NULL first in user before deleting them
 
