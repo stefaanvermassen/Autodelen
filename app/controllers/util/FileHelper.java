@@ -38,7 +38,7 @@ public class FileHelper {
 
     //Source: http://www.cs.helsinki.fi/u/hahonen/uusmedia/sisalto/cgi_perl_ssi/mime.html
     public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png", "image/tiff"}); // array is too small to allocate a Set
-    public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList(new String[]{"text/plain", "application/pdf"});
+    public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList(new String[]{"text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream"});
 
     private static String uploadFolder;
 
