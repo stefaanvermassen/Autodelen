@@ -21,6 +21,10 @@ public interface CarDAO {
     public Car getCar(int id) throws DataAccessException;
     public void deleteCar(Car car) throws DataAccessException;
 
+    public List<CarAvailabilityInterval> getAvailabilities(Car car) throws DataAccessException;
+    public void addOrUpdateAvailabilities(Car car, List<CarAvailabilityInterval> availabilities) throws DataAccessException;
+    public void deleteAvailabilties(List<CarAvailabilityInterval> availabilities) throws DataAccessException;
+
     public int getAmountOfCars(Filter filter) throws DataAccessException;
     public List<Car> getCarList(int page, int pageSize) throws DataAccessException;
     public List<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;

@@ -10,15 +10,15 @@ public class CarInsurance {
 
 	private Integer id;
     private String name;
-	private DateTime expiration;
+	private Date expiration;
 	private Integer bonusMalus;
 	private Integer polisNr;
 
-    public CarInsurance(String name, DateTime expiration, Integer bonusMalus, Integer polisNr) {
+    public CarInsurance(String name, Date expiration, Integer bonusMalus, Integer polisNr) {
         this(null, name, expiration, bonusMalus, polisNr);
     }
 	
-	public CarInsurance(Integer id, String name, DateTime expiration, Integer bonusMalus, Integer polisNr) {
+	public CarInsurance(Integer id, String name, Date expiration, Integer bonusMalus, Integer polisNr) {
 		this.id=id;
         this.name = name;
 		this.expiration = expiration;
@@ -27,7 +27,7 @@ public class CarInsurance {
 	}
 	
 	
-	public DateTime getExpiration() {
+	public Date getExpiration() {
 		return expiration;
 	}
 	public Integer getPolisNr() {
@@ -38,7 +38,7 @@ public class CarInsurance {
 		this.polisNr = polisNr;
 	}
 
-	public void setExpiration(DateTime expiration) {
+	public void setExpiration(Date expiration) {
 		this.expiration = expiration;
 	}
 	public Integer getBonusMalus() {

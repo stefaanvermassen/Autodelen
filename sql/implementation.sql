@@ -90,7 +90,7 @@ ENGINE=InnoDB;
 CREATE TABLE `CarInsurances` (
 	`insurance_id` INT NOT NULL AUTO_INCREMENT,
 	`insurance_name` VARCHAR(64),
-	`insurance_expiration` DATETIME,
+	`insurance_expiration` DATE,
 	`insurance_contract_id` INT, # Polisnr
 	`insurance_bonus_malus` INT,
 	`insurance_created_at` DATETIME,
@@ -195,8 +195,10 @@ ENGINE=InnoDB;
 CREATE TABLE `CarAvailabilities` (
 	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
 	`car_availability_car_id` INT NOT NULL,
-	`car_availability_from` DATETIME NOT NULL,
-	`car_availability_to` DATETIME NOT NULL,
+	`car_availability_begin_day_of_week` INT NOT NULL,
+	`car_availability_begin_time` TIME NOT NULL,
+	`car_availability_end_day_of_week` INT NOT NULL,
+	`car_availability_end_time` TIME NOT NULL,
 	PRIMARY KEY (`car_availability_id`),
 	FOREIGN KEY (`car_availability_car_id`) REFERENCES Cars(`car_id`)
 )

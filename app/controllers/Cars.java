@@ -12,6 +12,7 @@ import controllers.Security.RoleSecured;
 
 import notifiers.Notifier;
 import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
 import play.Logger;
 import play.api.templates.Html;
 import play.data.Form;
@@ -36,10 +37,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
@@ -92,7 +90,7 @@ public class Cars extends Controller {
 
         // Insurance
         public String insuranceName;
-        public DateTime expiration;
+        public Date expiration;
         public Integer bonusMalus;
         public Integer polisNr;
 
@@ -125,7 +123,7 @@ public class Cars extends Controller {
             if(car.getInsurance() != null) {
                 insuranceName = car.getInsurance().getName();
                 if(car.getInsurance().getExpiration() != null)
-                    expiration = new DateTime(car.getInsurance().getExpiration());
+                    expiration = car.getInsurance().getExpiration();
                 bonusMalus = car.getInsurance().getBonusMalus();
                 polisNr = car.getInsurance().getPolisNr();
             }
@@ -150,9 +148,9 @@ public class Cars extends Controller {
                 error +=  "Geef de autonaam op. ";
             if(brand.length() <= 0)
                 error +=  "Geef het automerk op. ";
-            if(seats != null && seats < 2)
+            if(seats == null || seats < 2)
                 error +=  "Een auto heeft minstens 2 zitplaatsen. ";
-            if(doors != null && doors < 2)
+            if(doors == null || doors < 2)
                 error +=  "Een auto heeft minstens 2 deuren. ";
 
             if("".equals(error)) return null;
@@ -464,6 +462,75 @@ public class Cars extends Controller {
                 context.commit();
                 flash("success", "Uw wijzigingen werden succesvol toegepast.");
                 return detail(carId);
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     * @return redirect to the car detailPage
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    public static Result updateAvailabilities(int carId, String valuesString) {
+        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(carId);
+
+            if (car == null) {
+                flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                return badRequest(carList());
+            }
+
+            User currentUser = DatabaseHelper.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                return badRequest(carList());
+            }
+
+            try {
+                String[] values = valuesString.split(";");
+
+                List<CarAvailabilityInterval> availabilitiesToAddOrUpdate = new ArrayList<>();
+                List<CarAvailabilityInterval> availabilitiesToDelete = new ArrayList<>();
+
+                for(String value : values) {
+                    String[] vs = value.split(",");
+                    if(vs.length != 5) {
+                        flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
+                        return badRequest(detail.render(car));
+                    }
+                    try {
+                        int id = Integer.parseInt(vs[0]);
+                        DayOfWeek beginDay = DayOfWeek.getDayFromInt(Integer.parseInt(vs[1]));
+                        String[] beginHM = vs[2].split(":");
+                        LocalTime beginTime = new LocalTime(Integer.parseInt(beginHM[0]), Integer.parseInt(beginHM[1]));
+                        DayOfWeek endDay = DayOfWeek.getDayFromInt(Integer.parseInt(vs[3]));
+                        String[] endHM = vs[4].split(":");
+                        LocalTime endTime = new LocalTime(Integer.parseInt(endHM[0]), Integer.parseInt(endHM[1]));
+                        if(id == 0) { // create
+                            availabilitiesToAddOrUpdate.add(new CarAvailabilityInterval(beginDay, beginTime, endDay, endTime));
+                        } else if(id > 0) { // update
+                            availabilitiesToAddOrUpdate.add(new CarAvailabilityInterval(id, beginDay, beginTime, endDay, endTime));
+                        } else { // delete
+                            availabilitiesToDelete.add(new CarAvailabilityInterval(-id, beginDay, beginTime, endDay, endTime));
+                        }
+                    } catch(ArrayIndexOutOfBoundsException | NumberFormatException e ) {
+                        flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
+                        return badRequest(detail.render(car));
+                    }
+                }
+
+                dao.addOrUpdateAvailabilities(car, availabilitiesToAddOrUpdate);
+                dao.deleteAvailabilties(availabilitiesToDelete);
+
+                context.commit();
+                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                return ok(detail.render(car));
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;

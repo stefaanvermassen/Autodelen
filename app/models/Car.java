@@ -4,6 +4,10 @@
  */
 package models;
 
+import org.joda.time.LocalTime;
+
+import java.util.List;
+
 /**
  *
  * @author Laurent
@@ -28,6 +32,7 @@ public class Car {
     private CarInsurance insurance;
     private User owner;
     private String comments;
+    private List<CarAvailabilityInterval> availabilities;
 
     public Car() {
         this(0, null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null, null);
@@ -192,6 +197,14 @@ public class Car {
 
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    public List<CarAvailabilityInterval> getAvailabilities() {
+        return availabilities;
+    }
+
+    public void setAvailabilities(List<CarAvailabilityInterval> availabilities) {
+        this.availabilities = availabilities;
     }
 
     @Override

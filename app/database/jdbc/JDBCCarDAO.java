@@ -15,6 +15,7 @@ import java.util.List;
 import database.FilterField;
 import models.*;
 import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -74,7 +75,10 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement createTechnicalCarDetailsStatement;
     private PreparedStatement updateInsuranceStatement;
     private PreparedStatement createInsuranceStatement;
-
+    private PreparedStatement getAvailabilitiesStatement;
+    private PreparedStatement createAvailabilityStatement;
+    private PreparedStatement updateAvailabilityStatement;
+    private PreparedStatement deleteAvailabilityStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -129,7 +133,7 @@ public class JDBCCarDAO implements CarDAO{
                 if(!rs.wasNull()) {
                     String name = rs.getString("insurance_name");
                     if(rs.wasNull()) name = null;
-                    DateTime expiration = new DateTime(rs.getDate("insurance_expiration"));
+                    Date expiration = rs.getDate("insurance_expiration");
                     if(rs.wasNull()) expiration = null;
                     Integer bonusMalus = rs.getInt("insurance_bonus_malus");
                     if(rs.wasNull()) bonusMalus = null;
@@ -262,6 +266,38 @@ public class JDBCCarDAO implements CarDAO{
         }
         return updateTechnicalCarDetailsStatement;
     }
+
+    private PreparedStatement getAvailabilitiesStatement() throws SQLException {
+        if (getAvailabilitiesStatement == null) {
+            getAvailabilitiesStatement = connection.prepareStatement("SELECT * FROM CarAvailabilities WHERE car_availability_car_id=?");
+        }
+        return getAvailabilitiesStatement;
+    }
+
+    private PreparedStatement createAvailabilityStatement() throws SQLException {
+        if (createAvailabilityStatement == null) {
+            createAvailabilityStatement = connection.prepareStatement("INSERT INTO CarAvailabilities(car_availability_car_id, " +
+                    "car_availability_begin_day_of_week, car_availability_begin_time, car_availability_end_day_of_week, car_availability_end_time) " +
+                    "VALUES (?,?,?,?,?)", new String[] {"car_availability_id"});
+        }
+        return createAvailabilityStatement;
+    }
+
+    private PreparedStatement updateAvailabilityStatement() throws SQLException {
+        if (updateAvailabilityStatement == null) {
+            updateAvailabilityStatement = connection.prepareStatement("UPDATE CarAvailabilities SET car_availability_car_id=?, " +
+                    "car_availability_begin_day_of_week=?, car_availability_begin_time=?, car_availability_end_day_of_week=?, car_availability_end_time=? " +
+                    "WHERE car_availability_id = ?");
+        }
+        return updateAvailabilityStatement;
+    }
+
+    private PreparedStatement deleteAvailabilityStatement() throws SQLException {
+        if (deleteAvailabilityStatement == null) {
+            deleteAvailabilityStatement = connection.prepareStatement("DELETE FROM CarAvailabilities WHERE car_availability_id = ?");
+        }
+        return deleteAvailabilityStatement;
+    }
     
     @Override
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year,
@@ -348,22 +384,26 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
+    private void setTechnicalCarDetailsVariables(PreparedStatement ps, TechnicalCarDetails technicalCarDetails) throws SQLException {
+        if(technicalCarDetails.getLicensePlate() != null)
+            ps.setString(1, technicalCarDetails.getLicensePlate());
+        else
+            ps.setNull(1, Types.VARCHAR);
+        if(technicalCarDetails.getRegistration() != null)
+            ps.setInt(2, technicalCarDetails.getRegistration().getId());
+        else
+            ps.setNull(2, Types.INTEGER);
+        if(technicalCarDetails.getChassisNumber() != null)
+            ps.setInt(3, technicalCarDetails.getChassisNumber());
+        else
+            ps.setNull(3, Types.INTEGER);
+    }
+
     private void createOrUpdateTechnicalCarDetails(TechnicalCarDetails technicalCarDetails) throws DataAccessException {
         try {
             if(technicalCarDetails.getId() == null) { // create
                 PreparedStatement ps = createTechnicalCarDetailsStatement();
-                if(technicalCarDetails.getLicensePlate() != null)
-                    ps.setString(1, technicalCarDetails.getLicensePlate());
-                else
-                    ps.setNull(1, Types.VARCHAR);
-                if(technicalCarDetails.getRegistration() != null)
-                    ps.setInt(2, technicalCarDetails.getRegistration().getId());
-                else
-                    ps.setNull(2, Types.INTEGER);
-                if(technicalCarDetails.getChassisNumber() != null)
-                    ps.setInt(3, technicalCarDetails.getChassisNumber());
-                else
-                    ps.setNull(3, Types.INTEGER);
+                setTechnicalCarDetailsVariables(ps, technicalCarDetails);
 
                 if(ps.executeUpdate() == 0)
                     throw new DataAccessException("No rows were affected when creating technicalCarDetails.");
@@ -376,18 +416,8 @@ public class JDBCCarDAO implements CarDAO{
                 }
             } else { // update
                 PreparedStatement ps = updateTechnicalCarDetailsStatement();
-                if(technicalCarDetails.getLicensePlate() != null)
-                    ps.setString(1, technicalCarDetails.getLicensePlate());
-                else
-                    ps.setNull(1, Types.VARCHAR);
-                if(technicalCarDetails.getRegistration() != null)
-                    ps.setInt(2, technicalCarDetails.getRegistration().getId());
-                else
-                    ps.setNull(2, Types.VARCHAR);
-                if(technicalCarDetails.getChassisNumber() != null)
-                    ps.setInt(3, technicalCarDetails.getChassisNumber());
-                else
-                    ps.setNull(3, Types.INTEGER);
+                setTechnicalCarDetailsVariables(ps, technicalCarDetails);
+
                 ps.setInt(4, technicalCarDetails.getId());
 
                 if(ps.executeUpdate() == 0)
@@ -399,26 +429,30 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
+    private void setCarInsuranceVariables(PreparedStatement ps, CarInsurance insurance) throws SQLException {
+        if(insurance.getName() != null)
+            ps.setString(1, insurance.getName());
+        else
+            ps.setNull(1, Types.VARCHAR);
+        if(insurance.getExpiration() != null)
+            ps.setDate(2, new Date(insurance.getExpiration().getTime()));
+        else
+            ps.setNull(2, Types.DATE);
+        if(insurance.getPolisNr() != null)
+            ps.setInt(3, insurance.getPolisNr());
+        else
+            ps.setNull(3, Types.INTEGER);
+        if(insurance.getBonusMalus() != null)
+            ps.setInt(4, insurance.getBonusMalus());
+        else
+            ps.setNull(4, Types.INTEGER);
+    }
+
     private void createOrUpdateInsurance(CarInsurance insurance) throws DataAccessException {
         try {
             if(insurance.getId() == null) { // create
                 PreparedStatement ps = createInsuranceStatement();
-                if(insurance.getName() != null)
-                    ps.setString(1, insurance.getName());
-                else
-                    ps.setNull(1, Types.VARCHAR);
-                if(insurance.getExpiration() != null)
-                    ps.setTimestamp(2, new Timestamp(insurance.getExpiration().getMillis()));
-                else
-                    ps.setNull(2, Types.TIMESTAMP);
-                if(insurance.getPolisNr() != null)
-                    ps.setInt(3, insurance.getPolisNr());
-                else
-                    ps.setNull(3, Types.INTEGER);
-                if(insurance.getBonusMalus() != null)
-                    ps.setInt(4, insurance.getBonusMalus());
-                else
-                    ps.setNull(4, Types.INTEGER);
+                setCarInsuranceVariables(ps, insurance);
 
                 if(ps.executeUpdate() == 0)
                     throw new DataAccessException("No rows were affected when creating carInsurance.");
@@ -431,22 +465,7 @@ public class JDBCCarDAO implements CarDAO{
                 }
             } else { // update
                 PreparedStatement ps = updateInsuranceStatement();
-                if(insurance.getName() != null)
-                    ps.setString(1, insurance.getName());
-                else
-                    ps.setNull(1, Types.VARCHAR);
-                if(insurance.getExpiration() != null)
-                    ps.setTimestamp(2, new Timestamp(insurance.getExpiration().getMillis()));
-                else
-                    ps.setNull(2, Types.TIMESTAMP);
-                if(insurance.getPolisNr() != null)
-                    ps.setInt(3, insurance.getPolisNr());
-                else
-                    ps.setNull(3, Types.INTEGER);
-                if(insurance.getBonusMalus() != null)
-                    ps.setInt(4, insurance.getBonusMalus());
-                else
-                    ps.setNull(4, Types.INTEGER);
+                setCarInsuranceVariables(ps, insurance);
 
                 ps.setInt(5, insurance.getId());
 
@@ -543,9 +562,11 @@ public class JDBCCarDAO implements CarDAO{
             PreparedStatement ps = getCarStatement();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return populateCar(rs, true);
-                else return null;
+                if(rs.next()) {
+                    Car car = populateCar(rs, true);
+                    car.setAvailabilities(getAvailabilities(car));
+                    return car;
+                } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading car resultset", ex);
             }
@@ -567,6 +588,91 @@ public class JDBCCarDAO implements CarDAO{
 		}
 		
 	}
+
+    @Override
+    public List<CarAvailabilityInterval> getAvailabilities(Car car) throws DataAccessException {
+        try {
+            PreparedStatement ps = getAvailabilitiesStatement();
+            ps.setInt(1, car.getId());
+            List<CarAvailabilityInterval> availabilities = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Time beginTime = rs.getTime("car_availability_begin_time");
+                    LocalTime beginLocalTime = new LocalTime(beginTime.getHours(), beginTime.getMinutes());
+                    Time endTime = rs.getTime("car_availability_end_time");
+                    LocalTime endLocalTime = new LocalTime(endTime.getHours(), endTime.getMinutes());
+                    availabilities.add(new CarAvailabilityInterval(rs.getInt("car_availability_id"), DayOfWeek.getDayFromInt(rs.getInt("car_availability_begin_day_of_week")),
+                            beginLocalTime, DayOfWeek.getDayFromInt(rs.getInt("car_availability_end_day_of_week")), endLocalTime));
+                }
+                return availabilities;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading availabilities resultset", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of availabilities", ex);
+        }
+    }
+
+    private void setAvailabilityVariables(PreparedStatement ps, int carId, CarAvailabilityInterval availability) throws SQLException {
+        ps.setInt(1, carId);
+        ps.setInt(2, availability.getBeginDayOfWeek().getI());
+        ps.setTime(3, new Time(availability.getBeginTime().getHourOfDay(), availability.getBeginTime().getMinuteOfHour(), 0));
+        ps.setInt(4, availability.getEndDayOfWeek().getI());
+        ps.setTime(5, new Time(availability.getEndTime().getHourOfDay(), availability.getEndTime().getMinuteOfHour(), 0));
+    }
+
+    @Override
+    public void addOrUpdateAvailabilities(Car car, List<CarAvailabilityInterval> availabilities) throws DataAccessException {
+        try {
+            for(CarAvailabilityInterval availability : availabilities) {
+                if(availability.getId() == null) { // create
+                    PreparedStatement ps = createAvailabilityStatement();
+                    setAvailabilityVariables(ps, car.getId(), availability);
+
+                    if(ps.executeUpdate() == 0)
+                        throw new DataAccessException("No rows were affected when creating availability.");
+                    try (ResultSet keys = ps.getGeneratedKeys()) {
+                        keys.next();
+                        int id = keys.getInt(1);
+                        availability.setId(id);
+                    } catch (SQLException ex) {
+                        throw new DataAccessException("Failed to get primary key for new availability.", ex);
+                    }
+                } else { // update
+                    PreparedStatement ps = updateAvailabilityStatement();
+                    setAvailabilityVariables(ps, car.getId(), availability);
+
+                    ps.setInt(6, availability.getId());
+
+                    if(ps.executeUpdate() == 0)
+                        throw new DataAccessException("No rows were affected when updating availability.");
+
+                }
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to create/update new availabilitiy");
+        }
+    }
+
+    @Override
+    public void deleteAvailabilties(List<CarAvailabilityInterval> availabilities) throws DataAccessException {
+        try {
+            for(CarAvailabilityInterval availability : availabilities) {
+                if(availability.getId() == null) {
+                    throw new DataAccessException("No id is available to availability.");
+                } else {
+                    PreparedStatement ps = deleteAvailabilityStatement();
+
+                    ps.setInt(1, availability.getId());
+
+                    if(ps.executeUpdate() == 0)
+                        throw new DataAccessException("No rows were affected when deleting availability.");
+                }
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to delete new availabilitiy");
+        }
+    }
 
     /**
      * @param filter The filter to apply to
