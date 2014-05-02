@@ -89,7 +89,8 @@ ENGINE=InnoDB;
 
 CREATE TABLE `CarInsurances` (
 	`insurance_id` INT NOT NULL AUTO_INCREMENT,
-	`insurance_expiration` DATETIME,
+	`insurance_name` VARCHAR(64),
+	`insurance_expiration` DATE,
 	`insurance_contract_id` INT, # Polisnr
 	`insurance_bonus_malus` INT,
 	`insurance_created_at` DATETIME,
@@ -133,6 +134,7 @@ CREATE TABLE `Cars` (
 	`car_insurance` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
+	`car_active` BIT(1) NOT NULL DEFAULT 0,
 	`car_images_id` INT,
 	`car_created_at` DATETIME,
 	`car_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -187,6 +189,19 @@ CREATE TABLE `InfoSessionEnrollees` ( # Wie is ingeschreven?
 	PRIMARY KEY (`infosession_id`, `infosession_enrollee_id`),
 	FOREIGN KEY (`infosession_enrollee_id`) REFERENCES Users(`user_id`),
 	FOREIGN KEY (`infosession_id`) REFERENCES InfoSessions(`infosession_id`) ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `CarAvailabilities` (
+	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
+	`car_availability_car_id` INT NOT NULL,
+	`car_availability_begin_day_of_week` INT NOT NULL,
+	`car_availability_begin_time` TIME NOT NULL,
+	`car_availability_end_day_of_week` INT NOT NULL,
+	`car_availability_end_time` TIME NOT NULL,
+	PRIMARY KEY (`car_availability_id`),
+	FOREIGN KEY (`car_availability_car_id`) REFERENCES Cars(`car_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;

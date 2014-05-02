@@ -30,8 +30,9 @@ public class UserPicker extends Controller {
                     for (String part : search.split(" ")) {
                         value = value.replaceAll("(?i)\\b(" + part + ")", "<#>$1</#>");
                     }
+                    value += " (" + user.getId() + ")";
 
-                    users += "<li data-uid=\"" + user.getEmail() + "\"><a href=\"javascript:void(0)\">" + value.replace("#", "strong") + "</a></li>";
+                    users += "<li data-uid=\"" + user.getId() + "\"><a href=\"javascript:void(0)\">" + value.replace("#", "strong") + "</a></li>";
                 }
                 return ok(users);
             } catch (DataAccessException ex) {

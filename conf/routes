@@ -142,6 +142,8 @@ GET         /cars/carcosts/page                     controllers.Cars.showCarCost
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
+GET         /cars/availabilities/edit               controllers.Cars.updateAvailabilities(carId : Int, values : String)
+GET         /cars/priviliges/edit                   controllers.Cars.updatePriviliged(carId : Int, values : String)
 
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()

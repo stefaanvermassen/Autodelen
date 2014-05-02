@@ -14,7 +14,7 @@ public enum CarFuel {
     BIODIESEL("Biodiesel"),
     GAS("Gas"),
     HYBRID("Hybride"),
-    ELECTRIC("Electrisch");
+    ELECTRIC("Elektrisch");
 
     // Enum implementation
     private String description;

@@ -32,10 +32,6 @@ import java.util.Set;
  */
 public class InfoSessions extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
-    private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
-
     private static List<String> typeList = null;
 
     private static List<String> getTypeList() {
@@ -50,7 +46,7 @@ public class InfoSessions extends Controller {
     }
 
     public static class InfoSessionCreationModel {
-        public String userEmail;
+        public Integer userId;
         public DateTime time;
         public Integer max_enrollees;
         public String type;
@@ -64,7 +60,7 @@ public class InfoSessions extends Controller {
 
         public String validate() {
             String error = "";
-            if(userEmail == null || userEmail.equals("")) {
+            if(userId == null || userId == 0) {
                 error += "Gelieve een host te selecteren. ";
             }
             if (time == null) {
@@ -80,7 +76,7 @@ public class InfoSessions extends Controller {
         public void populate(InfoSession i) {
             if(i == null) return;
 
-            userEmail = i.getHost().getEmail();
+            userId = i.getHost().getId();
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
             type = i.getType().getDescription();
@@ -102,7 +98,7 @@ public class InfoSessions extends Controller {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class);
 
         InfoSessionCreationModel model = new InfoSessionCreationModel();
-        model.userEmail = user.getEmail();
+        model.userId = user.getId();
         model.address.populate(user.getAddressDomicile());
         model.type = InfoSessionType.NORMAL.getDescription();
         editForm = editForm.fill(model);
@@ -187,7 +183,7 @@ public class InfoSessions extends Controller {
 
                 // Check the host field
                 UserDAO udao = context.getUserDAO();
-                User host = udao.getUser(editForm.get().userEmail);
+                User host = udao.getUser(editForm.get().userId, false);
 
                 if (host == null) {
                     editForm.reject("Infosessie gastheer bestaat niet.");
@@ -295,7 +291,7 @@ public class InfoSessions extends Controller {
                 });
             } else {
                 final InfoSession enrolled = dao.getAttendingInfoSession(user);
-                if (SHOW_MAP) {
+                if (DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
                     return Maps.getLatLongPromise(session.getAddress().getId()).map(
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
@@ -465,7 +461,7 @@ public class InfoSessions extends Controller {
                     }
 
                     UserDAO udao = context.getUserDAO();
-                    User host = udao.getUser(createForm.get().userEmail);
+                    User host = udao.getUser(createForm.get().userId, false);
                     if (host == null) {
                         createForm.reject("De gastheer ID bestaat niet.");
                         return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
@@ -632,11 +628,12 @@ public class InfoSessions extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     public static Result pendingApprovalListPaged(int page) {
+        int pageSize = DataProvider.getSettingProvider().getIntOrDefault("infosessions_page_size", 10);
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
-            List<Approval> approvalsList = dao.getApprovals(page, PAGE_SIZE);
+            List<Approval> approvalsList = dao.getApprovals(page, pageSize);
             int amountOfResults = dao.getApprovalCount();
-            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
             return ok(approvalpage.render(approvalsList, page, amountOfResults, amountOfPages));
         }
@@ -799,7 +796,7 @@ public class InfoSessions extends Controller {
             final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
 
             final boolean showApprovalButton = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
-            if (enrolled == null || !SHOW_MAP) {
+            if (enrolled == null || !DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
@@ -896,7 +893,8 @@ public class InfoSessions extends Controller {
                 orderBy = FilterField.INFOSESSION_DATE;
             }
 
-            List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, PAGE_SIZE, filter);
+            int pageSize = DataProvider.getSettingProvider().getIntOrDefault("infosessions_page_size", 10);
+            List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, pageSize, filter);
             if (enrolled != null) {
                 //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
                 // Hack herpedy derp!!
@@ -910,7 +908,7 @@ public class InfoSessions extends Controller {
             }
 
             int amountOfResults = dao.getAmountOfInfoSessions(filter);
-            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
             if (admin)
                 return infosessionsAdminPage.render(sessions, page, amountOfResults, amountOfPages);
             else
