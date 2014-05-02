@@ -32,10 +32,6 @@ import java.util.Set;
  */
 public class InfoSessions extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
-    private static final boolean SHOW_MAP = true; //TODO: put in config dashboard later
-
     private static List<String> typeList = null;
 
     private static List<String> getTypeList() {
@@ -295,7 +291,7 @@ public class InfoSessions extends Controller {
                 });
             } else {
                 final InfoSession enrolled = dao.getAttendingInfoSession(user);
-                if (SHOW_MAP) {
+                if (DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
                     return Maps.getLatLongPromise(session.getAddress().getId()).map(
                             new F.Function<F.Tuple<Double, Double>, Result>() {
                                 public Result apply(F.Tuple<Double, Double> coordinates) {
@@ -632,11 +628,12 @@ public class InfoSessions extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     public static Result pendingApprovalListPaged(int page) {
+        int pageSize = DataProvider.getSettingProvider().getIntOrDefault("infosessions_page_size", 10);
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
-            List<Approval> approvalsList = dao.getApprovals(page, PAGE_SIZE);
+            List<Approval> approvalsList = dao.getApprovals(page, pageSize);
             int amountOfResults = dao.getApprovalCount();
-            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
             return ok(approvalpage.render(approvalsList, page, amountOfResults, amountOfPages));
         }
@@ -799,7 +796,7 @@ public class InfoSessions extends Controller {
             final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
 
             final boolean showApprovalButton = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
-            if (enrolled == null || !SHOW_MAP) {
+            if (enrolled == null || !DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
@@ -896,7 +893,8 @@ public class InfoSessions extends Controller {
                 orderBy = FilterField.INFOSESSION_DATE;
             }
 
-            List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, PAGE_SIZE, filter);
+            int pageSize = DataProvider.getSettingProvider().getIntOrDefault("infosessions_page_size", 10);
+            List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, pageSize, filter);
             if (enrolled != null) {
                 //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
                 // Hack herpedy derp!!
@@ -910,7 +908,7 @@ public class InfoSessions extends Controller {
             }
 
             int amountOfResults = dao.getAmountOfInfoSessions(filter);
-            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
             if (admin)
                 return infosessionsAdminPage.render(sessions, page, amountOfResults, amountOfPages);
             else
