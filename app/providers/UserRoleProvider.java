@@ -14,7 +14,7 @@ import java.util.Set;
 public class UserRoleProvider {
 
     private static final String ROLES_BY_ID = "role:id:%d";
-    private static final UserRole[] ADMIN_ROLES = new UserRole[] { UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN, UserRole.MAIL_ADMIN, UserRole.RESERVATION_ADMIN };
+    private static final UserRole[] ADMIN_ROLES = new UserRole[] { UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN, UserRole.MAIL_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER };
 
     private DataAccessProvider provider;
     private UserProvider userProvider;

@@ -7,7 +7,6 @@ import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
 import providers.DataProvider;
-import providers.UserRoleProvider;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -20,16 +19,12 @@ import views.html.infosession.addinfosession;
 import views.html.infosession.*;
 
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
-import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -520,9 +515,6 @@ public class InfoSessions extends Controller {
             user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));
         }
 
-        InfoSessionDAO idao = context.getInfoSessionDAO();
-        Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
-
         List<String> errors = new ArrayList<>();
         if (user.getAddressDomicile() == null)
             errors.add("Domicilieadres ontbreekt.");
@@ -534,11 +526,11 @@ public class InfoSessions extends Controller {
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
         if (user.getDriverLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
+        if(user.isPayedDeposit())
+            errors.add("Lidgeld nog niet betaald.");
         if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
-        if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT)
-            errors.add("Nog niet aanwezig geweest op een infosessie.");
         return errors;
     }
 
@@ -568,8 +560,16 @@ public class InfoSessions extends Controller {
                     flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                     return redirect(routes.Dashboard.index());
                 } else {
-                    List<String> errors = checkApprovalConditions(user, context);
-                    return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context)));
+                    InfoSessionDAO idao = context.getInfoSessionDAO();
+                    Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
+
+                    if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
+                        flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                        return redirect(routes.InfoSessions.showUpcomingSessions());
+                    } else {
+                        List<String> errors = checkApprovalConditions(user, context);
+                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context)));
+                    }
                 }
             }
         }
@@ -591,19 +591,31 @@ public class InfoSessions extends Controller {
                         flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                         return redirect(routes.Dashboard.index());
                     } else {
-                        List<String> errors = checkApprovalConditions(user, context);
-                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
+                        InfoSessionDAO idao = context.getInfoSessionDAO();
+                        Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
+                        if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
+                            flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                            return redirect(routes.InfoSessions.showUpcomingSessions());
+                        } else {
+                            List<String> errors = checkApprovalConditions(user, context);
+                            return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
+                        }
                     }
                 } else {
                     ApprovalDAO dao = context.getApprovalDAO();
                     InfoSessionDAO idao = context.getInfoSessionDAO();
                     try {
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
-                        Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
-                        context.commit();
+                        if(lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
+                            flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                            return redirect(routes.InfoSessions.showUpcomingSessions());
+                        } else {
+                            Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
+                            context.commit();
 
-                        flash("success", "Uw aanvraag werd succesvol ingediend.");
-                        return redirect(routes.Dashboard.index());
+                            flash("success", "Uw aanvraag werd succesvol ingediend.");
+                            return redirect(routes.Dashboard.index());
+                        }
                     } catch (DataAccessException ex) {
                         context.rollback();
                         throw ex;
@@ -781,24 +793,27 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static F.Promise<Result> showUpcomingSessions() {
-        User user = DataProvider.getUserProvider().getUser();
+        final User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
-            final InfoSession enrolled = dao.getAttendingInfoSession(user);
+            final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
 
+            final boolean showApprovalButton = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
             if (enrolled == null || !SHOW_MAP) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
-                        return ok(infosessions.render(enrolled, null));
+                        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, showApprovalButton));
                     }
                 });
             } else {
-                return Maps.getLatLongPromise(enrolled.getAddress().getId()).map(
+
+                return Maps.getLatLongPromise(enrolled.getFirst().getAddress().getId()).map(
                         new F.Function<F.Tuple<Double, Double>, Result>() {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
-                                return ok(infosessions.render(enrolled,
-                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getTime().toString("dd-MM-yyyy") + " om " + enrolled.getTime().toString("HH:mm"))));
+                                return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(),
+                                        coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getFirst().getTime().toString("dd-MM-yyyy") + " om " + enrolled.getFirst().getTime().toString("HH:mm")),
+                                        showApprovalButton));
                             }
                         }
                 );

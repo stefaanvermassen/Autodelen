@@ -1,6 +1,5 @@
 @(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
-    @import providers.DataProvider;
-
+@import providers.DataProvider;
     @app("Profiel bewerken") {
 
         <div id="page-header-wrapper">
@@ -82,6 +81,14 @@
                                         @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land")
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="form-group">
+                                @if(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)){
+                                        <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Lidgeld betaald
+                                } else {
+                                    <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Lidgeld betaald
+                                }
                             </div>
 
                             @*
