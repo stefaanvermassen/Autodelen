@@ -267,8 +267,10 @@ ENGINE=InnoDB;
 CREATE TABLE `Damages` (
 	`damage_id` INT NOT NULL AUTO_INCREMENT,
 	`damage_car_ride_id` INT NOT NULL,
-	`damage_filegroup_id` INT NOT NULL,
-	`damage_description` TEXT NOT NULL,
+	`damage_filegroup_id` INT,
+	`damage_description` TEXT,
+	`damage_finished` BIT(1) NOT NULL DEFAULT 0,
+	`damage_time` DATETIME NOT NULL,
    	`damage_created_at` DATETIME,
    	`damage_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_id`),

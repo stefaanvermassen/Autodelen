@@ -28,6 +28,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private UserRoleDAO userRoleDAO;
     private TemplateDAO templateDAO;
     private CarRideDAO carRideDAO;
+    private DamageDAO damageDAO;
     private RefuelDAO refuelDAO;
     private SchedulerDAO schedulerDAO;
     private NotificationDAO notificationDAO;
@@ -151,7 +152,15 @@ public class JDBCDataAccessContext implements DataAccessContext {
         return reservationDAO;
 	}
 
-	@Override
+    @Override
+    public DamageDAO getDamageDAO() {
+        if(damageDAO == null){
+            damageDAO = new JDBCDamageDAO(connection);
+        }
+        return damageDAO;
+    }
+
+    @Override
 	public UserRoleDAO getUserRoleDAO() {
 		if(userRoleDAO == null){
 			userRoleDAO = new JDBCUserRoleDAO(connection);
