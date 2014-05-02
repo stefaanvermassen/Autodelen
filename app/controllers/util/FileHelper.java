@@ -124,7 +124,13 @@ public class FileHelper {
     public static Result getPublicFile(String path, String contentType) {
         String playPath = Play.current().path().getAbsolutePath();
         try {
-            FileInputStream is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
+            FileInputStream is;
+            if(Play.isProd(Play.current())){
+                playPath = Paths.get(playPath, ConfigurationHelper.getConfigurationString("application.classpath")).toString();
+                is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
+            }else{
+                is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
+            }
             return Controller.ok(is).as(contentType);
         } catch (FileNotFoundException e) {
             return Controller.notFound();
