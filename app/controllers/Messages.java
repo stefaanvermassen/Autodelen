@@ -31,10 +31,10 @@ public class Messages extends Controller {
     public static class MessageCreationModel {
         public String subject;
         public String body;
-        public String useremail;
+        public Integer userId;
 
         public String validate() {
-            if("".equals(useremail) || "".equals(subject) || "".equals(body))
+            if(userId == null || userId == 0 || "".equals(subject) || "".equals(body))
                 return "Vul alle velden in";
 
             return null;
@@ -121,7 +121,7 @@ public class Messages extends Controller {
                 return redirect(routes.Messages.showMessages());
             }
             MessageCreationModel model = new MessageCreationModel();
-            model.useremail = user.getEmail();
+            model.userId = user.getId();
             Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
             return ok(addmessage.render(editForm.fill(model)));
 
@@ -151,7 +151,7 @@ public class Messages extends Controller {
 
                 try {
                     User sender = DataProvider.getUserProvider().getUser();
-                    User receiver = DataProvider.getUserProvider().getUser(createForm.get().useremail);
+                    User receiver = context.getUserDAO().getUser(createForm.get().userId, false);
                     Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
                     DataProvider.getCommunicationProvider().invalidateMessages(receiver.getId()); // invalidate the message
                     DataProvider.getCommunicationProvider().invalidateMessageNumber(receiver.getId());

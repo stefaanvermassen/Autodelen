@@ -50,7 +50,7 @@ public class InfoSessions extends Controller {
     }
 
     public static class InfoSessionCreationModel {
-        public String userEmail;
+        public Integer userId;
         public DateTime time;
         public Integer max_enrollees;
         public String type;
@@ -64,7 +64,7 @@ public class InfoSessions extends Controller {
 
         public String validate() {
             String error = "";
-            if(userEmail == null || userEmail.equals("")) {
+            if(userId == null || userId == 0) {
                 error += "Gelieve een host te selecteren. ";
             }
             if (time == null) {
@@ -80,7 +80,7 @@ public class InfoSessions extends Controller {
         public void populate(InfoSession i) {
             if(i == null) return;
 
-            userEmail = i.getHost().getEmail();
+            userId = i.getHost().getId();
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
             type = i.getType().getDescription();
@@ -102,7 +102,7 @@ public class InfoSessions extends Controller {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class);
 
         InfoSessionCreationModel model = new InfoSessionCreationModel();
-        model.userEmail = user.getEmail();
+        model.userId = user.getId();
         model.address.populate(user.getAddressDomicile());
         model.type = InfoSessionType.NORMAL.getDescription();
         editForm = editForm.fill(model);
@@ -187,7 +187,7 @@ public class InfoSessions extends Controller {
 
                 // Check the host field
                 UserDAO udao = context.getUserDAO();
-                User host = udao.getUser(editForm.get().userEmail);
+                User host = udao.getUser(editForm.get().userId, false);
 
                 if (host == null) {
                     editForm.reject("Infosessie gastheer bestaat niet.");
@@ -465,7 +465,7 @@ public class InfoSessions extends Controller {
                     }
 
                     UserDAO udao = context.getUserDAO();
-                    User host = udao.getUser(createForm.get().userEmail);
+                    User host = udao.getUser(createForm.get().userId, false);
                     if (host == null) {
                         createForm.reject("De gastheer ID bestaat niet.");
                         return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));

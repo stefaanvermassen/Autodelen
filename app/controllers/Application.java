@@ -23,6 +23,8 @@ public class Application extends Controller {
                         routes.javascript.Cars.showCarsPage(),
                         routes.javascript.Cars.showCarCostsPage(),
                         routes.javascript.Cars.getCarCostModal(),
+                        routes.javascript.Cars.updateAvailabilities(),
+                        routes.javascript.Cars.updatePriviliged(),
                         routes.javascript.Refuels.provideRefuelInfo(),
                         routes.javascript.Refuels.showUserRefuelsPage(),
                         routes.javascript.Refuels.showOwnerRefuelsPage(),
