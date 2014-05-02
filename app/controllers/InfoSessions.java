@@ -526,7 +526,7 @@ public class InfoSessions extends Controller {
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
         if (user.getDriverLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
-        if(user.isPayedDeposit())
+        if(!user.isPayedDeposit())
             errors.add("Lidgeld nog niet betaald.");
         if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
             if (user.getCellphone() == null && user.getPhone() == null)
