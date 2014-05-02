@@ -72,11 +72,8 @@
       <file leaf-file-name="CarDAO.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/database/CarDAO.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="62" selection-start="825" selection-end="825" vertical-scroll-proportion="0.0" vertical-offset="140" max-vertical-offset="629">
-              <folding>
-                <element signature="e#0#1775#0" expanded="false" />
-                <element signature="imports" expanded="false" />
-              </folding>
+            <state line="21" column="62" selection-start="825" selection-end="825" vertical-scroll-proportion="0.0" vertical-offset="357" max-vertical-offset="714">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -84,7 +81,7 @@
       <file leaf-file-name="JDBCCarDAO.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCCarDAO.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="600" column="58" selection-start="27410" selection-end="27410" vertical-scroll-proportion="1.1042129" vertical-offset="9430" max-vertical-offset="14484">
+            <state line="600" column="58" selection-start="27410" selection-end="27410" vertical-scroll-proportion="-0.37311384" vertical-offset="10200" max-vertical-offset="14484">
               <folding />
             </state>
           </provider>
@@ -93,11 +90,8 @@
       <file leaf-file-name="Car.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/models/Car.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="56" selection-start="841" selection-end="841" vertical-scroll-proportion="0.0" vertical-offset="1210" max-vertical-offset="3485">
-              <folding>
-                <element signature="e#5082#5083#0" expanded="true" />
-                <element signature="e#5115#5116#0" expanded="true" />
-              </folding>
+            <state line="35" column="56" selection-start="841" selection-end="841" vertical-scroll-proportion="0.0" vertical-offset="595" max-vertical-offset="4913">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -135,7 +129,7 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectReloadState">
-    <option name="STATE" value="2" />
+    <option name="STATE" value="0" />
   </component>
   <component name="ProjectStructureProblems">
     <ignored-problems>
@@ -156,7 +150,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -236,6 +229,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -324,13 +318,12 @@
     <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3294271" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3294271" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -338,11 +331,12 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3294271" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -364,11 +358,29 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/database/CarDAO.java">
       <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="62" selection-start="825" selection-end="825" vertical-scroll-proportion="0.0" vertical-offset="357" max-vertical-offset="714">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCCarDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="600" column="58" selection-start="27410" selection-end="27410" vertical-scroll-proportion="0.0" vertical-offset="10200" max-vertical-offset="14484">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/models/Car.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4913">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/database/CarDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
         <state line="29" column="42" selection-start="1343" selection-end="1343" vertical-scroll-proportion="0.0" vertical-offset="493" max-vertical-offset="714">
-          <folding>
-            <element signature="e#0#1775#0" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -382,10 +394,7 @@
     <entry file="file://$PROJECT_DIR$/src/database/CarDAO.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="29" column="42" selection-start="1343" selection-end="1343" vertical-scroll-proportion="0.0" vertical-offset="493" max-vertical-offset="714">
-          <folding>
-            <element signature="e#0#1775#0" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -399,20 +408,14 @@
     <entry file="file://$PROJECT_DIR$/src/models/Car.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="219" column="39" selection-start="5055" selection-end="5055" vertical-scroll-proportion="0.0" vertical-offset="3723" max-vertical-offset="4896">
-          <folding>
-            <element signature="e#5082#5083#0" expanded="true" />
-            <element signature="e#5115#5116#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/CarDAO.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="18" column="117" selection-start="596" selection-end="596" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="646">
-          <folding>
-            <element signature="e#0#1775#0" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -425,11 +428,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/SettingDAO.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="18" selection-start="160" selection-end="160" vertical-scroll-proportion="0.0" vertical-offset="187" max-vertical-offset="408">
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
+        <state line="11" column="18" selection-start="160" selection-end="160" vertical-scroll-proportion="0.0" vertical-offset="187" max-vertical-offset="408" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCTemplateDAO.java">
@@ -458,11 +457,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/SettingDAO.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="49" selection-start="221" selection-end="221" vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="408">
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
+        <state line="12" column="49" selection-start="221" selection-end="221" vertical-scroll-proportion="0.0" vertical-offset="204" max-vertical-offset="408" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCTemplateDAO.java">
@@ -513,26 +508,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/SettingDAO.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="18" selection-start="160" selection-end="160" vertical-scroll-proportion="0.25202155" vertical-offset="0" max-vertical-offset="742">
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
+        <state line="11" column="18" selection-start="160" selection-end="160" vertical-scroll-proportion="0.25202155" vertical-offset="0" max-vertical-offset="742" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/CarDAO.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="62" selection-start="825" selection-end="825" vertical-scroll-proportion="0.0" vertical-offset="140" max-vertical-offset="629">
-          <folding>
-            <element signature="e#0#1775#0" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCUserDAO.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="13" selection-start="187" selection-end="187" vertical-scroll-proportion="-3.164609" vertical-offset="2426" max-vertical-offset="8483">
+        <state line="13" column="13" selection-start="187" selection-end="187" vertical-scroll-proportion="-3.164609" vertical-offset="2426" max-vertical-offset="8483" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCCarDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="600" column="58" selection-start="27410" selection-end="27410" vertical-scroll-proportion="-0.37311384" vertical-offset="10200" max-vertical-offset="14484">
           <folding />
         </state>
       </provider>
@@ -540,16 +533,6 @@
     <entry file="file://$PROJECT_DIR$/src/models/Car.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="35" column="56" selection-start="841" selection-end="841" vertical-scroll-proportion="0.0" vertical-offset="1210" max-vertical-offset="3485">
-          <folding>
-            <element signature="e#5082#5083#0" expanded="true" />
-            <element signature="e#5115#5116#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/database/jdbc/JDBCCarDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="600" column="58" selection-start="27410" selection-end="27410" vertical-scroll-proportion="1.1042129" vertical-offset="9430" max-vertical-offset="14484">
           <folding />
         </state>
       </provider>
