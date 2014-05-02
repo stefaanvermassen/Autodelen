@@ -41,7 +41,7 @@ function newRow() {
             '<input class="availability_id hidden" value="0">' +
         '</td>' +
         '<td>' +
-            '<select class="beginDayOfWeek form-control">' +
+            '<select class="beginDayOfWeek">' +
                 '<option value="2" >Maandag</option>' +
                 '<option value="3" >Dinsdag</option>' +
                 '<option value="4" >Woensdag</option>' +
@@ -58,7 +58,7 @@ function newRow() {
             '</div>' +
         '</td>' +
         '<td>' +
-            '<select class="endDayOfWeek form-control">' +
+            '<select class="endDayOfWeek">' +
                 '<option value="2" >Maandag</option>' +
                 '<option value="3" >Dinsdag</option>' +
                 '<option value="4" >Woensdag</option>' +
