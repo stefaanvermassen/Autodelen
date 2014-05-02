@@ -6,15 +6,14 @@ import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
+import models.*;
 import providers.DataProvider;
 import providers.UserRoleProvider;
-import models.*;
 import controllers.Security.RoleSecured;
 
 import notifiers.Notifier;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
-import play.Logger;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
@@ -29,11 +28,7 @@ import views.html.cars.cars;
 import views.html.cars.detail;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
-import views.html.flashes;
-import views.html.profile.uploadPicture;
-import views.html.reserve.reservationDetailsPartial;
 
-import javax.imageio.IIOException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -243,7 +238,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result newCar() {
-        return ok(edit.render(Form.form(CarModel.class), null, getCountryList(),getFuelList()));
+        return ok(edit.render(Form.form(CarModel.class), null, getCountryList(), getFuelList()));
     }
 
     /**
@@ -478,7 +473,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result updateAvailabilities(int carId, String valuesString) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
@@ -487,8 +482,8 @@ public class Cars extends Controller {
                 return badRequest(carList());
             }
 
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
-            if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+            User currentUser = DataProvider.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                 flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
