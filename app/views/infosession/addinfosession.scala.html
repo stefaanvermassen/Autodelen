@@ -1,5 +1,5 @@
 @(form: play.data.Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0, countryList: List[String], typeList: List[String])
-@import database.DatabaseHelper;
+@import providers.DataProvider;
 @* TODO: This file should be renamed since it's also used for editing *@
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
@@ -77,7 +77,7 @@
                                                 <div class="form-group">
                                                     <label class="col-md-12" for="host">Host</label>
                                                     @if(form("userEmail").value){
-                                                        @defining(DatabaseHelper.getUserProvider().getUser(form("userEmail").value)) { user =>
+                                                        @defining(DataProvider.getUserProvider().getUser(form("userEmail").value)) { user =>
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
                                                                 <input type="hidden" name="userEmail" value="@user.getEmail" />
@@ -85,7 +85,7 @@
                                                             </div>
                                                         }
                                                     }else{
-                                                        @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                                                        @defining(DataProvider.getUserProvider().getUser()) { user =>
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
                                                                 <input type="hidden" name="userEmail" value="@user.getEmail"/>

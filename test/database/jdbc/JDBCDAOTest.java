@@ -39,8 +39,8 @@ public class JDBCDAOTest {
      */
     @Before
     public void setUp() throws Exception {
-        DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
-        context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        DataProvider.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
+        context = DataProvider.getDataAccessProvider().getDataAccessContext();
 
         addressDAO = context.getAddressDAO();
         userDAO = context.getUserDAO();
