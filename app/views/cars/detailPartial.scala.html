@@ -19,6 +19,12 @@
                     }
                     <!-- TODO: profile picture-->
 
+                @if(car.isActive) {
+                    <span class="label label-success">Actief</span>
+                } else {
+                    <span class="label label-danger">Non-actief</span>
+                }
+
                 <h2>@car.getName</h2>
                 <h3>@car.getBrand @car.getType</h3>
                 <p> <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a></p>
@@ -79,7 +85,6 @@
 
                         </div>
                     </div>
-                        <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
                 </div>
                     <!-- /.panel-body -->
             </div>

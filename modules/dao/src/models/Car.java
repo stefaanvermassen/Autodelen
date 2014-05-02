@@ -6,6 +6,7 @@ package models;
 
 import org.joda.time.LocalTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +34,8 @@ public class Car {
     private User owner;
     private String comments;
     private List<CarAvailabilityInterval> availabilities;
+    private boolean active;
+    private List<User> priviliged;
 
     public Car() {
         this(0, null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null, null);
@@ -205,6 +208,22 @@ public class Car {
 
     public void setAvailabilities(List<CarAvailabilityInterval> availabilities) {
         this.availabilities = availabilities;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public List<User> getPriviliged() {
+        return priviliged;
+    }
+
+    public void setPriviliged(List<User> priviliged) {
+        this.priviliged = priviliged;
     }
 
     @Override

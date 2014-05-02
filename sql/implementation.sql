@@ -134,6 +134,7 @@ CREATE TABLE `Cars` (
 	`car_insurance` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
+	`car_active` BIT(1) NOT NULL DEFAULT 0;
 	`car_images_id` INT,
 	`car_created_at` DATETIME,
 	`car_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

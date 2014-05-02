@@ -103,9 +103,11 @@ function updateCarAvailabilities(carId) {
      myJsRoutes.controllers.Cars.updateAvailabilities(carId, values).ajax({
          success : function() {
              location.reload();
+             scroll(0,0);
          },
-         error : function() {
-             alert("Er ging iets mis bij het updaten van de beschikbaarheid...");
+         error : function() { // Errormessage will come in flashes
+             location.reload();
+             scroll(0,0);
          }
      });
 }

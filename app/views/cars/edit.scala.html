@@ -54,24 +54,25 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-
                         <div class="form-group">
-                            @if(car == null) {
-                                <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
-                            } else {
-                                <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
-                            }
-                            <!-- TODO: profile picture-->
-                        </div>
-                        @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
-                            @if(isAdmin) {
-                                <div class="form-group">
-                                    <label class="col-md-1 control-label" for="receiver">Eigenaar</label>
-                                        @if(form("userEmail").value){
-                                            @defining(DataProvider.getUserProvider().getUser(form("userEmail").value)) { user =>
+                            <fieldset>
+                                @if(car == null) {
+                                    <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                                } else {
+                                    <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                                }
+                                <!-- TODO: profile picture-->
+                                <div class="col-md-12">
+                                    @helper.checkbox(form("active"), '_label -> "Actief")
+                                </div>
+                                @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                                    @if(isAdmin) {
+                                        <label class="col-md-1 control-label" for="receiver">Eigenaar</label>
+                                        @if(form("userId").value){
+                                            @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
                                                 <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
-                                                    <input type="hidden" name="userEmail" value="@user.getEmail" />
+                                                    <input type="hidden" name="userId" value="@user.getId" />
                                                     <ul class="dropdown-menu" role="menu"></ul>
                                                 </div>
                                             }
@@ -79,14 +80,15 @@
                                             @defining(DataProvider.getUserProvider().getUser()) { user =>
                                                 <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
-                                                    <input type="hidden" name="userEmail" value="@user.getEmail"/>
+                                                    <input type="hidden" name="userId" value="@user.getId"/>
                                                     <ul class="dropdown-menu" role="menu"></ul>
                                                 </div>
                                             }
                                         }
-                                </div>
-                            }
-                        }
+                                    }
+                                }
+                            </fieldset>
+                        </div>
                         <div class="form-group">
                             <fieldset>
                                 <div class="form-group">

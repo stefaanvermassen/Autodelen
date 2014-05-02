@@ -79,6 +79,9 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement createAvailabilityStatement;
     private PreparedStatement updateAvailabilityStatement;
     private PreparedStatement deleteAvailabilityStatement;
+    private PreparedStatement getPriviligedStatement;
+    private PreparedStatement createPriviligedStatement;
+    private PreparedStatement deletePriviligedStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -113,6 +116,7 @@ public class JDBCCarDAO implements CarDAO{
             if(!rs.wasNull())
                 car.setOwnerAnnualKm(ownerAnnualKm);
             car.setComments(rs.getString("car_comments"));
+            car.setActive(rs.getBoolean("car_active"));
             Address location = null;
             User user = null;
             TechnicalCarDetails technicalCarDetails = null;
@@ -167,7 +171,7 @@ public class JDBCCarDAO implements CarDAO{
             createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_name, car_type, car_brand, car_location, " +
                     "car_seats, car_doors, car_year, car_gps, car_hook, car_fuel, " +
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_technical_details, car_insurance, car_owner_user_id, car_comments) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    "car_technical_details, car_insurance, car_owner_user_id, car_comments, car_active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarStatement;
     }
@@ -177,7 +181,7 @@ public class JDBCCarDAO implements CarDAO{
             updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
                     "car_seats=? , car_doors=? , car_year=? , car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=? WHERE car_id = ?");
+                    "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=?, car_active=? WHERE car_id = ?");
         }
         return updateCarStatement;
     }
@@ -298,11 +302,35 @@ public class JDBCCarDAO implements CarDAO{
         }
         return deleteAvailabilityStatement;
     }
+
+    private PreparedStatement getPriviligedStatement() throws SQLException {
+        if (getPriviligedStatement == null) {
+            getPriviligedStatement = connection.prepareStatement("SELECT * FROM CarPrivileges " +
+                    "INNER JOIN Users ON Users.user_id = CarPrivileges.car_privilege_user_id WHERE car_privilege_car_id=?");
+        }
+        return getPriviligedStatement;
+    }
+
+    private PreparedStatement createPriviligedStatement() throws SQLException {
+        if (createPriviligedStatement == null) {
+            createPriviligedStatement = connection.prepareStatement("INSERT INTO CarPrivileges(car_privilege_user_id, " +
+                    "car_privilege_car_id) " +
+                    "VALUES (?,?)");
+        }
+        return createPriviligedStatement;
+    }
+
+    private PreparedStatement deletePriviligedStatement() throws SQLException {
+        if (deletePriviligedStatement == null) {
+            deletePriviligedStatement = connection.prepareStatement("DELETE FROM CarPrivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?");
+        }
+        return deletePriviligedStatement;
+    }
     
     @Override
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments) throws DataAccessException {
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement();
             ps.setString(1, name);
@@ -369,13 +397,16 @@ public class JDBCCarDAO implements CarDAO{
                 ps.setNull(16, Types.INTEGER);
             }
             ps.setString(17, comments);
+            ps.setBoolean(18, active);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next();
                 int id = keys.getInt(1);
-                return new Car(id, name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
+                Car car = new Car(id, name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
+                car.setActive(active);
+                return car;
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new car.", ex);
             }
@@ -546,7 +577,9 @@ public class JDBCCarDAO implements CarDAO{
             }
             ps.setString(17, car.getComments());
 
-            ps.setInt(18, car.getId());
+            ps.setBoolean(18, car.isActive());
+
+            ps.setInt(19, car.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");
@@ -565,6 +598,7 @@ public class JDBCCarDAO implements CarDAO{
                 if(rs.next()) {
                     Car car = populateCar(rs, true);
                     car.setAvailabilities(getAvailabilities(car));
+                    car.setPriviliged(getPriviliged(car));
                     return car;
                 } else return null;
             } catch (SQLException ex) {
@@ -671,6 +705,59 @@ public class JDBCCarDAO implements CarDAO{
             }
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to delete new availabilitiy");
+        }
+    }
+
+    @Override
+    public List<User> getPriviliged(Car car) throws DataAccessException {
+        try {
+            PreparedStatement ps = getPriviligedStatement();
+            ps.setInt(1, car.getId());
+            List<User> users = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    users.add(JDBCUserDAO.populateUser(rs, false, false));
+                }
+                return users;
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading priviliged resultset", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of priviliged", ex);
+        }
+    }
+
+    @Override
+    public void addPriviliged(Car car, List<User> users) throws DataAccessException {
+        try {
+            for(User user : users) {
+                PreparedStatement ps = createPriviligedStatement();
+                ps.setInt(1, user.getId());
+                ps.setInt(2, car.getId());
+
+                if(ps.executeUpdate() == 0)
+                    throw new DataAccessException("No rows were affected when creating priviliged.");
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to create new priviliged");
+        }
+    }
+
+    @Override
+    public void deletePriviliged(Car car, List<User> users) throws DataAccessException {
+        try {
+            for(User user : users) {
+                PreparedStatement ps = deletePriviligedStatement();
+
+                ps.setInt(1, user.getId());
+                ps.setInt(2, car.getId());
+
+                if(ps.executeUpdate() == 0)
+                    throw new DataAccessException("No rows were affected when deleting priviliged.");
+
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to delete priviliged");
         }
     }
 

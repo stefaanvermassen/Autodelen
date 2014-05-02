@@ -63,7 +63,7 @@ public class Cars extends Controller {
 
     public static class CarModel {
 
-        public String userEmail;
+        public Integer userId;
 
         public String name;
         public String brand;
@@ -78,6 +78,7 @@ public class Cars extends Controller {
         public Integer estimatedValue;
         public Integer ownerAnnualKm;
         public String comments;
+        public boolean active;
 
         // TechnicalCarDetails
         public String licensePlate;
@@ -95,7 +96,7 @@ public class Cars extends Controller {
         public void populate(Car car) {
             if(car == null) return;
 
-            userEmail = car.getOwner().getEmail();
+            userId = car.getOwner().getId();
 
             name = car.getName();
             brand = car.getBrand();
@@ -110,6 +111,7 @@ public class Cars extends Controller {
             estimatedValue = car.getEstimatedValue();
             ownerAnnualKm = car.getOwnerAnnualKm();
             comments = car.getComments();
+            active = car.isActive();
 
             if(car.getTechnicalCarDetails() != null) {
                 licensePlate = car.getTechnicalCarDetails().getLicensePlate();
@@ -136,7 +138,7 @@ public class Cars extends Controller {
          */
         public String validate() {
             String error = "";
-            if("".equals(userEmail))
+            if(userId == null || userId == 0)
                 error += "Geef een eigenaar op. ";
             if(address.isEmpty())
                 error += "Geef het adres op. ";
@@ -263,7 +265,7 @@ public class Cars extends Controller {
                     if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
                             || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                         // User is permitted to add cars for other users
-                        owner = DataProvider.getUserProvider().getUser(model.userEmail);
+                        owner = context.getUserDAO().getUser(model.userId, false);
                     }
                     TechnicalCarDetails technicalCarDetails = null;
                     // TODO: registration
@@ -278,7 +280,7 @@ public class Cars extends Controller {
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments);
+                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active);
 
                     context.commit();
 
@@ -446,11 +448,13 @@ public class Cars extends Controller {
 
                 car.setComments(model.comments);
 
+                car.setActive(model.active);
+
                 User user = DataProvider.getUserProvider().getUser();
                 if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
                         || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                     // User is permitted to add cars for other users
-                    car.setOwner(DataProvider.getUserProvider().getUser(model.userEmail));
+                    car.setOwner(context.getUserDAO().getUser(model.userId, false));
                 }
 
                 dao.updateCar(car);
@@ -483,7 +487,7 @@ public class Cars extends Controller {
             }
 
             User currentUser = DataProvider.getUserProvider().getUser();
-            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
                 flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
@@ -526,7 +530,7 @@ public class Cars extends Controller {
 
                 context.commit();
                 flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                return ok(detail.render(car));
+                return detail(car.getId());
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;
@@ -534,6 +538,81 @@ public class Cars extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    /**
+     * Method: POST
+     * @return redirect to the car detailPage
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    public static Result updatePriviliged(int carId, String valuesString) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(carId);
+
+            if (car == null) {
+                flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                return badRequest(carList());
+            }
+
+            User currentUser = DataProvider.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
+                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                return badRequest(carList());
+            }
+
+            try {
+                String[] values = valuesString.split(";");
+
+                List<User> priviliged = car.getPriviliged();
+
+                List<User> usersToAdd = new ArrayList<>();
+                List<User> usersToDelete = new ArrayList<>();
+
+                for(String value : values) {
+                    try {
+                        int id = Integer.parseInt(value);
+                        User user;
+                        if(id > 0) { // create
+                            user = context.getUserDAO().getUser(id, false);
+                            if(!userInList(id, priviliged))
+                                usersToAdd.add(user);
+                        } else { // delete
+                            user = context.getUserDAO().getUser(-1 * id, false);
+                            usersToDelete.add(user);
+                        }
+                        if(user == null) {
+                            flash("error", "De opgegeven gebruiker bestaat niet.");
+                            return badRequest(detail.render(car));
+                        }
+                    } catch(NumberFormatException e) {
+                        flash("error", "Er is een fout gebeurd bij het doorgeven van de gepriviligieerden.");
+                        return badRequest(detail.render(car));
+                    }
+                }
+
+                dao.addPriviliged(car, usersToAdd);
+                dao.deletePriviliged(car, usersToDelete);
+
+                context.commit();
+                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                return detail(car.getId());
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    private static boolean userInList(int userId, List<User> users) {
+        for(User u : users) {
+            if(u.getId() == userId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -550,9 +629,9 @@ public class Cars extends Controller {
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
-            } else {
-                return ok(detail.render(car));
             }
+
+            return ok(detail.render(car));
         } catch (DataAccessException ex) {
             throw ex;
             //TODO: log

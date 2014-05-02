@@ -86,5 +86,12 @@
       <Port>5050</Port>
     </configuration>
   </component>
+  <component name="SbtLocalSettings">
+    <option name="modificationStamps">
+      <map>
+        <entry key="$PROJECT_DIR$/../.." value="1397317841716" />
+      </map>
+    </option>
+  </component>
 </project>
 
