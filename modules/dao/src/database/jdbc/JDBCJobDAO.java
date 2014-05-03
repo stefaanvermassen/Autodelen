@@ -59,7 +59,7 @@ public class JDBCJobDAO implements JobDAO {
 
     private PreparedStatement getDeleteJobByTypeStatement() throws SQLException {
         if(deleteJobByTypeStatement == null){
-            deleteJobByTypeStatement = connection.prepareStatement("DELETE FROM jobs WHERE job_type=? AND job_ref_id=?");
+            deleteJobByTypeStatement = connection.prepareStatement("DELETE FROM jobs WHERE job_type=? AND job_ref_id=? AND job_finished=0");
         }
         return deleteJobByTypeStatement;
     }
