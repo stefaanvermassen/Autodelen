@@ -69,7 +69,7 @@ public class Global extends GlobalSettings {
     }
 
     public void onStop(Application app) {
-        //Logger.info("Application shutdown...");
+        Scheduler.getInstance().stop();
     }
 
 }

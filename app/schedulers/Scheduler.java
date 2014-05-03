@@ -37,6 +37,7 @@ public class Scheduler implements Runnable {
         EXECUTORS = new EnumMap<>(JobType.class);
         EXECUTORS.put(JobType.IS_REMINDER, new InfoSessionReminderJob());
     }
+
     private static Scheduler scheduler;
     private static Object lock = new Object();
 
@@ -56,6 +57,14 @@ public class Scheduler implements Runnable {
     public Scheduler() {
         runningJobs = new ConcurrentHashMap<>();
         cachedPool = Executors.newCachedThreadPool();
+    }
+
+    public void stop(){
+        if(isRunning){
+            if(!(cachedPool.isTerminated() || cachedPool.isShutdown()))
+                cachedPool.shutdown();
+            runningJobs.clear();
+        }
     }
 
     public void start() {
