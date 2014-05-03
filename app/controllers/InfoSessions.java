@@ -396,7 +396,7 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result enrollSession(int sessionId) {
         User user = DataProvider.getUserProvider().getUser();
-        if (!DataProvider.getUserRoleProvider().isFullUser(user)) {
+        if (DataProvider.getUserRoleProvider().isFullUser(user)) {
             flash("warning", "U bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
         }
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
