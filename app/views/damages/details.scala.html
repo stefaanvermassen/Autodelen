@@ -1,4 +1,5 @@
-@(damage: Damage)
+@(damage: Damage, owner: User, car: Car)
+@import providers.DataProvider;
 @app("Schade details") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -15,10 +16,67 @@
                 @flashes()
                 <div class="panel panel-default">
                     <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Schade toolbox
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <a class="btn btn-primary btn-sm" href="">Beschrijving aanpassen</a>
+                        <a class="btn btn-primary btn-sm" href="">Nieuwe status</a>
+                        <a class="btn btn-primary btn-sm" href="">Nieuw bewijsstuk</a>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
                         <i class="fa fa-wrench"></i> Geselecteerd schadedossier
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
+                        Autodetails:
+                        <div class="well">
+                                <!-- row -->
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Autonaam:</strong> @car.getName
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Merk:</strong> @car.getBrand
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Type:</strong> @car.getType
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Eigenaar:</strong> @damage.getCarRide.getReservation.getCar.getName
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Merk:</strong> @damage.getCarRide.getReservation.getCar.getBrand
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Type:</strong> @damage.getCarRide.getReservation.getCar
+                                </div>
+
+                            </div>
+                        </div>
+                            Eigenaar:
+                            <div class="well">
+                                    <!-- row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Naam:</strong> @owner.getFirstName @owner.getLastName
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Adres:</strong>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Type:</strong> @car.getType
+                                    </div>
+
+                                </div>
+                            </div>
                     </div>
                         <!-- /.panel-body -->
                 </div>

@@ -1,9 +1,8 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
-import database.DamageDAO;
-import database.DataAccessContext;
-import database.DataAccessException;
+import database.*;
+import models.Car;
 import models.Damage;
 import models.User;
 import play.mvc.Controller;
@@ -45,8 +44,12 @@ public class Damages extends Controller {
     public static Result showDamageDetails(int damageId) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             DamageDAO dao = context.getDamageDAO();
+            UserDAO userDAO = context.getUserDAO();
+            CarDAO carDAO = context.getCarDAO();
             Damage damage = dao.getDamage(damageId);
-            return ok(details.render(damage));
+            Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
+            User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
+            return ok(details.render(damage, owner, damagedCar));
         } catch (DataAccessException ex) {
             throw ex;
         }
