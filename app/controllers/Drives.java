@@ -383,13 +383,20 @@ public class Drives extends Controller {
             CarRide ride = dao.getCarRide(reservationId);
             if(ride == null){
                 int refueling = detailsForm.get().refueling;
+                boolean damaged = detailsForm.get().damaged;
                 ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage,
-                        detailsForm.get().damaged, refueling);
+                        damaged, refueling);
                 if(refueling > 0){
                     RefuelDAO refuelDAO = context.getRefuelDAO();
                     for(int i=0; i< refueling; i++){
                         Refuel refuel = refuelDAO.createRefuel(ride);
                     }
+                    context.commit();
+                }
+                if (damaged){
+                    DamageDAO damageDAO = context.getDamageDAO();
+                    Damage damage = damageDAO.createDamage(ride);
+                    System.out.println(damage.getId());
                     context.commit();
                 }
             } else if(isOwner) {

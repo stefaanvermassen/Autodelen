@@ -6,6 +6,8 @@ tmp
 uploads
 .history
 dist
+modules/dao/.idea
+modules/dao/dao.iml
 /.idea
 /*.iml
 /out
@@ -19,3 +21,4 @@ dist
 .target
 .metadata
 .DS_Store
+*.class
