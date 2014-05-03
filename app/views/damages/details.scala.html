@@ -1,5 +1,5 @@
 @(damage: Damage, owner: User, car: Car)
-@import providers.DataProvider;
+@import org.joda.time.format.DateTimeFormat
 @app("Schade details") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -37,7 +37,7 @@
                                 <!-- row -->
                             <div class="row">
                                 <div class="col-sm-4">
-                                    <strong>Autonaam:</strong> @car.getName
+                                    <strong>Autonaam:</strong> <a class="" href="@routes.Cars.detail(car.getId)">@car.getName</a>
                                 </div>
                                 <div class="col-sm-4">
                                     <strong>Merk:</strong> @car.getBrand
@@ -45,8 +45,41 @@
                                 <div class="col-sm-4">
                                     <strong>Type:</strong> @car.getType
                                 </div>
-
                             </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Bouwjaar:</strong> @car.getYear
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Brandstof:</strong> @car.getFuel.getDescription
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Deuren:</strong> @car.getDoors
+                                </div>
+                            </div>
+                            @if(car.getTechnicalCarDetails != null){
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Nummerplaat:</strong> @car.getTechnicalCarDetails.getLicensePlate
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Chassisnummer:</strong> @car.getTechnicalCarDetails.getChassisNumber
+                                    </div>
+                                </div>
+                            }
+                            @if(car.getInsurance != null){
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Verzekering:</strong> @car.getInsurance.getName
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Bonus-malus:</strong> @car.getInsurance.getBonusMalus
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Polisnr:</strong> @car.getInsurance.getPolisNr
+                                    </div>
+                                </div>
+                            }
 
                         </div>
                             Eigenaar:
@@ -54,7 +87,7 @@
                                     <!-- row -->
                                 <div class="row">
                                     <div class="col-sm-4">
-                                        <strong>Naam:</strong> @owner.getFirstName @owner.getLastName
+                                        <strong>Naam:</strong> <a class="" href="@routes.Profile.index(owner.getId)">@owner.getFirstName @owner.getLastName</a>
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Adres:</strong>
@@ -64,15 +97,61 @@
                                             @owner.getAddressDomicile.getBus
                                             @owner.getAddressDomicile.getZip
                                             @owner.getAddressDomicile.getCity
+                                        }else{
+                                            Niet ingegeven
                                         }
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Telefoon:</strong>
-                                        @owner.getCellphone
-                                        @owner.getPhone
+                                        @if(owner.getCellphone == null && owner.getPhone == null){
+                                            Niet ingegeven
+                                        }else{
+                                            @owner.getCellphone
+                                            @owner.getPhone
+                                        }
                                     </div>
 
                                 </div>
+                            </div>
+                            Autoreservatie:
+                            <div class="well">
+                                    <!-- row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Van:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getFrom)
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Tot:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getTo)
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Status:</strong> @damage.getCarRide.getReservation.getStatus.getDescription
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            Schadedossier:
+                            <div class="well">
+                                <p><strong>Tijd:</strong>
+                                <br>
+                                @DateTimeFormat.forPattern("dd/MM/YYYY HH:mm").print(damage.getTime)
+                                </p>
+                                <p>
+                                <strong>Beschrijving:</strong>
+                                <br>
+                                @damage.getDescription
+                                </p>
+                                <p>
+                                <strong>Log:</strong>
+                                </p>
+                                <ul class="list-group">
+                                    <li class="list-group-item">Cras justo odio</li>
+                                    <li class="list-group-item">Dapibus ac facilisis in</li>
+                                    <li class="list-group-item">Morbi leo risus</li>
+                                    <li class="list-group-item">Porta ac consectetur ac</li>
+                                    <li class="list-group-item">Vestibulum at eros</li>
+                                </ul>
+
                             </div>
                     </div>
                         <!-- /.panel-body -->
