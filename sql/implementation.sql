@@ -376,6 +376,17 @@ CREATE TABLE `approvals` (
   COLLATE='latin1_swedish_ci'
   ENGINE=InnoDB;
 
+CREATE TABLE `jobs` (
+  `job_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `job_type` ENUM('IS_REMINDER','RES_REMINDER','REPORT') NOT NULL DEFAULT 'REPORT',
+  `job_ref_id` INT(11) NULL DEFAULT '0',
+  `job_time` DATETIME NOT NULL,
+  `job_finished` BIT(1) NOT NULL DEFAULT b'0',
+  PRIMARY KEY (`job_id`)
+)
+  ENGINE=InnoDB;
+
+
 CREATE TABLE `settings` (
   `setting_id` INT(11) NOT NULL AUTO_INCREMENT,
   `setting_name` CHAR(32) NOT NULL,
