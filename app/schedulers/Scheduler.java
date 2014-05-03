@@ -36,6 +36,7 @@ public class Scheduler implements Runnable {
     static {
         EXECUTORS = new EnumMap<>(JobType.class);
         EXECUTORS.put(JobType.IS_REMINDER, new InfoSessionReminderJob());
+        EXECUTORS.put(JobType.REPORT, new ReportGenerationJob());
     }
 
     private static Scheduler scheduler;
@@ -85,7 +86,7 @@ public class Scheduler implements Runnable {
             Job reportJob = dao.getLastJobForType(JobType.REPORT);
             if (reportJob == null) {
                 try {
-                    DateTime scheduledFor = firstDayOfNextMonth();
+                    DateTime scheduledFor = Util.firstDayOfNextMonth();
                     dao.createJob(JobType.REPORT, 0, scheduledFor);
                     context.commit();
                     Logger.info("Scheduled next report for " + scheduledFor.toString());
@@ -153,14 +154,5 @@ public class Scheduler implements Runnable {
             }
         }
     }
-
-    private static DateTime firstDayOfNextMonth() {
-        MutableDateTime mdt = new MutableDateTime();
-        mdt.addMonths(1);
-        mdt.setDayOfMonth(1);
-        mdt.setMillisOfDay(0); // if you want to make sure you're at midnight
-        return mdt.toDateTime();
-    }
-
 
 }
