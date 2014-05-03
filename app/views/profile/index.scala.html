@@ -1,4 +1,4 @@
-@(user: User, completeness: Int = 0)
+@(user: User, completeness: Int = 0, editable: Boolean)
 @import providers.DataProvider;
 @app("Profiel") {
     <div id="page-header-wrapper">
@@ -27,7 +27,7 @@
                 <div class="panel panel-default">
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                    @smallProfile(user)
+                    @smallProfile(user, editable)
                     </div>
                         <!-- /.panel-body -->
                 </div>
