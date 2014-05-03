@@ -48,18 +48,6 @@
 
                             </div>
 
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <strong>Eigenaar:</strong> @damage.getCarRide.getReservation.getCar.getName
-                                </div>
-                                <div class="col-sm-4">
-                                    <strong>Merk:</strong> @damage.getCarRide.getReservation.getCar.getBrand
-                                </div>
-                                <div class="col-sm-4">
-                                    <strong>Type:</strong> @damage.getCarRide.getReservation.getCar
-                                </div>
-
-                            </div>
                         </div>
                             Eigenaar:
                             <div class="well">
@@ -70,9 +58,18 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Adres:</strong>
+                                        @if(owner.getAddressDomicile != null){
+                                            @owner.getAddressDomicile.getStreet
+                                            @owner.getAddressDomicile.getNumber
+                                            @owner.getAddressDomicile.getBus
+                                            @owner.getAddressDomicile.getZip
+                                            @owner.getAddressDomicile.getCity
+                                        }
                                     </div>
                                     <div class="col-sm-4">
-                                        <strong>Type:</strong> @car.getType
+                                        <strong>Telefoon:</strong>
+                                        @owner.getCellphone
+                                        @owner.getPhone
                                     </div>
 
                                 </div>
