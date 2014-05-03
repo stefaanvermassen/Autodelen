@@ -62,8 +62,10 @@ public class Global extends GlobalSettings {
         } catch(IOException ex){
             Logger.error("Could not load database properties: " + ex.getMessage());
         }
-        Scheduler scheduler = new SendUnreadNotificationsMailScheduler();
-        scheduler.schedule(Duration.create(1, TimeUnit.HOURS));
+
+        Scheduler scheduler = Scheduler.getInstance(); // This sho
+        scheduler.start();
+        scheduler.schedule(Duration.create(1, TimeUnit.HOURS) ,new SendUnreadNotificationsMailScheduler());
     }
 
     public void onStop(Application app) {

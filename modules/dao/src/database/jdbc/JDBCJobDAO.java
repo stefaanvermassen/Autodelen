@@ -15,20 +15,30 @@ import java.util.List;
  */
 public class JDBCJobDAO implements JobDAO {
 
+    private static final String JOB_FIELDS = "job_id, job_type, job_ref_id, job_time, job_finished";
+
     private Connection connection;
     private PreparedStatement getUnfinishedJobsAfterStatement;
     private PreparedStatement createJobStatement;
     private PreparedStatement deleteJobByTypeStatement;
     private PreparedStatement deleteJobByIdStatement;
     private PreparedStatement updateJobStatement;
+    private PreparedStatement getLastJobByTypeStatement;
 
     public JDBCJobDAO(Connection connection){
         this.connection = connection;
     }
 
+    private PreparedStatement getGetLastJobByTypeStatement() throws SQLException {
+        if(getLastJobByTypeStatement == null){
+            getLastJobByTypeStatement = connection.prepareStatement("SELECT "+JOB_FIELDS+" FROM jobs WHERE job_type=? ORDER BY job_time DESC LIMIT 1");
+        }
+        return getLastJobByTypeStatement;
+    }
+
     private PreparedStatement getGetUnfinishedJobsAfterStatement() throws SQLException {
         if(getUnfinishedJobsAfterStatement == null){
-            getUnfinishedJobsAfterStatement = connection.prepareStatement("SELECT job_id, job_type, job_ref_id, job_time, job_finished FROM jobs WHERE job_finished=0 AND job_time <= ?");
+            getUnfinishedJobsAfterStatement = connection.prepareStatement("SELECT "+JOB_FIELDS+" FROM jobs WHERE job_finished=0 AND job_time <= ?");
         }
         return getUnfinishedJobsAfterStatement;
     }
@@ -110,10 +120,10 @@ public class JDBCJobDAO implements JobDAO {
     }
 
     @Override
-    public void deleteJob(int jobId) throws DataAccessException {
+    public void deleteJob(long jobId) throws DataAccessException {
         try {
             PreparedStatement ps = getDeleteJobByIdStatement();
-            ps.setInt(1, jobId);
+            ps.setLong(1, jobId);
             if(ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to delete job by id. No rows affected.");
         } catch(SQLException ex){
@@ -134,16 +144,34 @@ public class JDBCJobDAO implements JobDAO {
     }
 
     @Override
-    public void setJobStatus(int jobId, boolean finished) throws DataAccessException {
+    public void setJobStatus(long jobId, boolean finished) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateJobStatement();
             ps.setBoolean(1, finished);
-            ps.setInt(2, jobId);
+            ps.setLong(2, jobId);
 
             if(ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to update job status.");
         } catch(SQLException ex){
             throw new DataAccessException("Failed to update job status.", ex);
+        }
+    }
+
+    @Override
+    public Job getLastJobForType(JobType type) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetLastJobByTypeStatement();
+            ps.setString(1, type.name());
+
+            try(ResultSet rs = ps.executeQuery()){
+                if(!rs.next())
+                    return null;
+                else return populateJob(rs);
+            } catch(SQLException ex){
+                throw new DataAccessException("Failed to read job resultset.", ex);
+            }
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to get last job by type.", ex);
         }
     }
 }
