@@ -81,7 +81,6 @@
         _focusin: function() {
             if(this.popoverFocused)
                 return;
-            console.log(this.element);
             this.element.after($('<div>')
                 .attr('id', this.popoverId)
                 .attr('class', 'popover_input')

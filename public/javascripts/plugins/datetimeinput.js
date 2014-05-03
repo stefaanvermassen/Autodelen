@@ -3,10 +3,10 @@
  * Datetimeinput v2
  * =========================================
  *
- * This script contains an extra plugin to JQuery named datetimeinput.
- * It links a datetimepicker object to an element, giving it several extra functionalities:
- * - Input validation
- * - Restriction of input tokens to numbers only
+ * This script contains an extra plugin to JQuery named datetimeinput
+ * giving an input field several extra functionalities:
+ * - input validation of a date, time or datetime
+ * - restriction of input tokens to numbers only
  *
  * An datetimeinput can be creating whilst handing it several specific options. Though these
  * options are not yet implemented, the functionality is already added to the datetimeinput object.
@@ -22,15 +22,20 @@
     var Datetimeinput = function (element, options) {
         this.element = $(element);
         this.formatString = options.formatString || "yyyy-mm-dd hh:ii";
-        this.skipChars = ["-", " ", ":"];
-        this.position = 0;
-        this.stepToken;
-        this.keydown = false;
+
+        this.startNode = null;
+        this.yearNode = null;
+        this.monthNode = null;
+        this.dayNode = null;
+        this.hourNode = null;
+        this.minuteNode = null;
+        this.currentNode = null;
+
+        this.fieldJumpPerformed = false;
+        this._initNodes(this.formatString);
         this._attachEvents();
 
-        // An inputfield value can already be set before calling constructing the datetimeinput
-        if(!this.inputIsValidDate())
-            this.resetDatetimeinput();
+        this.element.val(this.formatString);
     };
 
     // Date time prototype
@@ -39,7 +44,7 @@
         _events: [],
 
         /**
-         * private function attaching several events to the element containing the
+         * Private function attaching several events to the element containing the
          * datettimeinput object
          * @private
          */
@@ -48,9 +53,9 @@
             this._events = [
                 [this.element, {
                     click: $.proxy(this._click, this),
-                    change: $.proxy(this.inputIsValidDate, this),
-                    keydown: $.proxy(this._keydown, this),
-                    keyup: $.proxy(this._keyup, this),
+                    focusin: $.proxy(this._focusin, this),
+                    focusout: $.proxy(this._focusout, this),
+                    keypress: $.proxy(this._keypress, this),
                     mouseover: $.proxy(this._mouseover, this)
                 }]
             ];
@@ -74,61 +79,87 @@
             this._events = [];
         },
 
+        /**
+         * Function responsible for initializing the nodes representing year, month
+         * day, hour and minutes.
+         * The nodes create a linkedList according to the formatted string provided
+         * to the function. This allows easy transversal.
+         * @param string The formatted string
+         * @private
+         */
+        _initNodes: function (string) {
+            var previousNode = null;
+            for (var i = 0; i < string.length; i++) {
+                var token = string.charAt(i);
+                var start = i++;
+                while (token == string.charAt(i)) {
+                    i++;
+                }
+                var node = new LLNode(start, i, token);
+                if (previousNode == null)
+                    this.startNode = node;
+                else
+                    previousNode.next = node;
+                switch (token) {
+                    case 'y':
+                        this.yearNode = node;
+                        break;
+                    case 'm':
+                        this.monthNode = node;
+                        break;
+                    case 'd':
+                        this.dayNode = node;
+                        break;
+                    case 'h':
+                        this.hourNode = node;
+                        break;
+                    case 'i':
+                        this.minuteNode = node;
+                        break;
+                    default:
+                        break;
+                }
+                previousNode = node;
+            }
+        },
+
+        /**
+         * Function responsible parse a provided value according to the formatted
+         * string contained in this datetimeinput object and fill in the nodes
+         * with the correct values.
+         * @param string The string provided
+         * @private
+         */
+        _fillInNodes: function (string) {
+            var node = this.startNode;
+            while (node != null) {
+                node.value = string.substring(node.start, node.end);
+                node = node.next;
+            }
+        },
+
         // EVENT HANDLERS
 
         /**
          * Function triggered after a click event.
-         * The selected range is set to the beginning of a valid position (i.e. a token not
-         * in skipChars).
-         * @param evt the event
+         * The currentNode is initialised after a check whether the value of the
+         * previous currentNode is validate. If not, the previous currentNode
+         * remains the currentNode.
+         * The function _toFormattedString is called.
          * @private
          */
-        _click: function (evt) {
-            this.position = this.element[0].selectionStart - 1;
-            if(this.position == -1)
-                this.position = 0;
-            else
-                this.goToFirstPreviousValidPosition();
-            this.element[0].setSelectionRange(this.position, this.position + 1);
-        },
-
-        /**
-         * Function triggered after a keydown event.
-         * The token corresponding to the key gets validated. If the token
-         * is valid, the stepToken is set.
-         * @param evt the event
-         * @private
-         */
-        _keydown: function(evt) {
-            if(this.keydown)
-                evt.preventDefault();
-            else
-                this.keydown = true;
-            /*var code = evt.keyCode || evt.which;
-            if(this.validateToken(code)) {
-                this.stepToken = true;
-            } else {
-                evt.preventDefault();
-                this.stepToken = false;
+        _click: function () {
+            if (this.currentNode == null || this._validateValue()) {
+                this.position = this.element[0].selectionStart - 1;
+                if (this.position == -1)
+                    this.position = 1;
+                this.currentNode = this.startNode;
+                while (this.currentNode != null && this.position > this.currentNode.end)
+                    this.currentNode = this.currentNode.next;
+                this.position = this.currentNode.end;
             }
-            this.element[0].setSelectionRange(this.position, this.position + 1);*/
-        },
-
-        /**
-         * Function triggered after a keyup event.
-         * If the stepToken is set, the selectionrange will shift right to the next
-         * valid position.
-         * @param evt the event
-         * @private
-         */
-        _keyup: function(evt) {
-            this.keydown = false;
-            if(this.validateInput())
-                this.stepToken = true;
-            else
-                this.stepToken = false;
-            this.goToNextValidPosition();
-            this.element[0].setSelectionRange(this.position, this.position + 1);
+            this.fieldJumpPerformed = false;
+            this._toFormattedString();
         },
 
         /**
@@ -137,217 +168,246 @@
          * @param evt the event
          * @private
          */
-        _mouseover: function(evt) {
-            this.element.css('cursor','default');
+        _mouseover: function () {
+            this.element.css('cursor', 'default');
+        },
+
+        /**
+         * Function triggered after a focusin event.
+         * Makes a call to the _fillInNodes method with the value currently
+         * stored in the inputfield.
+         * @private
+         */
+        _focusin: function () {
+            this._fillInNodes(this.element.val());
+        },
+
+        /**
+         * Function triggered after a focusout event.
+         * Allows the lose of focus, if and only if, the provided value
+         * (if any) of the current node is valid.
+         * @private
+         */
+        _focusout: function () {
+            if (this.currentNode != null && !this._validateValue())
+                this.element.focus();
+            else
+                this.currentNode = null;
+            this._toFormattedString();
+        },
+
+        /**
+         * Function triggered after a keypress event.
+         * The default action triggered by this event is prevented.
+         * If the currentNode is defined, the value entered is parsed and
+         * validated.
+         * @param evt The event containing the key pressed
+         * @private
+         */
+        _keypress: function (evt) {
+            evt.preventDefault();
+            if (this.currentNode == null)
+                return;
+            if (this.position == this.currentNode.end)
+                this.currentNode.value = 0;
+            var num = parseInt(String.fromCharCode(evt.which));
+            if (!isNaN(num)) {
+                if (this._validateValue(num)) {
+                    if (!this.fieldJumpPerformed) {
+                        this.position--;
+                        if (this.position == this.currentNode.start) {
+                            this._fieldJump()
+                        }
+                    }
+                    this.fieldJumpPerformed = false;
+                }
+            }
+            this._toFormattedString();
+        },
+
+        /**
+         * Private function responsible for the representation of the
+         * values stored in the nodes, according to the formatted string.
+         * @private
+         */
+        _toFormattedString: function () {
+            var node = this.startNode;
+            var string = '';
+            while (node != null) {
+                var valstr = '';
+                if (this.currentNode != null && this.currentNode == node && this.position < this.currentNode.end) {
+                    var diff = this.position - node.start;
+                    while (diff > 0) {
+                        valstr += ' ';
+                        diff--;
+                    }
+                }
+                if (node.value != -1) {
+                    while ((valstr + node.value).length < node.end - node.start)
+                        valstr += '0';
+                    valstr += node.value;
+                    string += valstr + ((node.next != null) ? this.formatString.substring(node.end, node.next.start) :
+                        this.formatString.substring(node.end));
+                } else {
+                    var end = (node.next != null) ? node.next.start : node.end;
+                    string += this.formatString.substring(node.start, end);
+                }
+                node = node.next;
+            }
+            this.element.val(string);
+            if (this.currentNode != null) {
+                window.getSelection().removeAllRanges();
+                this.element[0].setSelectionRange(this.currentNode.start, this.currentNode.end);
+            }
+        },
+
+        /**
+         * Private function called when a field jumped is being performed.
+         * A field jump, is the jump to next node in the linkedlist.
+         * @private
+         */
+        _fieldJump: function () {
+            this.currentNode = this.currentNode.next;
+            if (this.currentNode != null)
+                this.position = this.currentNode.end;
+        },
+
+        /**
+         * Private function called to perform a forced field jump.
+         * @private
+         */
+        _forceFieldJump: function () {
+            this._fieldJump();
+            this.fieldJumpPerformed = true;
+        },
+
+        /**
+         * Private function capable of detecting whether the current node is
+         * the year-, month-, day-, hour- or minutesnode and performing a call to
+         * the correct method to validate the value provided to the current node.
+         * @param value The value provided to the current node (this value is appended to the node)
+         * @returns {boolean} True if the resulting value is valid, false otherwise
+         * @private
+         */
+        _validateValue: function (value) {
+            var result = false;
+            var backup = this.currentNode.value;
+            if (!(typeof value === 'undefined'))
+                this.currentNode.appendValue(value);
+            switch (this.currentNode.token) {
+                case 'y':
+                    result = this._validateYear();
+                    this._correctDate();
+                    break;
+                case 'm':
+                    result = this._validateMonth();
+                    this._correctDate();
+                    break;
+                case 'd':
+                    result = this._validateDay();
+                    this._correctDate();
+                    break;
+                case 'h':
+                    result = this._validateHour();
+                    break;
+                case 'i':
+                    result = this._validateMinutes();
+                    break;
+            }
+            if (!result)
+                this.currentNode.value = backup;
+            return result;
+        },
+
+        /**
+         * @returns {boolean} True whenever the value contained in the yearnode is valid.
+         * @private
+         */
+        _validateYear: function () {
+            return true;
+        },
+
+        /**
+         * @returns {boolean} True whenever the value contained in the monthnode is valid.
+         * @private
+         */
+        _validateMonth: function () {
+            return this._validate(12, false);
+        },
+
+        /**
+         * @returns {boolean} True whenever the value contained in the daynode is valid.
+         * @private
+         */
+        _validateDay: function () {
+            return this._validate(31, false);
+        },
+
+        /**
+         * @returns {boolean} True whenever the value contained in the hournode is valid.
+         * @private
+         */
+        _validateHour: function () {
+            return this._validate(23, true);
+        },
+
+        /**
+         * @returns {boolean} True whenever the value contained in the minutnode is valid.
+         * @private
+         */
+        _validateMinutes: function () {
+            return this._validate(59, true);
+        },
+
+        /**
+         * @returns {boolean} True whenever the value contained in the currentNode is valid
+         * according to the maximum value provided and determining whether zero is a valid.
+         * @param max The maximum value allowed
+         * @param allowZero True is zero is allowed as value
+         * @returns {boolean} True whenever the value contained in the current node is valid.
+         * @private
+         */
+        _validate: function (max, allowZero) {
+            var dec = Math.floor(max / 10);
+            if (this.currentNode.value > dec && this.currentNode.value < (max + 1)) {
+                this._forceFieldJump();
+            }
+            else if (this.currentNode.value > (max) || (!allowZero && this._isLastToken() && this.currentNode.value == 0))
+                return false;
+            return true;
+        },
+
+        /**
+         * Correct the day contained in the daynode according to the year and month contained
+         * in the corresponding nodes.
+         * @private
+         */
+        _correctDate: function () {
+            var max = DTIGlobal.getDaysInMonth(this.monthNode.value - 1, this.yearNode.value);
+            if (this.dayNode.value > max)
+                this.dayNode.value = max;
+        },
+
+        /**
+         * @returns {boolean} True if the token provided is the last token for this field (node).
+         * @private
+         */
+        _isLastToken: function () {
+            return this.position == (this.currentNode.start + 1);
         },
 
         // EXTRA FUNCTIONS
-
-        setValue: function(value) {
-            if(this.validateInput(value))
-                this.element.val(value);
-            else
-                this.element.val(this.formatString);
-        },
-
         /**
-         * Function telling whether a given position in the formatString is valid.
-         * @returns {boolean} true if the token in the formatstring at position is not contained in skipChars
+         * Provide a value to this datetimeinput. The value will be processed
+         * and stored in the correct nodes according to the formatted string.
+         * @param value The value provided
+         * @param format The format provided
+         * @private
          */
-        positionIsValid: function() {
-            for(var i = 0; i < this.skipChars.length; i++) {
-                if(this.skipChars[i] == this.formatString.charAt(this.position))
-                    return false;
-            }
-            return true;
-        },
-
-        /**
-         * Function shifting the selectionrange right to the next valid position inside the formatString if the
-         * stepToken is set.
-         */
-        goToNextValidPosition: function() {
-            while(this.position < this.formatString.length - 1 && this.stepToken) {
-                this.position++;
-                if(this.positionIsValid())
-                    this.stepToken = false;
-            }
-        },
-
-        /**
-         * Function shifting the selectionrange left to the previous valid position inside the formatString if the
-         * stepToken is set.
-         */
-        goToPreviousValidPosition: function() {
-            var step = 1;
-            while(this.position > 0 && step) {
-                this.position--;
-                if(this.positionIsValid())
-                    step = false;
-            }
-        },
-
-        /**
-         * Function shifting the selection range to the left to the first valid position,
-         * starting from the current position.
-         */
-        goToFirstPreviousValidPosition: function() {
-            var stepBack = this.position != 0;
-            while(this.position >= 0 && stepBack) {
-                if(this.positionIsValid())
-                    this.position--;
-                else
-                    stepBack = false;
-            }
-            // Correct position
-            if(this.position != 0)
-                this.position++;
-        },
-
-        /**
-         * Function to reset the datetimeinput.
-         */
-        resetDatetimeinput: function() {
-            this.element.val(this.formatString);
-        },
-
-        validateInput: function(value) {
-            if(value == null)
-                return null;
-            var num = parseInt(value, 10);
-            return !(isNaN(num));
-        },
-
-        /**
-         * Function validating the input.
-         * If the input is no valid date, the input is removed
-         */
-        inputIsValidDate: function() {
-            var date = this.inputToDate(this.element.val());
-            if(isNaN(date.valueOf())) {
-                this.element.val(this.formatString);
-                return false;
-            }
-            return true;
-        },
-
-        /**
-         * Function parsing the input to a date corresponding the formatString.
-         * @param input the input to be parsed to a date
-         * @returns {Date} the resulting date
-         */
-        inputToDate: function(input) {
-            var index = 0;
-            var input = this.element.val();
-            var year = 0,
-                month = 0,
-                date = 0,
-                hour = 0,
-                min = 0,
-                sec = 0;
-            while(index < this.formatString.length) {
-                switch(this.formatString.charAt(index)){
-                    case('D'):
-                        date = parseInt(input.substring(index, index + 2));
-                        index += 3; // Skip "DD[skipchar]"
-                        break;
-                    case('M'):
-                        month = parseInt(input.substring(index, index + 2));
-                        index += 3; // Skip "DD[skipchar]"
-                        break;
-                    case('Y'):
-                        year = parseInt(input.substring(index, index + 4));
-                        index += 5; // Skip "YYYY[skipchar]"
-                        break;
-                    case('h'):
-                        hour = parseInt(input.substring(index, index + 2));
-                        index += 3; // Skip "hh[skipchar]";
-                        break;
-                    case('m'):
-                        min = parseInt(input.substring(index, index + 2));
-                        index += 3; // Skip "mm[skipchar]";
-                        break;
-                    case('s'):
-                        sec = parseInt(input.substring(index, index + 2));
-                        index += 3; // Skip "ss[skipchar]";
-                        break;
-                    default:
-                        index++; // Avoid infinite loops
-                        break;
-                }
-            }
-            return new Date(year, month, date, hour, min, sec);
-        },
-
-        /**
-         * Function validating a token.
-         * The token is tested (corresponding to the current position) if it's either an valid date, month,
-         * year, hours or minutes.
-         * @param code the code indicating the token to be validated
-         * @returns {boolean} true if the token is part of a valid month, year,...
-         */
-        validateToken: function(code) {
-            var string = this.formatString.toUpperCase();
-            var pos = this.position;
-            // Move left
-            if(code == 37) {
-                this.goToPreviousValidPosition()
-                return false;
-            }
-            // Allow tab
-            if(code == 9) {
-                return true;
-            }
-            // Valid days: 0[1 - 9], 3[0 - 1], [1,2],
-            if(string.charAt(pos) == 'D') {
-                if(string.charAt(pos + 1) == 'D') {
-                    return code >= 96 && code <= 99;
-                }
-                else {
-                    if(this.element.val().charAt(pos - 1) == '0')
-                        return code >= 97 && code <= 105;
-                    else if(this.element.val().charAt(pos - 1) == '3')
-                        return code >= 96 && code <= 97;
-                    return code >= 96 && code <= 105;
-                }
-            }
-            // Valid months: 0[1-9], 1[0-2]
-            if(string.charAt(pos) == 'M') {
-                if(string.charAt(pos + 1) == 'M') {
-                    return code >= 96 && code <= 97;
-                }
-                else {
-                    if (this.element.val().charAt(pos - 1) == '0')
-                        return code >= 97 && code <= 105;
-                    return code >= 96 && code <= 98;
-                }
-            }
-            // Valid years
-            if(string.charAt(pos) == 'Y')
-                return code >= 96 && code <= 105;
-            // Valid hours
-            if(string.charAt(pos) == 'h') {
-                if(string.charAt(pos + 1) == 'h') {
-                    return code >= 96 && code <= 98;
-                }
-                else {
-                    if (this.element.val().charAt(pos - 1) == '0')
-                        return code >= 97 && code <= 105;
-                    if (this.element.val().charAt(pos - 1) == '2')
-                        return code >= 96 && code <= 99;
-                    return code >= 96 && code <= 105;
-                }
-            }
-            // Valid minutes
-            if(string.charAt(pos) == 'm') {
-                if(string.charAt(pos + 1) == 'm') {
-                    return code >= 96 && code <= 101;
-                }
-                else {
-                    return code >= 96 && code <= 105;
-                }
-            }
-            return true;
+        provideValue: function (value, format) {
+            if (format === this.formatString)
+                this._fillInNodes(value);
+            this._toFormattedString();
         }
     };
 
@@ -373,4 +433,47 @@
     };
 
     $.fn.datetimeinput.Constructor = Datetimeinput;
+
+    /**
+     * Global functions of the datetimeinput plugin
+     */
+    var DTIGlobal = {
+        isLeapYear: function(year) {
+            return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        },
+
+        getDaysInMonth: function(month, year) {
+            return [31, (DTIGlobal.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+        }
+    };
+
+    /**
+     * Linkedlist node containing:
+     * - the start index if the node
+     * - the end index
+     * - the value contained in this node,
+     * - the token identifying this node
+     * - the linkedlist node following this node
+     * @constructor
+     */
+    var LLNode = function(start, end, token) {
+        this.start = start;
+        this.end = end;
+        this.value = -1;
+        this.token = token;
+        this.next = null;
+    };
+
+    LLNode.prototype = {
+        constructor: LLNode,
+
+        /**
+         * @param value Append the value to the current value contained in the node
+         */
+        appendValue: function(value) {
+            this.value = this. value * 10 + value;
+        }
+    };
+
+
 }(window.jQuery);
