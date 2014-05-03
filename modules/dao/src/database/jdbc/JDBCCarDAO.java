@@ -10,6 +10,7 @@ import database.Filter;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import database.FilterField;
@@ -632,9 +633,11 @@ public class JDBCCarDAO implements CarDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Time beginTime = rs.getTime("car_availability_begin_time");
-                    LocalTime beginLocalTime = new LocalTime(beginTime.getHours(), beginTime.getMinutes());
+                    LocalTime beginLocalTime = LocalTime.fromDateFields(beginTime);
+
                     Time endTime = rs.getTime("car_availability_end_time");
-                    LocalTime endLocalTime = new LocalTime(endTime.getHours(), endTime.getMinutes());
+                    LocalTime endLocalTime = LocalTime.fromDateFields(endTime);
+
                     availabilities.add(new CarAvailabilityInterval(rs.getInt("car_availability_id"), DayOfWeek.getDayFromInt(rs.getInt("car_availability_begin_day_of_week")),
                             beginLocalTime, DayOfWeek.getDayFromInt(rs.getInt("car_availability_end_day_of_week")), endLocalTime));
                 }
@@ -650,9 +653,9 @@ public class JDBCCarDAO implements CarDAO{
     private void setAvailabilityVariables(PreparedStatement ps, int carId, CarAvailabilityInterval availability) throws SQLException {
         ps.setInt(1, carId);
         ps.setInt(2, availability.getBeginDayOfWeek().getI());
-        ps.setTime(3, new Time(availability.getBeginTime().getHourOfDay(), availability.getBeginTime().getMinuteOfHour(), 0));
+        ps.setTime(3, new Time(availability.getBeginTime().toDateTimeToday().getMillis()));
         ps.setInt(4, availability.getEndDayOfWeek().getI());
-        ps.setTime(5, new Time(availability.getEndTime().getHourOfDay(), availability.getEndTime().getMinuteOfHour(), 0));
+        ps.setTime(5, new Time(availability.getEndTime().toDateTimeToday().getMillis()));
     }
 
     @Override
