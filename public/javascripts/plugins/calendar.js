@@ -1,16 +1,23 @@
+/*
+ * =========================================
+ * Calendar V1
+ * =========================================
+ *
+ * Custom jquery plugin in order to display a calendar.
+ * The calendar currently only supports the Dutch language, though
+ * localisation can easily be added.
+ *
+ * The calendar is fully compatible with mobile devices:
+ * - scrolling is prevented within the calendar in order to
+ *      allow selecting
+ *
+ * Created by Benjamin on 27/04/2014.
+ *
+ */
+
 !function ($) {
-
-    var months = ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December'];
-    var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    var monthValues = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
-    var monthLeapValues = [-1, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
-    var centryNumber = [6, 4, 2, 0];
-    var tableHeaders = ['Zon', 'Maa', 'Din', 'Woe', 'Don', 'Vrij', 'Zat'];
-
     function isLeapYear(year) {
-        var y = year;
-        var lastDigits = y % 100;
-        return (lastDigits != 0 && y % 4 == 0) || (lastDigits == 0 && y % 400 == 0);
+        return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
     }
 
     function converToDateValue(day, month, year) {
@@ -77,6 +84,7 @@
     var Calendar = function (element, options) {
         this.options = options || {};
         this.element = $(element);
+        this.language = this.language in dates ? this.language : 'nl';
         this.disablePast = options.disablePast || false;
         this.dateFormat = options.dateFormat || "yyyy-mm-dd";
         if(!this._checkDateFormat())
@@ -309,6 +317,9 @@
         },
 
         firstWeekdayOfMonth: function() {
+            var monthValues = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
+            var monthLeapValues = [-1, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
+            var centryNumber = [6, 4, 2, 0];
             var y = this.yearDisplayed % 100;
             var c = Math.floor(this.yearDisplayed/100);
             var v = isLeapYear(this.yearDisplayed) ? monthLeapValues[this.monthDisplayed] : monthValues[this.monthDisplayed];
@@ -316,9 +327,7 @@
         },
 
         numberOfDaysInMonth: function(month) {
-            if(month != 1)
-                return monthDays[month];
-            return isLeapYear(this.yearDisplayed) ? 29 : 28;
+            return [31, isLeapYear(this.yearDisplayed) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
         },
 
         // Rendering functions
@@ -369,7 +378,7 @@
                                     .attr('class', 'btn btn-default')
                                     .attr('type', 'button')
                                     .append($('<b>')
-                                        .text('Vandaag')
+                                        .text(dates[this.language].today)
                                     )
                                 )
                             )
@@ -382,7 +391,7 @@
 
         resetTitle: function() {
             $('#' + this.title).html('').append($('<h2>')
-                    .text(months[this.monthDisplayed] + ' ' + this.yearDisplayed)
+                    .text(dates[this.language].months[this.monthDisplayed] + ' ' + this.yearDisplayed)
             );
             this._resetTitleLeft();
         },
@@ -412,7 +421,7 @@
 
         _appendCalendarHeaders: function() {
             var headerRow = this.element.find('thead').find('tr');
-            jQuery.each(tableHeaders, function(_, val) {
+            jQuery.each(dates[this.language].daysShort, function(_, val) {
                 headerRow.append($('<th>').text(val));
             });
         },
@@ -507,7 +516,7 @@
     };
 
     /**
-     *  Add the datetimeinput to Jquery to be available.
+     *  Add the calendar to Jquery to be available.
      */
     $.fn.calendar = function(option) {
         var args = Array.apply(null, arguments);
@@ -526,4 +535,15 @@
     };
 
     $.fn.calendar.Constructor = Calendar;
+
+    var dates = $.fn.calendar.dates = {
+        nl: {
+            days:        ["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"],
+            daysShort:   ["Zon", "Maa", "Din", "Woe", "Don", "Vrij", "Zat"],
+            months:      ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September",
+                "October", "November", "December"],
+            monthsShort: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            today:       "Vandaag"
+        }
+    };
 }(window.jQuery);
