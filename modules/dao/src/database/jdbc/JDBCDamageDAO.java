@@ -28,7 +28,7 @@ public class JDBCDamageDAO implements DamageDAO {
     private static final String DAMAGE_QUERY = "SELECT * FROM Damages " +
             "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
             "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
-            "JOIN FileGroups ON damage_filegroup_id = file_group_id " +
+            "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
             "JOIN Cars ON reservation_car_id = car_id " +
             "JOIN Users ON reservation_user_id = user_id ";
 
@@ -95,7 +95,7 @@ public class JDBCDamageDAO implements DamageDAO {
     public static Damage populateDamage(ResultSet rs) throws SQLException {
         return new Damage(rs.getInt("damage_id"), JDBCCarRideDAO.populateCarRide(rs), rs.getInt("damage_filegroup_id"),
                 rs.getString("damage_description"), new DateTime(rs.getTimestamp("damage_time")),
-                rs.getInt("damage_finished"));
+                rs.getBoolean("damage_finished"));
     }
 
     @Override
@@ -142,7 +142,7 @@ public class JDBCDamageDAO implements DamageDAO {
             ps.setInt(1, damage.getCarRide().getReservation().getId());
             ps.setInt(2, damage.getProofId());
             ps.setString(3, damage.getDescription());
-            ps.setInt(4, damage.getFinished());
+            ps.setBoolean(4, damage.getFinished());
             ps.setTimestamp(5, new Timestamp(damage.getTime().getMillis()));
             ps.setInt(6, damage.getId());
             if(ps.executeUpdate() == 0)
@@ -173,23 +173,13 @@ public class JDBCDamageDAO implements DamageDAO {
     }
 
     @Override
-    public List<Damage> getUserDamages() throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetUserDamagesStatement();
-            return getDamageList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of damages for user.", e);
-        }
-    }
-
-    @Override
     public List<Damage> getUserDamages(int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetUnfinishedDamagesStatement();
+            PreparedStatement ps = getGetUserDamagesStatement();
             ps.setInt(1, userId);
             return getDamageList(ps);
         } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
+            throw new DataAccessException("Unable to retrieve the list of damages for user.", e);
         }
     }
 
