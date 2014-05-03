@@ -95,7 +95,7 @@
                 while (token == string.charAt(i)) {
                     i++;
                 }
-                var node = new LLNode(start, i, 0, token, null);
+                var node = new LLNode(start, i, token);
                 if (previousNode == null)
                     this.startNode = node;
                 else
@@ -434,6 +434,9 @@
 
     $.fn.datetimeinput.Constructor = Datetimeinput;
 
+    /**
+     * Global functions of the datetimeinput plugin
+     */
     var DTIGlobal = {
         isLeapYear: function(year) {
             return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
@@ -444,7 +447,16 @@
         }
     };
 
-    var LLNode = function(start, end, value, token, next) {
+    /**
+     * Linkedlist node containing:
+     * - the start index if the node
+     * - the end index
+     * - the value contained in this node,
+     * - the token identifying this node
+     * - the linkedlist node following this node
+     * @constructor
+     */
+    var LLNode = function(start, end, token) {
         this.start = start;
         this.end = end;
         this.value = -1;
@@ -455,6 +467,9 @@
     LLNode.prototype = {
         constructor: LLNode,
 
+        /**
+         * @param value Append the value to the current value contained in the node
+         */
         appendValue: function(value) {
             this.value = this. value * 10 + value;
         }
