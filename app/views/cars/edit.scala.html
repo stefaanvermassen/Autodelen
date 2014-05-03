@@ -1,5 +1,5 @@
 @(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
-@import database.DatabaseHelper;
+@import providers.DataProvider;
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
@@ -14,6 +14,7 @@
         $(document).ready(function() {
 
             $('#datepicker').datetimepicker({
+                minView: 2,
                 weekStart: 1,
                 language: 'nl',
                 todayBtn:  1,
@@ -53,39 +54,41 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-
                         <div class="form-group">
-                            @if(car == null) {
-                                <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
-                            } else {
-                                <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
-                            }
-                            <!-- TODO: profile picture-->
-                        </div>
-                        @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
-                            @if(isAdmin) {
-                                <div class="form-group">
-                                    <label class="col-md-1 control-label" for="receiver">Eigenaar</label>
-                                        @if(form("userEmail").value){
-                                            @defining(DatabaseHelper.getUserProvider().getUser(form("userEmail").value)) { user =>
+                            <fieldset>
+                                @if(car == null) {
+                                    <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                                } else {
+                                    <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                                }
+                                <!-- TODO: profile picture-->
+                                <div class="col-md-12">
+                                    @helper.checkbox(form("active"), '_label -> "Actief")
+                                </div>
+                                @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                                    @if(isAdmin) {
+                                        <label class="col-md-1 control-label" for="receiver">Eigenaar</label>
+                                        @if(form("userId").value){
+                                            @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
                                                 <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
-                                                    <input type="hidden" name="userEmail" value="@user.getEmail" />
+                                                    <input type="hidden" name="userId" value="@user.getId" />
                                                     <ul class="dropdown-menu" role="menu"></ul>
                                                 </div>
                                             }
                                         }else{
-                                            @defining(DatabaseHelper.getUserProvider().getUser()) { user =>
+                                            @defining(DataProvider.getUserProvider().getUser()) { user =>
                                                 <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
-                                                    <input type="hidden" name="userEmail" value="@user.getEmail"/>
+                                                    <input type="hidden" name="userId" value="@user.getId"/>
                                                     <ul class="dropdown-menu" role="menu"></ul>
                                                 </div>
                                             }
                                         }
-                                </div>
-                            }
-                        }
+                                    }
+                                }
+                            </fieldset>
+                        </div>
                         <div class="form-group">
                             <fieldset>
                                 <div class="form-group">
@@ -275,9 +278,15 @@
                                 <div class="panel-body">
                                     <fieldset>
                                         <div class="form-group">
+                                            <label class="col-md-12" for="insuranceName">Verzekeraar</label>
+                                            <div class="col-md-12">
+                                                <input id="insuranceName" name="insuranceName" type="text" class="form-control input-md" value="@form("insuranceName").value">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
                                             <label class="col-md-12" for="expiration">Vervaldatum</label>
                                             <div class="col-md-4">
-                                                <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="expiration">
+                                                <div id="datepicker" class="input-group date form_date" data-date-format="dd MM yyyy" data-link-field="expiration">
                                                     <input class="form-control input-md" size="16" type="text" value="@form("expiration").value"readonly>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>

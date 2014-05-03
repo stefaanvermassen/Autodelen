@@ -1,7 +1,7 @@
 package controllers;
 
 import controllers.util.TestHelper;
-import database.DatabaseHelper;
+import database.DataProvider;
 import database.mocking.TestDataAccessProvider;
 import models.User;
 import models.UserRole;
@@ -37,7 +37,7 @@ public class LoginControllerTest {
 
             @Override
             public void run() {
-                DatabaseHelper.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
+                DataProvider.setDataAccessProvider(new TestDataAccessProvider()); // Required!!
 
                 Map<String,String> data = new HashMap<>();
                 data.put("email", "nonexistent@something.com");

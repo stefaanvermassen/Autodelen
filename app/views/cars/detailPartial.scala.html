@@ -1,8 +1,8 @@
 @(car: Car)
 @import controllers.Cars;
 @import org.joda.time.format.DateTimeFormat
-@import database.DatabaseHelper;
-@defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+@import providers.DataProvider;
+@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
     <div class="row">
         <div class="col-lg-3">
             <div class="panel panel-default">
@@ -18,6 +18,12 @@
                         <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
                     }
                     <!-- TODO: profile picture-->
+
+                @if(car.isActive) {
+                    <span class="label label-success">Actief</span>
+                } else {
+                    <span class="label label-danger">Non-actief</span>
+                }
 
                 <h2>@car.getName</h2>
                 <h3>@car.getBrand @car.getType</h3>
@@ -72,13 +78,13 @@
                             <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
                             <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { File placeholder }<br>
                             <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
+                            <strong>Verzekeraar: </strong> @if(car.getInsurance == null || car.getInsurance.getName == null) { Onbekend } else { @car.getInsurance.getName }<br>
                             <strong>Verzekering vervaldatum: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @car.getInsurance.getExpiration }<br>
                             <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus== null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
                             <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr== null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>
 
                         </div>
                     </div>
-                        <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
                 </div>
                     <!-- /.panel-body -->
             </div>

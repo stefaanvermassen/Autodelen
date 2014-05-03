@@ -6,13 +6,14 @@ import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.providers.UserRoleProvider;
 import models.*;
+import providers.DataProvider;
+import providers.UserRoleProvider;
 import controllers.Security.RoleSecured;
 
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import play.Logger;
+import org.joda.time.LocalTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
@@ -27,19 +28,12 @@ import views.html.cars.cars;
 import views.html.cars.detail;
 import views.html.cars.carsAdmin;
 import views.html.cars.carspage;
-import views.html.flashes;
-import views.html.profile.uploadPicture;
-import views.html.reserve.reservationDetailsPartial;
 
-import javax.imageio.IIOException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
@@ -69,7 +63,7 @@ public class Cars extends Controller {
 
     public static class CarModel {
 
-        public String userEmail;
+        public Integer userId;
 
         public String name;
         public String brand;
@@ -84,6 +78,7 @@ public class Cars extends Controller {
         public Integer estimatedValue;
         public Integer ownerAnnualKm;
         public String comments;
+        public boolean active;
 
         // TechnicalCarDetails
         public String licensePlate;
@@ -91,7 +86,8 @@ public class Cars extends Controller {
         public Integer chassisNumber;
 
         // Insurance
-        public DateTime expiration;
+        public String insuranceName;
+        public Date expiration;
         public Integer bonusMalus;
         public Integer polisNr;
 
@@ -100,7 +96,7 @@ public class Cars extends Controller {
         public void populate(Car car) {
             if(car == null) return;
 
-            userEmail = car.getOwner().getEmail();
+            userId = car.getOwner().getId();
 
             name = car.getName();
             brand = car.getBrand();
@@ -115,6 +111,7 @@ public class Cars extends Controller {
             estimatedValue = car.getEstimatedValue();
             ownerAnnualKm = car.getOwnerAnnualKm();
             comments = car.getComments();
+            active = car.isActive();
 
             if(car.getTechnicalCarDetails() != null) {
                 licensePlate = car.getTechnicalCarDetails().getLicensePlate();
@@ -122,7 +119,9 @@ public class Cars extends Controller {
             }
 
             if(car.getInsurance() != null) {
-                expiration = new DateTime(car.getInsurance().getExpiration());
+                insuranceName = car.getInsurance().getName();
+                if(car.getInsurance().getExpiration() != null)
+                    expiration = car.getInsurance().getExpiration();
                 bonusMalus = car.getInsurance().getBonusMalus();
                 polisNr = car.getInsurance().getPolisNr();
             }
@@ -139,7 +138,7 @@ public class Cars extends Controller {
          */
         public String validate() {
             String error = "";
-            if("".equals(userEmail))
+            if(userId == null || userId == 0)
                 error += "Geef een eigenaar op. ";
             if(address.isEmpty())
                 error += "Geef het adres op. ";
@@ -147,9 +146,9 @@ public class Cars extends Controller {
                 error +=  "Geef de autonaam op. ";
             if(brand.length() <= 0)
                 error +=  "Geef het automerk op. ";
-            if(seats != null && seats < 2)
+            if(seats == null || seats < 2)
                 error +=  "Een auto heeft minstens 2 zitplaatsen. ";
-            if(doors != null && doors < 2)
+            if(doors == null || doors < 2)
                 error +=  "Een auto heeft minstens 2 deuren. ";
 
             if("".equals(error)) return null;
@@ -170,8 +169,8 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result showUserCars() {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             // Doesn't need to be paginated, because a single user will never have a lot of cars
             List<Car> listOfCars = dao.getCarsOfUser(user.getId());
@@ -206,7 +205,7 @@ public class Cars extends Controller {
 
     private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
 
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
             if(orderBy == null) {
@@ -241,7 +240,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result newCar() {
-        return ok(edit.render(Form.form(CarModel.class), null, getCountryList(),getFuelList()));
+        return ok(edit.render(Form.form(CarModel.class), null, getCountryList(), getFuelList()));
     }
 
     /**
@@ -254,19 +253,19 @@ public class Cars extends Controller {
         if (carForm.hasErrors()) {
             return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 try {
-                    User user = DatabaseHelper.getUserProvider().getUser();
+                    User user = DataProvider.getUserProvider().getUser();
                     CarModel model = carForm.get();
                     AddressDAO adao = context.getAddressDAO();
                     Address address = modifyAddress(model.address, null, adao);
 
                     User owner = user;
-                    if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
-                            || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                    if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                            || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                         // User is permitted to add cars for other users
-                        owner = DatabaseHelper.getUserProvider().getUser(model.userEmail);
+                        owner = context.getUserDAO().getUser(model.userId, false);
                     }
                     TechnicalCarDetails technicalCarDetails = null;
                     // TODO: registration
@@ -275,13 +274,13 @@ public class Cars extends Controller {
                         technicalCarDetails = new TechnicalCarDetails(model.licensePlate, null, model.chassisNumber);
                     }
                     CarInsurance insurance = null;
-                    if((model.expiration != null || (model.polisNr != null && model.polisNr != 0))
+                    if((model.insuranceName != null && !model.insuranceName.equals("")) || (model.expiration != null || (model.polisNr != null && model.polisNr != 0))
                             || (model.bonusMalus != null && model.bonusMalus != 0)) {
-                        insurance = new CarInsurance(model.expiration, model.bonusMalus, model.polisNr);
+                        insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments);
+                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active);
 
                     context.commit();
 
@@ -311,7 +310,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCar(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
@@ -319,8 +318,8 @@ public class Cars extends Controller {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
             } else {
-                User currentUser = DatabaseHelper.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                User currentUser = DataProvider.getUserProvider().getUser();
+                if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
@@ -345,7 +344,7 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result editCarPost(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
@@ -358,8 +357,8 @@ public class Cars extends Controller {
                 return badRequest(carList());
             }
 
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
-            if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+            User currentUser = DataProvider.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                 flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
@@ -415,11 +414,15 @@ public class Cars extends Controller {
                         car.getTechnicalCarDetails().setChassisNumber(null);
                 }
                 if(car.getInsurance() == null) {
-                    if((model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)
+                    if(model.insuranceName != null && !model.insuranceName.equals("") || (model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)
                             || (model.polisNr != null && model.polisNr != 0))
-                        car.setInsurance(new CarInsurance(model.expiration, model.bonusMalus, model.polisNr));
+                        car.setInsurance(new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr));
                 }
                 else {
+                    if(model.insuranceName != null && !model.insuranceName.equals(""))
+                        car.getInsurance().setName(model.insuranceName);
+                    else
+                        car.getInsurance().setName(null);
                     if(model.expiration != null)
                         car.getInsurance().setExpiration(model.expiration);
                     else
@@ -445,11 +448,13 @@ public class Cars extends Controller {
 
                 car.setComments(model.comments);
 
-                User user = DatabaseHelper.getUserProvider().getUser();
-                if(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
-                        || DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+                car.setActive(model.active);
+
+                User user = DataProvider.getUserProvider().getUser();
+                if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
+                        || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                     // User is permitted to add cars for other users
-                    car.setOwner(DatabaseHelper.getUserProvider().getUser(model.userEmail));
+                    car.setOwner(context.getUserDAO().getUser(model.userId, false));
                 }
 
                 dao.updateCar(car);
@@ -467,22 +472,166 @@ public class Cars extends Controller {
     }
 
     /**
+     * Method: POST
+     * @return redirect to the car detailPage
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    public static Result updateAvailabilities(int carId, String valuesString) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(carId);
+
+            if (car == null) {
+                flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                return badRequest(carList());
+            }
+
+            User currentUser = DataProvider.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
+                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                return badRequest(carList());
+            }
+
+            try {
+                String[] values = valuesString.split(";");
+
+                List<CarAvailabilityInterval> availabilitiesToAddOrUpdate = new ArrayList<>();
+                List<CarAvailabilityInterval> availabilitiesToDelete = new ArrayList<>();
+
+                for(String value : values) {
+                    String[] vs = value.split(",");
+                    if(vs.length != 5) {
+                        flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
+                        return badRequest(detail.render(car));
+                    }
+                    try {
+                        int id = Integer.parseInt(vs[0]);
+                        DayOfWeek beginDay = DayOfWeek.getDayFromInt(Integer.parseInt(vs[1]));
+                        String[] beginHM = vs[2].split(":");
+                        LocalTime beginTime = new LocalTime(Integer.parseInt(beginHM[0]), Integer.parseInt(beginHM[1]));
+                        DayOfWeek endDay = DayOfWeek.getDayFromInt(Integer.parseInt(vs[3]));
+                        String[] endHM = vs[4].split(":");
+                        LocalTime endTime = new LocalTime(Integer.parseInt(endHM[0]), Integer.parseInt(endHM[1]));
+                        if(id == 0) { // create
+                            availabilitiesToAddOrUpdate.add(new CarAvailabilityInterval(beginDay, beginTime, endDay, endTime));
+                        } else if(id > 0) { // update
+                            availabilitiesToAddOrUpdate.add(new CarAvailabilityInterval(id, beginDay, beginTime, endDay, endTime));
+                        } else { // delete
+                            availabilitiesToDelete.add(new CarAvailabilityInterval(-id, beginDay, beginTime, endDay, endTime));
+                        }
+                    } catch(ArrayIndexOutOfBoundsException | NumberFormatException e ) {
+                        flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
+                        return badRequest(detail.render(car));
+                    }
+                }
+
+                dao.addOrUpdateAvailabilities(car, availabilitiesToAddOrUpdate);
+                dao.deleteAvailabilties(availabilitiesToDelete);
+
+                context.commit();
+                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                return detail(car.getId());
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     * @return redirect to the car detailPage
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    public static Result updatePriviliged(int carId, String valuesString) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO dao = context.getCarDAO();
+            Car car = dao.getCar(carId);
+
+            if (car == null) {
+                flash("danger", "Car met ID=" + carId + " bestaat niet.");
+                return badRequest(carList());
+            }
+
+            User currentUser = DataProvider.getUserProvider().getUser();
+            if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
+                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                return badRequest(carList());
+            }
+
+            try {
+                String[] values = valuesString.split(";");
+
+                List<User> priviliged = car.getPriviliged();
+
+                List<User> usersToAdd = new ArrayList<>();
+                List<User> usersToDelete = new ArrayList<>();
+
+                for(String value : values) {
+                    try {
+                        int id = Integer.parseInt(value);
+                        User user;
+                        if(id > 0) { // create
+                            user = context.getUserDAO().getUser(id, false);
+                            if(!userInList(id, priviliged))
+                                usersToAdd.add(user);
+                        } else { // delete
+                            user = context.getUserDAO().getUser(-1 * id, false);
+                            usersToDelete.add(user);
+                        }
+                        if(user == null) {
+                            flash("error", "De opgegeven gebruiker bestaat niet.");
+                            return badRequest(detail.render(car));
+                        }
+                    } catch(NumberFormatException e) {
+                        flash("error", "Er is een fout gebeurd bij het doorgeven van de gepriviligieerden.");
+                        return badRequest(detail.render(car));
+                    }
+                }
+
+                dao.addPriviliged(car, usersToAdd);
+                dao.deletePriviliged(car, usersToDelete);
+
+                context.commit();
+                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                return detail(car.getId());
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    private static boolean userInList(int userId, List<User> users) {
+        for(User u : users) {
+            if(u.getId() == userId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      *
      * @param carId The car to show details of
      * @return A detail page of the car (only available to car_user+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
     public static Result detail(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(carId);
 
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
                 return badRequest(carList());
-            } else {
-                return ok(detail.render(car));
             }
+
+            return ok(detail.render(car));
         } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
@@ -497,7 +646,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated(UserRole.CAR_ADMIN)
     public static Result removeCar(int carId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
             try {
                 Car car = dao.getCar(carId);
@@ -507,8 +656,8 @@ public class Cars extends Controller {
                 } else {
 
                     //TODO: this is repeat code, unify with above controllers as extra check
-                    User currentUser = DatabaseHelper.getUserProvider().getUser();
-                    if(!(car.getOwner().getId() == currentUser.getId() || DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                    User currentUser = DataProvider.getUserProvider().getUser();
+                    if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                         flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
                         return badRequest(carList());
                     }
@@ -551,7 +700,7 @@ public class Cars extends Controller {
     public static Result getCarCostModal(int id){
         // TODO: hide from other users (badRequest)
 
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             CarDAO dao = context.getCarDAO();
             Car car = dao.getCar(id);
             if(car == null){
@@ -572,7 +721,7 @@ public class Cars extends Controller {
     public static Result addNewCarCost(int carId) {
         Form<CarCostModel> carCostForm = Form.form(CarCostModel.class).bindFromRequest();
         if (carCostForm.hasErrors()) {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
                 flash("danger", "Kost toevoegen mislukt.");
@@ -582,7 +731,7 @@ public class Cars extends Controller {
             }
 
         } else {
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarCostDAO dao = context.getCarCostDAO();
                 try {
                     CarCostModel model = carCostForm.get();
@@ -654,8 +803,8 @@ public class Cars extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         // Check if admin or car owner
-        User user = DatabaseHelper.getUserProvider().getUser();
-        UserRoleProvider userRoleProvider = DatabaseHelper.getUserRoleProvider();
+        User user = DataProvider.getUserProvider().getUser();
+        UserRoleProvider userRoleProvider = DataProvider.getUserRoleProvider();
         if(!userRoleProvider.hasRole(user, UserRole.CAR_ADMIN) || !userRoleProvider.hasRole(user, UserRole.SUPER_USER)) {
             String carIdString = filter.getValue(FilterField.CAR_ID);
             int carId;
@@ -664,7 +813,7 @@ public class Cars extends Controller {
             } else {
                 carId = Integer.parseInt(carIdString);
             }
-            try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO carDAO = context.getCarDAO();
                 List<Car> listOfCars = carDAO.getCarsOfUser(user.getId());
                 // Check if carId in cars
@@ -690,7 +839,7 @@ public class Cars extends Controller {
     }
 
     private static Html carCostList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
 
             if(orderBy == null) {
@@ -718,7 +867,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result approveCarCost(int carCostId, int returnToDetail) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
             CarCost carCost = dao.getCarCost(carCostId);
             carCost.setStatus(CarCostStatus.ACCEPTED);
@@ -749,7 +898,7 @@ public class Cars extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result refuseCarCost(int carCostId, int returnToDetail) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
             CarCost carCost = dao.getCarCost(carCostId);
             carCost.setStatus(CarCostStatus.REFUSED);
@@ -770,7 +919,7 @@ public class Cars extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result getProof(int proofId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
         } catch (DataAccessException ex) {
             throw ex;

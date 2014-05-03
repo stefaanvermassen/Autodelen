@@ -1,5 +1,5 @@
 @(infoSession: InfoSession, enrolled: InfoSession = null, map: Maps.MapDetails = null)
-@import database.DatabaseHelper;
+@import providers.DataProvider;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
 
@@ -36,7 +36,8 @@
     <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Details infosessie</h1>
-        @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+        @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+                @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
            @flashes()
             @if(isAdmin) {
                 <div class="panel panel-default">
@@ -58,7 +59,7 @@
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     @* TODO: refine logic behind buttons *@
-                    @detailPartial(infoSession, map)
+                    @detailPartial(infoSession, fullUser, map)
                     @if(enrolled == null ) {
                         <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Inschrijven</a>
                     } else {
@@ -95,7 +96,13 @@
                                 @for((enrollee, index) <- infoSession.getEnrolled.zipWithIndex) {
                                     <tr>
                                         <td>@(index + 1)</td>
-                                        <td><a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser</a></td>
+                                        <td>
+                                            @if(fullUser) {
+                                                <a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser.getFirstName @enrollee.getUser.getLastName</a>
+                                            } else {
+                                                @enrollee.getUser.getFirstName @enrollee.getUser.getLastName
+                                            }
+                                        </td>
                                         @if(isAdmin) {
                                             <td>
                                                 <div class="btn-group btn-group-xs">
@@ -163,4 +170,5 @@
     </div>
   </div>
 </div>
+}
 }

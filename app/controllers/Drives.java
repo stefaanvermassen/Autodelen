@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
+import providers.DataProvider;
 import views.html.drives.driveDetails;
 import views.html.drives.drivesAdmin;
 import views.html.drives.drives;
@@ -152,8 +153,8 @@ public class Drives extends Controller {
      */
     private static Html detailsPage(int reservationId, Form<Reserve.ReservationModel> adjustForm, Form<RefuseModel> refuseForm,
                                     Form<InfoModel> detailsForm) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO rdao = context.getReservationDAO();
             UserDAO udao = context.getUserDAO();
             CarDAO cdao = context.getCarDAO();
@@ -181,7 +182,21 @@ public class Drives extends Controller {
             CarRide driveInfo = null;
             if(reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus() == ReservationStatus.FINISHED)
                 driveInfo = ddao.getCarRide(reservationId);
-            return driveDetails.render(adjustForm, refuseForm, detailsForm, reservation, driveInfo, car, owner, loaner);
+
+            Reservation nextReservation = rdao.getNextReservation(reservation);
+            if(nextReservation != null)
+                nextReservation = nextReservation.getFrom().isBefore(reservation.getTo().plusDays(1)) ? nextReservation : null;
+            User nextLoaner = nextReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
+                    udao.getUser(nextReservation.getUser().getId(), true) : null;
+
+            Reservation previousReservation = rdao.getPreviousReservation(reservation);
+            if(previousReservation != null)
+                previousReservation = previousReservation.getTo().isAfter(reservation.getFrom().minusDays(1)) ? previousReservation : null;
+            User previousLoaner = previousReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
+                    udao.getUser(previousReservation.getUser().getId(), true) : null;
+
+            return driveDetails.render(adjustForm, refuseForm, detailsForm, reservation, driveInfo, car, owner, loaner,
+                    previousLoaner, nextLoaner);
         } catch(DataAccessException ex) {
             throw ex;
         }
@@ -198,13 +213,13 @@ public class Drives extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     public static Result adjustDetails(int reservationId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         Form<RefuseModel> refuseModel = Form.form(RefuseModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
         if(adjustForm.hasErrors())
             return badRequest(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO rdao = context.getReservationDAO();
             Reservation reservation = rdao.getReservation(reservationId);
             if(reservation == null) {
@@ -300,8 +315,8 @@ public class Drives extends Controller {
      * @return the reservation if successful, null otherwise
      */
     public static Reservation adjustStatus(int reservationId, ReservationStatus status) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
             Reservation reservation = dao.getReservation(reservationId);
             if(reservation == null) {
@@ -309,8 +324,8 @@ public class Drives extends Controller {
                 return null;
             }
             // Both super user and reservation admin are allowed to adjust the status of a reservation
-            if(!(DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER))
-                    && !((DatabaseHelper.getUserRoleProvider().hasRole(user, UserRole.RESERVATION_ADMIN)))) {
+            if(!(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER))
+                    && !((DataProvider.getUserRoleProvider().hasRole(user, UserRole.RESERVATION_ADMIN)))) {
                 switch (status) {
                     // Only the loaner is allowed to cancel a reservation at any time
                     case CANCELLED:
@@ -343,13 +358,13 @@ public class Drives extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     public static Result provideDriveInfo(int reservationId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
         Form<RefuseModel> refuseForm = Form.form(RefuseModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
         if(detailsForm.hasErrors())
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO dao = context.getCarRideDAO();
             ReservationDAO rdao = context.getReservationDAO();
             Reservation reservation = rdao.getReservation(reservationId);
@@ -368,13 +383,20 @@ public class Drives extends Controller {
             CarRide ride = dao.getCarRide(reservationId);
             if(ride == null){
                 int refueling = detailsForm.get().refueling;
+                boolean damaged = detailsForm.get().damaged;
                 ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage,
-                        detailsForm.get().damaged, refueling);
+                        damaged, refueling);
                 if(refueling > 0){
                     RefuelDAO refuelDAO = context.getRefuelDAO();
                     for(int i=0; i< refueling; i++){
                         Refuel refuel = refuelDAO.createRefuel(ride);
                     }
+                    context.commit();
+                }
+                if (damaged){
+                    DamageDAO damageDAO = context.getDamageDAO();
+                    Damage damage = damageDAO.createDamage(ride);
+                    System.out.println(damage.getId());
                     context.commit();
                 }
             } else if(isOwner) {
@@ -404,11 +426,11 @@ public class Drives extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result approveDriveInfo(int reservationId) {
-        User user = DatabaseHelper.getUserProvider().getUser();
+        User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
         Form<RefuseModel> refuseForm = Form.form(RefuseModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO dao = context.getCarRideDAO();
             ReservationDAO rdao = context.getReservationDAO();
             Reservation reservation = rdao.getReservation(reservationId);
@@ -445,8 +467,8 @@ public class Drives extends Controller {
      * @return The number of reservations
      */
     public static int reservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try(DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
             return dao.numberOfReservationsWithStatus(status, user.getId(), userIsOwner, userIsLoaner);
         } catch(DataAccessException ex) {
@@ -501,8 +523,8 @@ public class Drives extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        User user = DatabaseHelper.getUserProvider().getUser();
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReservationDAO dao = context.getReservationDAO();
 
             if(field == null) {

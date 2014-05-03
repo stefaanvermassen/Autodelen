@@ -4,7 +4,6 @@ import database.DataAccessContext;
 import database.DataAccessException;
 import database.DataAccessProvider;
 import database.DatabaseConfiguration;
-import play.db.DB;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

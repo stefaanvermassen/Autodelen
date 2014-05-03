@@ -1,6 +1,5 @@
 @(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
-    @import database.DatabaseHelper;
-
+@import providers.DataProvider;
     @app("Profiel bewerken") {
 
         <div id="page-header-wrapper">
@@ -84,6 +83,14 @@
                                 </div>
                             </div>
 
+                            <div class="form-group">
+                                @if(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)){
+                                        <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Lidgeld betaald
+                                } else {
+                                    <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Lidgeld betaald
+                                }
+                            </div>
+
                             @*
                             <div class="form-group">
                                 <div class="panel panel-default">
@@ -103,7 +110,7 @@
                                             }
                                         }
                                         <!-- TODO: verantwoordelijke toewijzen -->
-                                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
+                                        @if(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
                                             <a href="#">Verantwoordelijke wijzigen (TODO)</a>
                                         }
                                     </div>

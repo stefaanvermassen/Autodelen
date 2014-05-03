@@ -1,4 +1,4 @@
-package database.providers;
+package providers;
 
 import database.*;
 import models.User;
@@ -14,7 +14,7 @@ import java.util.Set;
 public class UserRoleProvider {
 
     private static final String ROLES_BY_ID = "role:id:%d";
-    private static final UserRole[] ADMIN_ROLES = new UserRole[] { UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN, UserRole.MAIL_ADMIN, UserRole.RESERVATION_ADMIN };
+    private static final UserRole[] ADMIN_ROLES = new UserRole[] { UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN, UserRole.MAIL_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER };
 
     private DataAccessProvider provider;
     private UserProvider userProvider;
@@ -28,7 +28,7 @@ public class UserRoleProvider {
         return getRoles(userId, true);
     }
 
-    //TODO: leave this helper function here, or move to the main databasehelper? Decoupling...
+    //TODO: leave this helper function here, or move to the main DataProvider? Decoupling...
     public boolean hasRole(String email, UserRole role) {
         User user = userProvider.getUser(email);
         if (user == null)

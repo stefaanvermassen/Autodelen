@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_dao" default="compile.module.dao">
+  <dirname property="module.dao.basedir" file="${ant.file.module_dao}"/>
+  
+  <property name="module.jdk.home.dao" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.dao" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.dao" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.dao" value="-encoding UTF-8 -source 1.7 ${compiler.args}"/>
+  
+  <property name="dao.output.dir" value="${module.dao.basedir}/out/production/dao"/>
+  <property name="dao.testoutput.dir" value="${module.dao.basedir}/out/test/dao"/>
+  
+  <path id="dao.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="dao.module.production.classpath">
+    <path refid="${module.jdk.classpath.dao}"/>
+    <path refid="library.joda-time-2.3.classpath"/>
+  </path>
+  
+  <path id="dao.runtime.production.module.classpath">
+    <pathelement location="${dao.output.dir}"/>
+    <path refid="library.joda-time-2.3.classpath"/>
+  </path>
+  
+  <path id="dao.module.classpath">
+    <path refid="${module.jdk.classpath.dao}"/>
+    <pathelement location="${dao.output.dir}"/>
+    <path refid="library.joda-time-2.3.classpath"/>
+  </path>
+  
+  <path id="dao.runtime.module.classpath">
+    <pathelement location="${dao.testoutput.dir}"/>
+    <pathelement location="${dao.output.dir}"/>
+    <path refid="library.joda-time-2.3.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.dao">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.dao">
+    <patternset refid="excluded.from.module.dao"/>
+  </patternset>
+  
+  <path id="dao.module.sourcepath">
+    <dirset dir="${module.dao.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.dao" depends="compile.module.dao.production,compile.module.dao.tests" description="Compile module dao"/>
+  
+  <target name="compile.module.dao.production" depends="register.custom.compilers" description="Compile module dao; production classes">
+    <mkdir dir="${dao.output.dir}"/>
+    <javac2 destdir="${dao.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.dao}/javac">
+      <compilerarg line="${compiler.args.dao}"/>
+      <bootclasspath refid="dao.module.bootclasspath"/>
+      <classpath refid="dao.module.production.classpath"/>
+      <src refid="dao.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.dao"/>
+    </javac2>
+    
+    <copy todir="${dao.output.dir}">
+      <fileset dir="${module.dao.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.dao.tests" depends="register.custom.compilers,compile.module.dao.production" description="compile module dao; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.dao" description="cleanup module">
+    <delete dir="${dao.output.dir}"/>
+    <delete dir="${dao.testoutput.dir}"/>
+  </target>
+</project>

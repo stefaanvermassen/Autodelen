@@ -26,7 +26,7 @@ import org.junit.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import database.DataAccessContext;
-import database.DatabaseHelper;
+import database.DataProvider;
 import database.TemplateDAO;
 
 public class EmailTemplateTest {
@@ -43,7 +43,7 @@ public class EmailTemplateTest {
 	public void setUp(){
 		helper = new TestHelper();
 		helper.setTestProvider();
-		DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
 		emailDAO = context.getTemplateDAO();
 		templates = emailDAO.getAllTemplates();
 		nonAdmins = new ArrayList<>();
