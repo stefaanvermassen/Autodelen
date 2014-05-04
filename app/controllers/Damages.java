@@ -2,10 +2,7 @@ package controllers;
 
 import controllers.Security.RoleSecured;
 import database.*;
-import models.Car;
-import models.Damage;
-import models.User;
-import models.UserRole;
+import models.*;
 import org.joda.time.DateTime;
 import play.data.Form;
 import play.mvc.Controller;
@@ -47,6 +44,8 @@ public class Damages extends Controller {
         public String status;
 
         public String validate() {
+            if("".equals(status))
+                return "Geef aub een status op.";
             return null;
         }
     }
@@ -79,10 +78,12 @@ public class Damages extends Controller {
             DamageDAO dao = context.getDamageDAO();
             UserDAO userDAO = context.getUserDAO();
             CarDAO carDAO = context.getCarDAO();
+            DamageLogDAO damageLogDAO = context.getDamageLogDAO();
             Damage damage = dao.getDamage(damageId);
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
-            return ok(details.render(damage, owner, damagedCar));
+            List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
+            return ok(details.render(damage, owner, damagedCar, damageLogList));
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -149,11 +150,13 @@ public class Damages extends Controller {
                 DamageDAO dao = context.getDamageDAO();
                 UserDAO userDAO = context.getUserDAO();
                 CarDAO carDAO = context.getCarDAO();
+                DamageLogDAO damageLogDAO = context.getDamageLogDAO();
                 Damage damage = dao.getDamage(damageId);
                 Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
                 User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
+                List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
                 flash("danger", "Beschrijving aanpassen mislukt.");
-                return badRequest(details.render(damage, owner, damagedCar));
+                return badRequest(details.render(damage, owner, damagedCar, damageLogList));
             }catch(DataAccessException ex){
                 throw ex; //log?
             }
@@ -168,6 +171,52 @@ public class Damages extends Controller {
                 damageDAO.updateDamage(damage);
                 context.commit();
                 flash("success", "De beschrijving werd gewijzigd.");
+                return redirect(
+                        routes.Damages.showDamageDetails(damageId)
+                );
+            } catch (DataAccessException ex) {
+                throw ex; //TODO: show gracefully
+            }
+        }
+    }
+
+
+    /**
+     * Method: POST
+     * @return redirect to the damage detail page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result addStatusPost(int damageId) {
+        Form<DamageStatusModel> damageStatusForm = Form.form(DamageStatusModel.class).bindFromRequest();
+        if (damageStatusForm.hasErrors()) {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+                DamageDAO dao = context.getDamageDAO();
+                UserDAO userDAO = context.getUserDAO();
+                CarDAO carDAO = context.getCarDAO();
+                DamageLogDAO damageLogDAO = context.getDamageLogDAO();
+                Damage damage = dao.getDamage(damageId);
+                Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
+                User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
+                List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
+                flash("danger", "Status toevoegen mislukt.");
+                return badRequest(details.render(damage, owner, damagedCar, damageLogList));
+            }catch(DataAccessException ex){
+                throw ex;
+            }
+        } else {
+
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+                DamageDAO damageDAO = context.getDamageDAO();
+                DamageLogDAO damageLogDAO = context.getDamageLogDAO();
+                Damage damage = damageDAO.getDamage(damageId);
+                DamageStatusModel model = damageStatusForm.get();
+                DamageLog damageLog = damageLogDAO.createDamageLog(damage,model.status);
+                context.commit();
+                if (damageLog == null) {
+                    flash("danger", "Kon de damagelog niet toevoegen aan de database.");
+                    return redirect(routes.Damages.showDamageDetails(damageId));
+                }
+                flash("success", "De status werd toegevoegd.");
                 return redirect(
                         routes.Damages.showDamageDetails(damageId)
                 );

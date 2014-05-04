@@ -8,12 +8,12 @@
                 <h4 class="modal-title" id="myModalLabel">Nieuwe log-status</h4>
             </div>
 
-
-            @if(form.hasGlobalErrors) {
-                <div class="alert alert-danger alert-dismissable">
-                    <strong>Error!</strong> @form.globalError.message
-                </div>
-            }
+            @helper.form(routes.Damages.addStatusPost(damageId), 'class -> "form-horizontal") {
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
                 <fieldset>
                     <div id="modalBody" class="modal-body">
                         <div class="panel-body">
@@ -21,21 +21,21 @@
                             <div class="form-group">
                                 <label class="col-md-1 control-label" for="amount">Status</label>
                                 <div class="col-md-12">
-                                    <input id="description" name="description" type="text" class="form-control input-md" value="@form("status").value" required>
-        </div>
-        </div>
+                                    <input id="status" name="status" type="text" class="form-control input-md" value="@form("status").value" required>
+                                </div>
+                            </div>
 
 
-        </div>
-        </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
-                <button type="submit" id="add" name="add" class="btn btn-success">Voeg toe</button>
-            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+                        <button type="submit" id="add" name="add" class="btn btn-success">Voeg toe</button>
+                    </div>
 
-        </fieldset>
+                </fieldset>
 
-
+            }
         </div>
     </div>
 </div>

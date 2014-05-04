@@ -1,4 +1,4 @@
-@(damage: Damage, owner: User, car: Car)
+@(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog])
 @import org.joda.time.format.DateTimeFormat
     @stylesheets = {
         <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
@@ -191,14 +191,13 @@
                                 <strong>Log:</strong>
                                 </p>
                                 <ul class="list-group">
+                                @for(damageLog <- damageLogList) {
                                     <li class="list-group-item">
-                                        <strong class="list-group-item-heading">Datum</strong>
-                                        <p class="list-group-item-text">Dapibus ac facilisis in</p>
+                                        <strong class="list-group-item-heading">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damageLog.getCreated)</strong>
+                                        <p class="list-group-item-text">@damageLog.getDescription</p>
                                     </li>
-                                    <li class="list-group-item">Dapibus ac facilisis in</li>
-                                    <li class="list-group-item">Morbi leo risus</li>
-                                    <li class="list-group-item">Porta ac consectetur ac</li>
-                                    <li class="list-group-item">Vestibulum at eros</li>
+
+                                }
                                 </ul>
                                 <p>
                                     <strong>Bewijsstukken:</strong>

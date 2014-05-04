@@ -36,7 +36,14 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
     private PreparedStatement getGetDamageLogsStatement() throws SQLException {
         if (getDamageLogsStatement == null) {
             getDamageLogsStatement = connection.prepareStatement("SELECT * FROM DamageLogs " +
-                    "JOIN Damages ON damage_log_damage_id = damage_id WHERE damage_log_damage_id = ?");
+                "JOIN Damages ON damage_log_damage_id = damage_id " +
+                "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
+                "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
+                "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
+                "JOIN Cars ON reservation_car_id = car_id " +
+                "JOIN Users ON reservation_user_id = user_id " +
+                "WHERE damage_log_damage_id = ? ORDER BY damage_log_created_at DESC"
+            );
         }
         return getDamageLogsStatement;
     }
@@ -45,12 +52,12 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
     @Override
     public DamageLog createDamageLog(Damage damage, String description) throws DataAccessException {
         DateTime created = new DateTime();
-        try{
+        try {
             PreparedStatement ps = getCreateDamageLogStatement();
             ps.setInt(1, damage.getId());
             ps.setString(2, description);
             ps.setTimestamp(3, new Timestamp(created.getMillis()));
-            if(ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating damagelog.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -59,7 +66,7 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for damagelog.", ex);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to create damagelog", e);
         }
     }
@@ -68,8 +75,9 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
     public List<DamageLog> getDamageLogsForDamage(int damageId) throws DataAccessException {
         try {
             PreparedStatement ps = getGetDamageLogsStatement();
+            ps.setInt(1, damageId);
             return getDamageLogList(ps);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to retrieve the list of damagelogs.", e);
         }
     }
@@ -81,7 +89,7 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
                 list.add(populateDamageLog(rs));
             }
             return list;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Error while reading damage resultset", e);
 
         }
