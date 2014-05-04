@@ -225,4 +225,27 @@ public class Damages extends Controller {
             }
         }
     }
+
+
+    /**
+     * Method: GET
+     *
+     * Called when a damage is closed/opened
+     *
+     * @param damageId  The carCost being approved
+     * @return the carcost index page
+     */
+    public static Result setDamageFinished(int damageId, int status) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            DamageDAO dao = context.getDamageDAO();
+            Damage damage = dao.getDamage(damageId);
+            damage.setFinished(status != 0);
+            dao.updateDamage(damage);
+            context.commit();
+            flash("success", "Status van schadedossier succesvol aangepast");
+            return redirect(routes.Damages.showDamageDetails(damageId));
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
 }

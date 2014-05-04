@@ -164,6 +164,7 @@ GET         /damages/status                         controllers.Damages.addStatu
 POST        /damages/status                         controllers.Damages.addStatusPost(damageId: Int)
 GET         /damages/proof                          controllers.Damages.addProof(damageId: Int)
 POST        /damages/edit                           controllers.Damages.editDamagePost(damageId: Int)
+GET         /damages/finished                       controllers.Damages.setDamageFinished(damageId: Int, status: Int)
 
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
