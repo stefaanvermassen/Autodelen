@@ -158,6 +158,7 @@ GET         /refuels/owner/refused                  controllers.Refuels.refuseRe
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
+GET         /damages/admin                          controllers.Damages.showAllDamages()
 GET         /damages/details                        controllers.Damages.showDamageDetails(damageId: Int)
 GET         /damages/edit                           controllers.Damages.editDamage(damageId: Int)
 GET         /damages/status                         controllers.Damages.addStatus(damageId: Int)

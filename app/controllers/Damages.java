@@ -70,6 +70,22 @@ public class Damages extends Controller {
     /**
      * Method: GET
      *
+     * @return index page containing all the damages from a specific user
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showAllDamages() {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            DamageDAO dao = context.getDamageDAO();
+            List<Damage> damageList = dao.getUnfinishedDamages();
+            return ok(damagesAdmin.render(damageList));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
      * @return detail page containing all information about a specific damage
      */
     @RoleSecured.RoleAuthenticated()
