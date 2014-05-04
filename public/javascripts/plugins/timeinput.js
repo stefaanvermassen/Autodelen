@@ -95,8 +95,6 @@
         _focusout: function() {
             if(!this.popoverFocused)
                 $('#' + this.popoverId).remove();
-            else
-                this.element.focus();
         },
 
         _mouseenter: function() {
@@ -115,7 +113,7 @@
         setMinutesOfSelectedTime: function(evt) {
             this.selectedTime += evt.target.value;
             this.popoverFocused = false;
-            this.element.datetimeinput('setValue', this.selectedTime);
+            this.element.val(this.selectedTime);
             this._focusout();
         },
 
