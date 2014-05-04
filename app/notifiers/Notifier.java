@@ -150,6 +150,7 @@ public class Notifier extends Mailer {
 
     public static void sendCarCostRequest(CarCost carCost) {
         String mail = "";
+        String userMail = "";
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
@@ -158,8 +159,8 @@ public class Notifier extends Mailer {
             List<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
             mail = replaceCarCostTags(carCost, template.getBody());
             for(User u: carAdminList){
-                mail = replaceUserTags(u, mail);
-                createNotification(notificationDAO, u, template.getSubject(), mail);
+                userMail = replaceUserTags(u, mail);
+                createNotification(notificationDAO, u, template.getSubject(), userMail);
             }
 
         }catch (DataAccessException ex) {

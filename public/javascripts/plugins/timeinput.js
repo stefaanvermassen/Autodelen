@@ -115,7 +115,7 @@
         setMinutesOfSelectedTime: function(evt) {
             this.selectedTime += evt.target.value;
             this.popoverFocused = false;
-            this.element.datetimeinput('setValue', this.selectedTime);
+            this.element.val(this.selectedTime);
             this._focusout();
         },
 

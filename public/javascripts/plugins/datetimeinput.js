@@ -35,7 +35,10 @@
         this._initNodes(this.formatString);
         this._attachEvents();
 
-        this.element.val(this.formatString);
+        if(this.element.val() === '')
+            this.element.val(this.formatString);
+        else
+            this._fillInNodes(this.element.val());
     };
 
     // Date time prototype
@@ -149,6 +152,7 @@
          * @private
          */
         _click: function () {
+            this._fillInNodes(this.element.val());
             if (this.currentNode == null || this._validateValue()) {
                 this.position = this.element[0].selectionStart - 1;
                 if (this.position == -1)
@@ -189,6 +193,7 @@
          * @private
          */
         _focusout: function () {
+            this._fillInNodes(this.element.val());
             if (this.currentNode != null && !this._validateValue())
                 this.element.focus();
             else
