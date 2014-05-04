@@ -6,6 +6,7 @@ import controllers.util.FormHelper;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
+import org.joda.time.MutableDateTime;
 import providers.DataProvider;
 import models.*;
 import notifiers.Notifier;
@@ -147,6 +148,11 @@ public class InfoSessions extends Controller {
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
                     dao.deleteInfoSession(sessionId);
+
+                    // Delete the reminder
+                    JobDAO jdao = context.getJobDAO();
+                    jdao.deleteJob(JobType.IS_REMINDER, sessionId);
+
                     context.commit();
                     flash("success", "De infosessie werd succesvol verwijderd.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -199,7 +205,18 @@ public class InfoSessions extends Controller {
 
                     // update time
                     DateTime time = editForm.get().time.withSecondOfMinute(0);
-                    session.setTime(time);
+                    if(!session.getTime().equals(time)) {
+                        session.setTime(time);
+
+                        // Schedule the reminder
+                        JobDAO jdao = context.getJobDAO();
+                        jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
+
+                        int minutesBefore = DataProvider.getSettingProvider().getIntOrDefault("infosession_reminder", 1440);
+                        MutableDateTime reminderDate = new MutableDateTime(session.getTime());
+                        reminderDate.addMinutes(-minutesBefore);
+                        jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
+                    }
 
                     // check if amountOfAttendees < new max
                     int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
@@ -468,6 +485,13 @@ public class InfoSessions extends Controller {
                     }
 
                     InfoSession session = dao.createInfoSession(type, typeAlternative, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments); //TODO: allow other hosts
+
+                    // Schedule the reminder
+                    JobDAO jdao = context.getJobDAO();
+                    int minutesBefore = DataProvider.getSettingProvider().getIntOrDefault("infosession_reminder", 1440);
+                    MutableDateTime reminderDate = new MutableDateTime(session.getTime());
+                    reminderDate.addMinutes(-minutesBefore);
+                    jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
 
                     context.commit();
 
