@@ -95,6 +95,8 @@
         _focusout: function() {
             if(!this.popoverFocused)
                 $('#' + this.popoverId).remove();
+            else
+                this.element.focus();
         },
 
         _mouseenter: function() {
