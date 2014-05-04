@@ -5,14 +5,18 @@ import database.DataAccessException;
 import database.SchedulerDAO;
 import models.User;
 import notifiers.Notifier;
+import play.libs.Akka;
 import providers.DataProvider;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Stefaan Vermassen on 26/04/14.
  */
-public class SendUnreadNotificationsMailScheduler extends Scheduler{
+public class SendUnreadNotificationsMailScheduler implements Runnable {
 
     @Override
     public void run() {
@@ -27,6 +31,5 @@ public class SendUnreadNotificationsMailScheduler extends Scheduler{
         }catch(DataAccessException ex) {
             throw ex;
         }
-
     }
 }

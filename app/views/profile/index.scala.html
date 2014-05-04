@@ -1,5 +1,5 @@
-@(user: User, completeness: Int = 0)
-
+@(user: User, completeness: Int = 0, editable: Boolean)
+@import providers.DataProvider;
 @app("Profiel") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -27,7 +27,7 @@
                 <div class="panel panel-default">
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                    @smallProfile(user)
+                    @smallProfile(user, editable)
                     </div>
                         <!-- /.panel-body -->
                 </div>
@@ -93,7 +93,13 @@
                                 <label class="h4">Contactverantwoordelijke</label>
                                 @defining(user.getContractManager) { manager =>
                                     @if(manager != null) {
-                                        <p class="form-control-static"><a href="@routes.Profile.index(manager.getId)">@manager.getFirstName @manager.getLastName</a></p>
+                                            <p class="form-control-static">
+                                            @if(DataProvider.getUserRoleProvider.isFullUser) {
+                                                <a href="@routes.Profile.index(manager.getId)">@manager.getFirstName @manager.getLastName</a>
+                                            } else {
+                                                @manager.getFirstName @manager.getLastName
+                                            }
+                                            </p>
                                     } else {
                                         <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
                                     }

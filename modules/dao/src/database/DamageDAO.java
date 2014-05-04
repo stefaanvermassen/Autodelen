@@ -16,7 +16,6 @@ public interface DamageDAO {
     public void updateDamage(Damage damage) throws DataAccessException;
     public List<Damage> getUnfinishedDamages() throws DataAccessException;
     public List<Damage> getFinishedDamages() throws DataAccessException;
-    public List<Damage> getUserDamages() throws DataAccessException;
     public List<Damage> getUserDamages(int userId) throws DataAccessException;
     public void deleteDamage(int damageId);
 }

@@ -1,9 +1,9 @@
 package controllers;
 
 import play.Routes;
-import play.mvc.*;
-
-import views.html.*;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.index;
 
 public class Application extends Controller {
 
@@ -20,7 +20,7 @@ public class Application extends Controller {
         return ok(
                 Routes.javascriptRouter("myJsRoutes",
                         // Routes
-                        routes.javascript.Cars.showCarsPage(),
+                        controllers.routes.javascript.Cars.showCarsPage(),
                         routes.javascript.Cars.showCarCostsPage(),
                         routes.javascript.Cars.getCarCostModal(),
                         routes.javascript.Cars.updateAvailabilities(),
@@ -28,6 +28,9 @@ public class Application extends Controller {
                         routes.javascript.Refuels.provideRefuelInfo(),
                         routes.javascript.Refuels.showUserRefuelsPage(),
                         routes.javascript.Refuels.showOwnerRefuelsPage(),
+                        routes.javascript.Damages.editDamage(),
+                        routes.javascript.Damages.addStatus(),
+                        routes.javascript.Damages.addProof(),
                         routes.javascript.InfoSessions.showUpcomingSessionsPage(),
                         routes.javascript.InfoSessions.showSessionsPage(),
                         routes.javascript.Reserve.showCarsPage(),

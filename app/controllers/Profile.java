@@ -201,7 +201,8 @@ public class Profile extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result indexWithoutId() {
         User user = DataProvider.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
-        return ok(index.render(user, getProfileCompleteness(user)));
+        User currentUser = DataProvider.getUserProvider().getUser();
+        return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user,currentUser)));
     }
 
     /**
@@ -225,7 +226,7 @@ public class Profile extends Controller {
 
             // Only a profile admin or user itself can edit
             if (canEditProfile(user, currentUser)) {
-                return ok(index.render(user, getProfileCompleteness(user)));
+                return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user,currentUser)));
             } else if (DataProvider.getUserRoleProvider().isFullUser(currentUser)) {
                 return ok(profile.render(user));
             } else {
