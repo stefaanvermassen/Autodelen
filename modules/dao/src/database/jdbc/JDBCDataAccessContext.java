@@ -29,6 +29,7 @@ public class JDBCDataAccessContext implements DataAccessContext {
     private TemplateDAO templateDAO;
     private CarRideDAO carRideDAO;
     private DamageDAO damageDAO;
+    private DamageLogDAO damageLogDAO;
     private RefuelDAO refuelDAO;
     private SchedulerDAO schedulerDAO;
     private NotificationDAO notificationDAO;
@@ -159,6 +160,14 @@ public class JDBCDataAccessContext implements DataAccessContext {
             damageDAO = new JDBCDamageDAO(connection);
         }
         return damageDAO;
+    }
+
+    @Override
+    public DamageLogDAO getDamageLogDAO() {
+        if(damageLogDAO == null){
+            damageLogDAO = new JDBCDamageLogDAO(connection);
+        }
+        return damageLogDAO;
     }
 
     @Override

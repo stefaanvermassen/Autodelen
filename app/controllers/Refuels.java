@@ -218,7 +218,7 @@ public class Refuels extends Controller {
             Refuel refuel = dao.getRefuel(refuelId);
             context.commit();
             Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, false);
-            flash("succes", "Tankbeurt succesvol geweigerd");
+            flash("success", "Tankbeurt succesvol geweigerd");
             return redirect(routes.Refuels.showOwnerRefuels());
         }catch(DataAccessException ex) {
             throw ex;
@@ -241,7 +241,7 @@ public class Refuels extends Controller {
             Refuel refuel = dao.getRefuel(refuelId);
             context.commit();
             Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, true);
-            flash("succes", "Tankbeurt succesvol geaccepteerd");
+            flash("success", "Tankbeurt succesvol geaccepteerd");
             return redirect(routes.Refuels.showOwnerRefuels());
         }catch(DataAccessException ex) {
             throw ex;

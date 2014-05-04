@@ -875,7 +875,7 @@ public class Cars extends Controller {
             context.commit();
             Notifier.sendCarCostStatusChanged(carCost.getCar().getOwner(), carCost, true);
 
-            flash("succes", "Autokost succesvol geaccepteerd");
+            flash("success", "Autokost succesvol geaccepteerd");
             if(returnToDetail==0){
                 return redirect(routes.Cars.showCarCosts());
             }else{
@@ -906,10 +906,10 @@ public class Cars extends Controller {
             context.commit();
             Notifier.sendCarCostStatusChanged(carCost.getCar().getOwner(), carCost, false);
             if(returnToDetail==0){
-                flash("succes", "Autokost succesvol geweigerd");
+                flash("success", "Autokost succesvol geweigerd");
                 return redirect(routes.Cars.showCarCosts());
             }else{
-                flash("succes", "Autokost succesvol geweigerd");
+                flash("success", "Autokost succesvol geweigerd");
                 return redirect(routes.Cars.detail(carCost.getCar().getId()));
             }
         }catch(DataAccessException ex) {
