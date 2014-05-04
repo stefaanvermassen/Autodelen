@@ -1,6 +1,11 @@
 @(damage: Damage, owner: User, car: Car)
 @import org.joda.time.format.DateTimeFormat
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    }
 @scripts = {
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
         <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
         <script>
         function loadDescriptionModal ( damageId ) {
@@ -41,7 +46,7 @@
         }
         </script>
 }
-@app("Schade details", scripts) {
+@app("Schade details", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>

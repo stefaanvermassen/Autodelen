@@ -85,8 +85,8 @@ public class JDBCDamageDAO implements DamageDAO {
 
     private PreparedStatement getUpdateDamageStatement() throws SQLException {
         if (updateDamageStatement == null) {
-            updateDamageStatement = connection.prepareStatement("UPDATE Damages SET damage_car_ride_id = ? , " +
-                    "damage_filegroup_id = ? , damage_description = ? , damage_finished = ? , damage_time = ? "
+            updateDamageStatement = connection.prepareStatement("UPDATE Damages SET damage_car_ride_id = ? ," +
+                    "damage_description = ? , damage_finished = ? , damage_time = ? "
                     + "WHERE damage_id = ?");
         }
         return updateDamageStatement;
@@ -140,11 +140,10 @@ public class JDBCDamageDAO implements DamageDAO {
         try {
             PreparedStatement ps = getUpdateDamageStatement();
             ps.setInt(1, damage.getCarRide().getReservation().getId());
-            ps.setInt(2, damage.getProofId());
-            ps.setString(3, damage.getDescription());
-            ps.setBoolean(4, damage.getFinished());
-            ps.setTimestamp(5, new Timestamp(damage.getTime().getMillis()));
-            ps.setInt(6, damage.getId());
+            ps.setString(2, damage.getDescription());
+            ps.setBoolean(3, damage.getFinished());
+            ps.setTimestamp(4, new Timestamp(damage.getTime().getMillis()));
+            ps.setInt(5, damage.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Damage update affected 0 rows.");
         } catch (SQLException e){

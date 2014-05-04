@@ -1,21 +1,7 @@
 @(form: Form[Cars.CarCostModel], car: Car)
 <!-- Large modal -->
 <script>
-$(document).ready(function() {
-
-$('#costtime').datetimepicker({
-weekStart: 1,
-language: 'nl',
-todayBtn: 1,
-autoclose: 1,
-todayHighlight: 1,
-startView: 2,
-forceParse: 0,
-showMeridian: 1,
-linkFormat: "yyyy-mm-dd HH:ii",
-startDate: new Date() // current date and time
-});
-});
+$('#costtime').datetimepicker({"autoclose": true, language: 'nl'});
 </script>
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div id=" " class="modal-dialog modal-lg">
