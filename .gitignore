@@ -8,6 +8,9 @@ uploads
 dist
 modules/dao/.idea
 modules/dao/dao.iml
+modules/dao/module_dao.xml
+modules/dao/dao.xml
+modules/dao/dao.properties
 /.idea
 /*.iml
 /out

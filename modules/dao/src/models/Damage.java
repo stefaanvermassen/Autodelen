@@ -11,7 +11,7 @@ public class Damage {
     private Integer proofId;
     private String description;
     private DateTime time;
-    private Integer finished;
+    private boolean finished;
 
     public Damage(Integer id, CarRide carRide) {
         this.id = id;
@@ -20,7 +20,7 @@ public class Damage {
         time = carRide.getReservation().getFrom();
     }
 
-    public Damage(Integer id, CarRide carRide, Integer proofId, String description, DateTime time, Integer finished) {
+    public Damage(Integer id, CarRide carRide, Integer proofId, String description, DateTime time, boolean finished) {
         this.id = id;
         this.carRide = carRide;
         this.proofId = proofId;
@@ -69,11 +69,11 @@ public class Damage {
         this.proofId = proofId;
     }
 
-    public Integer getFinished() {
+    public boolean getFinished() {
         return finished;
     }
 
-    public void setFinished(Integer finished) {
+    public void setFinished(boolean finished) {
         this.finished = finished;
     }
 }

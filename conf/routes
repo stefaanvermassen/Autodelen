@@ -156,6 +156,13 @@ GET         /refuels/proof                          controllers.Refuels.getProof
 GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
 GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
 
+#Damages
+GET         /damages                                controllers.Damages.showDamages()
+GET         /damages/details                        controllers.Damages.showDamageDetails(damageId: Int)
+GET         /damages/edit                           controllers.Damages.editDamage(damageId: Int)
+GET         /damages/status                         controllers.Damages.addStatus(damageId: Int)
+GET         /damages/proof                          controllers.Damages.addProof(damageId: Int)
+
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                              controllers.Maps.showMap()

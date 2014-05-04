@@ -396,7 +396,6 @@ public class Drives extends Controller {
                 if (damaged){
                     DamageDAO damageDAO = context.getDamageDAO();
                     Damage damage = damageDAO.createDamage(ride);
-                    System.out.println(damage.getId());
                     context.commit();
                 }
             } else if(isOwner) {
