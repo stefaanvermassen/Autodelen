@@ -1,6 +1,47 @@
 @(damage: Damage, owner: User, car: Car)
 @import org.joda.time.format.DateTimeFormat
-@app("Schade details") {
+@scripts = {
+        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+        <script>
+        function loadDescriptionModal ( damageId ) {
+        myJsRoutes.controllers.Damages.editDamage ( damageId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        function loadStatusModal ( damageId ) {
+        myJsRoutes.controllers.Damages.addStatus ( damageId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        function loadProofModal ( damageId ) {
+        myJsRoutes.controllers.Damages.addProof ( damageId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        </script>
+}
+@app("Schade details", scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -20,9 +61,9 @@
                     </div>
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <a class="btn btn-primary btn-sm" href="">Beschrijving aanpassen</a>
-                        <a class="btn btn-primary btn-sm" href="">Nieuwe status</a>
-                        <a class="btn btn-primary btn-sm" href="">Nieuw bewijsstuk</a>
+                        <button class="btn btn-primary" onclick="loadDescriptionModal(@damage.getId)">Tijd/beschrijving aanpassen</button>
+                        <button class="btn btn-primary" onclick="loadStatusModal(@damage.getId)">Nieuwe status</button>
+                        <button class="btn btn-primary" onclick="loadProofModal(@damage.getId)">Nieuwe bewijsstuk</button>
                     </div>
                         <!-- /.panel-body -->
                 </div>
@@ -145,12 +186,18 @@
                                 <strong>Log:</strong>
                                 </p>
                                 <ul class="list-group">
-                                    <li class="list-group-item">Cras justo odio</li>
+                                    <li class="list-group-item">
+                                        <strong class="list-group-item-heading">Datum</strong>
+                                        <p class="list-group-item-text">Dapibus ac facilisis in</p>
+                                    </li>
                                     <li class="list-group-item">Dapibus ac facilisis in</li>
                                     <li class="list-group-item">Morbi leo risus</li>
                                     <li class="list-group-item">Porta ac consectetur ac</li>
                                     <li class="list-group-item">Vestibulum at eros</li>
                                 </ul>
+                                <p>
+                                    <strong>Bewijsstukken:</strong>
+                                </p>
 
                             </div>
                     </div>
@@ -163,4 +210,5 @@
             <!-- /row -->
     </div>
     <!-- /page-wrapper -->
+    <div id="resultModal"></div>
 }

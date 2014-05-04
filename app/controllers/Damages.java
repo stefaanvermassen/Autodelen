@@ -5,18 +5,41 @@ import database.*;
 import models.Car;
 import models.Damage;
 import models.User;
+import org.joda.time.DateTime;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.damages.damages;
 import views.html.damages.details;
-
+import views.html.damages.editmodal;
+import views.html.damages.statusmodal;
+import views.html.damages.proofmodal;
 import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 03/05/14.
  */
 public class Damages extends Controller {
+
+    public static class DamageModel {
+
+        public String description;
+        public DateTime time;
+
+        public String validate() {
+            return null;
+        }
+    }
+
+    public static class DamageStatusModel {
+
+        public String status;
+
+        public String validate() {
+            return null;
+        }
+    }
 
     /**
      * Method: GET
@@ -53,5 +76,32 @@ public class Damages extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
+    }
+
+    /**
+     * Method: GET
+     * @return modal to edit damage information
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result editDamage(int damageId) {
+        return ok(editmodal.render(Form.form(DamageModel.class), damageId));
+    }
+
+    /**
+     * Method: GET
+     * @return modal to provide new damage log status
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result addStatus(int damageId) {
+        return ok(statusmodal.render(Form.form(DamageStatusModel.class), damageId));
+    }
+
+    /**
+     * Method: GET
+     * @return modal to provide new damage proof
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result addProof(int damageId) {
+        return ok(proofmodal.render(damageId));
     }
 }
