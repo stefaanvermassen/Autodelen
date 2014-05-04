@@ -1,5 +1,25 @@
 @(form: Form[Damages.DamageModel], damageId: Integer)
 <!-- Large modal -->
+<link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+<script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+<script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+<script>
+$(document).ready(function() {
+
+$('#damagetime').datetimepicker({
+weekStart: 1,
+language: 'nl',
+todayBtn: 1,
+autoclose: 1,
+todayHighlight: 1,
+startView: 2,
+forceParse: 0,
+showMeridian: 1,
+linkFormat: "yyyy-mm-dd HH:ii",
+startDate: new Date() // current date and time
+});
+});
+</script>
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div id=" " class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -24,6 +44,19 @@
                                     <textarea id="description" name="description" type="text" class="form-control input-md" value="@form("description").value" rows="5"></textarea>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <div id="damagetime" class="input-group date form_datetime col-md-5" data-link-field="input_time">
+                                    <label class="col-md-1 control-label" for="time"></label>
+                                    <div class="col-md-12">
+                                        <input id="input_time" name="time" placeholder="Datum" class="form-control input-md"  type="text" value="@form("time").value" required>
+                                    </div>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                </div>
+                            </div>
+
+
 
 
 
