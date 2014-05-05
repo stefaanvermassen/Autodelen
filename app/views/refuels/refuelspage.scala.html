@@ -11,6 +11,7 @@
                 <th>Status</th>
                 <th>Bewijs</th>
                 <th>Acties</th>
+                <th>Debug</th>
             </tr>
         </thead>
         <tbody>
@@ -57,7 +58,7 @@
                         </td>
 
                         <td>
-                        @if(refuel.getCarRide.getReservation.getCar.getOwner.getId == user.getId()) {
+                        @if(refuel.getCarRide.getReservation.getCar.getOwner.getId == user.getId) {
                             @refuel.getStatus match {
                                 case RefuelStatus.ACCEPTED => {
                                     <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
@@ -75,6 +76,10 @@
                             Geen
                         }
 
+                        </td>
+                        <td>
+                            Reservation: @refuel.getCarRide.getReservation.getId, Car: @refuel.getCarRide.getReservation.getCar.getId, Owner: @refuel.getCarRide.getReservation.getCar.getOwner.getId
+                            User: @user.getId
                         </td>
                     }
 
