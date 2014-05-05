@@ -23,7 +23,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
             "LEFT JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
             "LEFT JOIN Cars ON reservation_car_id = car_id " +
             "LEFT JOIN Users ON reservation_user_id = user_id " +
-            "LEFT JOIN Users owners ON car_id = owners.user_id " +
+            "LEFT JOIN Users owners ON car_owner_user_id = owners.user_id " +
             "LEFT JOIN FILES ON refuel_file_id = file_id ";
 
     private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND refuel_status <> ?";
