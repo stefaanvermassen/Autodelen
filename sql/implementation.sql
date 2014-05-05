@@ -280,6 +280,17 @@ CREATE TABLE `Damages` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
+CREATE TABLE `DamageLogs` (
+	`damage_log_id` INT NOT NULL AUTO_INCREMENT,
+	`damage_log_damage_id` INT NOT NULL,
+	`damage_log_description` TEXT,
+   	`damage_log_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`damage_log_id`),
+	FOREIGN KEY (`damage_log_damage_id`) REFERENCES Damages(`damage_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
 CREATE TABLE `Messages` ( # from user to user != Notifications
 	`message_id` INT NOT NULL AUTO_INCREMENT,
 	`message_from_user_id` INT NOT NULL,
