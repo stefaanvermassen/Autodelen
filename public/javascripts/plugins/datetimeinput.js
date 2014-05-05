@@ -1,6 +1,6 @@
 /*
  * =========================================
- * Datetimeinput v2
+ * Datetimeinput v2.1
  * =========================================
  *
  * This script contains an extra plugin to JQuery named datetimeinput
@@ -58,6 +58,7 @@
                     click: $.proxy(this._click, this),
                     focusin: $.proxy(this._focusin, this),
                     focusout: $.proxy(this._focusout, this),
+                    keydown: $.proxy(this._keydown, this),
                     keypress: $.proxy(this._keypress, this),
                     mouseover: $.proxy(this._mouseover, this)
                 }]
@@ -103,6 +104,7 @@
                     this.startNode = node;
                 else
                     previousNode.next = node;
+                node.previous = previousNode;
                 switch (token) {
                     case 'y':
                         this.yearNode = node;
@@ -136,7 +138,9 @@
         _fillInNodes: function (string) {
             var node = this.startNode;
             while (node != null) {
-                node.value = string.substring(node.start, node.end);
+                var val = parseInt(string.substring(node.start, node.end));
+                if(!isNaN(val))
+                    node.value = val;
                 node = node.next;
             }
         },
@@ -183,6 +187,8 @@
          * @private
          */
         _focusin: function () {
+            if(this.currentNode == null)
+                this.currentNode = this.startNode;
             this._fillInNodes(this.element.val());
         },
 
@@ -198,6 +204,37 @@
                 this.element.focus();
             else
                 this.currentNode = null;
+            this._toFormattedString();
+        },
+
+        /**
+         * Function triggered after a keydown event.
+         * Handles specific keys (e.g. arrow keys, backspace, delete,...)
+         * @param evt The event
+         * @private
+         */
+        _keydown: function(evt) {
+            var code = evt.which;
+            if(code == 37 || code == 40) {
+                if(this.currentNode.value == 0)
+                    this.currentNode.value = 1;
+                this.currentNode = (this.currentNode.previous != null) ? this.currentNode.previous : this.currentNode;
+                this.position = this.currentNode.end;
+            }
+            else if(code == 39 || code == 38) {
+                if(this.currentNode.value == 0)
+                    this.currentNode.value = 1;
+                this.currentNode = (this.currentNode.next != null) ? this.currentNode.next : this.currentNode;
+                this.position = this.currentNode.end;
+            }
+            else if(code == 8 || code == 46) {
+                if (this.position < this.currentNode.end) {
+                    this.currentNode.value = Math.floor(this.currentNode.value / 10);
+                    this.position++;
+                }
+            } else
+                return;
+            evt.preventDefault();
             this._toFormattedString();
         },
 
@@ -272,9 +309,9 @@
          * @private
          */
         _fieldJump: function () {
-            this.currentNode = this.currentNode.next;
-            if (this.currentNode != null)
-                this.position = this.currentNode.end;
+            if (this.currentNode.next != null)
+                this.currentNode = this.currentNode.next;
+            this.position = this.currentNode.end;
         },
 
         /**
@@ -467,6 +504,7 @@
         this.value = -1;
         this.token = token;
         this.next = null;
+        this.previous = null
     };
 
     LLNode.prototype = {
@@ -476,8 +514,8 @@
          * @param value Append the value to the current value contained in the node
          */
         appendValue: function(value) {
-            this.value = this. value * 10 + value;
-        }
+            this.value  = this.value * 10 + value;
+        },
     };
 
 
