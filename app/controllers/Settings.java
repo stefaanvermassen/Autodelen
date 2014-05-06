@@ -58,7 +58,7 @@ public class Settings extends Controller {
             Set<UserRole> roles = dao.getUserRoles(user.getId());
             if (roles.contains(UserRole.SUPER_USER)) {
                 flash("warning", "U heeft reeds superuser rechten.");
-                return badRequest(views.html.dashboard.render());
+                return badRequest(views.html.dashboard.render(user, Profile.getProfileCompleteness(user)));
             } else {
                 try {
                     dao.addUserRole(user.getId(), UserRole.SUPER_USER);

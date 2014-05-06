@@ -1,3 +1,4 @@
+@(user: User, completeness: Int = 0)
 @scripts = {
     <script src="@routes.Assets.at("javascripts/bootstrap-colorpicker.min.js")" type="text/javascript"></script>
     <script>
@@ -81,7 +82,7 @@
                 </div>
                 <!-- /.panel-body -->
             </div>
-                
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     ② Vul je profiel verder aan
@@ -89,7 +90,7 @@
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     <div class="progress">
-                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width : 10%;">10% compleet</div>
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
                     </div>
 
                     De volgende dingen moeten minstens aangevuld worden om je volwaardig lidmaatschap aan te vragen:
@@ -102,7 +103,17 @@
 
                     Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
                 </div>
-                <!-- /.panel-body -->
+                    <!-- /.panel-body -->
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    ③ Vraag je volwaardig lidmaatschap aan!
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    Als je alles hebt aangevuld kan je je volwaardig lidmaatschap <a href="@routes.InfoSessions.requestApproval">hier</a> aanvragen.
+                </div>
+                    <!-- /.panel-body -->
             </div>
         </div>
         <!-- /col-lg-12 -->
