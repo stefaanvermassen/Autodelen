@@ -101,7 +101,7 @@ public class JDBCJobDAO implements JobDAO {
             PreparedStatement ps = getCreateJobStatement();
             ps.setString(1, type.name());
             ps.setInt(2, refId);
-            ps.setDate(3, new Date(when.getMillis()));
+            ps.setTimestamp(3, new Timestamp(when.getMillis()));
             ps.setBoolean(4, false);
 
             if (ps.executeUpdate() != 1)
