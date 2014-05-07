@@ -240,6 +240,7 @@
         },
 
         _clickCell: function(target, shiftpressed) {
+            console.log(shiftpressed);
             if(shiftpressed && this.firstSelectedValue != null) {
                 if (this.firstSelectedValue >= target.value) {
                     this.setValueSecondSelected((this.secondSelectedValue != null) ? this.secondSelectedValue : this.firstSelectedValue);
@@ -268,17 +269,18 @@
 
         _mousedown: function(evt) {
             this.mousedown = true;
-            this._clickCell(evt.target, $(evt.target).hasClass('selected'));
         },
 
         _mouseup: function() {
-            if(this.firstSelectedValue < this.dateValueToday && this.secondSelectedValue < this.dateValueToday && this.disablePast) {
-                this.setValueFirstSelected(null);
-                this.setValueSecondSelected(null);
-                this._colorSelectedDates();
-            } else if(this.firstSelectedValue < this.dateValueToday && this.disablePast) {
-                this.setValueFirstSelected(this.dateValueToday);
-                this._colorSelectedDates();
+            if(this.disablePast) {
+                if(this.firstSelectedValue < this.dateValueToday && this.secondSelectedValue < this.dateValueToday) {
+                    this.setValueFirstSelected(null);
+                    this.setValueSecondSelected(null);
+                    this._colorSelectedDates();
+                } else if(this.firstSelectedValue < this.dateValueToday) {
+                    this.setValueFirstSelected(this.dateValueToday);
+                    this._colorSelectedDates();
+                }
             }
             this.mousedown = false;
         },
@@ -292,8 +294,8 @@
         },
 
         _touchmove: function(evt) {
-            var touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
             evt.preventDefault();
+            var touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
             this.mousemove = true;
             this._selectCell(document.elementFromPoint(touch.clientX, touch.clientY));
         },
@@ -447,6 +449,9 @@
         _fillCalendarBody: function() {
             // Clear body
             var body = $('#' + this.calendarBody).html('');
+            body.attr('data-toggle', 'tooltip').attr('data-placement', 'right').attr('title', 'Klik en sleep met de cursor over ' +
+                'de datums\nOF\nSelecteer de begindatum door te klikken en selecteer daarna\n' +
+                'de einddatum door te klikken met shift ingedrukt.');
             // Variables
             var day = 1;
             var startDay = this.firstWeekdayOfMonth();
