@@ -116,6 +116,8 @@ POST        /settings/sysvars/edit                  controllers.Settings.editSys
 GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
 GET         /settings/sysvars/create                controllers.Settings.createSysvar()
 POST        /settings/sysvars/create                controllers.Settings.createSysvarPost()
+GET         /changepass                             controllers.Settings.changePassword()
+POST        /changepass                             controllers.Settings.changePasswordPost()
 
 
 # Emailtemplates

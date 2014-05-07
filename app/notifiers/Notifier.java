@@ -230,7 +230,7 @@ public class Notifier extends Mailer {
     }
 
 
-    public static void sendReservationApprovedByOwnerMail(User user, Reservation carReservation) {
+    public static void sendReservationApprovedByOwnerMail(User user, String remarks, Reservation carReservation) {
         String mail = "";
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
@@ -240,6 +240,7 @@ public class Notifier extends Mailer {
             mail = replaceUserTags(user, template.getBody());
             mail = replaceCarReservationTags(carReservation, mail);
             mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
+            mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
             mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
             NotificationDAO notificationDAO = context.getNotificationDAO();
             createNotification(notificationDAO, user, template.getSubject(), mail);

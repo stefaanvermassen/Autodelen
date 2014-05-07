@@ -769,6 +769,8 @@ public class Profile extends Controller {
 
                     context.commit();
                     flash("success", "Het profiel werd succesvol aangepast.");
+
+                    DataProvider.getUserProvider().invalidateUser(user); //invalidate cache
                     return redirect(routes.Profile.index(userId));
                 } catch (DataAccessException ex) {
                     context.rollback();

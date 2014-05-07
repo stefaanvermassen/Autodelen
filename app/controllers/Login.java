@@ -16,6 +16,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import providers.DataProvider;
+import providers.UserProvider;
 import views.html.login.*;
 
 
@@ -234,7 +235,7 @@ public class Login extends Controller {
                         return badRequest("There was no password reset requested on this account.");
                     } else if (ident.equals(uuid)) {
                         dao.deleteVerificationString(user, VerificationType.PWRESET);
-                        user.setPassword(hashPassword(resetForm.get().password));
+                        user.setPassword(UserProvider.hashPassword(resetForm.get().password));
                         dao.updateUser(user, true);
                         context.commit();
 
@@ -267,9 +268,8 @@ public class Login extends Controller {
             return badRequest(login.render(loginForm, redirect));
         } else {
             User user = DataProvider.getUserProvider().getUser(loginForm.get().email);
-            boolean goodCredentials = user != null && BCrypt.checkpw(loginForm.get().password, user.getPassword());
 
-            if (goodCredentials) {
+            if (UserProvider.hasValidPassword(user, loginForm.get().password)) {
                 if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
                     loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
                     loginForm.data().put("reactivate", "True");
@@ -311,16 +311,6 @@ public class Login extends Controller {
                     routes.Login.login(null)
             );
         }
-    }
-
-    /**
-     * Hashes a password using the BCRYPT iteration hashing method including a salt.
-     *
-     * @param password The password to be hashed
-     * @return The hashed password including the salt
-     */
-    private static String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 
     /**
@@ -387,7 +377,7 @@ public class Login extends Controller {
                 try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                     UserDAO dao = context.getUserDAO();
                     try {
-                        User user = dao.createUser(registerForm.get().email, hashPassword(registerForm.get().password),
+                        User user = dao.createUser(registerForm.get().email, UserProvider.hashPassword(registerForm.get().password),
                                 registerForm.get().firstName, registerForm.get().lastName);
 
                         // Now we create a registration UUID
