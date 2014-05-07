@@ -10,6 +10,13 @@
         <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
     </div>
 </div> <br />
+<!-- row -->
+<div class="row">
+    <div class="col-sm-12">
+        <strong>Commentaar:</strong> @reservation.getMessage
+    </div>
+</div><br />
+<!-- /row -->
 @if(reservation.getStatus == ReservationStatus.REQUEST) {
     @helper.form(routes.Drives.refuseReservation(reservation.getId), 'class -> "form-horizontal") {
         <div class="row">
