@@ -21,11 +21,8 @@ public class JDBCDamageDAO implements DamageDAO {
     private static final String[] AUTO_GENERATED_KEYS = {"damage_id"};
     private Connection connection;
     private PreparedStatement createDamageStatement;
-    private PreparedStatement getUnfinishedDamagesStatement;
-    private PreparedStatement getFinishedDamagesStatement;
     private PreparedStatement deleteDamageStatement;
     private PreparedStatement getDamageStatement;
-    private PreparedStatement getUserDamagesStatement;
     private PreparedStatement updateDamageStatement;
     private PreparedStatement getGetAmountOfDamagesStatement;
     private PreparedStatement getGetDamageListPageStatement;
@@ -51,7 +48,7 @@ public class JDBCDamageDAO implements DamageDAO {
         ps.setString(start, finished);
 
         String s = ""; // This will match nothing
-        if(finished.equals("-1")) { // Not very nice programming, but works :D
+        if(finished.equals("-1") || finished.equals("")) { // Not very nice programming, but works :D
             s = "%%"; // This will match everything
         }
         ps.setString(start+1, s);
@@ -114,13 +111,12 @@ public class JDBCDamageDAO implements DamageDAO {
         return getGetAmountOfDamagesStatement;
     }
 
-    private PreparedStatement getGetDamageListPageStatement() throws SQLException {
+    private PreparedStatement getGetDamageListPageDescStatement() throws SQLException {
         if(getGetDamageListPageStatement == null) {
-            getGetDamageListPageStatement = connection.prepareStatement(DAMAGE_QUERY + FILTER_FRAGMENT + " LIMIT ?, ?");
+            getGetDamageListPageStatement = connection.prepareStatement(DAMAGE_QUERY + FILTER_FRAGMENT + " ORDER BY damage_id desc LIMIT ?, ?");
         }
         return getGetDamageListPageStatement;
     }
-
 
     private PreparedStatement getUpdateDamageStatement() throws SQLException {
         if (updateDamageStatement == null) {
@@ -215,7 +211,7 @@ public class JDBCDamageDAO implements DamageDAO {
             PreparedStatement ps = null;
             switch(orderBy) {
                 default: // TODO: get something to order on + asc/desc
-                    ps = getGetDamageListPageStatement();
+                    ps = getGetDamageListPageDescStatement();
                     break;
             }
             if(ps == null) {
