@@ -59,6 +59,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getGetReservationListPageByFromDescStatement;
     private PreparedStatement getGetAmountOfReservationsStatement;
     private PreparedStatement getNumberOfReservationsWithStatusStatement;
+    private PreparedStatement updateTableStatement;
 
     public JDBCReservationDAO(Connection connection) {
         this.connection = connection;
@@ -156,6 +157,14 @@ public class JDBCReservationDAO implements ReservationDAO{
                     "WHERE CarReservations.reservation_status = ? " + match);
         }
         return getNumberOfReservationsWithStatusStatement;
+    }
+
+    private PreparedStatement getUpdateTableStatement() throws SQLException {
+        if(updateTableStatement == null) {
+            updateTableStatement = connection.prepareStatement("UPDATE carreservations SET reservation_status=?" +
+                    " WHERE CarReservations.reservation_to < NOW() AND CarReservations.reservation_status = ?");
+        }
+        return updateTableStatement;
     }
 
     @Override
@@ -363,24 +372,12 @@ public class JDBCReservationDAO implements ReservationDAO{
     @Override
     public void updateTable() {
         try {
-            String statement = "SELECT reservation_id, reservation_status FROM CarReservations WHERE CarReservations.reservation_to < NOW() " +
-                    "AND CarReservations.reservation_status = 'ACCEPTED'";
-            PreparedStatement ps = connection.prepareStatement(statement);
-            try (ResultSet rs = ps.executeQuery()) {
-                while(rs.next()) {
-                    ReservationStatus status = ReservationStatus.valueOf(rs.getString("reservation_status"));
-                    PreparedStatement update =
-                             connection.prepareStatement("UPDATE CarReservations SET reservation_status ='" +
-                                     ReservationStatus.REQUEST_DETAILS.toString() + "' WHERE reservation_id = " +
-                                     + rs.getInt("reservation_id"));
-                    if(update.executeUpdate() == 0)
-                        throw new DataAccessException("Error while updating the reservations table");
-                }
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error while updating the reservations table", ex);
-            }
-        } catch(SQLException ex) {
-            throw new DataAccessException("Error while updating the reservations table");
+            PreparedStatement ps = getUpdateTableStatement();
+            ps.setString(1, ReservationStatus.REQUEST_DETAILS.toString());
+            ps.setString(2, ReservationStatus.ACCEPTED.toString());
+            ps.executeUpdate(); // it is possible that no records are affected
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while updating the reservations table", ex);
         }
     }
 }
