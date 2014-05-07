@@ -3,7 +3,6 @@ package controllers;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -109,7 +108,7 @@ public class Drives extends Controller {
             // The failure of updateTable is probably due a deadlock prevention, because this method is
             // called frequently, the failure is not a problem at all.
         }
-        return drives.render(1, 1, "", "status=" + ReservationStatus.ACCEPTED.toString());
+        return drives.render(1, 1);
     }
 
     /**
