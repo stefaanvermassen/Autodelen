@@ -7,6 +7,7 @@ import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
+import org.joda.time.MutableDateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
@@ -102,13 +103,6 @@ public class Drives extends Controller {
      * @return the html page of the index page
      */
     public static Html showIndex() {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            ReservationDAO dao = context.getReservationDAO();
-            dao.updateTable();
-        } catch(DataAccessException ex){
-            // The failure of updateTable is probably due a deadlock prevention, because this method is
-            // called frequently, the failure is not a problem at all.
-        }
         return drives.render(1, 1, "", "status=" + ReservationStatus.ACCEPTED.toString());
     }
 
@@ -252,6 +246,17 @@ public class Drives extends Controller {
             reservation.setFrom(from);
             reservation.setTo(until);
             rdao.updateReservation(reservation);
+
+            if(reservation.getStatus() == ReservationStatus.REQUEST) {
+                // Remove old reservation auto accept and add new
+                JobDAO jdao = context.getJobDAO();
+                jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId()); //remove the old job
+                int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+                MutableDateTime autoAcceptDate = new MutableDateTime();
+                autoAcceptDate.addMinutes(minutesAfterNow);
+                jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+            }
+
             context.commit();
             return ok(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
         } catch(DataAccessException ex) {
@@ -273,6 +278,7 @@ public class Drives extends Controller {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
         if(reservation == null)
             return badRequest(showIndex());
+
         Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "", reservation);
         return details(reservationId);
     }
@@ -358,6 +364,11 @@ public class Drives extends Controller {
             }
             reservation.setStatus(status);
             dao.updateReservation(reservation);
+
+            // Unschedule the job for auto accept
+            JobDAO jdao = context.getJobDAO();
+            jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId());
+
             context.commit();
             return reservation;
         } catch(DataAccessException ex) {
