@@ -80,7 +80,7 @@ public class JDBCJobDAO implements JobDAO {
     public List<Job> getUnfinishedBefore(DateTime time) throws DataAccessException {
         try {
             PreparedStatement ps = getGetUnfinishedJobsAfterStatement();
-            ps.setDate(1, new Date(time.getMillis()));
+            ps.setTimestamp(1, new Timestamp(time.getMillis()));
             List<Job> jobs = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()){
                 while(rs.next()){

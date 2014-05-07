@@ -4,11 +4,9 @@ import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.IllegalFieldValueException;
 import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -22,7 +20,6 @@ import views.html.reserve.reservations;
 import views.html.reserve.reservationspage;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
