@@ -37,6 +37,7 @@ public class Scheduler implements Runnable {
         EXECUTORS = new EnumMap<>(JobType.class);
         EXECUTORS.put(JobType.IS_REMINDER, new InfoSessionReminderJob());
         EXECUTORS.put(JobType.REPORT, new ReportGenerationJob());
+        EXECUTORS.put(JobType.RESERVE_ACCEPT, new ReservationAutoAcceptJob());
     }
 
     private static Scheduler scheduler;

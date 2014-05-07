@@ -273,6 +273,7 @@ public class Drives extends Controller {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
         if(reservation == null)
             return badRequest(showIndex());
+
         Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "", reservation);
         return details(reservationId);
     }
@@ -358,6 +359,11 @@ public class Drives extends Controller {
             }
             reservation.setStatus(status);
             dao.updateReservation(reservation);
+
+            // Unschedule the job for auto accept
+            JobDAO jdao = context.getJobDAO();
+            jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId());
+
             context.commit();
             return reservation;
         } catch(DataAccessException ex) {

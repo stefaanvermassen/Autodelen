@@ -9,6 +9,7 @@ import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
 import org.joda.time.IllegalFieldValueException;
+import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
@@ -179,6 +180,14 @@ public class Reserve extends Controller {
                 // Create the reservation
                 User user = DataProvider.getUserProvider().getUser();
                 Reservation reservation = rdao.createReservation(from, until, car, user);
+
+                // Schedule the auto accept
+                JobDAO jdao = context.getJobDAO();
+                int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+                MutableDateTime autoAcceptDate = new MutableDateTime();
+                autoAcceptDate.addMinutes(minutesAfterNow);
+                jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+
                 context.commit();
 
                 if (reservation != null) {
