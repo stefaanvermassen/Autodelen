@@ -84,6 +84,7 @@ public class Damages extends Controller {
 
         User user = DataProvider.getUserProvider().getUser();
         filter.putValue(FilterField.DAMAGE_USER_ID, user.getId() + "");
+        filter.putValue(FilterField.DAMAGE_FINISHED, "-1");
 
         return ok(damageList(page, carField, asc, filter));
     }
