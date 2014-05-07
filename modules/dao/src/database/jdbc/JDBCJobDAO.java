@@ -73,7 +73,7 @@ public class JDBCJobDAO implements JobDAO {
 
     private Job populateJob(ResultSet rs) throws SQLException {
         return new Job(rs.getInt("job_id"), Enum.valueOf(JobType.class, rs.getString("job_type")),
-                new DateTime(rs.getDate("job_time").getTime()), rs.getBoolean("job_finished"), rs.getObject("job_ref_id") == null ? -1 : rs.getInt("job_ref_id"));
+                new DateTime(rs.getTimestamp("job_time").getTime()), rs.getBoolean("job_finished"), rs.getObject("job_ref_id") == null ? -1 : rs.getInt("job_ref_id"));
     }
 
     @Override
