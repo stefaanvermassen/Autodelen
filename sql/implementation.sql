@@ -396,7 +396,7 @@ CREATE TABLE `jobs` (
   PRIMARY KEY (`job_id`)
 )
   COLLATE='latin1_swedish_ci'
-  ENGINE=InnoDB
+  ENGINE=InnoDB;
 
 
 CREATE TABLE `settings` (
