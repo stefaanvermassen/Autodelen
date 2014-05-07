@@ -7,6 +7,7 @@ import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
+import org.joda.time.MutableDateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
@@ -252,6 +253,17 @@ public class Drives extends Controller {
             reservation.setFrom(from);
             reservation.setTo(until);
             rdao.updateReservation(reservation);
+
+            if(reservation.getStatus() == ReservationStatus.REQUEST) {
+                // Remove old reservation auto accept and add new
+                JobDAO jdao = context.getJobDAO();
+                jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId()); //remove the old job
+                int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+                MutableDateTime autoAcceptDate = new MutableDateTime();
+                autoAcceptDate.addMinutes(minutesAfterNow);
+                jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+            }
+
             context.commit();
             return ok(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
         } catch(DataAccessException ex) {
