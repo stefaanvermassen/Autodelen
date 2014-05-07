@@ -264,7 +264,7 @@ public class Drives extends Controller {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
         if(reservation == null)
             return badRequest(showIndex());
-        Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), reservation);
+        Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "", reservation);
         return details(reservationId);
     }
 

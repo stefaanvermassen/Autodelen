@@ -119,6 +119,10 @@
   Adres van de auto:<br>
   %reservation_car_address%<br>
   <br>
+  Opmerkingen door de eigenaar:<br>
+  <br>
+  <i>%reservation_remarks%</i><br>
+  <br>
   Klik <a href=\"%reservation_url%\">hier</a> om naar de reservatie te gaan.<br>
   <br>
   Met vriendelijke groeten,<br>
@@ -134,6 +138,8 @@
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_to";
   INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_car_address";
+  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_remarks";
   INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_url";
 
