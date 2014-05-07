@@ -101,7 +101,16 @@ public class Drives extends Controller {
     /**
      * @return the html page of the index page
      */
-    public static Html showIndex() { return drives.render(1, 1, "", "status=" + ReservationStatus.ACCEPTED.toString()); }
+    public static Html showIndex() {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ReservationDAO dao = context.getReservationDAO();
+            dao.updateTable();
+        } catch(DataAccessException ex){
+            // The failure of updateTable is probably due a deadlock prevention, because this method is
+            // called frequently, the failure is not a problem at all.
+        }
+        return drives.render(1, 1, "", "status=" + ReservationStatus.ACCEPTED.toString());
+    }
 
     /**
      * Method: GET
