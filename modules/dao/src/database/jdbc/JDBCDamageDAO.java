@@ -2,6 +2,8 @@ package database.jdbc;
 
 import database.DamageDAO;
 import database.DataAccessException;
+import database.Filter;
+import database.FilterField;
 import models.CarRide;
 import models.Damage;
 import models.FileGroup;
@@ -25,12 +27,53 @@ public class JDBCDamageDAO implements DamageDAO {
     private PreparedStatement getDamageStatement;
     private PreparedStatement getUserDamagesStatement;
     private PreparedStatement updateDamageStatement;
+    private PreparedStatement getGetAmountOfDamagesStatement;
+    private PreparedStatement getGetDamageListPageStatement;
+
     private static final String DAMAGE_QUERY = "SELECT * FROM Damages " +
             "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
             "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
             "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
             "JOIN Cars ON reservation_car_id = car_id " +
             "JOIN Users ON reservation_user_id = user_id ";
+
+    public static final String FILTER_FRAGMENT = " WHERE (damage_finished = ? OR damage_finished LIKE ?) AND reservation_user_id LIKE ? " +
+            "AND car_id LIKE ? AND car_owner_user_id LIKE ? ";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = new JDBCFilter();
+        }
+
+        String finished = filter.getValue(FilterField.DAMAGE_FINISHED);
+
+        ps.setString(start, finished);
+
+        String s = ""; // This will match nothing
+        if(finished.equals("-1")) { // Not very nice programming, but works :D
+            s = "%%"; // This will match everything
+        }
+        ps.setString(start+1, s);
+
+        String userId = filter.getValue(FilterField.DAMAGE_USER_ID);
+        if(userId.equals("")) { // Not very nice programming, but works :D
+            userId = "%%";
+        }
+        ps.setString(start+2, userId);
+
+        String carId = filter.getValue(FilterField.DAMAGE_CAR_ID);
+        if(carId.equals("")) { // Not very nice programming, but works :D
+            carId = "%%";
+        }
+        ps.setString(start+3, carId);
+
+        String ownerId = filter.getValue(FilterField.DAMAGE_OWNER_ID);
+        if(ownerId.equals("")) { // Not very nice programming, but works :D
+            ownerId = "%%";
+        }
+        ps.setString(start+4, ownerId);
+    }
 
     public JDBCDamageDAO(Connection connection) {
         this.connection = connection;
@@ -59,29 +102,25 @@ public class JDBCDamageDAO implements DamageDAO {
         return deleteDamageStatement;
     }
 
-    private PreparedStatement getGetUnfinishedDamagesStatement() throws SQLException {
-        if (getUnfinishedDamagesStatement == null) {
-            getUnfinishedDamagesStatement = connection.prepareStatement(DAMAGE_QUERY +
-                    "WHERE damage_finished = 0");
+    private PreparedStatement getGetAmountOfDamagesStatement() throws SQLException {
+        if(getGetAmountOfDamagesStatement == null) {
+            getGetAmountOfDamagesStatement = connection.prepareStatement("SELECT count(damage_id) as amount_of_damages FROM Damages " +
+                    "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
+                    "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
+                    "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
+                    "JOIN Cars ON reservation_car_id = car_id " +
+                    "JOIN Users ON reservation_user_id = user_id " + FILTER_FRAGMENT);
         }
-        return getUnfinishedDamagesStatement;
+        return getGetAmountOfDamagesStatement;
     }
 
-    private PreparedStatement getGetFinishedDamagesStatement() throws SQLException {
-        if (getFinishedDamagesStatement == null) {
-            getFinishedDamagesStatement = connection.prepareStatement(DAMAGE_QUERY +
-                    "WHERE damage_finished = 1");
+    private PreparedStatement getGetDamageListPageStatement() throws SQLException {
+        if(getGetDamageListPageStatement == null) {
+            getGetDamageListPageStatement = connection.prepareStatement(DAMAGE_QUERY + FILTER_FRAGMENT + " LIMIT ?, ?");
         }
-        return getFinishedDamagesStatement;
+        return getGetDamageListPageStatement;
     }
 
-    private PreparedStatement getGetUserDamagesStatement() throws SQLException {
-        if (getUserDamagesStatement == null) {
-            getUserDamagesStatement = connection.prepareStatement(DAMAGE_QUERY +
-                    "WHERE reservation_user_id = ?");
-        }
-        return getUserDamagesStatement;
-    }
 
     private PreparedStatement getUpdateDamageStatement() throws SQLException {
         if (updateDamageStatement == null) {
@@ -152,33 +191,44 @@ public class JDBCDamageDAO implements DamageDAO {
     }
 
     @Override
-    public List<Damage> getUnfinishedDamages() throws DataAccessException {
+    public int getAmountOfDamages(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetUnfinishedDamagesStatement();
-            return getDamageList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of unfinished damages.", e);
+            PreparedStatement ps = getGetAmountOfDamagesStatement();
+            fillFragment(ps, filter, 1);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_damages");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of damages", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of damages", ex);
         }
     }
 
     @Override
-    public List<Damage> getFinishedDamages() throws DataAccessException {
+    public List<Damage> getDamages(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetFinishedDamagesStatement();
-            return getDamageList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of finished damages.", e);
-        }
-    }
+            PreparedStatement ps = null;
+            switch(orderBy) {
+                default: // TODO: get something to order on + asc/desc
+                    ps = getGetDamageListPageStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create getDamageList statement");
+            }
 
-    @Override
-    public List<Damage> getUserDamages(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetUserDamagesStatement();
-            ps.setInt(1, userId);
+            fillFragment(ps, filter, 1);
+            int first = (page-1)*pageSize;
+            ps.setInt(6, first);
+            ps.setInt(7, pageSize);
             return getDamageList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of damages for user.", e);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of damages", ex);
         }
     }
 
@@ -203,7 +253,6 @@ public class JDBCDamageDAO implements DamageDAO {
             return list;
         }catch (SQLException e){
             throw new DataAccessException("Error while reading damage resultset", e);
-
         }
     }
 }

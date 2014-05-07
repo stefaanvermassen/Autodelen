@@ -158,7 +158,9 @@ GET         /refuels/owner/refused                  controllers.Refuels.refuseRe
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
+GET         /damages/page                           controllers.Damages.showDamagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/admin                          controllers.Damages.showAllDamages()
+GET         /damages/admin/page                     controllers.Damages.showDamagesPageAdmin(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/details                        controllers.Damages.showDamageDetails(damageId: Int)
 GET         /damages/edit                           controllers.Damages.editDamage(damageId: Int)
 GET         /damages/status                         controllers.Damages.addStatus(damageId: Int)
@@ -173,6 +175,8 @@ GET         /maps/test                              controllers.Maps.showMap()
 
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
+# Car Picker
+GET         /carpicker                              controllers.CarPicker.getList(search: String ?= "")
 
 # Javascript routing
 GET         /assets/javascripts/routes              controllers.Application.javascriptRoutes()
