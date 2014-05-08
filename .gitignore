@@ -25,3 +25,5 @@ modules/dao/dao.properties
 .metadata
 .DS_Store
 *.class
+lib/dao.jar
+lib/dao.jar

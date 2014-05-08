@@ -8,7 +8,18 @@
 
 @* Source: https://github.com/smalot/bootstrap-datetimepicker, released under Apache v2 license *@
     <script>
+        function onInfoSessionTypeChange() {
+            if(document.getElementById("infosession_type_select").value === "Ander") {
+                $("#type_alternative_wrap" ).show();
+            } else {
+                $("#type_alternative_wrap" ).hide();
+            }
+        }
+
         $(document).ready(function() {
+
+            onInfoSessionTypeChange();
+
             $("input[name='addresstype']:radio").change(function(e)
             {
                 console.log('Address type changed!');
@@ -17,7 +28,7 @@
                 } else {
                     $('#otherAddress').hide();
                 }
-            }); 
+            });
 
             $('#datepicker').datetimepicker({
                 weekStart: 1,
@@ -114,12 +125,13 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="col-md-12">
-                                                        @helper.select(form("type"), helper.options(typeList), '_label -> "Type")
+                                                        @helper.select(form("type"), helper.options(typeList), '_label -> "Type", 'class -> "form-control", 'id -> "infosession_type_select", 'onchange -> "onInfoSessionTypeChange()")
                                                     </div>
-                                                    <!-- TODO: remove type_alternative if not OTHER selected -->
-                                                    <label class="col-md-12" for="type_alternative">Specifieer type (in geval Andere)</label>
-                                                    <div class="col-md-12">
-                                                        <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" value="@form("type_alternative").value">
+                                                    <div id="type_alternative_wrap">
+                                                        <label class="col-md-12" for="type_alternative">Specifieer type</label>
+                                                        <div class="col-md-12">
+                                                            <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("type_alternative").value">
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
