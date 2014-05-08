@@ -7,6 +7,7 @@ import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
 import models.*;
+import play.libs.F;
 import providers.DataProvider;
 import providers.UserRoleProvider;
 import controllers.Security.RoleSecured;
@@ -458,7 +459,7 @@ public class Cars extends Controller {
 
                 context.commit();
                 flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                return detail(carId);
+                return redirect(routes.Cars.detail(car.getId()));
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;
@@ -499,7 +500,7 @@ public class Cars extends Controller {
                     String[] vs = value.split(",");
                     if(vs.length != 5) {
                         flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
-                        return badRequest(detail.render(car));
+                        return redirect(routes.Cars.detail(carId));
                     }
                     try {
                         int id = Integer.parseInt(vs[0]);
@@ -518,7 +519,7 @@ public class Cars extends Controller {
                         }
                     } catch(ArrayIndexOutOfBoundsException | NumberFormatException e ) {
                         flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
-                        return badRequest(detail.render(car));
+                        return redirect(routes.Cars.detail(carId));
                     }
                 }
 
@@ -527,7 +528,7 @@ public class Cars extends Controller {
 
                 context.commit();
                 flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                return detail(car.getId());
+                return redirect(routes.Cars.detail(car.getId()));
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;
@@ -580,11 +581,11 @@ public class Cars extends Controller {
                         }
                         if(user == null) {
                             flash("error", "De opgegeven gebruiker bestaat niet.");
-                            return badRequest(detail.render(car));
+                            return redirect(routes.Cars.detail(carId));
                         }
                     } catch(NumberFormatException e) {
                         flash("error", "Er is een fout gebeurd bij het doorgeven van de gepriviligieerden.");
-                        return badRequest(detail.render(car));
+                        return redirect(routes.Cars.detail(carId));
                     }
                 }
 
@@ -593,7 +594,7 @@ public class Cars extends Controller {
 
                 context.commit();
                 flash("success", "Uw wijzigingen werden succesvol toegepast.");
-                return detail(car.getId());
+                return redirect(routes.Cars.detail(car.getId()));
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;
@@ -618,17 +619,37 @@ public class Cars extends Controller {
      * @return A detail page of the car (only available to car_user+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
-    public static Result detail(int carId) {
+    public static F.Promise<Result> detail(int carId) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
-            Car car = dao.getCar(carId);
+            final Car car = dao.getCar(carId);
 
             if(car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return F.Promise.promise(new F.Function0<Result>() {
+                    @Override
+                    public Result apply() throws Throwable {
+                        return badRequest(carList());
+                    }
+                });
+            } else {
+                if (DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
+                    return Maps.getLatLongPromise(car.getLocation().getId()).map(
+                            new F.Function<F.Tuple<Double, Double>, Result>() {
+                                public Result apply(F.Tuple<Double, Double> coordinates) {
+                                    return ok(detail.render(car, coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14)));
+                                }
+                            }
+                    );
+                } else {
+                    return F.Promise.promise(new F.Function0<Result>() {
+                        @Override
+                        public Result apply() throws Throwable {
+                            return ok(detail.render(car, null));
+                        }
+                    });
+                }
             }
-
-            return ok(detail.render(car));
         } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
@@ -722,7 +743,7 @@ public class Cars extends Controller {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
                 flash("danger", "Kost toevoegen mislukt.");
-                return badRequest(detail.render(car));
+                return redirect(routes.Cars.detail(carId));
             }catch(DataAccessException ex){
                 throw ex; //log?
             }

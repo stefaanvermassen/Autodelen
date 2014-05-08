@@ -1,6 +1,4 @@
-@(car: Car)
-@import controllers.Cars;
-@import org.joda.time.format.DateTimeFormat
+@(car: Car, mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider;
 @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
     <div class="row">
@@ -46,8 +44,10 @@
                             <h3 class="panel-title">Adres</h3>
                         </div>
                         <div class="panel-body">
-                            Map placeholder<br>
                             <strong>Adres:</strong> @car.getLocation.toString
+                            <div class="well map">
+                                @map(mapDetails)
+                            </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
