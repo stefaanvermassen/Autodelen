@@ -30,7 +30,7 @@ public class JDBCTemplateDAO implements TemplateDAO {
     private PreparedStatement getTemplateByTitleStatement() throws SQLException {
         if (getTemplateByIdStatement == null) {
             getTemplateByIdStatement = connection.prepareStatement("SELECT template_id, template_title, template_subject, template_body, template_send_mail, template_send_mail_changeable " +
-                    "FROM Templates WHERE template_id = ?;");
+                    "FROM templates WHERE template_id = ?;");
         }
         return getTemplateByIdStatement;
     }
@@ -38,14 +38,14 @@ public class JDBCTemplateDAO implements TemplateDAO {
     private PreparedStatement getAllTemplatesStatement() throws SQLException {
         if (getAllTemplatesStatement == null) {
             getAllTemplatesStatement = connection.prepareStatement("SELECT template_id, template_title, template_body, template_subject, template_send_mail, template_send_mail_changeable " +
-                    "FROM Templates;");
+                    "FROM templates;");
         }
         return getAllTemplatesStatement;
     }
 
     private PreparedStatement getUpdateTemplateStatement() throws SQLException {
         if (updateTemplateStatement == null) {
-            updateTemplateStatement = connection.prepareStatement("UPDATE Templates SET template_subject = ?, template_body = ?, template_send_mail = ? WHERE template_id = ?;");
+            updateTemplateStatement = connection.prepareStatement("UPDATE templates SET template_subject = ?, template_body = ?, template_send_mail = ? WHERE template_id = ?;");
         }
         return updateTemplateStatement;
     }

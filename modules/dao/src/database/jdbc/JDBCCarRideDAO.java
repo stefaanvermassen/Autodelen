@@ -36,14 +36,14 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getCreateCarRideStatement() throws SQLException {
         if (createCarRideStatement == null) {
-            createCarRideStatement = connection.prepareStatement("INSERT INTO CarRides (car_ride_car_reservation_id, car_ride_start_mileage, " +
+            createCarRideStatement = connection.prepareStatement("INSERT INTO carrides (car_ride_car_reservation_id, car_ride_start_mileage, " +
                     "car_ride_end_mileage, car_ride_damage, car_ride_refueling) VALUE (?, ?, ?, ?, ?)");
         }
         return createCarRideStatement;
     }
     private PreparedStatement getUpdateCarRideStatement() throws SQLException {
         if (updateCarRideStatement == null) {
-            updateCarRideStatement = connection.prepareStatement("UPDATE CarRides SET car_ride_status = ? , car_ride_start_mileage = ? , " +
+            updateCarRideStatement = connection.prepareStatement("UPDATE carrides SET car_ride_status = ? , car_ride_start_mileage = ? , " +
                     "car_ride_end_mileage = ? , car_ride_damage = ? , car_ride_refueling = ? " +
                     "WHERE car_ride_car_reservation_id = ?");
         }
@@ -52,8 +52,8 @@ public class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getGetCarRideStatement() throws SQLException {
         if (getCarRideStatement == null) {
-            getCarRideStatement = connection.prepareStatement("SELECT * FROM CarRides INNER JOIN CarReservations ON CarRides.car_ride_car_reservation_id = CarReservations.reservation_id " +
-                    "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id" +
+            getCarRideStatement = connection.prepareStatement("SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
+                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id" +
                     " WHERE car_ride_car_reservation_id = ?");
         }
         return getCarRideStatement;

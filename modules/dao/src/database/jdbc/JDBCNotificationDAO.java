@@ -25,7 +25,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getGetAmountOfNotificationsStatement;
     private PreparedStatement setReadStatement;
 
-    public static final String NOTIFICATION_QUERY = "SELECT * FROM Notifications JOIN Users ON " +
+    public static final String NOTIFICATION_QUERY = "SELECT * FROM notifications JOIN users ON " +
             "notification_user_id= user_id";
 
     public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? AND notification_read = ? ";
@@ -52,7 +52,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
     private PreparedStatement getCreateNotificationStatement() throws SQLException {
         if (createNotificationStatement == null) {
-            createNotificationStatement = connection.prepareStatement("INSERT INTO Notifications (notification_user_id, " +
+            createNotificationStatement = connection.prepareStatement("INSERT INTO notifications (notification_user_id, " +
                     "notification_read, notification_subject,"
                     + "notification_body) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
         }
@@ -61,7 +61,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
     private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
         if (getNotificationListByUseridStatement == null) {
-            getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM Notifications JOIN Users ON " +
+            getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM notifications JOIN users ON " +
                     "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_created_at DESC;");
         }
         return getNotificationListByUseridStatement;
@@ -76,7 +76,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
     private PreparedStatement getNumberOfUnreadNotificationsStatement() throws SQLException {
         if (getNumberOfUnreadNotificationsStatement == null) {
-            getNumberOfUnreadNotificationsStatement = connection.prepareStatement("SELECT COUNT(*) AS unread_number FROM Notifications JOIN Users ON " +
+            getNumberOfUnreadNotificationsStatement = connection.prepareStatement("SELECT COUNT(*) AS unread_number FROM notifications JOIN users ON " +
                     "notification_user_id= user_id WHERE notification_user_id=? AND notification_read=0;");
         }
         return getNumberOfUnreadNotificationsStatement;
@@ -84,7 +84,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
     private PreparedStatement getGetAmountOfNotificationsStatement() throws SQLException {
         if(getGetAmountOfNotificationsStatement == null) {
-            getGetAmountOfNotificationsStatement = connection.prepareStatement("SELECT count(*) as amount_of_notifications FROM Notifications JOIN Users ON " +
+            getGetAmountOfNotificationsStatement = connection.prepareStatement("SELECT count(*) as amount_of_notifications FROM notifications JOIN users ON " +
                     "notification_user_id= user_id" + FILTER_FRAGMENT);
         }
         return getGetAmountOfNotificationsStatement;
@@ -92,7 +92,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
 
     private PreparedStatement getSetReadStatement() throws SQLException {
         if (setReadStatement == null) {
-            setReadStatement = connection.prepareStatement("UPDATE Notifications SET notification_read = ? WHERE notification_id = ?;");
+            setReadStatement = connection.prepareStatement("UPDATE notifications SET notification_read = ? WHERE notification_id = ?;");
         }
         return setReadStatement;
     }

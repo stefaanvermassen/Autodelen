@@ -25,9 +25,9 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private static final String[] AUTO_GENERATED_KEYS = {"reservation_id"};
 
-    public static final String RESERVATION_QUERY = "SELECT * FROM CarReservations " +
-            "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id " +
-            "INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id ";
+    public static final String RESERVATION_QUERY = "SELECT * FROM carreservations " +
+            "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
+            "INNER JOIN users ON carreservations.reservation_user_id = users.user_id ";
 
     public static final String FILTER_FRAGMENT = " WHERE (car_owner_user_id=? OR reservation_user_id=? ) ";
 
@@ -75,14 +75,14 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private PreparedStatement getDeleteReservationStatement() throws SQLException {
     	if(deleteReservationStatement == null){
-    		deleteReservationStatement = connection.prepareStatement("DELETE FROM CarReservations WHERE reservation_id=?");
+    		deleteReservationStatement = connection.prepareStatement("DELETE FROM carreservations WHERE reservation_id=?");
     	}
     	return deleteReservationStatement;
     }
     
     private PreparedStatement getCreateReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
-            createReservationStatement = connection.prepareStatement("INSERT INTO CarReservations (reservation_user_id, reservation_car_id, reservation_status,"
+            createReservationStatement = connection.prepareStatement("INSERT INTO carreservations (reservation_user_id, reservation_car_id, reservation_status,"
                     + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createReservationStatement;
@@ -90,7 +90,7 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private PreparedStatement getUpdateReservationStatement() throws SQLException {
         if (updateReservationStatement == null) {
-            updateReservationStatement = connection.prepareStatement("UPDATE CarReservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
+            updateReservationStatement = connection.prepareStatement("UPDATE carreservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
                     + "reservation_from=? , reservation_to=?, reservation_message = ?WHERE reservation_id = ?");
         }
         return updateReservationStatement;
@@ -98,7 +98,7 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private PreparedStatement getGetReservationStatement() throws SQLException {
         if (getReservationStatement == null) {
-            getReservationStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id WHERE reservation_id=?");
+            getReservationStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id WHERE reservation_id=?");
         }
         return getReservationStatement;
     }
@@ -106,7 +106,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getGetNextReservationStatement() throws SQLException {
         if (getNextReservationStatement == null) {
             getNextReservationStatement = connection.prepareStatement(RESERVATION_QUERY +
-                    " WHERE reservation_from >= ? AND reservation_id != ? AND CarReservations.reservation_status = '"
+                    " WHERE reservation_from >= ? AND reservation_id != ? AND carreservations.reservation_status = '"
                     + ReservationStatus.ACCEPTED.toString() + "' ORDER BY reservation_to ASC LIMIT 1");
         }
         return getNextReservationStatement;
@@ -115,7 +115,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getGetPreviousReservationStatement() throws SQLException {
         if (getPreviousReservationStatement == null) {
             getPreviousReservationStatement = connection.prepareStatement(RESERVATION_QUERY +
-                    " WHERE reservation_to <= ? AND reservation_id != ? AND CarReservations.reservation_status = '"
+                    " WHERE reservation_to <= ? AND reservation_id != ? AND carreservations.reservation_status = '"
                     + ReservationStatus.ACCEPTED.toString() + "' ORDER BY reservation_to DESC LIMIT 1");
         }
         return getPreviousReservationStatement;
@@ -137,7 +137,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getGetReservationListByCaridStatement() throws SQLException {
         if (getReservationListByCaridStatement == null) {
             // Only request the reservations for which the current user is the loaner or the owner
-            getReservationListByCaridStatement = connection.prepareStatement("SELECT * FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
+            getReservationListByCaridStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     "WHERE car_id=?");
         }
         return getReservationListByCaridStatement ;
@@ -145,18 +145,18 @@ public class JDBCReservationDAO implements ReservationDAO{
 
     private PreparedStatement getGetAmountOfReservationsStatement() throws SQLException {
         if(getGetAmountOfReservationsStatement == null) {
-            getGetAmountOfReservationsStatement = connection.prepareStatement("SELECT COUNT(reservation_id) AS amount_of_reservations FROM CarReservations " +
-                    "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id " +
-                    "INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " + FILTER_FRAGMENT);
+            getGetAmountOfReservationsStatement = connection.prepareStatement("SELECT COUNT(reservation_id) AS amount_of_reservations FROM carreservations " +
+                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
+                    "INNER JOIN users ON carreservations.reservation_user_id = users.user_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfReservationsStatement;
     }
 
     private PreparedStatement getGetNumberOfReservationsWithStatusStatement(String match) throws SQLException {
         if(getNumberOfReservationsWithStatusStatement == null) {
-            getNumberOfReservationsWithStatusStatement = connection.prepareStatement("SELECT COUNT(*) as result FROM CarReservations " +
-                    "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id " +
-                    "WHERE CarReservations.reservation_status = ? " + match);
+            getNumberOfReservationsWithStatusStatement = connection.prepareStatement("SELECT COUNT(*) as result FROM carreservations " +
+                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
+                    "WHERE carreservations.reservation_status = ? " + match);
         }
         return getNumberOfReservationsWithStatusStatement;
     }
@@ -164,7 +164,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getUpdateTableStatement() throws SQLException {
         if(updateTableStatement == null) {
             updateTableStatement = connection.prepareStatement("UPDATE carreservations SET reservation_status=?" +
-                    " WHERE CarReservations.reservation_to < NOW() AND CarReservations.reservation_status = ?");
+                    " WHERE carreservations.reservation_to < NOW() AND carreservations.reservation_status = ?");
         }
         return updateTableStatement;
     }
