@@ -40,6 +40,10 @@ public class Maps extends Controller {
             this.message = message;
         }
 
+        public MapDetails(double latitude, double longtitude, int zoom){
+            this(latitude, longtitude, zoom, null);
+        }
+
         public double getLatitude() {
             return latitude;
         }
