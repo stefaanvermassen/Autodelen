@@ -1,4 +1,4 @@
-@(refuseFrom: play.data.Form[Drives.RefuseModel], reservation: Reservation)
+@(refuseFrom: play.data.Form[Drives.RemarksModel], reservation: Reservation)
 <div class="row">
     <div class="col-sm-4">
         <strong>Status:</strong> @reservation.getStatus.getDescription
@@ -11,22 +11,22 @@
     </div>
 </div> <br />
 @if(reservation.getStatus == ReservationStatus.REQUEST) {
-    @helper.form(routes.Drives.refuseReservation(reservation.getId), 'class -> "form-horizontal") {
-        <div class="row">
-            <div id="actions1" class="btn-group btn-group-xs form-group col-sm-12">
-                <a type="button" class="btn btn-xs btn-success" href="@routes.Drives.approveReservation(reservation.getId)">
-                    Goedkeuren</a>
-                <button id="reject" type="button" class="btn btn-xs btn-warning">
-                    Afkeuren</button>
-            </div>
-            <div id="actions2" class="hidden">
-                <div class="btn-group btn-group-xs form-group col-sm-12">
-                    <button type="submit" class="btn btn-xs btn-success">Afkeuren</button>
-                    <button id="annulate" type="button" class="btn btn-xs btn-warning">
-                        Annuleren</button>
-                </div>
-                <textarea name="reason" class="form-control" rows="3" placeholder="Reden voor de weigering"></textarea>
-            </div>
+    <div class="row">
+        <div class="col-xs-12">
+                @helper.form(routes.Drives.setReservationStatus(reservation.getId), 'class -> "form-horizontal") {
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-6 btn-group btn-group-xs">
+                            <button type="submit" class="btn btn-xs btn-success" name="status" value="@ReservationStatus.ACCEPTED">Goedkeuren</button>
+                            <button type="submit" class="btn btn-xs btn-danger" name="status" value="@ReservationStatus.REFUSED">afkeuren</button>
+                        </div>
+                    </div><br />
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <textarea name="remarks" class="form-control" rows="3" placeholder="Reden voor de weigering/opmerkingen bij de goedkeuring"></textarea>
+                        </div>
+                    </div>
+                }
+            </div><br />
         </div>
-    }
+    </div>
 }

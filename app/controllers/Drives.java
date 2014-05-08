@@ -40,9 +40,10 @@ public class Drives extends Controller {
      * The owner is obligated to inform the loaner why his reservation request
      * is denied.
      */
-    public static class RefuseModel {
+    public static class RemarksModel {
         // String containing the reason for refusing a reservation
-        public String reason;
+        public String status;
+        public String remarks;
 
         /**
          * Validates the form:
@@ -50,8 +51,9 @@ public class Drives extends Controller {
          * @return an error string or null
          */
         public String validate() {
-            if("".equals(reason))
-                return "Gelieve mee te delen waarom u deze aanvraag weigert.";
+            // Should not be possible but you never know
+            if(status == null || "".equals(status))
+                return "Een fout deed zich voor bij het verwerken van de actie. Probeer het opnieuw";
             return null;
         }
     }
@@ -143,7 +145,7 @@ public class Drives extends Controller {
      * @return the html page
      */
     private static Html detailsPage(int reservationId) {
-        return detailsPage(reservationId, Form.form(Reserve.ReservationModel.class), Form.form(RefuseModel.class), Form.form(InfoModel.class));
+        return detailsPage(reservationId, Form.form(Reserve.ReservationModel.class), Form.form(RemarksModel.class), Form.form(InfoModel.class));
     }
 
     /**
@@ -159,7 +161,7 @@ public class Drives extends Controller {
      * @param detailsForm Form allowing the loaner to provided details about the drive
      * @return the html page
      */
-    private static Html detailsPage(int reservationId, Form<Reserve.ReservationModel> adjustForm, Form<RefuseModel> refuseForm,
+    private static Html detailsPage(int reservationId, Form<Reserve.ReservationModel> adjustForm, Form<RemarksModel> refuseForm,
                                     Form<InfoModel> detailsForm) {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -222,7 +224,7 @@ public class Drives extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     public static Result adjustDetails(int reservationId) {
         User user = DataProvider.getUserProvider().getUser();
-        Form<RefuseModel> refuseModel = Form.form(RefuseModel.class);
+        Form<RemarksModel> refuseModel = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
         if(adjustForm.hasErrors())
@@ -269,6 +271,8 @@ public class Drives extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result approveReservation(int reservationId) {
+        Form<RemarksModel> refuseForm = Form.form(RemarksModel.class).bindFromRequest();
+        System.out.println(refuseForm.get().remarks);
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
         if(reservation == null)
             return badRequest(showIndex());
@@ -288,14 +292,41 @@ public class Drives extends Controller {
     public static Result refuseReservation(int reservationId) {
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
+        Form<RemarksModel> refuseForm = Form.form(RemarksModel.class).bindFromRequest();
         if(refuseForm.hasErrors())
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.REFUSED);
         if(reservation == null) {
             return badRequest(showIndex());
         }
-        Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), reservation, refuseForm.get().reason);
+        return details(reservationId);
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result setReservationStatus(int reservationId) {
+        Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
+        Form<InfoModel> detailsForm = Form.form(InfoModel.class);
+        Form<RemarksModel> remarksForm = Form.form(RemarksModel.class).bindFromRequest();
+        if(remarksForm.hasErrors())
+            return badRequest(detailsPage(reservationId, adjustForm, remarksForm, detailsForm));
+        ReservationStatus status = ReservationStatus.valueOf(remarksForm.get().status);
+        String remarks = remarksForm.get().remarks;
+        if(status == ReservationStatus.REFUSED && (remarks == null || "".equals(remarks))) {
+            remarksForm.reject("Gelieve aan te geven waarom u de reservatie weigert.");
+            return badRequest(detailsPage(reservationId, adjustForm, remarksForm, detailsForm));
+        }
+        if(status != ReservationStatus.REFUSED && status != ReservationStatus.ACCEPTED)  {
+            remarksForm.reject("Het is niet toegestaan om de status van de reservatie aan te passen naar: " + status.toString());
+            return badRequest(detailsPage(reservationId, adjustForm, remarksForm, detailsForm));
+        }
+        Reservation reservation = adjustStatus(reservationId, status);
+        if(reservation == null) {
+            return badRequest(showIndex());
+        }
+        if(status == ReservationStatus.REFUSED)
+            Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), remarks, reservation);
+        else
+            Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), remarks, reservation);
         return details(reservationId);
     }
 
@@ -368,7 +399,7 @@ public class Drives extends Controller {
     public static Result provideDriveInfo(int reservationId) {
         User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class);
+        Form<RemarksModel> refuseForm = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
         if(detailsForm.hasErrors())
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
@@ -435,7 +466,7 @@ public class Drives extends Controller {
     public static Result approveDriveInfo(int reservationId) {
         User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class);
+        Form<RemarksModel> refuseForm = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO dao = context.getCarRideDAO();
@@ -546,7 +577,7 @@ public class Drives extends Controller {
             int amountOfResults = dao.getAmountOfReservations(filter);
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
-            return ok(drivespage.render(user.getId(), Form.form(RefuseModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+            return ok(drivespage.render(user.getId(), Form.form(RemarksModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
         } catch (DataAccessException ex) {
             throw ex;
         }

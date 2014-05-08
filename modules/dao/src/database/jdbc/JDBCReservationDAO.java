@@ -29,24 +29,6 @@ public class JDBCReservationDAO implements ReservationDAO{
             "INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id " +
             "INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id ";
 
-    public static final String FILTER_FRAGMENT = " WHERE (car_owner_user_id=? OR reservation_user_id=? ) ";
-
-    public static final String MATCH_PASSED = " reservation_status != '" + ReservationStatus.ACCEPTED.toString() +
-            "' AND reservation_status != '" + ReservationStatus.REQUEST.toString() + "' ";
-
-    public static final String MATCH_STATUS = " reservation_status = ? ";
-
-    private void fillFragment(PreparedStatement ps, Filter filter, int start, boolean matchStatus) throws SQLException {
-        if(filter == null) {
-            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = new JDBCFilter();
-        }
-        ps.setString(start, filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID));
-        ps.setString(start+1, filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID));
-        if(matchStatus)
-            ps.setString(start+2, filter.getValue(FilterField.RESERVATION_STATUS));
-    }
-
     private Connection connection;
     private PreparedStatement createReservationStatement;
     private PreparedStatement updateReservationStatement;
@@ -274,7 +256,6 @@ public class JDBCReservationDAO implements ReservationDAO{
     @Override
     public List<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            String amount = "amount";
             Statement statement = connection.createStatement();
             String sql = getReservationsPageStatement(filter);
             sql += " ORDER BY ";

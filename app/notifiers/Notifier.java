@@ -255,7 +255,7 @@ public class Notifier extends Mailer {
         }
     }
 
-    public static void sendReservationRefusedByOwnerMail(User user, Reservation carReservation, String reason) {
+    public static void sendReservationRefusedByOwnerMail(User user, String reason, Reservation carReservation) {
         String mail = "";
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
