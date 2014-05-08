@@ -17,7 +17,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private static final String SMALL_USER_FIELDS = "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email";
 
-    private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM Users";
+    private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM users";
 
     private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, users.user_gender, " +
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
@@ -26,13 +26,13 @@ public class JDBCUserDAO implements UserDAO {
             "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, users.user_image_id, " +
             "contractManagers.user_id, contractManagers.user_password, contractManagers.user_firstname, contractManagers.user_lastname, contractManagers.user_email";
 
-    private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM Users " +
+    private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM users " +
             "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
             "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
             "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
 
     // TODO: more fields to filter on
-    public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? " +
+    public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?)";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
@@ -69,28 +69,28 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getDeleteVerificationStatement() throws SQLException {
         if(deleteVerificationStatement == null){
-            deleteVerificationStatement = connection.prepareStatement("DELETE FROM Verifications WHERE verification_user_id = ? AND verification_type = ?");
+            deleteVerificationStatement = connection.prepareStatement("DELETE FROM verifications WHERE verification_user_id = ? AND verification_type = ?");
         }
         return deleteVerificationStatement;
     }
 
     private PreparedStatement getCreateVerificationStatement() throws SQLException {
         if(createVerificationStatement == null){
-            createVerificationStatement = connection.prepareStatement("INSERT INTO Verifications(verification_ident, verification_user_id, verification_type) VALUES(UUID(),?, ?)");
+            createVerificationStatement = connection.prepareStatement("INSERT INTO verifications(verification_ident, verification_user_id, verification_type) VALUES(UUID(),?, ?)");
         }
         return createVerificationStatement;
     }
 
     private PreparedStatement getGetVerificationStatement() throws SQLException {
         if(getVerificationStatement == null){
-            getVerificationStatement = connection.prepareStatement("SELECT verification_ident FROM Verifications WHERE verification_user_id = ? AND verification_type = ?");
+            getVerificationStatement = connection.prepareStatement("SELECT verification_ident FROM verifications WHERE verification_user_id = ? AND verification_type = ?");
         }
         return getVerificationStatement;
     }
     
     private PreparedStatement getDeleteUserStatement() throws SQLException {
     	if(deleteUserStatement == null){
-    		deleteUserStatement = connection.prepareStatement("UPDATE Users SET user_status = 'DROPPED' WHERE user_id = ?");
+    		deleteUserStatement = connection.prepareStatement("UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?");
     	}
     	return deleteUserStatement;
     }
@@ -125,14 +125,14 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getSmallUpdateUserStatement() throws SQLException {
         if (smallUpdateUserStatement == null){
-            smallUpdateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=? WHERE user_id = ?");
+            smallUpdateUserStatement = connection.prepareStatement("UPDATE users SET user_email=?, user_password=?, user_firstname=?, user_lastname=? WHERE user_id = ?");
         }
         return smallUpdateUserStatement;
     }
 
     private PreparedStatement getUpdateUserStatement() throws SQLException {
     	if (updateUserStatement == null){
-    		updateUserStatement = connection.prepareStatement("UPDATE Users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
+    		updateUserStatement = connection.prepareStatement("UPDATE users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
                     "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
                     "user_agree_terms=?, user_contract_manager_id=?, user_image_id = ?, user_driver_license_id=?, user_driver_license_file_group_id=?, " +
                     "user_identity_card_id=?, user_identity_card_registration_nr=?, user_identity_card_file_group_id=? " +
@@ -157,7 +157,7 @@ public class JDBCUserDAO implements UserDAO {
 
     private PreparedStatement getGetAmountOfUsersStatement() throws SQLException {
         if(getGetAmountOfUsersStatement == null) {
-            getGetAmountOfUsersStatement = connection.prepareStatement("SELECT COUNT(user_id) AS amount_of_users FROM Users" + FILTER_FRAGMENT);
+            getGetAmountOfUsersStatement = connection.prepareStatement("SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT);
         }
         return getGetAmountOfUsersStatement;
     }

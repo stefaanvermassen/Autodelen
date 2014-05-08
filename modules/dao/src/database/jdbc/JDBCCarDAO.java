@@ -28,19 +28,19 @@ public class JDBCCarDAO implements CarDAO{
 
     private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
 
-    public static final String CAR_QUERY = "SELECT * FROM Cars " +
-            "LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location " +
-            "LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id " +
-            "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details " +
-            "LEFT JOIN CarInsurances ON CarInsurances.insurance_id = Cars.car_insurance ";
+    public static final String CAR_QUERY = "SELECT * FROM cars " +
+            "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
+            "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+            "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_technical_details " +
+            "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance ";
 
-    public static final String FILTER_FRAGMENT = " WHERE Cars.car_name LIKE ? AND Cars.car_id LIKE ? AND Cars.car_brand LIKE ? " +
-            "AND ( Cars.car_manual = ? OR Cars.car_manual LIKE ? ) " +
-            "AND Cars.car_gps >= ? AND Cars.car_hook >= ? AND Cars.car_seats >= ? AND Addresses.address_zipcode LIKE ? AND Cars.car_fuel LIKE ? " +
-            "AND Cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM Cars INNER JOIN Carreservations " +
-            "ON Carreservations.reservation_car_id = Cars.car_id " +
-            "WHERE ? < CarReservations.reservation_to AND ? > CarReservations.reservation_from) " +
-            "AND ( Cars.car_active = ? OR Cars.car_active LIKE ? )";
+    public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
+            "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
+            "AND cars.car_gps >= ? AND cars.car_hook >= ? AND cars.car_seats >= ? AND addresses.address_zipcode LIKE ? AND cars.car_fuel LIKE ? " +
+            "AND cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM cars INNER JOIN carreservations " +
+            "ON carreservations.reservation_car_id = cars.car_id " +
+            "WHERE ? < carreservations.reservation_to AND ? > carreservations.reservation_from) " +
+            "AND ( cars.car_active = ? OR cars.car_active LIKE ? )";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -185,14 +185,14 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getDeleteCarStatement() throws SQLException {
     	if(deleteCarStatement == null){
-    		deleteCarStatement = connection.prepareStatement("DELETE FROM Cars WHERE car_id = ?");
+    		deleteCarStatement = connection.prepareStatement("DELETE FROM cars WHERE car_id = ?");
     	}
     	return deleteCarStatement;
     }
     
     private PreparedStatement createCarStatement() throws SQLException {
         if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO Cars(car_name, car_type, car_brand, car_location, " +
+            createCarStatement = connection.prepareStatement("INSERT INTO cars(car_name, car_type, car_brand, car_location, " +
                     "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
                     "car_technical_details, car_insurance, car_owner_user_id, car_comments, car_active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
@@ -202,7 +202,7 @@ public class JDBCCarDAO implements CarDAO{
     
     private PreparedStatement updateCarStatement() throws SQLException {
         if (updateCarStatement == null) {
-            updateCarStatement = connection.prepareStatement("UPDATE Cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
+            updateCarStatement = connection.prepareStatement("UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
                     "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=?, car_active=? WHERE car_id = ?");
@@ -254,18 +254,18 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
         if(getGetAmountOfCarsStatement == null) {
-            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM Cars " +
-                    "LEFT JOIN Addresses ON Addresses.address_id=Cars.car_location " +
-                    "LEFT JOIN Users ON Users.user_id=Cars.car_owner_user_id " +
-                    "LEFT JOIN TechnicalCarDetails ON TechnicalCarDetails.details_id = Cars.car_technical_details " +
-                    "LEFT JOIN CarInsurances ON CarInsurances.insurance_id = Cars.car_insurance" + FILTER_FRAGMENT);
+            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
+                    "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
+                    "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+                    "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_technical_details " +
+                    "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance" + FILTER_FRAGMENT);
         }
         return getGetAmountOfCarsStatement;
     }
 
     private PreparedStatement createInsuranceStatement() throws SQLException {
         if (createInsuranceStatement == null) {
-            createInsuranceStatement = connection.prepareStatement("INSERT INTO CarInsurances(insurance_name, insurance_expiration, " +
+            createInsuranceStatement = connection.prepareStatement("INSERT INTO carinsurances(insurance_name, insurance_expiration, " +
                     "insurance_contract_id, insurance_bonus_malus) VALUES (?,?,?,?)", new String[] {"insurance_id"});
         }
         return createInsuranceStatement;
@@ -273,7 +273,7 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement updateInsuranceStatement() throws SQLException {
         if (updateInsuranceStatement == null) {
-            updateInsuranceStatement = connection.prepareStatement("UPDATE CarInsurances SET insurance_name=?, insurance_expiration=?, " +
+            updateInsuranceStatement = connection.prepareStatement("UPDATE carinsurances SET insurance_name=?, insurance_expiration=?, " +
                     "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?");
         }
         return updateInsuranceStatement;
@@ -281,7 +281,7 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement createTechnicalCarDetailsStatement() throws SQLException {
         if (createTechnicalCarDetailsStatement == null) {
-            createTechnicalCarDetailsStatement = connection.prepareStatement("INSERT INTO TechnicalCarDetails(details_car_license_plate, " +
+            createTechnicalCarDetailsStatement = connection.prepareStatement("INSERT INTO technicalcardetails(details_car_license_plate, " +
                     "details_car_registration, details_car_chassis_number) VALUES (?,?,?)", new String[] {"details_id"});
         }
         return createTechnicalCarDetailsStatement;
@@ -289,7 +289,7 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement updateTechnicalCarDetailsStatement() throws SQLException {
         if (updateTechnicalCarDetailsStatement == null) {
-            updateTechnicalCarDetailsStatement = connection.prepareStatement("UPDATE TechnicalCarDetails SET details_car_license_plate=?, " +
+            updateTechnicalCarDetailsStatement = connection.prepareStatement("UPDATE technicalcardetails SET details_car_license_plate=?, " +
                     "details_car_registration=?, details_car_chassis_number=? WHERE details_id = ?");
         }
         return updateTechnicalCarDetailsStatement;
@@ -297,14 +297,14 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getAvailabilitiesStatement() throws SQLException {
         if (getAvailabilitiesStatement == null) {
-            getAvailabilitiesStatement = connection.prepareStatement("SELECT * FROM CarAvailabilities WHERE car_availability_car_id=?");
+            getAvailabilitiesStatement = connection.prepareStatement("SELECT * FROM caravailabilities WHERE car_availability_car_id=?");
         }
         return getAvailabilitiesStatement;
     }
 
     private PreparedStatement createAvailabilityStatement() throws SQLException {
         if (createAvailabilityStatement == null) {
-            createAvailabilityStatement = connection.prepareStatement("INSERT INTO CarAvailabilities(car_availability_car_id, " +
+            createAvailabilityStatement = connection.prepareStatement("INSERT INTO caravailabilities(car_availability_car_id, " +
                     "car_availability_begin_day_of_week, car_availability_begin_time, car_availability_end_day_of_week, car_availability_end_time) " +
                     "VALUES (?,?,?,?,?)", new String[] {"car_availability_id"});
         }
@@ -313,7 +313,7 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement updateAvailabilityStatement() throws SQLException {
         if (updateAvailabilityStatement == null) {
-            updateAvailabilityStatement = connection.prepareStatement("UPDATE CarAvailabilities SET car_availability_car_id=?, " +
+            updateAvailabilityStatement = connection.prepareStatement("UPDATE caravailabilities SET car_availability_car_id=?, " +
                     "car_availability_begin_day_of_week=?, car_availability_begin_time=?, car_availability_end_day_of_week=?, car_availability_end_time=? " +
                     "WHERE car_availability_id = ?");
         }
@@ -322,22 +322,22 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement deleteAvailabilityStatement() throws SQLException {
         if (deleteAvailabilityStatement == null) {
-            deleteAvailabilityStatement = connection.prepareStatement("DELETE FROM CarAvailabilities WHERE car_availability_id = ?");
+            deleteAvailabilityStatement = connection.prepareStatement("DELETE FROM caravailabilities WHERE car_availability_id = ?");
         }
         return deleteAvailabilityStatement;
     }
 
     private PreparedStatement getPriviligedStatement() throws SQLException {
         if (getPriviligedStatement == null) {
-            getPriviligedStatement = connection.prepareStatement("SELECT * FROM CarPrivileges " +
-                    "INNER JOIN Users ON Users.user_id = CarPrivileges.car_privilege_user_id WHERE car_privilege_car_id=?");
+            getPriviligedStatement = connection.prepareStatement("SELECT * FROM carprivileges " +
+                    "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?");
         }
         return getPriviligedStatement;
     }
 
     private PreparedStatement createPriviligedStatement() throws SQLException {
         if (createPriviligedStatement == null) {
-            createPriviligedStatement = connection.prepareStatement("INSERT INTO CarPrivileges(car_privilege_user_id, " +
+            createPriviligedStatement = connection.prepareStatement("INSERT INTO carprivileges(car_privilege_user_id, " +
                     "car_privilege_car_id) " +
                     "VALUES (?,?)");
         }
@@ -346,7 +346,7 @@ public class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement deletePriviligedStatement() throws SQLException {
         if (deletePriviligedStatement == null) {
-            deletePriviligedStatement = connection.prepareStatement("DELETE FROM CarPrivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?");
+            deletePriviligedStatement = connection.prepareStatement("DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?");
         }
         return deletePriviligedStatement;
     }

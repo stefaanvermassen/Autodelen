@@ -71,14 +71,14 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getDeleteInfoSessionStatement() throws SQLException {
         if (deleteInfoSession == null) {
-            deleteInfoSession = connection.prepareStatement("DELETE FROM InfoSessions WHERE infosession_id = ?");
+            deleteInfoSession = connection.prepareStatement("DELETE FROM infosessions WHERE infosession_id = ?");
         }
         return deleteInfoSession;
     }
     
     private PreparedStatement getUpdateInfoSessionStatement() throws SQLException {
     	if(updateInfoSession==null){
-    		updateInfoSession = connection.prepareStatement("UPDATE InfoSessions SET infosession_type=?, infosession_type_alternative=?, infosession_max_enrollees=?, infosession_timestamp=?, infosession_address_id=?, infosession_host_user_id=?, infosession_comments=? WHERE infosession_id=?");
+    		updateInfoSession = connection.prepareStatement("UPDATE infosessions SET infosession_type=?, infosession_type_alternative=?, infosession_max_enrollees=?, infosession_timestamp=?, infosession_address_id=?, infosession_host_user_id=?, infosession_comments=? WHERE infosession_id=?");
     	}
     	return updateInfoSession;
     }
@@ -136,7 +136,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getRegisterUserForSession() throws SQLException {
         if (registerUserForSession == null) {
-            registerUserForSession = connection.prepareStatement("INSERT INTO InfoSessionEnrollees(infosession_id, infosession_enrollee_id) VALUES (?,?)");
+            registerUserForSession = connection.prepareStatement("INSERT INTO infosessionenrollees(infosession_id, infosession_enrollee_id) VALUES (?,?)");
         }
         return registerUserForSession;
     }
@@ -150,7 +150,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private PreparedStatement getCreateInfoSessionStatement() throws SQLException {
         if (createInfoSessionStatement == null) {
-            createInfoSessionStatement = connection.prepareStatement("INSERT INTO InfoSessions(infosession_type, infosession_type_alternative, infosession_timestamp, infosession_address_id, infosession_host_user_id, infosession_max_enrollees, infosession_comments) VALUES (?,?,?,?,?,?,?)",
+            createInfoSessionStatement = connection.prepareStatement("INSERT INTO infosessions(infosession_type, infosession_type_alternative, infosession_timestamp, infosession_address_id, infosession_host_user_id, infosession_max_enrollees, infosession_comments) VALUES (?,?,?,?,?,?,?)",
                     new String[]{"infosession_id"});
         }
         return createInfoSessionStatement;
@@ -183,7 +183,7 @@ public class JDBCInfoSessionDAO implements InfoSessionDAO {
     private PreparedStatement getGetAmountOfInfoSessionsStatement() throws SQLException {
         if(getGetAmountOfInfoSessionsStatement == null) {
             // TODO: filter the WHERE statement
-            getGetAmountOfInfoSessionsStatement = connection.prepareStatement("SELECT COUNT(ses.infosession_id) AS amount_of_infosessions FROM InfoSessions ses " + FILTER_FRAGMENT);
+            getGetAmountOfInfoSessionsStatement = connection.prepareStatement("SELECT COUNT(ses.infosession_id) AS amount_of_infosessions FROM infosessions ses " + FILTER_FRAGMENT);
         }
         return getGetAmountOfInfoSessionsStatement;
     }
