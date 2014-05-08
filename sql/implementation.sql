@@ -3,14 +3,14 @@ CREATE DATABASE autodelen;
 USE autodelen;
 SET NAMES utf8;
 
-CREATE TABLE `FileGroups` (
+CREATE TABLE `filegroups` (
 	`file_group_id` INT NOT NULL AUTO_INCREMENT,
 	PRIMARY KEY (`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Files` (
+CREATE TABLE `files` (
   `file_id` INT(11) NOT NULL AUTO_INCREMENT,
   `file_path` VARCHAR(255) NOT NULL,
   `file_name` VARCHAR(128) NULL,
@@ -19,13 +19,13 @@ CREATE TABLE `Files` (
   `file_created_at` DATETIME,
   `file_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`file_id`),
-	FOREIGN KEY (`file_file_group_id`) REFERENCES FileGroups(`file_group_id`)
+	FOREIGN KEY (`file_file_group_id`) REFERENCES filegroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 
-CREATE TABLE `Addresses` (
+CREATE TABLE `addresses` (
   `address_id` INT(10) NOT NULL AUTO_INCREMENT,
   `address_country` VARCHAR(64) NOT NULL DEFAULT 'Belgium',
   `address_city` VARCHAR(64) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `Addresses` (
   COLLATE='latin1_swedish_ci'
   ENGINE=InnoDB;
 
-CREATE TABLE `Users` (
+CREATE TABLE `users` (
 	`user_id` INT NOT NULL AUTO_INCREMENT,
 	`user_email` VARCHAR(64) NOT NULL,
 	`user_password` CHAR(64) NOT NULL,
@@ -67,27 +67,27 @@ CREATE TABLE `Users` (
 	`user_last_notified` DATETIME,
 	`user_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`user_id`),
-	FOREIGN KEY (`user_address_domicile_id`) REFERENCES Addresses(`address_id`),
-	FOREIGN KEY (`user_address_residence_id`) REFERENCES Addresses(`address_id`),
-	FOREIGN KEY (`user_driver_license_file_group_id`) REFERENCES FileGroups(`file_group_id`),
-	FOREIGN KEY (`user_identity_card_file_group_id`) REFERENCES FileGroups(`file_group_id`),
-	FOREIGN KEY (`user_contract_manager_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`user_image_id`) REFERENCES Files(`file_id`),
+	FOREIGN KEY (`user_address_domicile_id`) REFERENCES addresses(`address_id`),
+	FOREIGN KEY (`user_address_residence_id`) REFERENCES addresses(`address_id`),
+	FOREIGN KEY (`user_driver_license_file_group_id`) REFERENCES filegroups(`file_group_id`),
+	FOREIGN KEY (`user_identity_card_file_group_id`) REFERENCES filegroups(`file_group_id`),
+	FOREIGN KEY (`user_contract_manager_id`) REFERENCES users(`user_id`),
+	FOREIGN KEY (`user_image_id`) REFERENCES files(`file_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `UserRoles` (
+CREATE TABLE `userroles` (
 	`userrole_userid` INT NOT NULL,
 	`userrole_role` ENUM('SUPER_USER', 'CAR_OWNER', 'CAR_USER', 'INFOSESSION_ADMIN', 'MAIL_ADMIN', 'PROFILE_ADMIN', 'RESERVATION_ADMIN', 'CAR_ADMIN') NOT NULL,
 	PRIMARY KEY (`userrole_userid`, `userrole_role`),
-	FOREIGN KEY (`userrole_userid`) REFERENCES Users(`user_id`)
+	FOREIGN KEY (`userrole_userid`) REFERENCES users(`user_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `CarInsurances` (
+CREATE TABLE `carinsurances` (
 	`insurance_id` INT NOT NULL AUTO_INCREMENT,
 	`insurance_name` VARCHAR(64),
 	`insurance_expiration` DATE,
@@ -100,7 +100,7 @@ CREATE TABLE `CarInsurances` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `TechnicalCarDetails` (
+CREATE TABLE `technicalcardetails` (
 	`details_id` INT NOT NULL AUTO_INCREMENT,
 	`details_car_license_plate` VARCHAR(64),
 	`details_car_registration` INT,
@@ -109,13 +109,13 @@ CREATE TABLE `TechnicalCarDetails` (
 	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`details_id`),
 	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`),
-	FOREIGN KEY (`details_car_registration`) REFERENCES FileGroups(`file_group_id`)
+	FOREIGN KEY (`details_car_registration`) REFERENCES filegroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
 
-CREATE TABLE `Cars` (
+CREATE TABLE `cars` (
 	`car_id` INT NOT NULL AUTO_INCREMENT,
 	`car_name` VARCHAR(64) NOT NULL,
 	`car_type` VARCHAR(64) NOT NULL DEFAULT '0',
@@ -139,16 +139,16 @@ CREATE TABLE `Cars` (
 	`car_created_at` DATETIME,
 	`car_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_id`),
-	FOREIGN KEY (`car_owner_user_id`) REFERENCES Users(`user_id`) ON DELETE CASCADE,
-	FOREIGN KEY (`car_location`) REFERENCES Addresses(`address_id`) ON DELETE CASCADE,
-	FOREIGN KEY (`car_images_id`) REFERENCES FileGroups(`file_group_id`),
-	FOREIGN KEY (`car_technical_details`) REFERENCES TechnicalCarDetails(`details_id`),
-	FOREIGN KEY (`car_insurance`) REFERENCES CarInsurances(`insurance_id`)
+	FOREIGN KEY (`car_owner_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE,
+	FOREIGN KEY (`car_location`) REFERENCES addresses(`address_id`) ON DELETE CASCADE,
+	FOREIGN KEY (`car_images_id`) REFERENCES filegroups(`file_group_id`),
+	FOREIGN KEY (`car_technical_details`) REFERENCES technicalcardetails(`details_id`),
+	FOREIGN KEY (`car_insurance`) REFERENCES carinsurances(`insurance_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `CarReservations` (
+CREATE TABLE `carreservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
 	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
 	`reservation_car_id` INT NOT NULL,
@@ -158,13 +158,13 @@ CREATE TABLE `CarReservations` (
 	`reservation_created_at` DATETIME,
 	`reservation_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
-	FOREIGN KEY (`reservation_car_id`) REFERENCES Cars(`car_id`), # Wat moet er gebeuren als de auto verwijderd wordt?
-	FOREIGN KEY (`reservation_user_id`) REFERENCES Users(`user_id`) ON DELETE CASCADE
+	FOREIGN KEY (`reservation_car_id`) REFERENCES cars(`car_id`), # Wat moet er gebeuren als de auto verwijderd wordt?
+	FOREIGN KEY (`reservation_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `InfoSessions` (
+CREATE TABLE `infosessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
 	`infosession_type` ENUM('NORMAL', 'OWNER', 'OTHER') NOT NULL DEFAULT 'NORMAL',
 	`infosession_type_alternative` VARCHAR(64),
@@ -176,24 +176,24 @@ CREATE TABLE `InfoSessions` (
 	`infosession_created_at` DATETIME,
 	`infosession_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`infosession_id`),
-	FOREIGN KEY (`infosession_host_user_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`infosession_address_id`) REFERENCES Addresses(`address_id`)	
+	FOREIGN KEY (`infosession_host_user_id`) REFERENCES users(`user_id`),
+	FOREIGN KEY (`infosession_address_id`) REFERENCES addresses(`address_id`)	
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `InfoSessionEnrollees` ( # Wie is ingeschreven?
+CREATE TABLE `infosessionenrollees` ( # Wie is ingeschreven?
 	`infosession_id` INT NOT NULL,
 	`infosession_enrollee_id` INT NOT NULL,
 	`infosession_enrollment_status` ENUM('ENROLLED', 'PRESENT', 'ABSENT') NOT NULL DEFAULT 'ENROLLED',
 	PRIMARY KEY (`infosession_id`, `infosession_enrollee_id`),
-	FOREIGN KEY (`infosession_enrollee_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`infosession_id`) REFERENCES InfoSessions(`infosession_id`) ON DELETE CASCADE
+	FOREIGN KEY (`infosession_enrollee_id`) REFERENCES users(`user_id`),
+	FOREIGN KEY (`infosession_id`) REFERENCES infosessions(`infosession_id`) ON DELETE CASCADE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `CarAvailabilities` (
+CREATE TABLE `caravailabilities` (
 	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
 	`car_availability_car_id` INT NOT NULL,
 	`car_availability_begin_day_of_week` INT NOT NULL,
@@ -201,22 +201,22 @@ CREATE TABLE `CarAvailabilities` (
 	`car_availability_end_day_of_week` INT NOT NULL,
 	`car_availability_end_time` TIME NOT NULL,
 	PRIMARY KEY (`car_availability_id`),
-	FOREIGN KEY (`car_availability_car_id`) REFERENCES Cars(`car_id`)
+	FOREIGN KEY (`car_availability_car_id`) REFERENCES cars(`car_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `CarPrivileges` (
+CREATE TABLE `carprivileges` (
 	`car_privilege_user_id` INT NOT NULL,
 	`car_privilege_car_id` INT NOT NULL,
 	PRIMARY KEY (`car_privilege_user_id`,`car_privilege_car_id`),
-	FOREIGN KEY (`car_privilege_user_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`car_privilege_car_id`) REFERENCES Cars(`car_id`)
+	FOREIGN KEY (`car_privilege_user_id`) REFERENCES users(`user_id`),
+	FOREIGN KEY (`car_privilege_car_id`) REFERENCES cars(`car_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `CarCosts` (
+CREATE TABLE `carcosts` (
 	`car_cost_id` INT NOT NULL AUTO_INCREMENT,
 	`car_cost_car_id` INT NOT NULL,
 	`car_cost_proof` INT,
@@ -228,13 +228,13 @@ CREATE TABLE `CarCosts` (
 	`car_cost_created_at` DATETIME,
 	`car_cost_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
-	FOREIGN KEY (`car_cost_car_id`) REFERENCES Cars(`car_id`),
-	FOREIGN KEY (`car_cost_proof`) REFERENCES Files(`file_id`)
+	FOREIGN KEY (`car_cost_car_id`) REFERENCES cars(`car_id`),
+	FOREIGN KEY (`car_cost_proof`) REFERENCES files(`file_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `CarRides` (
+CREATE TABLE `carrides` (
   `car_ride_car_reservation_id` INT NOT NULL, # also primary key
   `car_ride_status` BIT(1) NOT NULL DEFAULT 0, # approved by owner?
   `car_ride_start_mileage` DECIMAL(10,1),
@@ -244,12 +244,12 @@ CREATE TABLE `CarRides` (
   `car_ride_created_at` DATETIME,
   `car_ride_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`car_ride_car_reservation_id`),
-  FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES CarReservations(`reservation_id`)
+  FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES carreservations(`reservation_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Refuels` (
+CREATE TABLE `refuels` (
 	`refuel_id` INT NOT NULL AUTO_INCREMENT,
 	`refuel_car_ride_id` INT NOT NULL,
 	`refuel_file_id` INT,
@@ -258,13 +258,13 @@ CREATE TABLE `Refuels` (
    	`refuel_created_at` DATETIME,
    	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),
-	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES CarRides(`car_ride_car_reservation_id`),
-	FOREIGN KEY (`refuel_file_id`) REFERENCES Files(`file_id`)
+	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`),
+	FOREIGN KEY (`refuel_file_id`) REFERENCES files(`file_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Damages` (
+CREATE TABLE `damages` (
 	`damage_id` INT NOT NULL AUTO_INCREMENT,
 	`damage_car_ride_id` INT NOT NULL,
 	`damage_filegroup_id` INT,
@@ -274,24 +274,24 @@ CREATE TABLE `Damages` (
    	`damage_created_at` DATETIME,
    	`damage_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_id`),
-	FOREIGN KEY (`damage_car_ride_id`) REFERENCES CarRides(`car_ride_car_reservation_id`),
-	FOREIGN KEY (`damage_filegroup_id`) REFERENCES FileGroups(`file_group_id`)
+	FOREIGN KEY (`damage_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`),
+	FOREIGN KEY (`damage_filegroup_id`) REFERENCES filegroups(`file_group_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `DamageLogs` (
+CREATE TABLE `damagelogs` (
 	`damage_log_id` INT NOT NULL AUTO_INCREMENT,
 	`damage_log_damage_id` INT NOT NULL,
 	`damage_log_description` TEXT,
    	`damage_log_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_log_id`),
-	FOREIGN KEY (`damage_log_damage_id`) REFERENCES Damages(`damage_id`)
+	FOREIGN KEY (`damage_log_damage_id`) REFERENCES damages(`damage_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Messages` ( # from user to user != Notifications
+CREATE TABLE `messages` ( # from user to user != notifications
 	`message_id` INT NOT NULL AUTO_INCREMENT,
 	`message_from_user_id` INT NOT NULL,
 	`message_to_user_id` INT NOT NULL,
@@ -301,13 +301,13 @@ CREATE TABLE `Messages` ( # from user to user != Notifications
    `message_created_at` DATETIME,
    `message_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`message_id`),
-	FOREIGN KEY (`message_from_user_id`) REFERENCES Users(`user_id`),
-	FOREIGN KEY (`message_to_user_id`) REFERENCES Users(`user_id`)
+	FOREIGN KEY (`message_from_user_id`) REFERENCES users(`user_id`),
+	FOREIGN KEY (`message_to_user_id`) REFERENCES users(`user_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Templates` (
+CREATE TABLE `templates` (
 	`template_id` INT NOT NULL,
 	`template_title` VARCHAR(255) NOT NULL,
 	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
@@ -322,7 +322,7 @@ CREATE TABLE `Templates` (
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `TemplateTags` ( # Welke tags kunnen we gebruiken in de templates
+CREATE TABLE `templatetags` ( # Welke tags kunnen we gebruiken in de templates
 	`template_tag_id` INT NOT NULL AUTO_INCREMENT,
 	`template_tag_body` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`template_tag_id`)
@@ -330,29 +330,29 @@ CREATE TABLE `TemplateTags` ( # Welke tags kunnen we gebruiken in de templates
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `TemplateTagAssociations` ( # Welke tags horen bij welke templates
+CREATE TABLE `templatetagassociations` ( # Welke tags horen bij welke templates
 	`template_tag_association_id` INT NOT NULL AUTO_INCREMENT,
 	`template_tag_id` INT NOT NULL,
 	`template_id` INT NOT NULL,
 	PRIMARY KEY (`template_tag_association_id`),
-	FOREIGN KEY (`template_id`) REFERENCES Templates(`template_id`),
-	FOREIGN KEY (`template_tag_id`) REFERENCES TemplateTags(`template_tag_id`)
+	FOREIGN KEY (`template_id`) REFERENCES templates(`template_id`),
+	FOREIGN KEY (`template_tag_id`) REFERENCES templatetags(`template_tag_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Verifications` (
+CREATE TABLE `verifications` (
 	`verification_ident` CHAR(37) NOT NULL,
 	`verification_user_id` INT(11) NOT NULL,
 	`verification_type` ENUM('REGISTRATION','PWRESET') NOT NULL DEFAULT 'REGISTRATION',
 	`verification_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`verification_user_id`, `verification_type`),
-	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `Users` (`user_id`)
+	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `users` (`user_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
 
-CREATE TABLE `Notifications` ( # from system to user
+CREATE TABLE `notifications` ( # from system to user
 	`notification_id` INT NOT NULL AUTO_INCREMENT,
 	`notification_user_id` INT NOT NULL,
 	`notification_read` BIT(1) NOT NULL DEFAULT 0,
@@ -361,7 +361,7 @@ CREATE TABLE `Notifications` ( # from system to user
    `notification_created_at` DATETIME,
    `notification_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`notification_id`),
-	FOREIGN KEY (`notification_user_id`) REFERENCES Users(`user_id`)
+	FOREIGN KEY (`notification_user_id`) REFERENCES users(`user_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
@@ -410,21 +410,21 @@ CREATE TABLE `settings` (
 
 DELIMITER $$
 
-CREATE TRIGGER Files_ins BEFORE INSERT ON Files FOR EACH ROW
+CREATE TRIGGER files_ins BEFORE INSERT ON files FOR EACH ROW
 BEGIN
   IF new.file_created_at IS NULL THEN
     SET new.file_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Addresses_ins BEFORE INSERT ON Addresses FOR EACH ROW
+CREATE TRIGGER addresses_ins BEFORE INSERT ON addresses FOR EACH ROW
 BEGIN
   IF new.address_created_at IS NULL THEN
     SET new.address_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Users_ins BEFORE INSERT ON Users FOR EACH ROW
+CREATE TRIGGER users_ins BEFORE INSERT ON users FOR EACH ROW
 BEGIN
   IF new.user_created_at IS NULL THEN
     SET new.user_created_at = now();
@@ -434,84 +434,84 @@ BEGIN
   END IF;
 END $$
 
-CREATE TRIGGER Cars_ins BEFORE INSERT ON Cars FOR EACH ROW
+CREATE TRIGGER cars_ins BEFORE INSERT ON cars FOR EACH ROW
 BEGIN
   IF new.car_created_at IS NULL THEN
     SET new.car_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER CarInsurances_ins BEFORE INSERT ON CarInsurances FOR EACH ROW
+CREATE TRIGGER carinsurances_ins BEFORE INSERT ON carinsurances FOR EACH ROW
 BEGIN
   IF new.insurance_created_at IS NULL THEN
     SET new.insurance_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER TechnicalCarsDetails_ins BEFORE INSERT ON TechnicalCarDetails FOR EACH ROW
+CREATE TRIGGER TechnicalcarsDetails_ins BEFORE INSERT ON technicalcardetails FOR EACH ROW
 BEGIN
   IF new.details_created_at IS NULL THEN
     SET new.details_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER CarReservations_ins BEFORE INSERT ON CarReservations FOR EACH ROW
+CREATE TRIGGER carreservations_ins BEFORE INSERT ON carreservations FOR EACH ROW
 BEGIN
   IF new.reservation_created_at IS NULL THEN
     SET new.reservation_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER InfoSessions_ins BEFORE INSERT ON InfoSessions FOR EACH ROW
+CREATE TRIGGER infosessions_ins BEFORE INSERT ON infosessions FOR EACH ROW
 BEGIN
   IF new.infosession_created_at IS NULL THEN
     SET new.infosession_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER CarCosts_ins BEFORE INSERT ON CarCosts FOR EACH ROW
+CREATE TRIGGER carcosts_ins BEFORE INSERT ON carcosts FOR EACH ROW
 BEGIN
   IF new.car_cost_created_at IS NULL THEN
     SET new.car_cost_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Refuels_ins BEFORE INSERT ON Refuels FOR EACH ROW
+CREATE TRIGGER refuels_ins BEFORE INSERT ON refuels FOR EACH ROW
 BEGIN
   IF new.refuel_created_at IS NULL THEN
     SET new.refuel_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Damages_ins BEFORE INSERT ON Damages FOR EACH ROW
+CREATE TRIGGER damages_ins BEFORE INSERT ON damages FOR EACH ROW
 BEGIN
   IF new.damage_created_at IS NULL THEN
     SET new.damage_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER CarRides_ins BEFORE INSERT ON CarRides FOR EACH ROW
+CREATE TRIGGER carrides_ins BEFORE INSERT ON carrides FOR EACH ROW
 BEGIN
   IF new.car_ride_created_at IS NULL THEN
     SET new.car_ride_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Templates_ins BEFORE INSERT ON Templates FOR EACH ROW
+CREATE TRIGGER templates_ins BEFORE INSERT ON templates FOR EACH ROW
 BEGIN
   IF new.template_created_at IS NULL THEN
     SET new.template_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Messages_ins BEFORE INSERT ON Messages FOR EACH ROW
+CREATE TRIGGER messages_ins BEFORE INSERT ON messages FOR EACH ROW
 BEGIN
   IF new.message_created_at IS NULL THEN
     SET new.message_created_at = now();
   END IF;
 END $$
 
-CREATE TRIGGER Notifications_ins BEFORE INSERT ON Notifications FOR EACH ROW
+CREATE TRIGGER notifications_ins BEFORE INSERT ON notifications FOR EACH ROW
 BEGIN
   IF new.notification_created_at IS NULL THEN
     SET new.notification_created_at = now();

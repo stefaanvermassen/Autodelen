@@ -16,9 +16,9 @@ public class JDBCMessageDAO implements MessageDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"message_id"};
 
-    private static final String MESSAGE_QUERY = "SELECT * FROM Messages " +
-            "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
-            "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id ";
+    private static final String MESSAGE_QUERY = "SELECT * FROM messages " +
+            "JOIN users AS Sender ON message_from_user_id = Sender.user_id " +
+            "JOIN users AS Receiver ON message_to_user_id = Receiver.user_id ";
 
     public static final String FILTER_FRAGMENT = " WHERE message_to_user_id=? OR message_from_user_id=?";
 
@@ -54,7 +54,7 @@ public class JDBCMessageDAO implements MessageDAO {
 
     private PreparedStatement getCreateMessageStatement() throws SQLException {
         if (createMessageStatement == null) {
-            createMessageStatement = connection.prepareStatement("INSERT INTO Messages (message_from_user_id, message_to_user_id, " +
+            createMessageStatement = connection.prepareStatement("INSERT INTO messages (message_from_user_id, message_to_user_id, " +
                     "message_read, message_subject, message_body) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createMessageStatement;
@@ -69,14 +69,14 @@ public class JDBCMessageDAO implements MessageDAO {
 
     private PreparedStatement getSetReadStatement() throws SQLException {
         if (setReadStatement == null) {
-            setReadStatement = connection.prepareStatement("UPDATE Messages SET message_read = ? WHERE message_id = ?;");
+            setReadStatement = connection.prepareStatement("UPDATE messages SET message_read = ? WHERE message_id = ?;");
         }
         return setReadStatement;
     }
 
     private PreparedStatement getNumberOfUnreadMessagesStatement() throws SQLException {
         if (getNumberOfUnreadMessagesStatement == null) {
-            getNumberOfUnreadMessagesStatement = connection.prepareStatement("SELECT COUNT(*) AS unread_number FROM Messages " +
+            getNumberOfUnreadMessagesStatement = connection.prepareStatement("SELECT COUNT(*) AS unread_number FROM messages " +
                     "WHERE message_to_user_id=? AND message_read=0;");
         }
         return getNumberOfUnreadMessagesStatement;
@@ -84,9 +84,9 @@ public class JDBCMessageDAO implements MessageDAO {
 
     private PreparedStatement getGetAmountOfMessagesStatement() throws SQLException {
         if(getAmountOfMessagesStatement == null) {
-            getAmountOfMessagesStatement = connection.prepareStatement("SELECT count(*) as amount_of_messages FROM Messages " +
-                    "JOIN Users AS Sender ON message_from_user_id = Sender.user_id " +
-                    "JOIN Users AS Receiver ON message_to_user_id = Receiver.user_id "+ FILTER_FRAGMENT);
+            getAmountOfMessagesStatement = connection.prepareStatement("SELECT count(*) as amount_of_messages FROM messages " +
+                    "JOIN users AS Sender ON message_from_user_id = Sender.user_id " +
+                    "JOIN users AS Receiver ON message_to_user_id = Receiver.user_id "+ FILTER_FRAGMENT);
         }
         return getAmountOfMessagesStatement;
     }

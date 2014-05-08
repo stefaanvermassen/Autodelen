@@ -25,12 +25,12 @@ public class JDBCDamageDAO implements DamageDAO {
     private PreparedStatement getDamageStatement;
     private PreparedStatement getUserDamagesStatement;
     private PreparedStatement updateDamageStatement;
-    private static final String DAMAGE_QUERY = "SELECT * FROM Damages " +
-            "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
-            "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
-            "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
-            "JOIN Cars ON reservation_car_id = car_id " +
-            "JOIN Users ON reservation_user_id = user_id ";
+    private static final String DAMAGE_QUERY = "SELECT * FROM damages " +
+            "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
+            "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+            "LEFT JOIN filegroups ON damage_filegroup_id = file_group_id " +
+            "JOIN cars ON reservation_car_id = car_id " +
+            "JOIN users ON reservation_user_id = user_id ";
 
     public JDBCDamageDAO(Connection connection) {
         this.connection = connection;
@@ -46,7 +46,7 @@ public class JDBCDamageDAO implements DamageDAO {
 
     private PreparedStatement getCreateDamageStatement() throws SQLException {
         if (createDamageStatement == null) {
-            createDamageStatement = connection.prepareStatement("INSERT INTO Damages " +
+            createDamageStatement = connection.prepareStatement("INSERT INTO damages " +
                     "(damage_car_ride_id, damage_time) VALUES(?, ?)", AUTO_GENERATED_KEYS);
         }
         return createDamageStatement;
@@ -54,7 +54,7 @@ public class JDBCDamageDAO implements DamageDAO {
 
     private PreparedStatement getDeleteDamageStatement() throws SQLException {
         if (deleteDamageStatement == null) {
-            deleteDamageStatement = connection.prepareStatement("DELETE FROM Damages WHERE damage_id = ?");
+            deleteDamageStatement = connection.prepareStatement("DELETE FROM damages WHERE damage_id = ?");
         }
         return deleteDamageStatement;
     }
@@ -85,7 +85,7 @@ public class JDBCDamageDAO implements DamageDAO {
 
     private PreparedStatement getUpdateDamageStatement() throws SQLException {
         if (updateDamageStatement == null) {
-            updateDamageStatement = connection.prepareStatement("UPDATE Damages SET damage_car_ride_id = ? ," +
+            updateDamageStatement = connection.prepareStatement("UPDATE damages SET damage_car_ride_id = ? ," +
                     "damage_description = ? , damage_finished = ? , damage_time = ? "
                     + "WHERE damage_id = ?");
         }
