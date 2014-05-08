@@ -502,7 +502,7 @@ public class Cars extends Controller {
                     String[] vs = value.split(",");
                     if(vs.length != 5) {
                         flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
-                        return badRequest(detail.render(car));
+                        return redirect(routes.Cars.detail(carId));
                     }
                     try {
                         int id = Integer.parseInt(vs[0]);
@@ -521,7 +521,7 @@ public class Cars extends Controller {
                         }
                     } catch(ArrayIndexOutOfBoundsException | NumberFormatException e ) {
                         flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
-                        return badRequest(detail.render(car));
+                        return redirect(routes.Cars.detail(carId));
                     }
                 }
 
@@ -583,11 +583,11 @@ public class Cars extends Controller {
                         }
                         if(user == null) {
                             flash("error", "De opgegeven gebruiker bestaat niet.");
-                            return badRequest(detail.render(car));
+                            return redirect(routes.Cars.detail(carId));
                         }
                     } catch(NumberFormatException e) {
                         flash("error", "Er is een fout gebeurd bij het doorgeven van de gepriviligieerden.");
-                        return badRequest(detail.render(car));
+                        return redirect(routes.Cars.detail(carId));
                     }
                 }
 
@@ -631,7 +631,7 @@ public class Cars extends Controller {
                 return badRequest(carList());
             }
 
-            return ok(detail.render(car));
+            return ok(detail.render(car, null));
         } catch (DataAccessException ex) {
             throw ex;
             //TODO: log
@@ -725,7 +725,7 @@ public class Cars extends Controller {
                 CarDAO dao = context.getCarDAO();
                 Car car = dao.getCar(carId);
                 flash("danger", "Kost toevoegen mislukt.");
-                return badRequest(detail.render(car));
+                return redirect(routes.Cars.detail(carId));
             }catch(DataAccessException ex){
                 throw ex; //log?
             }
