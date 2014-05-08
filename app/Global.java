@@ -12,6 +12,7 @@ import play.*;
 import play.data.format.Formatters;
 import providers.DataProvider;
 import scala.concurrent.duration.Duration;
+import schedulers.CheckFinishedRidesJob;
 import schedulers.Scheduler;
 import schedulers.SendUnreadNotificationsMailScheduler;
 
@@ -63,9 +64,10 @@ public class Global extends GlobalSettings {
             Logger.error("Could not load database properties: " + ex.getMessage());
         }
 
-        Scheduler scheduler = Scheduler.getInstance(); // This sho
+        Scheduler scheduler = Scheduler.getInstance();
         scheduler.start();
-        scheduler.schedule(Duration.create(1, TimeUnit.HOURS) ,new SendUnreadNotificationsMailScheduler());
+        scheduler.schedule(Duration.create(1, TimeUnit.HOURS) ,new SendUnreadNotificationsMailScheduler()); // send notifications when enough
+        scheduler.schedule(Duration.create(1, TimeUnit.MINUTES), new CheckFinishedRidesJob()); // change ride status to finished
     }
 
     public void onStop(Application app) {
