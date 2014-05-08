@@ -265,47 +265,14 @@ public class Drives extends Controller {
         }
     }
 
-
-    /**
-     * Method: GET
-     *
-     * Called when a reservation of a car is approved by the owner.
-     *
-     * @param reservationId The id of the reservation being approved
-     * @return the drives index page
-     */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
-    public static Result approveReservation(int reservationId) {
-        Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
-        if(reservation == null)
-            return badRequest(showIndex());
-
-        Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "", reservation);
-        return details(reservationId);
-    }
-
     /**
      * Method: POST
      *
-     * Called when a reservation of a car is refused by the owner.
+     * Called when a reservation of a car is refused/accepted by the owner.
      *
-     * @param reservationId the id of the reservation being refused
+     * @param reservationId the id of the reservation being refused/accepted
      * @return the drives index page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
-    public static Result refuseReservation(int reservationId) {
-        Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
-        Form<InfoModel> detailsForm = Form.form(InfoModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
-        if(refuseForm.hasErrors())
-            return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
-        Reservation reservation = adjustStatus(reservationId, ReservationStatus.REFUSED);
-        if(reservation == null) {
-            return badRequest(showIndex());
-        }
-        return details(reservationId);
-    }
-
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result setReservationStatus(int reservationId) {
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
