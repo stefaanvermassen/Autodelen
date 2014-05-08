@@ -28,6 +28,8 @@ public class Application extends Controller {
                         routes.javascript.Refuels.provideRefuelInfo(),
                         routes.javascript.Refuels.showUserRefuelsPage(),
                         routes.javascript.Refuels.showOwnerRefuelsPage(),
+                        routes.javascript.Damages.showDamagesPage(),
+                        routes.javascript.Damages.showDamagesPageAdmin(),
                         routes.javascript.Damages.editDamage(),
                         routes.javascript.Damages.addStatus(),
                         routes.javascript.Damages.addProof(),

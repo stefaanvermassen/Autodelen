@@ -40,6 +40,11 @@ public class Addresses extends Controller {
         public boolean isEmpty() {
             return nullOrEmpty(bus) && nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(number);
         }
+
+        public boolean enoughFilled() {
+            // bus can be empty, rest not
+            return !nullOrEmpty(zipCode) && !nullOrEmpty(city) && !nullOrEmpty(street) && !nullOrEmpty(number);
+        }
     }
 
     private static boolean nullOrEmpty(String s) {

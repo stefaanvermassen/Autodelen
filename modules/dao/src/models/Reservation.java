@@ -18,14 +18,16 @@ public class Reservation {
     private User user;
     private DateTime from;
     private DateTime to;
+    private String message;
 
-    public Reservation(int id, Car car, User user, DateTime from, DateTime to) {
+    public Reservation(int id, Car car, User user, DateTime from, DateTime to, String message) {
         this.id = id;
         this.car = car;
         this.user = user;
         this.from = from;
         this.to = to;
         this.status = ReservationStatus.REQUEST;
+        this.message = message;
     }    
     
     public int getId() {
@@ -71,5 +73,12 @@ public class Reservation {
     public void setTo(DateTime to) {
         this.to = to;
     }
-    
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

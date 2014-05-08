@@ -66,7 +66,9 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
-        Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs, false), JDBCUserDAO.populateUser(rs, false, false), new DateTime(rs.getTimestamp("reservation_from")), new DateTime(rs.getTimestamp("reservation_to")));
+        Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs, false),
+                JDBCUserDAO.populateUser(rs, false, false), new DateTime(rs.getTimestamp("reservation_from")),
+                new DateTime(rs.getTimestamp("reservation_to")), rs.getString("reservation_message"));
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         return reservation;
     }
@@ -81,7 +83,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getCreateReservationStatement() throws SQLException {
         if (createReservationStatement == null) {
             createReservationStatement = connection.prepareStatement("INSERT INTO carreservations (reservation_user_id, reservation_car_id, reservation_status,"
-                    + "reservation_from, reservation_to) VALUES (?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createReservationStatement;
     }
@@ -89,7 +91,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getUpdateReservationStatement() throws SQLException {
         if (updateReservationStatement == null) {
             updateReservationStatement = connection.prepareStatement("UPDATE carreservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
-                    + "reservation_from=? , reservation_to=? WHERE reservation_id = ?");
+                    + "reservation_from=? , reservation_to=?, reservation_message = ?WHERE reservation_id = ?");
         }
         return updateReservationStatement;
     }
@@ -168,7 +170,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     @Override
-    public Reservation createReservation(DateTime from, DateTime to, Car car, User user) throws DataAccessException {
+    public Reservation createReservation(DateTime from, DateTime to, Car car, User user, String message) throws DataAccessException {
         try{
             PreparedStatement ps = getCreateReservationStatement();
             ps.setInt(1, user.getId());
@@ -176,13 +178,14 @@ public class JDBCReservationDAO implements ReservationDAO{
             ps.setString(3, ReservationStatus.REQUEST.toString());
             ps.setTimestamp(4, new Timestamp(from.getMillis()));
             ps.setTimestamp(5, new Timestamp(to.getMillis()));
+            ps.setString(6, message);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating reservation.");
             
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Reservation(keys.getInt(1), car, user, from, to);
+                return new Reservation(keys.getInt(1), car, user, from, to, message);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new reservation.", ex);
             }
@@ -201,7 +204,8 @@ public class JDBCReservationDAO implements ReservationDAO{
             ps.setString(3, reservation.getStatus().toString());
             ps.setTimestamp(4, new Timestamp(reservation.getFrom().getMillis()));
             ps.setTimestamp(5, new Timestamp(reservation.getTo().getMillis()));
-            ps.setInt(6, reservation.getId());
+            ps.setString(6, reservation.getMessage());
+            ps.setInt(7, reservation.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Reservation update affected 0 rows.");

@@ -9,9 +9,10 @@ package database;
  */
 public enum FilterField {
 
-    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true),
+    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_MANUAL(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true), CAR_ACTIVE(true),
     CAR_COST_STATUS(false), CAR_COST_DATE(true),
     REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_NOT_STATUS(true),
+    DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
     INFOSESSION_DATE(true), INFOSESSION_TYPE(false),
@@ -52,6 +53,9 @@ public enum FilterField {
                 break;
             case "seats":
                 field = CAR_SEATS;
+                break;
+            case "manual":
+                field = CAR_MANUAL;
                 break;
             case "gps":
                 field = CAR_GPS;
@@ -100,6 +104,18 @@ public enum FilterField {
                 break;
             case "car_cost_date":
                 field = CAR_COST_DATE;
+                break;
+            case "damage_finished":
+                field = DAMAGE_FINISHED;
+                break;
+            case "damage_user_id":
+                field = DAMAGE_USER_ID;
+                break;
+            case "damage_owner_id":
+                field = DAMAGE_OWNER_ID;
+                break;
+            case "damage_car_id":
+                field = DAMAGE_CAR_ID;
                 break;
         }
         return field;

@@ -35,7 +35,7 @@
  * In the partial file:
  *  ...
  *  <th name="name" class="sortable">Naam</th>
- *  <th name="brand" id= class="sortable">Merk</th>
+ *  <th name="brand" class="sortable">Merk</th>
  * ...
  *  <p id="pagination" name="@amountOfResults, @amountOfPages"></p>
  */
