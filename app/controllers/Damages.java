@@ -1,9 +1,11 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
 import models.*;
 import org.joda.time.DateTime;
+import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -20,6 +22,8 @@ import static controllers.util.Addresses.getCountryList;
  * Created by Stefaan Vermassen on 03/05/14.
  */
 public class Damages extends Controller {
+
+    private static final int PAGE_SIZE = 10;
 
     public static class DamageModel {
 
@@ -57,27 +61,58 @@ public class Damages extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result showDamages() {
-        User user = DataProvider.getUserProvider().getUser();
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            DamageDAO dao = context.getDamageDAO();
-            List<Damage> damageList = dao.getUserDamages(user.getId());
-            return ok(damages.render(damageList));
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        return ok(damages.render());
     }
 
     /**
      * Method: GET
      *
-     * @return index page containing all the damages from a specific user
+     * @return index page containing all the damages from everyone
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showAllDamages() {
+        return ok(damagesAdmin.render());
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result showDamagesPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField carField = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        User user = DataProvider.getUserProvider().getUser();
+        filter.putValue(FilterField.DAMAGE_USER_ID, user.getId() + "");
+        filter.putValue(FilterField.DAMAGE_FINISHED, "-1");
+
+        return ok(damageList(page, carField, asc, filter));
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showDamagesPageAdmin(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField carField = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+        return ok(damageList(page, carField, asc, filter));
+    }
+
+    private static Html damageList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             DamageDAO dao = context.getDamageDAO();
-            List<Damage> damageList = dao.getUnfinishedDamages();
-            return ok(damagesAdmin.render(damageList));
+
+            if(orderBy == null) {
+                orderBy = FilterField.DAMAGE_FINISHED;
+            }
+
+            List<Damage> listOfResults = dao.getDamages(orderBy, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfDamages(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return damagespage.render(listOfResults, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
         }

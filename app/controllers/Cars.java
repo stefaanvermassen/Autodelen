@@ -70,6 +70,7 @@ public class Cars extends Controller {
         public String type;
         public Integer seats;
         public Integer doors;
+        public boolean manual;
         public boolean gps;
         public boolean hook;
         public Integer year;
@@ -104,6 +105,7 @@ public class Cars extends Controller {
             seats = car.getSeats();
             doors = car.getDoors();
             year = car.getYear();
+            manual = car.isManual();
             gps = car.isGps();
             hook = car.isHook();
             fuel = car.getFuel().getDescription();
@@ -140,8 +142,8 @@ public class Cars extends Controller {
             String error = "";
             if(userId == null || userId == 0)
                 error += "Geef een eigenaar op. ";
-            if(address.isEmpty())
-                error += "Geef het adres op. ";
+            if(!address.enoughFilled())
+                error += "Geef het adres op.";
             if(name.length() <= 0)
                 error +=  "Geef de autonaam op. ";
             if(brand.length() <= 0)
@@ -279,7 +281,7 @@ public class Cars extends Controller {
                         insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                            model.year, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
+                            model.year, model.manual, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
                             model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active);
 
                     context.commit();
@@ -376,6 +378,7 @@ public class Cars extends Controller {
                     car.setSeats(model.seats);
                 else
                     car.setSeats((null));
+                car.setManual(model.manual);
                 car.setGps(model.gps);
                 car.setHook(model.hook);
                 car.setFuel(CarFuel.getFuelFromString(model.fuel));
@@ -438,13 +441,7 @@ public class Cars extends Controller {
                 }
                 AddressDAO adao = context.getAddressDAO();
                 Address address = car.getLocation();
-                boolean delete = model.address.isEmpty() && address != null;
-                car.setLocation(delete || model.address.isEmpty() ? null : modifyAddress(model.address, address, adao));
-
-                // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
-                // TODO: soft-delete addresses and keep references
-                if (delete)
-                    adao.deleteAddress(address);
+                car.setLocation(modifyAddress(model.address, address, adao));
 
                 car.setComments(model.comments);
 

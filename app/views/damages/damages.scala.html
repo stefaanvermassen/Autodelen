@@ -1,6 +1,14 @@
-@(damageList: java.util.List[Damage])
-@import org.joda.time.format.DateTimeFormat
-@app("Schadedossiers") {
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+    var route = myJsRoutes.controllers.Damages.showDamagesPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
+@app("Schadedossiers", stylesheets, scripts) {
 
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -19,41 +27,9 @@
                 </p>
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
-                            <thead>
-                                <tr role="row">
-                                    <th>Auto</th>
-                                    <th>Autorit van</th>
-                                    <th>Autorit tot</th>
-                                    <th>Afgelopen</th>
-                                    <th>Acties</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @if(damageList.isEmpty) {
-                                <tr>
-                                    <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="6">
-                                        U heeft momenteel geen schadedossiers in het systeem. Deze zullen automatisch worden aangevuld na het invullen van ritdetails.
-                                    </td>
-                                </tr>
-                            } else {
-                                @for(damage <- damageList) {
-                                    <tr>
-                                        <td>@damage.getCarRide.getReservation.getCar.getName</td>
-                                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getFrom)</td>
-                                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getTo)</td>
-                                        <td>@if(damage.getFinished){Ja}else{Nee}</td>
-                                        <td>
-                                            <div class="btn-group btn-group-xs">
-                                                <a class="btn btn-primary" href="@routes.Damages.showDamageDetails(damage.getId)">Details</a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            </tbody>
-                        </table>
-
+                        <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
+                        </div>
                     </div>
                         <!-- /.panel-body -->
                 </div>

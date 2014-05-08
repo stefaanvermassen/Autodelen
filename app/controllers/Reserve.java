@@ -49,6 +49,8 @@ public class Reserve extends Controller {
         // Date and time the user will return the car to the owner
         public String until;
 
+        public String message;
+
         /**
          * @return the start datetime of the reservation
          */
@@ -176,7 +178,7 @@ public class Reserve extends Controller {
 
                 // Create the reservation
                 User user = DataProvider.getUserProvider().getUser();
-                Reservation reservation = rdao.createReservation(from, until, car, user);
+                Reservation reservation = rdao.createReservation(from, until, car, user, reservationForm.get().message);
 
                 // Schedule the auto accept
                 JobDAO jdao = context.getJobDAO();
@@ -242,6 +244,7 @@ public class Reserve extends Controller {
             } catch(IllegalArgumentException ex) {
                 return ok(reservationspage.render(new ArrayList<Car>(), page, 0, 0, false));
             }
+            filter.putValue(FilterField.CAR_ACTIVE, "1");
 
             List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
 

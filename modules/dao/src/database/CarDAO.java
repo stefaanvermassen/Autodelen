@@ -14,8 +14,8 @@ import java.util.List;
  */
 public interface CarDAO {
 
-    public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook,
-                         CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
+    public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
+                         boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                          TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active) throws DataAccessException;
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
