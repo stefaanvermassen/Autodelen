@@ -66,7 +66,8 @@ public class Maps extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Promise<Result> getMap(int zoom, int x, int y) {
-        final Promise<Result> resultPromise = WS.url(String.format(TILE_URL, zoom, x, y)).get().map(
+        String mapServer = DataProvider.getSettingProvider().getStringOrDefault("maps_tile_server", TILE_URL);
+        final Promise<Result> resultPromise = WS.url(String.format(mapServer, zoom, x, y)).get().map(
                 new Function<WS.Response, Result>() {
                     public Result apply(WS.Response response) {
                         return ok(response.getBodyAsStream()).as("image/jpeg");
