@@ -37,7 +37,7 @@
                             @if(form("userId").value){
                                 @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
                                     <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
-                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" autocomplete="false" />
                                         <input type="hidden" name="userId" value="@user.getId" />
                                         <ul class="dropdown-menu" role="menu"></ul>
                                     </div>
