@@ -1,5 +1,5 @@
-@(user: User, completeness: Int = 0)
-
+@(user: User, completeness: Int = 0, editable: Boolean)
+@import providers.DataProvider;
 @app("Profiel") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -13,13 +13,21 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-wrench"></i> Profile toolbox
+                    </div>
                     <div class="panel-body">
-                        <p>
-                            Profiel compleetheid:
-                        </p>
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width:@completeness%;">@completeness%</div>
-                        </div>
+                        @if(editable) {
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                            </div>
+
+                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.edit(user.getId)">Profielinformatie wijzigen</a>
+                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.profilePictureUpload(user.getId)">Profielfoto wijzigen</a>
+                            <a class="smallprofile-static btn btn-default btn-sm" class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijs wijzigen</a>
+                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitskaart wijzigen</a>
+
+                        }
                     </div>
                 </div>
             </div>
@@ -29,7 +37,7 @@
                 <div class="panel panel-default">
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                    @smallProfile(user)
+                    @smallProfile(user, editable)
                     </div>
                         <!-- /.panel-body -->
                 </div>
@@ -66,19 +74,27 @@
                                 }
                             </div>
                             <div class="form-group">
-                                <label class="h4">Rijksregisternummer</label>
+                                <label class="h4">Identiteitskaart</label>
                                 <p class="form-control-static">
-                                    XXX.XXXX.XXXXXXX</p> @* TODO: nummer in identity card DAO *@
-                            </div>
-                            <div class="form-group">
-                                <label class="h4">Contactverantwoordelijke</label>
-                                @defining(user.getContractManager) { manager =>
-                                    @if(manager != null) {
-                                        <p class="form-control-static"><a href="@routes.Profile.index(manager.getId)">@manager.getFirstName @manager.getLastName</a></p>
+                                    @if(user.getIdentityCard != null && user.getIdentityCard.getRegistrationNr != null && !user.getIdentityCard.getRegistrationNr.isEmpty) {
+                                        @user.getIdentityCard.getRegistrationNr
                                     } else {
-                                        <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
+                                        Niet gespecifieerd.
                                     }
-                                }
+                                    <br/>
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="h4">Rijbewijs</label>
+                                <p class="form-control-static">
+                                    @if(user.getDriverLicense != null && user.getDriverLicense.getId != null && !user.getDriverLicense.getId.isEmpty) {
+                                        @user.getDriverLicense.getId
+                                    } else {
+                                        Niet gespecifieerd.
+                                    }
+                                    <br/>
+                                </p>
                             </div>
                         </form>
                     </div>

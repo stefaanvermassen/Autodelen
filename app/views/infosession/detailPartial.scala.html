@@ -1,11 +1,18 @@
-@(infoSession: InfoSession, mapDetails: Maps.MapDetails = null)
+@(infoSession: InfoSession, canClick: Boolean, mapDetails: Maps.MapDetails = null)
 <div class="row">
     <div class="col-lg-4">
-        <div class="well">
+        <div class="">
             <p>
-                <strong>Host:</strong> <a href="@routes.Profile.index(infoSession.getHost.getId)">@infoSession.getHost.getFirstName @infoSession.getHost.getLastName</a><br>
-                <strong>Type:</strong> @infoSession.getType.name()<br>
-                <strong>Datum:</strong> @infoSession.getTime.toString("dd/MM/yyyy")<br>
+                <strong>Host:</strong>
+                @if(canClick) {
+                    <a href="@routes.Profile.index(infoSession.getHost.getId)">@infoSession.getHost.getFirstName @infoSession.getHost.getLastName</a>
+                } else {
+                    @infoSession.getHost.getFirstName @infoSession.getHost.getLastName
+                }
+                <br>
+
+                <strong>Type:</strong> @infoSession.getType.getDescription @if(infoSession.getType.equals(InfoSessionType.OTHER)) { : @infoSession.getTypeAlternative } <br>
+                <strong>Datum:</strong> @infoSession.getTime.toString("dd-MM-yyyy")<br>
                 <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
                 @if(infoSession.getMaxEnrollees == 0){
@@ -17,7 +24,8 @@
                     } else {
                         Volzet (Max. @infoSession.getMaxEnrollees)
                     }
-                }
+                } <br>
+                <strong>Commentaar:</strong> @infoSession.getComments<br>
             </p>
         </div>
     </div>

@@ -3,8 +3,14 @@ project/project
 project/target
 target
 tmp
+uploads
 .history
 dist
+modules/dao/.idea
+modules/dao/dao.iml
+modules/dao/module_dao.xml
+modules/dao/dao.xml
+modules/dao/dao.properties
 /.idea
 /*.iml
 /out
@@ -18,3 +24,6 @@ dist
 .target
 .metadata
 .DS_Store
+*.class
+lib/dao.jar
+lib/dao.jar

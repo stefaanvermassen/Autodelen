@@ -1,5 +1,5 @@
 @(infoSession: InfoSession, enrolled: InfoSession = null, map: Maps.MapDetails = null)
-@import database.DatabaseHelper;
+@import providers.DataProvider;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
 
@@ -20,10 +20,6 @@
 
 @stylesheets = {
     <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
-
-    <style>
-            #map { height: 400px; width: 1000px; } /* TODO: make responsive */
-    </style>
 }
 
 @app("Details Infosessie", stylesheets, scripts) {
@@ -39,7 +35,9 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-        @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+            <h1 class="page-header">Details infosessie</h1>
+        @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+                @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
            @flashes()
             @if(isAdmin) {
                 <div class="panel panel-default">
@@ -61,14 +59,14 @@
                 <!-- /.panel-heading -->
                 <div class="panel-body">
                     @* TODO: refine logic behind buttons *@
-                    @detailPartial(infoSession, map)
+                    @detailPartial(infoSession, fullUser, map)
                     @if(enrolled == null ) {
                         <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Inschrijven</a>
                     } else {
                         @if(enrolled.getId == infoSession.getId){
-                            <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven uit deze infosessie</a>
+                            <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
                         } else {
-                            <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Uitschrijven uit andere infosessie en inschrijven voor deze infosessie</a>
+                            <button class="btn btn-success" data-toggle="modal" data-target="#myModal">Inschrijven</button>
                         }
                     }
                 </div>
@@ -98,7 +96,13 @@
                                 @for((enrollee, index) <- infoSession.getEnrolled.zipWithIndex) {
                                     <tr>
                                         <td>@(index + 1)</td>
-                                        <td><a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser</a></td>
+                                        <td>
+                                            @if(fullUser) {
+                                                <a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser.getFirstName @enrollee.getUser.getLastName</a>
+                                            } else {
+                                                @enrollee.getUser.getFirstName @enrollee.getUser.getLastName
+                                            }
+                                        </td>
                                         @if(isAdmin) {
                                             <td>
                                                 <div class="btn-group btn-group-xs">
@@ -148,4 +152,23 @@
     </div>
 </div>
 <!-- /page-wrapper -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Infosessie wijzigen</h4>
+      </div>
+      <div class="modal-body">
+        Je hebt je reeds voor een andere infosessie ingeschreven. Ben je zeker dat je deze wilt wijzigen?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+        <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Ja, schrijf me in voor deze infosessie</a>
+      </div>
+    </div>
+  </div>
+</div>
+}
 }

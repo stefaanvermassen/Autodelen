@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
   "org.mindrot"             % "jbcrypt"                      % "0.3m", // Library for secure password storage
   "com.typesafe"            %% "play-plugins-mailer"         % "2.1-RC2",
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
-  "mysql"                   % "mysql-connector-java"         % "5.1.29"
+  "mysql"                   % "mysql-connector-java"         % "5.1.29",
+  "com.typesafe.akka"       %% "akka-actor"                  % "2.2.0"
 )
 
 play.Project.playJavaSettings

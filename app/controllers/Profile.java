@@ -1,55 +1,24 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.*;
 import database.*;
-import models.Address;
-import models.User;
-import models.UserRole;
+import models.*;
+import play.Logger;
 import play.data.Form;
 import play.mvc.*;
+import providers.DataProvider;
 import views.html.profile.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import javax.imageio.IIOException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static controllers.util.Addresses.getCountryList;
+import static controllers.util.Addresses.modifyAddress;
 
 public class Profile extends Controller {
-
-    private static List<String> COUNTRIES;
-    private static final Locale COUNTRY_LANGUAGE = new Locale("nl", "BE");
-
-    private static boolean nullOrEmpty(String s) {
-        return s == null || s.isEmpty();
-    }
-
-    public static class EditAddressModel { //TODO: unify with other models in controllers
-
-        public String city;
-        public String number;
-        public String street;
-        public String bus;
-        public String zipCode;
-        public String country;
-
-        public void populate(Address address) {
-            if (address == null) {
-                country = COUNTRY_LANGUAGE.getDisplayCountry(COUNTRY_LANGUAGE);
-                return;
-            }
-
-            city = address.getCity();
-            number = address.getCity();
-            street = address.getStreet();
-            bus = address.getBus();
-            zipCode = address.getZip();
-            country = address.getCountry();
-        }
-
-        public boolean isEmpty() {
-            return nullOrEmpty(bus) && nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(number);
-        }
-    }
 
     public static class EditProfileModel {
         public String phone;
@@ -58,15 +27,14 @@ public class Profile extends Controller {
         public String lastName;
         public String email; // TODO: verification
 
-        public String identityCardNumber;
-        public String nationalNumber;
+        public Addresses.EditAddressModel domicileAddress;
+        public Addresses.EditAddressModel residenceAddress;
 
-        public EditAddressModel domicileAddress;
-        public EditAddressModel residenceAddress;
+        public boolean paidDeposit;
 
         public EditProfileModel() {
-            this.domicileAddress = new EditAddressModel();
-            this.residenceAddress = new EditAddressModel();
+            this.domicileAddress = new Addresses.EditAddressModel();
+            this.residenceAddress = new Addresses.EditAddressModel();
         }
 
         public void populate(User user) {
@@ -81,6 +49,7 @@ public class Profile extends Controller {
 
             this.domicileAddress.populate(user.getAddressDomicile());
             this.residenceAddress.populate(user.getAddressResidence());
+            this.paidDeposit = user.isPayedDeposit();
         }
 
         public String validate() {
@@ -90,23 +59,138 @@ public class Profile extends Controller {
         }
     }
 
+    private static boolean nullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
+
     /**
-     * Lazy loads a country list in current configured locale
+     * The page to upload a new profile picture
      *
-     * @return A list of all countries enabled in the Java locale
+     * @param userId The userId for which the picture is uploaded
+     * @return The page to upload
      */
-    private static List<String> getCountryList() {
-        if (COUNTRIES == null) {
-            COUNTRIES = new ArrayList<>();
-            Locale[] locales = Locale.getAvailableLocales();
-            for (Locale obj : locales) {
-                if ((obj.getDisplayCountry() != null) && (!"".equals(obj.getDisplayCountry()))) {
-                    COUNTRIES.add(obj.getDisplayCountry(COUNTRY_LANGUAGE));
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUpload(int userId) {
+        return ok(uploadPicture.render(userId));
+    }
+
+    /**
+     * Gets the profile picture for given user Id, or default one if missing
+     *
+     * @param userId The user for which the image is requested
+     * @return The image with correct content type
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result getProfilePicture(int userId) {
+        //TODO: checks on whether other person can see this
+        //TODO: Rely on heavy caching of the image ID or views since each app page includes this
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if (user != null && user.getProfilePictureId() >= 0) {
+                return FileHelper.getFileStreamResult(context.getFileDAO(), user.getProfilePictureId());
+            } else {
+                return FileHelper.getPublicFile(Paths.get("images", "no_profile.png").toString(), "image/png");
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Processes a profile picture upload request
+     *
+     * @param userId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result profilePictureUploadPost(int userId) {
+        // First we check if the user is allowed to upload to this userId
+        User currentUser = DataProvider.getUserProvider().getUser();
+        User user;
+
+        // We load the other user(by id)
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            user = dao.getUser(userId, true);
+
+            // Check if the userId exists
+            if (user == null || currentUser.getId() != user.getId() && !DataProvider.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+
+        // Start saving the actual picture
+        Http.MultipartFormData body = request().body().asMultipartFormData();
+        Http.MultipartFormData.FilePart picture = body.getFile("picture");
+        if (picture != null) {
+            String contentType = picture.getContentType();
+            if (!FileHelper.isImageContentType(contentType)) { // Check the content type using MIME
+                flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                return badRequest(uploadPicture.render(userId));
+            } else {
+                try {
+                    // We do not put this inside the try-block because then we leave the connection open through file IO, which blocks it longer than it should.
+                    Path relativePath;
+
+                    // Non-resized:
+                    //relativePath = FileHelper.saveFile(picture, ConfigurationHelper.getConfigurationString("uploads.profile")); // save file to disk
+
+
+                    // Resized:
+                    try {
+                        relativePath = FileHelper.saveResizedImage(picture, ConfigurationHelper.getConfigurationString("uploads.profile"), 800);
+                    } catch(IIOException ex){
+                        // This means imagereader failed.
+                        Logger.error("Failed profile picture resize: " + ex.getMessage());
+                        flash("danger", "Uw afbeelding is corrupt / niet ondersteund. Gelieve het opnieuw te proberen of een administrator te contacteren.");
+                        return badRequest(uploadPicture.render(userId));
+                    }
+
+                    try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {                     // Save the file reference in the database
+                        FileDAO dao = context.getFileDAO();
+                        UserDAO udao = context.getUserDAO();
+                        try {
+                            models.File file = dao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
+                            int oldPictureId = user.getProfilePictureId();
+                            user.setProfilePictureId(file.getId());
+                            udao.updateUser(user, true);
+                            context.commit();
+
+                            if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
+                                try {
+                                    File oldPicture = dao.getFile(oldPictureId);
+                                    FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
+                                    dao.deleteFile(oldPictureId);
+
+                                    context.commit();
+                                } catch (DataAccessException ex) {
+                                    // Failed to delete old profile picture, but no rollback needed
+                                    throw ex;
+                                }
+                            }
+
+                            flash("success", "De profielfoto werd succesvol aangepast.");
+                            return redirect(routes.Profile.index(userId));
+                        } catch (DataAccessException ex) {
+                            context.rollback();
+                            FileHelper.deleteFile(relativePath);
+                            throw ex;
+                        }
+                    } catch (DataAccessException ex) {
+                        FileHelper.deleteFile(relativePath);
+                        throw ex;
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
                 }
             }
-            Collections.sort(COUNTRIES);
+        } else {
+            flash("error", "Missing file");
+            return redirect(routes.Application.index());
         }
-        return COUNTRIES;
     }
 
     /**
@@ -116,8 +200,9 @@ public class Profile extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result indexWithoutId() {
-        User user = DatabaseHelper.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
-        return ok(index.render(user, getProfileCompleteness(user)));
+        User user = DataProvider.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
+        User currentUser = DataProvider.getUserProvider().getUser();
+        return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user,currentUser)));
     }
 
     /**
@@ -128,7 +213,7 @@ public class Profile extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result index(int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
 
@@ -137,28 +222,417 @@ public class Profile extends Controller {
                 return redirect(routes.Dashboard.index());
             }
 
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
+            User currentUser = DataProvider.getUserProvider().getUser();
 
-            // Only a profile admin or
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
-                if (!DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_USER)) {
-                    return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.CAR_USER}));
-                }
-
-                /** TODO: Verander naar FULL user i.p.v. userRole CAR_USER
-                 * if (currentUser.getStatus() != UserStatus.FULL) {
-                 *     return badRequest(views.html.unauthorized.render(new UserRole[]{}));
-                 * }
-                 */
-
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user,currentUser)));
+            } else if (DataProvider.getUserRoleProvider().isFullUser(currentUser)) {
                 return ok(profile.render(user));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
             }
-
-            return ok(index.render(user, getProfileCompleteness(user)));
         } catch (DataAccessException ex) {
             throw ex;
         }
     }
+
+    /**
+     * Returns whether the currentUser can edit the profile of user
+     *
+     * @param user        The subject
+     * @param currentUser The actor
+     * @return A boolean when the profile can be edited
+     */
+    private static boolean canEditProfile(User user, User currentUser) {
+        return currentUser.getId() == user.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN);
+    }
+
+    public static class EditIdentityCardForm {
+        public String cardNumber;
+        public String nationalNumber;
+
+        public EditIdentityCardForm() {
+        }
+
+        public EditIdentityCardForm(String cardNumber, String nationalNumber) {
+            this.cardNumber = cardNumber;
+            this.nationalNumber = nationalNumber;
+        }
+
+        public String validate() {
+            return null; //TODO: use validation list
+        }
+    }
+
+    /**
+     * Method: GET
+     * Generates the page where the user can upload his/her identity information
+     * @param userId The user the requester wants to edit
+     * @return A page to edit the identity card information
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCard(int userId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Dashboard.index());
+            }
+
+            User currentUser = DataProvider.getUserProvider().getUser();
+
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
+
+                if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) { // get all uploaded files already
+                    FileDAO fdao = context.getFileDAO();
+                    user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+                }
+
+                if(user.getIdentityCard() != null) {
+                    form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
+                }
+
+                return ok(identitycard.render(user, form));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Returns the file requested after authorization checks
+     * @param userId
+     * @param fileId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result viewFile(int userId, int fileId, String stype){
+        final FileType type = Enum.valueOf(FileType.class, stype);
+
+        return FileHelper.genericFileAction(userId, fileId, new FileAction() {
+            @Override
+            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+                return FileHelper.getFileStreamResult(dao, file.getId());
+            }
+
+            @Override
+            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+                User currentUser = DataProvider.getUserProvider().getUser();
+                if (!canEditProfile(user, currentUser))
+                    return null;
+
+                FileGroup files = null;
+                switch(type){
+                    case IDENTITYCARD:
+                        if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null)
+                            files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                    case DRIVERSLICENSE:
+                        if(user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null)
+                            files = dao.getFiles(user.getDriverLicense().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                }
+
+                if(files == null)
+                    return null;
+                else
+                    return files.getFileWithId(fileId);
+            }
+
+            @Override
+            public Result failAction(User user) {
+                return redirect(routes.Profile.editIdentityCard(user.getId()));
+            }
+        });
+    }
+
+
+
+    /**
+     * Method: GET
+     * Deletes a file from the identity card filegroup
+     * @param userId The user to delete from
+     * @param fileId The file to delete
+     * @return A redirect to the identity card page overview
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result deleteFile(final int userId, int fileId, String stype){
+        final FileType type = Enum.valueOf(FileType.class, stype);
+
+        return FileHelper.genericFileAction(userId, fileId, new FileAction() {
+            @Override
+            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+                dao.deleteFile(file.getId());
+                FileHelper.deleteFile(Paths.get(file.getPath()));
+                context.commit();
+
+                flash("success", file.getFileName() + " werd met succes verwijderd.");
+                switch(type){
+                    case IDENTITYCARD:
+                        return redirect(routes.Profile.editIdentityCard(userId));
+                    case DRIVERSLICENSE:
+                        return redirect(routes.Profile.editDriversLicense(userId));
+                }
+                return badRequest("No action specified for type: " + type);
+            }
+
+            @Override
+            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+                User currentUser = DataProvider.getUserProvider().getUser();
+                if (!canEditProfile(user, currentUser))
+                    return null;
+
+                FileGroup files = null;
+                switch(type){
+                    case IDENTITYCARD:
+                        if(user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null)
+                            files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                    case DRIVERSLICENSE:
+                        if(user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null)
+                            files = dao.getFiles(user.getDriverLicense().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        break;
+                }
+
+                if(files == null)
+                    return null;
+                else
+                    return files.getFileWithId(fileId);
+            }
+
+            @Override
+            public Result failAction(User user) {
+                return redirect(routes.Profile.editIdentityCard(user.getId()));
+            }
+        });
+    }
+
+    /**
+     * Method: POST
+     * Processes the request to add files / change identity card information
+     * @param userId The user to edit
+     * @return The overview page or error page when something went wrong
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result editIdentityCardPost(int userId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+            User currentUser = DataProvider.getUserProvider().getUser();
+
+            if (user == null || !canEditProfile(user, currentUser)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) {
+                user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+            }
+
+            Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(identitycard.render(user, form));
+            } else {
+                try {
+                    boolean updateUser = false; // Only perform a user update when we changed something (so not when adding a file to existing filegroup)
+
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    EditIdentityCardForm model = form.get();
+
+                    IdentityCard card = user.getIdentityCard();
+                    if (card == null) {
+                        updateUser = true;
+                        card = new IdentityCard();
+                        user.setIdentityCard(card);
+                    }
+
+                    // Now check if we also have to create / add file to the group
+                    Http.MultipartFormData.FilePart newFile = body.getFile("file");
+                    if (newFile != null) {
+                        if(!FileHelper.isDocumentContentType(newFile.getContentType())){
+                            flash("danger", "Het documentstype dat u bijgevoegd heeft is niet toegestaan. (" + newFile.getContentType() + ").");
+                            return badRequest(identitycard.render(user, form));
+                        } else {
+                            FileGroup group = card.getFileGroup();
+                            if (group == null) {
+                                // Create new filegroup
+                                group = fdao.createFileGroup();
+                                card.setFileGroup(group);
+                                updateUser = true;
+                            }
+
+                            // Now we add the file to the group
+                            Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.identitycard"));
+                            models.File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
+                            group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        }
+                    }
+
+                    if((user.getIdentityCard().getRegistrationNr() != null && !user.getIdentityCard().getRegistrationNr().equals(model.nationalNumber)) ||
+                            (user.getIdentityCard().getRegistrationNr() == null && model.nationalNumber != null) ||
+                            (user.getIdentityCard().getId() == null && model.cardNumber != null) ||
+                            (user.getIdentityCard().getId() != null && !user.getIdentityCard().getId().equals(model.cardNumber))) {
+                        card.setRegistrationNr(model.nationalNumber);
+                        card.setId(model.cardNumber);
+                        updateUser = true;
+                    }
+
+                    if(updateUser) {
+                        udao.updateUser(user, true);
+                    }
+                    context.commit();
+
+                    flash("success", "Uw identiteitskaart werd succesvol bijgewerkt.");
+                    return ok(identitycard.render(user, form));
+                } catch(DataAccessException | IOException ex){ //IO or database error causes a rollback
+                    context.rollback();
+                    throw new RuntimeException(ex); //unchecked
+                }
+            }
+
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    public static class EditDriversLicenseModel {
+        public String cardNumber;
+
+        public EditDriversLicenseModel() {
+        }
+
+        public EditDriversLicenseModel(String cardNumber) {
+            this.cardNumber = cardNumber;
+        }
+
+        public String validate() {
+            return null; //TODO: use validation list
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result editDriversLicense(int userId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO dao = context.getUserDAO();
+            User user = dao.getUser(userId, true);
+
+            if (user == null) {
+                flash("danger", "GebruikersID " + userId + " bestaat niet.");
+                return redirect(routes.Dashboard.index());
+            }
+
+            User currentUser = DataProvider.getUserProvider().getUser();
+
+            // Only a profile admin or user itself can edit
+            if (canEditProfile(user, currentUser)) {
+                Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class);
+
+                if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null) { // get all uploaded files already
+                    FileDAO fdao = context.getFileDAO();
+                    user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+                }
+
+                if(user.getDriverLicense() != null) {
+                    form = form.fill(new EditDriversLicenseModel(user.getDriverLicense().getId()));
+                }
+
+                return ok(driverslicense.render(user, form));
+            } else {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    // TODO: a LOT of code overlap with identity card!!
+    @RoleSecured.RoleAuthenticated()
+    public static Result editDriversLicensePost(int userId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            FileDAO fdao = context.getFileDAO();
+            User user = udao.getUser(userId, true);
+            User currentUser = DataProvider.getUserProvider().getUser();
+
+            if (user == null || !canEditProfile(user, currentUser)) {
+                return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+            }
+
+            if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null) {
+                user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+            }
+
+            Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(driverslicense.render(user, form));
+            } else {
+                try {
+                    boolean updateUser = false; // Only perform a user update when we changed something (so not when adding a file to existing filegroup)
+
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    EditDriversLicenseModel model = form.get();
+
+                    DriverLicense card = user.getDriverLicense();
+                    if (card == null) {
+                        updateUser = true;
+                        card = new DriverLicense();
+                        user.setDriverLicense(card);
+                    }
+
+                    // Now check if we also have to create / add file to the group
+                    Http.MultipartFormData.FilePart newFile = body.getFile("file");
+                    if (newFile != null) {
+                        if(!FileHelper.isDocumentContentType(newFile.getContentType())){
+                            flash("danger", "Het documentstype dat u bijgevoegd heeft is niet toegestaan. (" + newFile.getContentType() + ").");
+                            return badRequest(driverslicense.render(user, form));
+                        } else {
+                            FileGroup group = card.getFileGroup();
+                            if (group == null) {
+                                // Create new filegroup
+                                group = fdao.createFileGroup();
+                                card.setFileGroup(group);
+                                updateUser = true;
+                            }
+
+                            // Now we add the file to the group
+                            Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.driverslicense"));
+                            models.File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
+                            group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        }
+                    }
+
+                    if(user.getDriverLicense().getId()!= null && !user.getDriverLicense().getId().equals(model.cardNumber) ||
+                            model.cardNumber != null && user.getDriverLicense().getId() == null) {
+                        card.setId(model.cardNumber);
+                        updateUser = true;
+                    }
+
+                    if(updateUser) {
+                        udao.updateUser(user, true);
+                    }
+                    context.commit();
+
+                    flash("success", "Uw rijbewijs werd succesvol bijgewerkt.");
+                    return ok(driverslicense.render(user, form));
+                } catch(DataAccessException | IOException ex){ //IO or database error causes a rollback
+                    context.rollback();
+                    throw new RuntimeException(ex); //unchecked
+                }
+            }
+
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+
 
     /**
      * Method: GET
@@ -169,12 +643,12 @@ public class Profile extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result edit(int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
+            User currentUser = DataProvider.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
+            if (!canEditProfile(user, currentUser)) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 
@@ -192,7 +666,7 @@ public class Profile extends Controller {
      * @param user The user to quote
      * @return Completeness in percents
      */
-    private static int getProfileCompleteness(User user) {
+    public static int getProfileCompleteness(User user) {
         int total = 0;
 
         if (user.getAddressDomicile() != null) {
@@ -219,47 +693,14 @@ public class Profile extends Controller {
         if (user.getIdentityCard() != null) {
             total++;
         }
-        if (user.getContractManager() != null) {
+        if (user.getProfilePictureId() != -1) {
             total++;
         }
-        //TODO: profile picture
 
-        return (int) (((float) total / 9) * 100);
+        return (int) (((float) total / 9) * 100); //9 records
     }
 
-    /**
-     * Modifies, creates or deletes an address in the database based on the provided form data and current address
-     *
-     * @param model   The submitted form data
-     * @param address The already-set address for the user
-     * @param dao     The DAO to edit addresses
-     * @return The changed or null if deleted
-     */
-    private static Address modifyAddress(EditAddressModel model, Address address, AddressDAO dao) {
-        if (address == null) {
-            // User entered new address in fields
-            address = dao.createAddress(model.country, model.zipCode, model.city, model.street, model.number, model.bus);
-        } else {
-            // User changed existing address
 
-            // Only call the database when there's actually some change
-            if ((model.country != null && model.country.equals(address.getCountry())) ||
-                    (model.zipCode != null && !model.zipCode.equals(address.getZip())) ||
-                    (model.city != null && !model.city.equals(address.getCity())) ||
-                    (model.street != null && !model.street.equals(address.getStreet())) ||
-                    (model.number != null && !model.number.equals(address.getNumber())) ||
-                    (model.bus != null && !model.bus.equals(address.getBus()))) {
-                address.setCountry(model.country);
-                address.setZip(model.zipCode);
-                address.setCity(model.city);
-                address.setStreet(model.street);
-                address.setNumber(model.number);
-                address.setBus(model.bus);
-                dao.updateAddress(address);
-            }
-        }
-        return address;
-    }
 
     /**
      * Method: POST
@@ -270,12 +711,14 @@ public class Profile extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result editPost(int userId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
             User user = dao.getUser(userId, true);
-            User currentUser = DatabaseHelper.getUserProvider().getUser();
+            User currentUser = DataProvider.getUserProvider().getUser();
 
-            if (currentUser.getId() != user.getId() && !DatabaseHelper.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN)) {
+            boolean isProfileAdmin = DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN);
+
+            if (currentUser.getId() != user.getId() && !isProfileAdmin) {
                 return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
             }
 
@@ -291,6 +734,11 @@ public class Profile extends Controller {
                     user.setCellphone(model.mobile);
                     user.setFirstName(model.firstName);
                     user.setLastName(model.lastName);
+
+                    // Admins can change the payment status
+                    if(isProfileAdmin){
+                        user.setPayedDeposit(model.paidDeposit);
+                    }
 
                     // Because of constraints with FK we have to set them to NULL first in user before deleting them
 
@@ -318,6 +766,8 @@ public class Profile extends Controller {
 
                     context.commit();
                     flash("success", "Het profiel werd succesvol aangepast.");
+
+                    DataProvider.getUserProvider().invalidateUser(user); //invalidate cache
                     return redirect(routes.Profile.index(userId));
                 } catch (DataAccessException ex) {
                     context.rollback();

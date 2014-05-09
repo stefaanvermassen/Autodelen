@@ -4,7 +4,6 @@ import controllers.Security.RoleSecured;
 import database.AddressDAO;
 import database.DataAccessContext;
 import database.DataAccessException;
-import database.DatabaseHelper;
 import models.Address;
 import play.data.*;
 import play.libs.F;
@@ -15,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import static play.libs.F.Function;
 import static play.libs.F.Promise;
 
+import providers.DataProvider;
 import views.html.maps.*;
 
 import play.mvc.*;
@@ -38,6 +38,10 @@ public class Maps extends Controller {
             this.longtitude = longtitude;
             this.zoom = zoom;
             this.message = message;
+        }
+
+        public MapDetails(double latitude, double longtitude, int zoom){
+            this(latitude, longtitude, zoom, null);
         }
 
         public double getLatitude() {
@@ -66,7 +70,8 @@ public class Maps extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Promise<Result> getMap(int zoom, int x, int y) {
-        final Promise<Result> resultPromise = WS.url(String.format(TILE_URL, zoom, x, y)).get().map(
+        String mapServer = DataProvider.getSettingProvider().getStringOrDefault("maps_tile_server", TILE_URL);
+        final Promise<Result> resultPromise = WS.url(String.format(mapServer, zoom, x, y)).get().map(
                 new Function<WS.Response, Result>() {
                     public Result apply(WS.Response response) {
                         return ok(response.getBodyAsStream()).as("image/jpeg");
@@ -77,37 +82,12 @@ public class Maps extends Controller {
     }
 
     /**
-     * Resolves an address to a longtitude and latitude
-     * @param addressId
-     * @return
-     */
-    @Deprecated
-    @RoleSecured.RoleAuthenticated()
-    public static Promise<Result> getLatLong(int addressId) {
-        try {
-            return getLatLongPromise(addressId).map(
-                    new Function<F.Tuple<Double, Double>, Result>() {
-                        public Result apply(F.Tuple<Double, Double> coordinates) {
-                            return ok("Coordinates: Lat=" + coordinates._1 + ";Lon=" + coordinates._2);
-                        }
-                    });
-        } catch(DataAccessException ex) {
-            return Promise.promise(new F.Function0<Result>() {
-                @Override
-                public Result apply() throws Throwable {
-                    return badRequest("Address id does not exist.");
-                }
-            });
-        }
-    }
-
-    /**
      * Resolves the longtitude and latitude for a given address ID
      * @param addressId The address to resolve
      * @return A promise with the longtitude and latitude
      */
     public static Promise<F.Tuple<Double, Double>> getLatLongPromise(int addressId) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             AddressDAO dao = context.getAddressDAO();
             Address address = dao.getAddress(addressId);
             if(address != null ){
@@ -115,7 +95,8 @@ public class Maps extends Controller {
                         .setQueryParameter("street", address.getNumber() + " " + address.getStreet())
                         .setQueryParameter("city", address.getCity())
                         .setQueryParameter("country", "Belgium")
-                        .setQueryParameter("postalcode", address.getZip())
+                        // TODO: uncomment postalcode line, it's only commented for test data purposes
+                        // .setQueryParameter("postalcode", address.getZip())
                         .setQueryParameter("format", "json").get().map(
                                 new Function<WS.Response, F.Tuple<Double, Double>>() {
                                     public F.Tuple<Double, Double> apply(WS.Response response) {

@@ -1,6 +1,5 @@
 @(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
-    @import database.DatabaseHelper;
-
+@import providers.DataProvider;
     @app("Profiel bewerken") {
 
         <div id="page-header-wrapper">
@@ -25,9 +24,7 @@
                             <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="form-group">
-                                @* TODO: profile pictures *@
-                                <img src="@routes.Assets.at("../../../../assets/images/no_profile.png")" alt="" class="img-responsive">
-                                <a href="#">Wijzig profielfoto</a>
+                                <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
                             </div>
                             <div class="form-group">
                                 <p class="form-control-static h2">
@@ -47,13 +44,7 @@
                     </div>
                 </div>
                 <div class="col-md-9">
-                        <!-- /.panel -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Details
-                        </div>
-                            <!-- /.panel-heading -->
-                        <div class="panel-body">
+                    
                             <div class="form-group">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
@@ -89,6 +80,22 @@
                             <div class="form-group">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
+                                        <h3 class="panel-title">Lidgeld</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        @if(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)){
+                                                <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Lidgeld betaald
+                                        } else {
+                                            <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Lidgeld betaald
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
                                         <h3 class="panel-title">Overige</h3>
                                     </div>
                                     <div class="panel-body">
@@ -104,17 +111,19 @@
                                             }
                                         }
                                         <!-- TODO: verantwoordelijke toewijzen -->
-                                        @if(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
+                                        @if(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.PROFILE_ADMIN)) {
                                             <a href="#">Verantwoordelijke wijzigen (TODO)</a>
                                         }
                                     </div>
                                 </div>
-                            </div>
+                            </div>*@
                             <div class="form-group">
-                                <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
                 </div>
                 <!-- /col-lg-9 -->
             }

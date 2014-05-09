@@ -39,8 +39,8 @@ public class JDBCDAOTest {
      */
     @Before
     public void setUp() throws Exception {
-        DatabaseHelper.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
-        context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        DataProvider.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
+        context = DataProvider.getDataAccessProvider().getDataAccessContext();
 
         addressDAO = context.getAddressDAO();
         userDAO = context.getUserDAO();
@@ -408,7 +408,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -443,7 +443,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments);
         cars.add(car);
         sc.close();
     }
@@ -479,7 +479,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments);
             cars.add(car);
         }
         sc.close();
@@ -612,7 +612,7 @@ public class JDBCDAOTest {
      */
     private void createCarRides() throws Exception {
         for(Reservation reservation : reservations) {
-            CarRide carRide = carRideDAO.createCarRide(reservation);
+            CarRide carRide = carRideDAO.createCarRide(reservation, 0, 0);
 
             carRides.add(carRide);
         }
@@ -692,7 +692,7 @@ public class JDBCDAOTest {
             int u5id = sc.nextInt();
             User u5 = users.get(u5id - 1);
 
-            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, host, address, time, 0);
+            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0);
             infoSessionDAO.registerUser(infoSession, u1);
             infoSessionDAO.registerUser(infoSession, u2);
             infoSessionDAO.registerUser(infoSession, u3);
@@ -741,7 +741,7 @@ public class JDBCDAOTest {
         int u5id = sc.nextInt();
         User u5 = users.get(u5id - 1);
 
-        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, host, address, time, 0);
+        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0);
         infoSessionDAO.registerUser(infoSession, u1);
         infoSessionDAO.registerUser(infoSession, u2);
         infoSessionDAO.registerUser(infoSession, u3);
@@ -797,8 +797,7 @@ public class JDBCDAOTest {
             Enrollee delete = infoSession.getEnrolled().get(0);
             infoSession.deleteEnrollee(delete);
 
-            infoSessionDAO.updateInfosessionTime(infoSession);
-            infoSessionDAO.updateInfoSessionAddress(infoSession);
+            infoSessionDAO.updateInfoSession(infoSession);
             infoSessionDAO.unregisterUser(infoSession, delete.getUser());
         }
         getInfoSessionTest();

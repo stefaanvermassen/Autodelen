@@ -1,50 +1,21 @@
-@(errorIndex: Int, form: play.data.Form[Drives.RefuseModel], beginPage : Int, beginAsc : Int, beginOrder : String, beginFilter : String)
-    @scripts = {
-        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-        <script>
-            var route = myJsRoutes.controllers.Drives.showDrivesPage;
-            // To go to the correct page
-            var beginPage = @beginPage;
-            var beginAsc = @beginAsc;
-            var beginOrder = "@beginOrder";
-            var beginFilter = "@beginFilter";
-        </script>
-        <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
-        <script>
-            var index = @errorIndex;
+@(beginPage : Int, beginAsc : Int, beginOrder : String, beginFilter : String)
 
-            @if(form.hasGlobalErrors) {
-                // Pretty ugly hack to make the correct refuse textfield visible
-                $(document).ready(function() {
-                    checkLoaded();
-                });
-            }
-
-            function checkLoaded() {
-                if(pageLoaded) {
-                    flipHidden(index);
-                } else {
-                    setTimeout("checkLoaded()",50);
-                }
-            }
-
-            function flipHidden(index) {
-                var hid1 = $("#hidden1_" + index);
-                var hid2 = $("#hidden2_" + index);
-                if(hid1.is(":visible")) {
-                    hid1.addClass("hidden");
-                    hid2.removeClass("hidden");
-                } else {
-                    hid1.removeClass("hidden");
-                    hid2.addClass("hidden");
-                }
-            }
-        </script>
-    }
-    @stylesheets = {
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    }
-
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
+    <script>
+        var route = myJsRoutes.controllers.Drives.showDrivesPage;
+        // To go to the correct page
+        var beginPage = @beginPage;
+        var beginAsc = @beginAsc;
+        var beginOrder = "@beginOrder";
+        var beginFilter = "@beginFilter";
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
 
 @app("Ritten", stylesheets, scripts) {
 
@@ -59,30 +30,53 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Ritten</h1>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Ritten
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        @if(form.hasGlobalErrors) {
-                            <div class="alert alert-danger alert-dismissable">
-                                <strong>Error!</strong> @form.globalError.message
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs">
+                  <li id="tab_planned" class="active"><a href="#resultpanel" data-toggle="tab">
+                      Gepland</a>
+                      <input name="status" value="@ReservationStatus.ACCEPTED.toString" class="searchTextField hidden">
+                  </li>
+                  <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
+                      Voorbij
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                              Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { amount =>
+                          @if(amount > 0) {
+                              (@amount)
+                          }
+                      }
+                      </a>
+                  </li>
+                  <li id="tab_request"><a href="#resultpanel" data-toggle="tab">
+                      Aanvragen
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { amount =>
+                          @if(amount > 0) {
+                              (@amount)
+                          }
+                      }
+                      </a>
+                      <input name="status" value="@ReservationStatus.REQUEST.toString" class="hidden">
+                  </li>
+                  <li class="hidden"><button id="searchButton"></button></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div id="resultpanel" class="tab-pane active">
+                        <div class="panel panel-default tabpanel">
+                            <div class="panel-body">
+                                <div id="resultsTable" class="table-responsive">
+                                    <!-- Here comes the loaded table-->
+                                </div>
                             </div>
-                        }
-
-                        <div id="resultsTable" class="table-responsive">
-
-                                <!-- Here comes the loaded table-->
+                            <!-- /.panel-body -->
                         </div>
+                        <!-- /.panel -->
                     </div>
-                        <!-- /.panel-body -->
                 </div>
-                    <!-- /.panel -->
             </div>
-                <!-- /col-lg-12 -->
+            <!-- /col-lg-12 -->
         </div>
-            <!-- /row -->
+        <!-- /row -->
     </div>
     <!-- /page-wrapper -->
 }

@@ -1,15 +1,19 @@
-@(enrolled: InfoSession = null, map: Maps.MapDetails = null)
-@import database.DatabaseHelper;
+@(enrolled: InfoSession = null, map: Maps.MapDetails = null, showApprovalButton: Boolean = false)
+@import providers.DataProvider;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
         var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
+        var infoSessionId;
 
         // Show confirm message to subscribe to an infosession
-        function confirmSubscription(id){
-            if(confirm('U bent reeds ingeschreven voor een infosessie. Bent u zeker dat u deze wil wijzigen?')){
-                window.location = myJsRoutes.controllers.InfoSessions.enrollSession(id ).url;
-            }
+        function showConfirmationModal(id){
+            infoSessionId = id;
+            $('#myModal').modal('show');
+        }
+
+        function changeInfoSession() {
+            window.location = myJsRoutes.controllers.InfoSessions.enrollSession(infoSessionId).url;
         }
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
@@ -21,10 +25,6 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
-
-    <style>
-        #map { height: 400px; width: 1000px; } /* TODO: make responsive */
-    </style>
 }
 
 @app("Infosessies", stylesheets, scripts) {
@@ -36,22 +36,25 @@
 </div>
 
 <div id="page-wrapper">
-    @defining(DatabaseHelper.getUserRoleProvider.hasRole(session.get("email"), UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+    @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+            @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Infosessies</h1>
                 @flashes()
-                @if(isAdmin) {
-                    <div class="panel panel-default">
+
+                @if(showApprovalButton) {
+                    <div class="panel panel-success">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
+                            <h3 class="panel-title"><i class="fa fa-check-square-o"></i> Goedkeuringsaanvraag</h3>
                         </div>
-                        <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <a class="btn btn-default btn-sm" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
+                            <p>Uw aanwezigheid werd bevestigd op onze infosessie.</p>
+                            <a href="@routes.InfoSessions.requestApproval">Dien een goedkeuringsaanvraag in.</a>
                         </div>
                     </div>
                 }
+                
                 @if(enrolled != null) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -59,24 +62,12 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @detailPartial(enrolled, map)
+                            @detailPartial(enrolled, fullUser, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
                             <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
                         </div>
                     </div>
                 }
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies's zoeken
-                    </div>
-                    <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <!-- TODO: layout, more fields to search on -->
-                        Hier komen zoekveldjes enzo!
-                    </div>
-                    <!-- /.panel-body -->
-                </div>
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -98,4 +89,23 @@
     }
 </div>
 <!-- /page-wrapper -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Infosessie wijzigen</h4>
+      </div>
+      <div class="modal-body">
+        Je hebt je reeds voor een andere infosessie ingeschreven. Ben je zeker dat je deze wilt wijzigen?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+        <button class="btn btn-success"  onClick="changeInfoSession()">Ja, schrijf me in voor deze infosessie</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
 }

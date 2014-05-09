@@ -57,6 +57,11 @@ public class TestDataAccessContext implements DataAccessContext {
     }
 
     @Override
+    public CarCostDAO getCarCostDAO() {
+        return null; // TODO
+    }
+
+    @Override
     public ReservationDAO getReservationDAO() {
         return reservationDAO;
     }
@@ -69,6 +74,21 @@ public class TestDataAccessContext implements DataAccessContext {
     @Override
     public CarRideDAO getCarRideDAO() {
         return carRidesDAO;
+    }
+
+    @Override
+    public ApprovalDAO getApprovalDAO() {
+        return null;
+    }
+
+    @Override
+    public FileDAO getFileDAO() {
+        return null;
+    }
+
+    @Override
+    public SettingDAO getSettingDAO() {
+        return null;
     }
 
     @Override

@@ -1,0 +1,39 @@
+@(refuseFrom: play.data.Form[Drives.RefuseModel], reservation: Reservation)
+<div class="row">
+    <div class="col-sm-4">
+        <strong>Status:</strong> @reservation.getStatus.getDescription
+    </div>
+    <div class="col-sm-4">
+        <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
+    </div>
+    <div class="col-sm-4">
+        <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
+    </div>
+</div> <br />
+<!-- row -->
+<div class="row">
+    <div class="col-sm-12">
+        <strong>Commentaar:</strong> @reservation.getMessage
+    </div>
+</div><br />
+<!-- /row -->
+@if(reservation.getStatus == ReservationStatus.REQUEST) {
+    @helper.form(routes.Drives.refuseReservation(reservation.getId), 'class -> "form-horizontal") {
+        <div class="row">
+            <div id="actions1" class="btn-group btn-group-xs form-group col-sm-12">
+                <a type="button" class="btn btn-xs btn-success" href="@routes.Drives.approveReservation(reservation.getId)">
+                    Goedkeuren</a>
+                <button id="reject" type="button" class="btn btn-xs btn-warning">
+                    Afkeuren</button>
+            </div>
+            <div id="actions2" class="hidden">
+                <div class="btn-group btn-group-xs form-group col-sm-12">
+                    <button type="submit" class="btn btn-xs btn-success">Afkeuren</button>
+                    <button id="annulate" type="button" class="btn btn-xs btn-warning">
+                        Annuleren</button>
+                </div>
+                <textarea name="reason" class="form-control" rows="3" placeholder="Reden voor de weigering"></textarea>
+            </div>
+        </div>
+    }
+}

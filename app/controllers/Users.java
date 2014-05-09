@@ -9,6 +9,7 @@ import controllers.Security.RoleSecured;
 import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
+import providers.DataProvider;
 import views.html.users.*;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class Users extends Controller {
     }
 
     private static Html userList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
 
             if(orderBy == null) {
@@ -61,6 +62,35 @@ public class Users extends Controller {
             return userspage.render(listOfUsers, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result impersonate(int userId){
+        if(session("impersonated") != null && !session("impersonated").isEmpty()) {
+            flash("danger", "U bent reeds in impersoneermodus.");
+            return redirect(routes.Dashboard.index());
+        } else {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+                UserDAO dao = context.getUserDAO();
+                User user = dao.getUser(userId, false);
+                if (user != null) {
+                    if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)){
+                        flash("danger", "U kan geen superuser impersoneren.");
+                        return redirect(routes.Dashboard.index());
+                    } else {
+                        String originalEmail = session("email"); //TODO: migrate to userprovider also
+                        DataProvider.getUserProvider().createUserSession(user);
+                        session("impersonated", originalEmail);
+                        return redirect(routes.Dashboard.index());
+                    }
+                } else {
+                    flash("danger", "Deze gebruikersID bestaat niet.");
+                    return redirect(routes.Users.showUsers());
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
+            }
         }
     }
 }

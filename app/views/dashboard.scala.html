@@ -1,4 +1,19 @@
-@app("Dashboard") {
+@(user: User, completeness: Int = 0)
+@scripts = {
+    <script src="@routes.Assets.at("javascripts/bootstrap-colorpicker.min.js")" type="text/javascript"></script>
+    <script>
+        $(function(){
+            $('.theme').colorpicker();
+        });
+        $('.theme').colorpicker().on('changeColor', function(ev){
+            less.modifyVars({ '@@bg' : ev.color.toHex() });
+        });
+    </script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-colorpicker.min.css")">
+}
+@app("Dashboard", stylesheets, scripts) {
 
 <div id="page-header-wrapper">
 	<ol class="breadcrumb">
@@ -9,8 +24,26 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-		    @flashes()
             <h1 class="page-header">Dashboard</h1>
+            @flashes()
+
+    @*
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Goedkeuringsaanvraag
+                </div>
+                    <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <!-- TODO: Hide this panel when not needed -->
+                    <p>
+                        Dien hier een goedkeuringsaanvraag in om een volwaardig lid te worden.
+                    </p>
+                    <a class="btn btn-success" href="@routes.InfoSessions.requestApproval">Goedkeuringsaanvraag indienen</a>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+                
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-wrench"></i> Temporary Toolbox
@@ -20,27 +53,68 @@
                     <a href="@routes.Settings.instantAdmin" class="btn btn-default">Insta-admin</a>
                     <a href="@routes.Login.login(null)" class="btn btn-default">Login</a>
                     <a href="@routes.Login.logout" class="btn btn-default">Logout</a>
+                    <div class="col-lg-4">
+                        <div class="input-group theme">
+                            <input type="text" value="" class="form-control" />
+                            <span class="input-group-addon"><i></i></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.panel-body -->
+            </div>          
+    *@
+
+            <div class="panel panel-default">
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    Welkom op onze webapplicatie. Om een volwaardig lid te worden moet je eerst nog enkele stappen doorlopen. Als volwaardig lid kan je auto's uitlenen of jezelf kandidaat stellen als auto-eigenaar. De stappen die je nog moet doorlopen om je aanvraag in te kunnen dienen staan hieronder opgelijst.
                 </div>
                 <!-- /.panel-body -->
             </div>
-         @*
-            <p class="row">
-                <div class="col-lg-6">
-                    <a href="@routes.Reserve.index" type="button" class="btn btn-primary btn-lg btn-block">Reserveren</a>
+                
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    ① Volg een infosessie
                 </div>
-                <div class="col-lg-6">
-                    <a href="@routes.Drives.index" type="button" class="btn btn-primary btn-lg btn-block">Ritten</a>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    Door een infosessie te volgen word je op de hoogte gebracht over het reilen en zeilen van ons systeem. Je inschrijven voor een infosessie kan <a href="@routes.InfoSessions.showUpcomingSessions">hier</a>.
                 </div>
-            </p>
-            <p class="row">
-                <div class="col-lg-6">
-                    <a href="@routes.Drives.index" type="button" class="btn btn-primary btn-lg btn-block">Afrekeningen</a>
-                </div>
-                <div class="col-lg-6">
-                    <a href="@routes.Dashboard.index" type="button" class="btn btn-primary btn-lg btn-block">Hulp</a>
-                </div>
-            </p>*@
+                <!-- /.panel-body -->
+            </div>
 
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    ② Vul je profiel verder aan
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                    </div>
+
+                    De volgende dingen moeten minstens aangevuld worden om je volwaardig lidmaatschap aan te vragen:
+                    <ul>
+                        <li>Domicilieadres</li>
+                        <li>Verblijfsadres</li>
+                        <li>Identiteitskaart</li>
+                        <li>Rijbewijs</li>
+                    </ul>
+
+                    Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
+                </div>
+                    <!-- /.panel-body -->
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    ③ Vraag je volwaardig lidmaatschap aan!
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    Als je alles hebt aangevuld kan je je volwaardig lidmaatschap <a href="@routes.InfoSessions.requestApproval">hier</a> aanvragen.
+                </div>
+                    <!-- /.panel-body -->
+            </div>
         </div>
         <!-- /col-lg-12 -->
     </div>

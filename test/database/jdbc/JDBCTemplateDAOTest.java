@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import database.DataAccessContext;
-import database.DatabaseHelper;
+import database.DataProvider;
 import database.TemplateDAO;
 
 public class JDBCTemplateDAOTest {
@@ -29,7 +29,7 @@ public class JDBCTemplateDAOTest {
      */
 	@Before
     public void setUp() throws Exception {
-        context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+        context = DataProvider.getDataAccessProvider().getDataAccessContext();
         templateDAO = context.getTemplateDAO();
         templates = templateDAO.getAllTemplates();
     }
