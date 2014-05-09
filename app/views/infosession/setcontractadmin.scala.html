@@ -34,7 +34,7 @@
                                     <label for="userPickerBox">Contractverantwoordelijke:</label>
                                         @if(admin != null){
                                             <input type="text" value="@admin.getFirstName @admin.getLastName" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off"/>
-                                            <input type="hidden" name="manager" value="@admin.getEmail"/>
+                                            <input type="hidden" name="manager" value="@admin.getId"/>
                                         } else {
                                             <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off" />
                                             <input type="hidden" name="manager" value=""/>
