@@ -8,18 +8,20 @@
         <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
     }
 
-@import providers.DataProvider;
 @app("Goedkeuringsaanvraag", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
-            <li class="active">Goedkeuringsaanvraag</li>
+            <li><a href="@routes.InfoSessions.pendingApprovalList">Goedkeuringsaanvragen</a></li>
+            <li class="active">Contractverantwoordelijke toewijzen</li>
         </ol>
     </div>
 
         <div id="page-wrapper">
             <div class="well">
-                @flashes()
+            @flashes()
+
+            @approvaluserpartial(approval, enrollStatus)
 
             <div class="panel panel-default">
                 <div class="panel-heading">
