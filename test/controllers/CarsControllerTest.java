@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import controllers.util.TestHelper;
 import models.Address;
 import models.Car;
 import models.CarFuel;
@@ -38,6 +39,7 @@ import database.DatabaseHelper;
 import database.UserDAO;
 import database.UserRoleDAO;
 import database.mocking.TestDataAccessProvider;
+import providers.DataProvider;
 
 public class CarsControllerTest {
 	
@@ -57,7 +59,7 @@ public class CarsControllerTest {
 		cars = new ArrayList<>();
 		users = new ArrayList<>();
 		helper.setTestProvider();
-		DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
 		carDAO = context.getCarDAO();
 		userDAO = context.getUserDAO();
 		userRoleDAO = context.getUserRoleDAO();
@@ -108,7 +110,7 @@ public class CarsControllerTest {
 	            userSc.nextLine();
 	            
 	            User user = helper.createRegisteredUser(email, password, firstname, lastname, new UserRole[]{UserRole.CAR_OWNER});
-	            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, fuel, economy, estimatedValue, annualKm, user, comments);
+	            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, false, gps, hook, fuel, economy, estimatedValue, annualKm, null, null, user, comments, true);
 	            pwMap.put(user, password);		 
 	            cars.add(car);
 	        }
@@ -381,38 +383,6 @@ public class CarsControllerTest {
 			        );
 			    assertEquals("Car details of not existing car", BAD_REQUEST, status(result9));
 			  
-			    helper.logout();    	
-			}
-		});
-		
-		
-	}
-	
-	@Test
-	public void removeCar(){
-		running(fakeApplication(),new Runnable() {
-			
-			@Override
-			public void run() {
-				helper.setTestProvider();
-				User user = cars.get(0).getOwner();
-				userRoleDAO.addUserRole(user.getId(), UserRole.SUPER_USER);
-				userDAO.updateUser(user, true);
-				cookie = helper.login(user, pwMap.get(user));
-			    
-			    // Verwijderen van auto die niet bestaat
-			    Result result10 = callAction(
-		                controllers.routes.ref.Cars.removeCar(cars.get(0).getId()),
-		                fakeRequest().withCookies(cookie)
-			        );
-			    assertEquals("Remove car", OK, status(result10));
-			    
-			    Result result12 = callAction(
-		                controllers.routes.ref.Cars.removeCar(9000),
-		                fakeRequest().withCookies(cookie)
-			        );
-			    assertEquals("Remove own car", BAD_REQUEST, status(result12));
-			    
 			    helper.logout();    	
 			}
 		});

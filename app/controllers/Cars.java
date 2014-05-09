@@ -657,43 +657,6 @@ public class Cars extends Controller {
     }
 
 
-    /**
-     * TODO: delete this out of final version
-     * @param carId The car to be removed
-     * @return redirect to the index carpage, with error-messages if there were any problems
-     */
-    @RoleSecured.RoleAuthenticated(UserRole.CAR_ADMIN)
-    public static Result removeCar(int carId) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            CarDAO dao = context.getCarDAO();
-            try {
-                Car car = dao.getCar(carId);
-                if (car == null) {
-                    flash("danger", "De auto met ID= " + carId + " bestaat niet.");
-                    return badRequest(carList());
-                } else {
-
-                    //TODO: this is repeat code, unify with above controllers as extra check
-                    User currentUser = DataProvider.getUserProvider().getUser();
-                    if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
-                        flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
-                        return badRequest(carList());
-                    }
-
-                    dao.deleteCar(car);
-                    context.commit();
-                    flash("success", "De auto werd succesvol verwijderd.");
-                    return ok(carList());
-                }
-            } catch (DataAccessException ex) {
-                context.rollback();
-                throw ex;
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
-    }
-
     /************************
      *      Car costs       *
      ************************/
