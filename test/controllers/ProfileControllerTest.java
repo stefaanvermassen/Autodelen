@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.util.TestHelper;
 import database.DataAccessContext;
-import database.DatabaseHelper;
+import providers.DataProvider;
 import models.User;
 import models.UserRole;
 import org.junit.Before;

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import controllers.util.TestHelper;
 import models.Address;
 import models.EnrollementStatus;
 import models.InfoSession;
@@ -33,7 +34,7 @@ import org.junit.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import database.DataAccessContext;
-import database.DatabaseHelper;
+import providers.DataProvider;
 import database.InfoSessionDAO;
 import database.UserDAO;
 import database.UserRoleDAO;
@@ -52,7 +53,7 @@ public class InfoSessionsControllerTest {
 	public void setUp(){
 		helper = new TestHelper();
 		helper.setTestProvider();
-		DataAccessContext context = DatabaseHelper.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
 		userDAO = context.getUserDAO();
 		userRoleDAO = context.getUserRoleDAO();
 		users = new ArrayList<>();

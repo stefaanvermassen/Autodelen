@@ -19,10 +19,12 @@ public class TestCarRidesDAO implements CarRideDAO {
 	}
 
     @Override
-    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage) throws DataAccessException {
+    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage, boolean damaged, int refueling) throws DataAccessException {
         CarRide ride = new CarRide(reservation);
         ride.setStartMileage(startMileage);
         ride.setEndMileage(endMileage);
+        ride.setDamaged(damaged);
+        ride.setRefueling(refueling);
         rides.add(ride);
         return ride;
     }

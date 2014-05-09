@@ -35,7 +35,7 @@ public class TestCarDAO implements CarDAO{
 		for(Car car : cars){
 			if(car.getId()==id){
 				return new Car(car.getId(),car.getName(), car.getBrand(),car.getType(), car.getLocation(),car.getSeats(),
-						car.getDoors(),car.getYear(),car.isGps(),car.isHook(),car.getFuel(),
+						car.getDoors(),car.getYear(), car.isManual(), car.isGps(),car.isHook(),car.getFuel(),
 						car.getFuelEconomy(),car.getEstimatedValue(),car.getOwnerAnnualKm(),
 						car.getTechnicalCarDetails(), car.getInsurance(), car.getOwner(),car.getComments());
 				}
@@ -43,19 +43,45 @@ public class TestCarDAO implements CarDAO{
 		return null;
 	}
 
-	@Override
-	public void deleteCar(Car car) throws DataAccessException {
-		if(cars.contains(car)) cars.remove(car);
-	}
+    @Override
+    public List<CarAvailabilityInterval> getAvailabilities(Car car) throws DataAccessException {
+        return null;
+    }
 
-	@Override
+    @Override
+    public void addOrUpdateAvailabilities(Car car, List<CarAvailabilityInterval> carAvailabilityIntervals) throws DataAccessException {
+
+    }
+
+    @Override
+    public void deleteAvailabilties(List<CarAvailabilityInterval> carAvailabilityIntervals) throws DataAccessException {
+
+    }
+
+    @Override
+    public List<User> getPriviliged(Car car) throws DataAccessException {
+        return null;
+    }
+
+    @Override
+    public void addPriviliged(Car car, List<User> users) throws DataAccessException {
+
+    }
+
+    @Override
+    public void deletePriviliged(Car car, List<User> users) throws DataAccessException {
+
+    }
+
+    @Override
 	public Car createCar(String name, String brand, String type,
-			Address location, Integer seats, Integer doors, Integer year, boolean gps,
+			Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps,
 			boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue,
-            Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments)
+            Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active)
 			throws DataAccessException {
-		Car car = new Car(idCounter++,name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
-		cars.add(car);
+		Car car = new Car(idCounter++,name, brand, type, location, seats, doors, year, manual, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
+		car.setActive(active);
+        cars.add(car);
 		return car;
 	}
 

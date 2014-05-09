@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import providers.DataProvider;
 
 /**
  * Created by HannesM on 26/02/14.
@@ -95,7 +96,6 @@ public class JDBCDAOTest {
             createCars();
             getCarTest();
             updateCarTest();
-            deleteCarsTest();
         } finally {
             context.rollback();
         }
@@ -112,7 +112,6 @@ public class JDBCDAOTest {
             createCarsWithoutAddresses();
             getCarTest();
             updateCarTest();
-            deleteCarsTest();
         } finally {
             context.rollback();
         }
@@ -360,7 +359,7 @@ public class JDBCDAOTest {
             boolean agreeTerms = sc.nextInt() == 1;
             user.setAgreeTerms(agreeTerms);
             int contractManagerId = sc.nextInt();
-            user.setContractManager(users.get(contractManagerId-1));
+            //user.setContractManager(users.get(contractManagerId-1));
             userDAO.updateUser(user, true);
         }
         getUserByIdTest(true);
@@ -408,7 +407,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
             cars.add(car);
         }
         sc.close();
@@ -443,7 +442,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
         cars.add(car);
         sc.close();
     }
@@ -479,7 +478,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
             cars.add(car);
         }
         sc.close();
@@ -507,24 +506,6 @@ public class JDBCDAOTest {
         }
         getCarTest();
     }
-    /**
-    * First createCars() has to be called
-    */
-    private void deleteCarsTest() {
-        Iterator<Car> i = cars.iterator();
-        while(i.hasNext()) {
-            Car car = i.next();
-            carDAO.deleteCar(car);
-            try {
-                Car returnCar = carDAO.getCar(car.getId());
-                if(returnCar != null)
-                    Assert.fail("Car not permanently deleted");
-            } catch(DataAccessException e) {
-                // This should happen.
-            }
-            i.remove();
-        }
-    }
 
     /**
      * Creates 100 random reservations in the database and in private List reservations
@@ -550,7 +531,7 @@ public class JDBCDAOTest {
     		int userid = sc.nextInt();
             User user = users.get(userid-1);
 
-    		Reservation reservation = reservationDAO.createReservation(from, to, car, user);
+    		Reservation reservation = reservationDAO.createReservation(from, to, car, user, "");
 
     		reservations.add(reservation);
     	}
@@ -612,7 +593,7 @@ public class JDBCDAOTest {
      */
     private void createCarRides() throws Exception {
         for(Reservation reservation : reservations) {
-            CarRide carRide = carRideDAO.createCarRide(reservation, 0, 0);
+            CarRide carRide = carRideDAO.createCarRide(reservation, 0, 0, false, 0);
 
             carRides.add(carRide);
         }
@@ -692,7 +673,7 @@ public class JDBCDAOTest {
             int u5id = sc.nextInt();
             User u5 = users.get(u5id - 1);
 
-            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0);
+            InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0, "");
             infoSessionDAO.registerUser(infoSession, u1);
             infoSessionDAO.registerUser(infoSession, u2);
             infoSessionDAO.registerUser(infoSession, u3);
@@ -741,7 +722,7 @@ public class JDBCDAOTest {
         int u5id = sc.nextInt();
         User u5 = users.get(u5id - 1);
 
-        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0);
+        InfoSession infoSession = infoSessionDAO.createInfoSession(InfoSessionType.NORMAL, "", host, address, time, 0, "");
         infoSessionDAO.registerUser(infoSession, u1);
         infoSessionDAO.registerUser(infoSession, u2);
         infoSessionDAO.registerUser(infoSession, u3);

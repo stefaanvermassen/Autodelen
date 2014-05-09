@@ -35,11 +35,10 @@ import play.mvc.Result;
 import database.AddressDAO;
 import database.CarDAO;
 import database.DataAccessContext;
-import database.DatabaseHelper;
+import providers.DataProvider;
 import database.UserDAO;
 import database.UserRoleDAO;
 import database.mocking.TestDataAccessProvider;
-import providers.DataProvider;
 
 public class CarsControllerTest {
 	
@@ -135,7 +134,6 @@ public class CarsControllerTest {
 			    data.put("brand", "Audi");
 			    data.put("type", "groot");
 			    data.put("seats", "5");
-			    data.put("doors", "5");
 			    data.put("year", "2012");
 			    data.put("comments", "Dit is een test");
 			    
@@ -189,11 +187,6 @@ public class CarsControllerTest {
 				for(UserRole role : UserRole.values()){
 					userRoleDAO.addUserRole(user.getId(), role);
 					if(!role.equals(UserRole.RESERVATION_ADMIN) && !role.equals(UserRole.SUPER_USER)){
-						Result result = callAction(
-				                controllers.routes.ref.Cars.removeCar(cars.get(1).getId()),
-				                fakeRequest().withCookies(cookie)
-					        );
-					    assertEquals("Cannot delete car", UNAUTHORIZED, status(result));
 					    
 					    if(!role.equals(UserRole.CAR_OWNER)){
 							Result result1 = callAction(

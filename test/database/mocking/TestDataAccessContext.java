@@ -62,8 +62,28 @@ public class TestDataAccessContext implements DataAccessContext {
     }
 
     @Override
+    public RefuelDAO getRefuelDAO() {
+        return null;
+    }
+
+    @Override
+    public SchedulerDAO getSchedulerDAO() {
+        return null;
+    }
+
+    @Override
     public ReservationDAO getReservationDAO() {
         return reservationDAO;
+    }
+
+    @Override
+    public DamageDAO getDamageDAO() {
+        return null;
+    }
+
+    @Override
+    public DamageLogDAO getDamageLogDAO() {
+        return null;
     }
 
     @Override
@@ -78,6 +98,11 @@ public class TestDataAccessContext implements DataAccessContext {
 
     @Override
     public ApprovalDAO getApprovalDAO() {
+        return null;
+    }
+
+    @Override
+    public JobDAO getJobDAO() {
         return null;
     }
 

@@ -26,7 +26,7 @@ import org.junit.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import database.DataAccessContext;
-import database.DataProvider;
+import providers.DataProvider;
 import database.TemplateDAO;
 
 public class EmailTemplateTest {

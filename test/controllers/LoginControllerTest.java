@@ -1,7 +1,7 @@
 package controllers;
 
 import controllers.util.TestHelper;
-import database.DataProvider;
+import providers.DataProvider;
 import database.mocking.TestDataAccessProvider;
 import models.User;
 import models.UserRole;

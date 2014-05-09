@@ -1,4 +1,4 @@
-import database.DataProvider;
+import providers.DataProvider;
 import database.mocking.TestDataAccessProvider;
 import org.junit.*;
 
