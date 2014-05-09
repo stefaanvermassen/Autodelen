@@ -13,7 +13,7 @@
         <div id="page-wrapper">
             @flashes()
             @if(hasErrors) {
-                <div class="panel panel-danger">
+                <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
                     </div>
@@ -28,8 +28,8 @@
                         <div class="btn-group">
                             <a class="btn btn-default" href="@routes.Profile.edit(user.getId)">
                                 Profiel aanvullen</a>
-                           <!-- <a class="btn btn-default" href="@routes.InfoSessions.showUpcomingSessions">
-                                Infosessie bijwonen</a> -->
+                            <a class="btn btn-default" href="@routes.InfoSessions.showUpcomingSessions">
+                                Infosessie bijwonen</a>
                         </div>
                     </div>
                 </div>

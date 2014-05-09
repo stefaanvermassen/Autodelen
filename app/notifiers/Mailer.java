@@ -1,6 +1,8 @@
 package notifiers;
 import com.typesafe.plugin.MailerAPI;
 import com.typesafe.plugin.MailerPlugin;
+import play.Logger;
+import play.Play;
 
 /**
  * Created by Stefaan Vermassen on 16/02/14.
@@ -34,7 +36,11 @@ public class Mailer {
     }
 
     public static void send(String html) {
-        mail.sendHtml(html);
+        if(!Play.isDev()) {
+            mail.sendHtml(html);
+        } else {
+            Logger.debug("Sent mail: " + html);
+        }
     }
 
     public static void sendText(String text) {

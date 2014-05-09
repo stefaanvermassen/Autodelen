@@ -22,8 +22,6 @@ public class User {
     private int profilePictureId; //TODO, review if it's okay practice to -1 = NULL
     private boolean payedDeposit;
     private boolean agreeTerms;
-    private User contractManager;
-    // TODO: image
 
     public User(int id, String email, String firstName, String lastName){
         this(id, email, firstName, lastName, null);
@@ -175,14 +173,6 @@ public class User {
         this.payedDeposit = payedDeposit;
     }
 
-    public User getContractManager() {
-        return contractManager;
-    }
-
-    public void setContractManager(User contractManager) {
-        this.contractManager = contractManager;
-    }
-
     public boolean isAgreeTerms() {
         return agreeTerms;
     }
@@ -211,8 +201,6 @@ public class User {
         if (addressResidence != null ? !addressResidence.equals(user.addressResidence) : user.addressResidence != null)
             return false;
         if (cellphone != null ? !cellphone.equals(user.cellphone) : user.cellphone != null) return false;
-        if (contractManager != null ? contractManager.getId() != user.contractManager.getId() : user.contractManager != null)
-            return false;
         if (damageHistory != null ? !damageHistory.equals(user.damageHistory) : user.damageHistory != null)
             return false;
         if (!email.equals(user.email)) return false;
@@ -246,7 +234,6 @@ public class User {
         result = 31 * result + (damageHistory != null ? damageHistory.hashCode() : 0);
         result = 31 * result + (payedDeposit ? 1 : 0);
         result = 31 * result + (agreeTerms ? 1 : 0);
-        result = 31 * result + (contractManager != null ? contractManager.hashCode() : 0);
         return result;
     }
 }

@@ -23,6 +23,8 @@
   INSERT INTO templatetags(template_tag_body) VALUE ("amount");
   INSERT INTO templatetags(template_tag_body) VALUE ("car_cost_description");
   INSERT INTO templatetags(template_tag_body) VALUE ("car_cost_time");
+  
+  INSERT INTO templatetags(template_tag_body) VALUE ("admin_name");
 
   #-- templates
   #INSERT INTO templates(template_id, template_title, template_body) VALUES (?,?)
@@ -418,3 +420,21 @@
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "amount";
   INSERT INTO templatetagassociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_time";
+  
+  
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  18,
+  "Contractmanager toegewezen",
+  "Beste %user_firstname% %user_lastname%,<br>
+
+  %admin_name% werd zojuist toegewezen als uw contractverantwoordelijke. Deze persoon zal uw registratie verder afhandelen.<br>
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage", 1);
+
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Contractmanager toegewezen" AND template_tag_body = "admin_name";

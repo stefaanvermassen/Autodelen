@@ -48,42 +48,7 @@
                         </div>
                     </div>
                 }
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fa fa-user"></i> Gebruiker</h3>
-                </div>
-                <div class="panel-body">
-                    <strong>Naam: </strong>@approval.getUser.getFirstName @approval.getUser.getLastName <br>
-                    <strong>Infosessie status: </strong>
-                    @if(approval.getSession == null) {
-                        <span class="label label-danger">Nooit ingeschreven</span>
-                    } else {
-                        @enrollStatus match {
-                            case EnrollementStatus.ABSENT => {
-                                <span class="label label-danger">Afwezig</span>
-                            }
-                            case EnrollementStatus.ENROLLED => {
-                                <span class="label label-warning">Ingeschreven</span>
-                            }
-                            case EnrollementStatus.PRESENT => {
-                                <span class="label label-success">Aanwezig</span>
-                            }
-                        }
-                        <br>
-                        <strong>Infosessie type: </strong>@approval.getSession.getType <a href="@routes.InfoSessions.detail(approval.getSession.getId)">Details</a>
-                    }
-
-                    <br>
-                    <strong>Opmerkingen:</strong><br>
-                    <textarea readonly rows="4" cols="50">@approval.getUserMessage</textarea>
-                    <br>
-
-                    <a class="btn btn-default" href="@routes.Profile.index(approval.getUser.getId)">Profiel bekijken</a>
-                </div>
-            </div>
-
-
+            @approvaluserpartial(approval, enrollStatus)
 
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -107,21 +72,6 @@
 
                     <div id="acceptProperties" class="panel panel-default">
                         <div class="panel-body">
-                            <div class="form-group">
-                                <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
-                                    <label for="userPickerBox">Contractverantwoordelijke:</label>
-                                        @defining(DataProvider.getUserProvider.getUser(form("contractManager").value)) { manager =>
-                                            @if(manager != null){
-                                                <input type="text" value="@manager.getFirstName @manager.getLastName" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
-                                            } else {
-                                                <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" />
-                                            }
-                                        }
-                                    <input type="hidden" name="@form("contractManager").name" value="@form("contractManager").value"/>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-
                             <div class="form-group">
                                 <div class="col-md-12">
                                     @* TODO: checkbox text append *@
