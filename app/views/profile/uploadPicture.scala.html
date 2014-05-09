@@ -21,9 +21,8 @@
                     <div class="panel-body">
                     @helper.form(routes.Profile.profilePictureUploadPost(userId), 'enctype -> "multipart/form-data") {
                         <input type="file" name="picture">
-                        <p>
-                            <input type="submit" value="Verzenden">
-                        </p>
+                        <br>
+                        <input class="btn btn-sm btn-default" type="submit" value="Verzenden">
                     }
                     </div>
                         <!-- /.panel-body -->
