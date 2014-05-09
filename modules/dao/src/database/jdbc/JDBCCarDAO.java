@@ -7,18 +7,13 @@ package database.jdbc;
 import database.CarDAO;
 import database.DataAccessException;
 import database.Filter;
+import database.FilterField;
+import models.*;
+import org.joda.time.LocalTime;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-
-import database.FilterField;
-import models.*;
-import org.joda.time.DateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
