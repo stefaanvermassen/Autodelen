@@ -666,7 +666,7 @@ public class Profile extends Controller {
      * @param user The user to quote
      * @return Completeness in percents
      */
-    private static int getProfileCompleteness(User user) {
+    public static int getProfileCompleteness(User user) {
         int total = 0;
 
         if (user.getAddressDomicile() != null) {

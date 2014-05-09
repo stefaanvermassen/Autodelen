@@ -2,8 +2,8 @@
  * Created by Cedric on 3/23/2014.
  */
 $(document).ready(function() {
-    var element = $('#map');
-    if(typeof(element) != 'undefined') {
+    if(document.getElementById('map')) {
+        var element = $('#map');
         var lon = element.data('lon');
         var lat = element.data('lat');
         var message = element.data('message');
