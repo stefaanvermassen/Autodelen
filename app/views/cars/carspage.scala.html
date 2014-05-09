@@ -4,6 +4,7 @@
         <tr role="row">
             <th name="name" class="sortable" tabindex="0" >Naam</th>
             <th name="brand" class="sortable" tabindex="0" >Merk</th>
+            <th>Actief</th>
             <th>Eigenaar</th>
             <th>Acties</th>
         </tr>
@@ -20,6 +21,13 @@
                 <tr>
                     <td>@car.getName</td>
                     <td>@car.getBrand</td>
+                    <td>
+                        @if(car.isActive) {
+                            <span class="label label-success">Actief</span>
+                        } else {
+                            <span class="label label-danger">Non-actief</span>
+                        }
+                    </td>
                     <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a></td>
                     <td>
                         <div class="btn-group btn-group-xs">

@@ -1,34 +1,34 @@
-  #-- TemplateTags
-  #-INSERT INTO TemplateTags(template_tag_body) VALUE (?)
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("user_firstname");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("user_lastname");
+  #-- templatetags
+  #-INSERT INTO templatetags(template_tag_body) VALUE (?)
+  INSERT INTO templatetags(template_tag_body) VALUE ("user_firstname");
+  INSERT INTO templatetags(template_tag_body) VALUE ("user_lastname");
 
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("verification_url");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("password_reset_url");
+  INSERT INTO templatetags(template_tag_body) VALUE ("verification_url");
+  INSERT INTO templatetags(template_tag_body) VALUE ("password_reset_url");
 
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("infosession_date");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("infosession_address");
+  INSERT INTO templatetags(template_tag_body) VALUE ("infosession_date");
+  INSERT INTO templatetags(template_tag_body) VALUE ("infosession_address");
 
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_from");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_to");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_user_firstname");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_user_lastname");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_url");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_car_address");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("reservation_reason");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_from");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_to");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_user_firstname");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_user_lastname");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_url");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_car_address");
+  INSERT INTO templatetags(template_tag_body) VALUE ("reservation_reason");
 
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("comment");
+  INSERT INTO templatetags(template_tag_body) VALUE ("comment");
 
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("car_name");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("amount");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("car_cost_description");
-  INSERT INTO TemplateTags(template_tag_body) VALUE ("car_cost_time");
+  INSERT INTO templatetags(template_tag_body) VALUE ("car_name");
+  INSERT INTO templatetags(template_tag_body) VALUE ("amount");
+  INSERT INTO templatetags(template_tag_body) VALUE ("car_cost_description");
+  INSERT INTO templatetags(template_tag_body) VALUE ("car_cost_time");
 
-  #-- Templates
-  #INSERT INTO Templates(template_id, template_title, template_body) VALUES (?,?)
+  #-- templates
+  #INSERT INTO templates(template_id, template_title, template_body) VALUES (?,?)
 
   #--Verificatie
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   1,
   "Verificatie",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -39,15 +39,15 @@
   Met vriendelijke groeten,<br>
   Dégage", 0);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Verificatie" AND template_tag_body = "verification_url";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Verificatie" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Verificatie" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Verificatie" AND template_tag_body = "verification_url";
 
   #--Welkom
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail) VALUES (
   2,
   "Welkom",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -57,13 +57,13 @@
   Met vriendelijke groeten,<br>
   Dégage", 0);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Welkom" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Welkom" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Welkom" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Welkom" AND template_tag_body = "user_lastname";
 
   #--Infosessie ingeschreven
-  INSERT INTO Templates(template_id, template_title, template_body) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body) VALUES (
   3,
   "Infosessie ingeschreven",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -75,17 +75,17 @@
   Met vriendelijke groeten,<br>
   Dégage");
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "infosession_address";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "infosession_date";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "infosession_address";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Infosessie ingeschreven" AND template_tag_body = "infosession_date";
 
   #--Reservatie bevestigen
-  INSERT INTO Templates(template_id, template_title, template_body) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body) VALUES (
   4,
   "Reservatie bevestigen",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -97,19 +97,19 @@
   Met vriendelijke groeten,<br>
   Dégage");
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_from";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_to";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_url";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_from";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_to";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_url";
 
   #--Reservatie bevestigd
-  INSERT INTO Templates(template_id, template_title, template_body) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body) VALUES (
   5,
   "Reservatie bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -119,26 +119,32 @@
   Adres van de auto:<br>
   %reservation_car_address%<br>
   <br>
+  Opmerkingen door de eigenaar:<br>
+  <br>
+  <i>%reservation_remarks%</i><br>
+  <br>
   Klik <a href=\"%reservation_url%\">hier</a> om naar de reservatie te gaan.<br>
   <br>
   Met vriendelijke groeten,<br>
   Dégage");
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_from";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_to";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_car_address";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_url";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_from";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_to";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_car_address";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_remarks";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigd" AND template_tag_body = "reservation_url";
 
   #--Reservatie geweigerd
-  INSERT INTO Templates(template_id, template_title, template_body) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body) VALUES (
   6,
   "Reservatie geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -150,20 +156,20 @@
   Met vriendelijke groeten,<br>
   Dégage");
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_from";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_to";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_reason";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_from";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_to";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie geweigerd" AND template_tag_body = "reservation_reason";
 
   #--Wachtwoord reset
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   7,
   "Wachtwoord reset",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -174,22 +180,22 @@
   Met vriendelijke groeten,<br>
   Dégage", 0);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "password_reset_url";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Wachtwoord reset" AND template_tag_body = "password_reset_url";
 
  #-- Algemene voorwaarden
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable, template_send_mail) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable, template_send_mail) VALUES (
     8,
     "Algemene voorwaarden",
     "TODO: Aanvullen algemene voorwaarden in templates", 0, 0);
 
   #--Lidmaatschap bevestigd
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   9,
   "Lidmaatschap bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -200,16 +206,16 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "comment";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "comment";
 
   #--Lidmaatschap geweigerd
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   10,
   "Lidmaatschap geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -220,16 +226,16 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "comment";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap geweigerd" AND template_tag_body = "comment";
 
   #--Autokost bevestigd
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   11,
   "Autokost bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -246,22 +252,22 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_name";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_cost_description";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "amount";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_cost_time";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_name";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_cost_description";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "amount";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost bevestigd" AND template_tag_body = "car_cost_time";
 
   #--Autokost geweigerd
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   12,
   "Autokost geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -278,23 +284,23 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_name";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_cost_description";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "amount";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_cost_time";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_name";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_cost_description";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "amount";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost geweigerd" AND template_tag_body = "car_cost_time";
 
 
   #--Tankbeurt bevestigd
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   13,
   "Tankbeurt bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -307,19 +313,19 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "car_name";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "amount";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "car_name";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt bevestigd" AND template_tag_body = "amount";
 
 
    #--Tankbeurt geweigerd
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   14,
   "Tankbeurt geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -332,17 +338,17 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "car_name";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "amount";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "car_name";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt geweigerd" AND template_tag_body = "amount";
 
   #-- Reminder mail
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   15,
   "Ongelezen berichten",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -352,14 +358,14 @@
   Met vriendelijke groeten,<br>
   Dégage", 0);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ongelezen berichten" AND template_tag_body = "user_lastname";
 
   #--Tankbeurt aanvraag
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   16,
   "Tankbeurt aanvraag",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -372,18 +378,18 @@
   Met vriendelijke groeten,<br>
   Dégage", 1);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "car_name";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "amount";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "car_name";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Tankbeurt aanvraag" AND template_tag_body = "amount";
 
   #--Autokost aanvraag
 
-  INSERT INTO Templates(template_id, template_title, template_body, template_send_mail_changeable, template_send_mail) VALUES (
+  INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable, template_send_mail) VALUES (
   17,
   "Autokost aanvraag",
   "Beste %user_firstname% %user_lastname%,<br>
@@ -400,15 +406,15 @@
   Met vriendelijke groeten,<br>
   Dégage", 0,0);
 
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_firstname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_lastname";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_name";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_description";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "amount";
-  INSERT INTO TemplateTagAssociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM Templates, TemplateTags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_time";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_name";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_description";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "amount";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Autokost aanvraag" AND template_tag_body = "car_cost_time";

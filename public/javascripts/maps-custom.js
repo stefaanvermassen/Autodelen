@@ -20,7 +20,7 @@ $(document).ready(function() {
         }).addTo(map);
 
         // add a marker in the given location, attach some popup content to it and open the popup
-        if(typeof(message) != 'undefined') {
+        if(typeof(message) != 'undefined' && message.length > 0) {
             L.marker([lat, lon]).addTo(map)
                 .bindPopup(message)
                 .openPopup();

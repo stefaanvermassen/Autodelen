@@ -23,6 +23,7 @@ public class Car {
     private Integer seats;
     private Integer doors;
     private Integer year;
+    private boolean manual;
     private boolean gps;
     private boolean hook;
     private CarFuel fuel;
@@ -38,10 +39,10 @@ public class Car {
     private List<User> priviliged;
 
     public Car() {
-        this(0, null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null, null);
+        this(0, null, null, null, null, null, null, null, false, false, false, null, null, null, null, null, null, null, null);
     }
 
-    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments) {
+    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -50,6 +51,7 @@ public class Car {
         this.seats = seats;
         this.doors = doors;
         this.year = year;
+        this.manual = manual;
         this.gps = gps;
         this.hook = hook;
         this.fuel = fuel;
@@ -120,6 +122,14 @@ public class Car {
 
     public void setYear(Integer year) {
         this.year = year;
+    }
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
     }
 
     public boolean isGps() {

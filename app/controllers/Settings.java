@@ -6,10 +6,12 @@ import models.Setting;
 import models.User;
 import models.UserRole;
 import org.joda.time.DateTime;
+import org.mindrot.jbcrypt.BCrypt;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
+import providers.UserProvider;
 import views.html.settings.*;
 
 import java.util.List;
@@ -75,6 +77,54 @@ public class Settings extends Controller {
             }
         } catch (DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    public static class ChangePasswordModel {
+        public String oldpw;
+        public String newpw;
+        public String repeatpw;
+
+        public String validate(){
+            if(oldpw == null || oldpw.isEmpty()){
+                return "Gelieve uw oud wachtwoord op te geven.";
+            } else if(newpw == null || newpw.length() < 6){
+                return "Uw nieuw wachtwoord moet minstens 6 tekens bevatten.";
+            } else if(!newpw.equals(repeatpw)){
+                return "Wachtwoorden komen niet overeen";
+            } else return null;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result changePassword(){
+        return ok(changepass.render(Form.form(ChangePasswordModel.class)));
+    }
+
+    @RoleSecured.RoleAuthenticated()
+    public static Result changePasswordPost(){
+        Form<ChangePasswordModel> form = Form.form(ChangePasswordModel.class).bindFromRequest();
+        if(form.hasErrors()){
+            return badRequest(changepass.render(form));
+        } else {
+            try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+                ChangePasswordModel model = form.get();
+                UserDAO dao = context.getUserDAO();
+                User user = DataProvider.getUserProvider().getUser(false);
+
+                if(!UserProvider.hasValidPassword(user, model.oldpw)){
+                    form.reject("Uw oude wachtwoord is incorrect.");
+                    return badRequest(changepass.render(form));
+                } else {
+                    user.setPassword(UserProvider.hashPassword(model.newpw));
+                    dao.updateUser(user, false);
+                    context.commit();
+
+                    DataProvider.getUserProvider().invalidateUser(user);
+                    flash("success", "Uw wachtwoord werd succesvol gewijzigd.");
+                    return redirect(routes.Settings.index());
+                }
+            }
         }
     }
 

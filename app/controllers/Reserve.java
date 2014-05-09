@@ -4,11 +4,10 @@ import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.IllegalFieldValueException;
+import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
@@ -21,7 +20,6 @@ import views.html.reserve.reservations;
 import views.html.reserve.reservationspage;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -50,6 +48,8 @@ public class Reserve extends Controller {
         public String from;
         // Date and time the user will return the car to the owner
         public String until;
+
+        public String message;
 
         /**
          * @return the start datetime of the reservation
@@ -178,7 +178,15 @@ public class Reserve extends Controller {
 
                 // Create the reservation
                 User user = DataProvider.getUserProvider().getUser();
-                Reservation reservation = rdao.createReservation(from, until, car, user);
+                Reservation reservation = rdao.createReservation(from, until, car, user, reservationForm.get().message);
+
+                // Schedule the auto accept
+                JobDAO jdao = context.getJobDAO();
+                int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+                MutableDateTime autoAcceptDate = new MutableDateTime();
+                autoAcceptDate.addMinutes(minutesAfterNow);
+                jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+
                 context.commit();
 
                 if (reservation != null) {
@@ -236,6 +244,7 @@ public class Reserve extends Controller {
             } catch(IllegalArgumentException ex) {
                 return ok(reservationspage.render(new ArrayList<Car>(), page, 0, 0, false));
             }
+            filter.putValue(FilterField.CAR_ACTIVE, "1");
 
             List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
 

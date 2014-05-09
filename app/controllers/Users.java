@@ -67,20 +67,30 @@ public class Users extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result impersonate(int userId){
-        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(userId, false);
-            if(user != null){
-                String originalEmail = session("email"); //TODO: migrate to userprovider also
-                DataProvider.getUserProvider().createUserSession(user);
-                session("impersonated", originalEmail);
-                return redirect(routes.Dashboard.index());
-            } else {
-                flash("danger", "Deze gebruikersID bestaat niet.");
-                return redirect(routes.Users.showUsers());
+        if(session("impersonated") != null && !session("impersonated").isEmpty()) {
+            flash("danger", "U bent reeds in impersoneermodus.");
+            return redirect(routes.Dashboard.index());
+        } else {
+            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+                UserDAO dao = context.getUserDAO();
+                User user = dao.getUser(userId, false);
+                if (user != null) {
+                    if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)){
+                        flash("danger", "U kan geen superuser impersoneren.");
+                        return redirect(routes.Dashboard.index());
+                    } else {
+                        String originalEmail = session("email"); //TODO: migrate to userprovider also
+                        DataProvider.getUserProvider().createUserSession(user);
+                        session("impersonated", originalEmail);
+                        return redirect(routes.Dashboard.index());
+                    }
+                } else {
+                    flash("danger", "Deze gebruikersID bestaat niet.");
+                    return redirect(routes.Users.showUsers());
+                }
+            } catch (DataAccessException ex) {
+                throw ex;
             }
-        } catch(DataAccessException ex){
-            throw ex;
         }
     }
 }

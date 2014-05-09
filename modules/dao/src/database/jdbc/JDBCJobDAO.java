@@ -73,14 +73,14 @@ public class JDBCJobDAO implements JobDAO {
 
     private Job populateJob(ResultSet rs) throws SQLException {
         return new Job(rs.getInt("job_id"), Enum.valueOf(JobType.class, rs.getString("job_type")),
-                new DateTime(rs.getDate("job_time").getTime()), rs.getBoolean("job_finished"), rs.getObject("job_ref_id") == null ? -1 : rs.getInt("job_ref_id"));
+                new DateTime(rs.getTimestamp("job_time").getTime()), rs.getBoolean("job_finished"), rs.getObject("job_ref_id") == null ? -1 : rs.getInt("job_ref_id"));
     }
 
     @Override
     public List<Job> getUnfinishedBefore(DateTime time) throws DataAccessException {
         try {
             PreparedStatement ps = getGetUnfinishedJobsAfterStatement();
-            ps.setDate(1, new Date(time.getMillis()));
+            ps.setTimestamp(1, new Timestamp(time.getMillis()));
             List<Job> jobs = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
@@ -101,7 +101,7 @@ public class JDBCJobDAO implements JobDAO {
             PreparedStatement ps = getCreateJobStatement();
             ps.setString(1, type.name());
             ps.setInt(2, refId);
-            ps.setDate(3, new Date(when.getMillis()));
+            ps.setTimestamp(3, new Timestamp(when.getMillis()));
             ps.setBoolean(4, false);
 
             if (ps.executeUpdate() != 1)
