@@ -22,9 +22,6 @@ function hideAdjustEnvironment() {
 }
 
 $(document).ready(function() {
-    if($('#datetimepickerfrom') === undefined)
-        return;
-
     $('#adjust').on('click', function() {
         if(!($('#fromadjust').hasClass('hidden'))) {
             hideAdjustEnvironment();
@@ -32,6 +29,9 @@ $(document).ready(function() {
             setAdjustEnvironment();
         }
     });
+
+    if($('#datetimepickerfrom') === undefined)
+        return;
 
     $('#datetimepickerfrom').datetimepicker({
         weekStart: 1,

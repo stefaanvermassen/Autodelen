@@ -1,4 +1,4 @@
-@(error: String)
+@(error: String, carName: String, carId: Int)
 @scripts = {
     <script>
         var yesImage = "@routes.Assets.at("images/tristate-checkbox/yes.png")";
@@ -55,7 +55,7 @@
                                     </div>
                                 </div>
                                 <div id="basicEnv" class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
-                                    <h4>Auto's zoeken</h4><hr />
+                                    <h4>@if(carId != -1) { @carName reserveren: } else { Auto's zoeken }</h4><hr />
                                     <input id="input_from_value" class="hidden searchTextField" name="from" value="" />
                                     <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
                                         <label>Reservatie van: </label><br />
@@ -77,9 +77,16 @@
                                     <div id="filterbuttons" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                         <br />
                                         <div class="btn-group btn-group-sm">
-                                            <button id="searchButton" type="button" class="btn btn-success">Zoeken</button>
-                                            <a id="extraButton" type="button" class="btn btn-primary" data-toggle="collapse" href="#extraFiltering">
-                                                Meer filteropties</a>
+                                            <button id="searchButton" type="button" class="btn btn-success">
+                                            @if(carId != -1) { Zoek @carName } else { Zoeken }</button>
+                                            @if(carId == -1) {
+                                                <a id="extraButton" type="button" class="btn btn-primary" data-toggle="collapse" href="#extraFiltering">
+                                                    Meer filteropties</a>
+                                            } else {
+                                                <a class="btn btn-primary" href="@routes.Reserve.index()">
+                                                    Zoek meer auto's
+                                                </a>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -91,8 +98,8 @@
                                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                             <label>Auto</label>
                                             <div class="userpicker" data-url="@routes.CarPicker.getList()">
-                                                <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
-                                                <input type="hidden" class="searchTextField" name="car_id" value= "" />
+                                                <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto" value="@carName"/>
+                                                <input type="hidden" class="searchTextField" name="car_id" value="@if(carId != -1){@carId}" />
                                                 <ul class="dropdown-menu" role="menu"></ul>
                                             </div>
                                         </div>
