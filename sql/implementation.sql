@@ -61,7 +61,6 @@ CREATE TABLE `users` (
 	`user_damage_history` TEXT,
 	`user_payed_deposit` BIT(1),
 	`user_agree_terms` BIT(1),
-	`user_contract_manager_id` INT,
 	`user_image_id` INT,
 	`user_created_at` DATETIME,
 	`user_last_notified` DATETIME,
@@ -71,7 +70,6 @@ CREATE TABLE `users` (
 	FOREIGN KEY (`user_address_residence_id`) REFERENCES addresses(`address_id`),
 	FOREIGN KEY (`user_driver_license_file_group_id`) REFERENCES filegroups(`file_group_id`),
 	FOREIGN KEY (`user_identity_card_file_group_id`) REFERENCES filegroups(`file_group_id`),
-	FOREIGN KEY (`user_contract_manager_id`) REFERENCES users(`user_id`),
 	FOREIGN KEY (`user_image_id`) REFERENCES files(`file_id`),
 	UNIQUE INDEX `user_email` (`user_email`)
 )

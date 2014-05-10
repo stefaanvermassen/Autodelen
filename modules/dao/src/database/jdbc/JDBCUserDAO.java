@@ -23,13 +23,11 @@ public class JDBCUserDAO implements UserDAO {
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
             "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
             "users.user_driver_license_id, users.user_driver_license_file_group_id, users.user_identity_card_id, users.user_identity_card_registration_nr, users.user_identity_card_file_group_id, " +
-            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_contract_manager_id, users.user_image_id, " +
-            "contractManagers.user_id, contractManagers.user_password, contractManagers.user_firstname, contractManagers.user_lastname, contractManagers.user_email";
+            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_image_id";
 
     private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM users " +
             "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
-            "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
-            "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
+            "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id";
 
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
@@ -134,7 +132,7 @@ public class JDBCUserDAO implements UserDAO {
     	if (updateUserStatement == null){
     		updateUserStatement = connection.prepareStatement("UPDATE users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
                     "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
-                    "user_agree_terms=?, user_contract_manager_id=?, user_image_id = ?, user_driver_license_id=?, user_driver_license_file_group_id=?, " +
+                    "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?, user_driver_license_file_group_id=?, " +
                     "user_identity_card_id=?, user_identity_card_registration_nr=?, user_identity_card_file_group_id=? " +
                     "WHERE user_id = ?");
     	}
@@ -168,6 +166,10 @@ public class JDBCUserDAO implements UserDAO {
     }
 
     public static User populateUser(ResultSet rs, boolean withPassword, boolean withRest, String tableName) throws SQLException {
+        if(rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0){ //Fix for left join not returning nullable int
+            return null;
+        }
+
         User user = new User(rs.getInt(tableName + ".user_id"), rs.getString(tableName + ".user_email"), rs.getString(tableName + ".user_firstname"), rs.getString(tableName + ".user_lastname"),
                 withPassword ? rs.getString(tableName + ".user_password") : null);
 
@@ -226,12 +228,6 @@ public class JDBCUserDAO implements UserDAO {
             else
                 user.setIdentityCard(null);
 
-            int contractManagerId = rs.getInt(tableName + ".user_contract_manager_id");
-            if(rs.wasNull()) {
-                user.setContractManager(null);
-            } else {
-                user.setContractManager(JDBCUserDAO.populateUser(rs, false, false, "contractManagers"));
-            }
             user.setStatus(UserStatus.valueOf(rs.getString(tableName + ".user_status")));
 
         }
@@ -338,35 +334,34 @@ public class JDBCUserDAO implements UserDAO {
                 else ps.setString(11, user.getDamageHistory());
                 ps.setBoolean(12, user.isPayedDeposit());
                 ps.setBoolean(13, user.isAgreeTerms());
-                if(user.getContractManager()==null) ps.setNull(14, Types.INTEGER);
-                else ps.setInt(14, user.getContractManager().getId());
-                if(user.getProfilePictureId() != -1) ps.setInt(15, user.getProfilePictureId());
-                else ps.setNull(15, Types.INTEGER);
+
+                if(user.getProfilePictureId() != -1) ps.setInt(14, user.getProfilePictureId());
+                else ps.setNull(14, Types.INTEGER);
                 if(user.getDriverLicense() == null) {
-                    ps.setNull(16, Types.VARCHAR);
-                    ps.setNull(17, Types.INTEGER);
+                    ps.setNull(15, Types.VARCHAR);
+                    ps.setNull(16, Types.INTEGER);
                 } else {
-                    if(user.getDriverLicense().getId() == null) ps.setNull(16, Types.VARCHAR);
-                    else ps.setString(16, user.getDriverLicense().getId());
-                    if(user.getDriverLicense().getFileGroup() == null) ps.setNull(17, Types.INTEGER);
-                    else ps.setInt(17, user.getDriverLicense().getFileGroup().getId());
+                    if(user.getDriverLicense().getId() == null) ps.setNull(15, Types.VARCHAR);
+                    else ps.setString(15, user.getDriverLicense().getId());
+                    if(user.getDriverLicense().getFileGroup() == null) ps.setNull(16, Types.INTEGER);
+                    else ps.setInt(16, user.getDriverLicense().getFileGroup().getId());
                 }
 
                 if(user.getIdentityCard() == null) {
+                    ps.setNull(17, Types.VARCHAR);
                     ps.setNull(18, Types.VARCHAR);
-                    ps.setNull(19, Types.VARCHAR);
-                    ps.setNull(20, Types.INTEGER);
+                    ps.setNull(19, Types.INTEGER);
                 } else {
-                    if(user.getIdentityCard().getId() == null) ps.setNull(18, Types.VARCHAR);
-                    else ps.setString(18, user.getIdentityCard().getId());
-                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(19, Types.VARCHAR);
-                    else ps.setString(19, user.getIdentityCard().getRegistrationNr());
-                    if(user.getIdentityCard().getFileGroup() == null) ps.setNull(20, Types.INTEGER);
-                    else ps.setInt(20, user.getIdentityCard().getFileGroup().getId());
+                    if(user.getIdentityCard().getId() == null) ps.setNull(17, Types.VARCHAR);
+                    else ps.setString(17, user.getIdentityCard().getId());
+                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(18, Types.VARCHAR);
+                    else ps.setString(18, user.getIdentityCard().getRegistrationNr());
+                    if(user.getIdentityCard().getFileGroup() == null) ps.setNull(19, Types.INTEGER);
+                    else ps.setInt(19, user.getIdentityCard().getFileGroup().getId());
                 }
 
 
-                ps.setInt(21, user.getId());
+                ps.setInt(20, user.getId());
             }
 
             if(ps.executeUpdate() == 0)

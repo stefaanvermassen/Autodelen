@@ -107,6 +107,8 @@ GET         /infosession/approvals/page             controllers.InfoSessions.pen
 GET         /infosession/approvals                  controllers.InfoSessions.pendingApprovalList()
 GET         /infosession/approval/details           controllers.InfoSessions.approvalDetails(id: Int)
 POST        /infosession/approval/details           controllers.InfoSessions.approvalAdminAction(id: Int)
+GET         /infosession/approval/admin             controllers.InfoSessions.approvalAdmin(id: Int)
+POST        /infosession/approval/admin             controllers.InfoSessions.approvalAdminPost(id: Int)
 
 # Settings
 # TODO: REMOVE THIS!!!

@@ -13,11 +13,21 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-wrench"></i> Profile toolbox
+                    </div>
                     <div class="panel-body">
+                        @if(editable) {
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                            </div>
 
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
-                        </div>
+                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.edit(user.getId)">Profielinformatie wijzigen</a>
+                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.profilePictureUpload(user.getId)">Profielfoto wijzigen</a>
+                            <a class="smallprofile-static btn btn-default btn-sm" class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijs wijzigen</a>
+                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitskaart wijzigen</a>
+
+                        }
                     </div>
                 </div>
             </div>
@@ -72,7 +82,6 @@
                                         Niet gespecifieerd.
                                     }
                                     <br/>
-                                    <a href="@routes.Profile.editIdentityCard(user.getId)">Wijzigen</a>
                                 </p>
                             </div>
 
@@ -85,25 +94,7 @@
                                         Niet gespecifieerd.
                                     }
                                     <br/>
-                                    <a href="@routes.Profile.editDriversLicense(user.getId)">Wijzigen</a>
                                 </p>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="h4">Contactverantwoordelijke</label>
-                                @defining(user.getContractManager) { manager =>
-                                    @if(manager != null) {
-                                            <p class="form-control-static">
-                                            @if(DataProvider.getUserRoleProvider.isFullUser) {
-                                                <a href="@routes.Profile.index(manager.getId)">@manager.getFirstName @manager.getLastName</a>
-                                            } else {
-                                                @manager.getFirstName @manager.getLastName
-                                            }
-                                            </p>
-                                    } else {
-                                        <p>Nog geen contractverantwoordelijke gespecifieerd.</p>
-                                    }
-                                }
                             </div>
                         </form>
                     </div>

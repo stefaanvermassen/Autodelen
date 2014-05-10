@@ -276,6 +276,23 @@ public class Notifier extends Mailer {
         }
     }
 
+    public static void sendContractManagerAssignedMail(User user, Approval approval){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.CONTRACTMANAGER_ASSIGNED);
+            String mail = replaceUserTags(user, template.getBody());
+            mail = mail.replace("%admin_name%", approval.getAdmin().toString());
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            createNotification(notificationDAO, user, template.getSubject(), mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }
+        }
+    }
+
     public static void sendPasswordResetMail(User user, String verificationUrl) {
         String mail = "";
         setSubject("Uw wachtwoord opnieuw instellen");
