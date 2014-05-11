@@ -44,6 +44,11 @@
                                 }
                                 case RefuelStatus.REQUEST => {
                                     <span class="fa fa-question-circle"></span>
+                                    @if(refuel.getCarRide.getReservation.getId == user.getId) {
+                                        <div class="btn-group btn-group-xs">
+                                            <button class="btn btn-primary" onclick="loadModal(@refuel.getId)">Bewijs wijzigen</button>
+                                        </div>
+                                    }
                                 }
                                 case _ => {}
                             }
