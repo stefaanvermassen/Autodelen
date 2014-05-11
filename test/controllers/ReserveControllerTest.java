@@ -85,6 +85,7 @@ public class ReserveControllerTest {
                 Map<String,String> reserveData = new HashMap<>();
                 reserveData.put("from", "2015-01-01 00:00");
                 reserveData.put("until", "2015-01-02 00:00");
+                reserveData.put("message", "Dankuwel");
                 Result result2 = callAction(
                         controllers.routes.ref.Reserve.confirmReservation(car.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
@@ -125,7 +126,7 @@ public class ReserveControllerTest {
                         controllers.routes.ref.Reserve.confirmReservation(car.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
                 );
-                assertEquals("Creating reservation on nonexisting date", BAD_REQUEST, status(result6));
+                assertEquals("Creating reservation on old date", 303, status(result6));
 
                 // Test if we can make a reservation of a car that doesn't exist
                 reserveData.put("from", "2015-01-01 00:00");

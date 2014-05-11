@@ -1,6 +1,7 @@
 package database.mocking;
 
 import database.*;
+import database.jdbc.JDBCJobDAO;
 
 /**
  * Created by Cedric on 3/7/14.
@@ -17,6 +18,7 @@ public class TestDataAccessContext implements DataAccessContext {
     private NotificationDAO notificationDAO;
     private MessageDAO messageDAO;
     private CarRideDAO carRidesDAO;
+    private JobDAO jobDAO;
 
     public TestDataAccessContext(){
         userDao = new TestUserDAO();
@@ -29,6 +31,7 @@ public class TestDataAccessContext implements DataAccessContext {
         notificationDAO = new TestNotificationDAO();
         messageDAO = new TestMessageDAO();
         carRidesDAO = new TestCarRidesDAO();
+        jobDAO = new TestJobDAO();
     }
 
     @Override
@@ -103,7 +106,7 @@ public class TestDataAccessContext implements DataAccessContext {
 
     @Override
     public JobDAO getJobDAO() {
-        return null;
+        return jobDAO;
     }
 
     @Override

@@ -86,7 +86,8 @@ public class InfoSessionsControllerTest {
 		} 
 		
 	}
-	
+
+    // TODO: doesn't work yet, problem with time-input (invalid format?)
 	@Test
 	public void createInfoSessionSucces() {
 		running(fakeApplication(),new Runnable() {
@@ -116,15 +117,16 @@ public class InfoSessionsControllerTest {
 
 		        // infosessie aanmaken
 		        Map<String,String> data = new HashMap<>();
-		        data.put("address_zip", "9000");
-		        data.put("address_city", "Gent");
-		        data.put("address_street", "Plateaustraat");
-		        data.put("address_number", "76");
-		        data.put("address_country", "België");
+                data.put("address.street", "Straat");
+                data.put("address.number", "1");
+                data.put("address.city", "Gent");
+                data.put("address.zipCode", "9000");
 		        data.put("max_enrollees", "50");
 		        //data.put("time", DateTime.now().plusDays(4).toString());
-		        data.put("tile", "2015-01-01 00:05");
-		        data.put("type", InfoSessionType.NORMAL.toString());
+		        data.put("time", "2015-01-01 00:05");
+		        data.put("type", InfoSessionType.NORMAL.getDescription());
+                data.put("userId", "" + user.getId());
+
 		        Result result3 = callAction(
 		        		controllers.routes.ref.InfoSessions.createNewSession(),
 		        		fakeRequest(POST,"/infosession/new").withCookies(cookie).withFormUrlEncodedBody(data)
@@ -133,7 +135,8 @@ public class InfoSessionsControllerTest {
 			}
 		});
 	}
-	
+
+    // TODO: doesn't work yet (same problem as above: time invalid)
 	@Test
 	public void editInfoSessionTest() {
 		running(fakeApplication(),new Runnable() {
@@ -147,14 +150,14 @@ public class InfoSessionsControllerTest {
 				InfoSession session = helper.createInfoSession(InfoSessionType.NORMAL,user, user.getAddressResidence(), new DateTime(),100);
 				
 				Map<String,String> data = new HashMap<>();
-		        data.put("address_zip", "9000");
-		        data.put("address_city", "Gent");
-		        data.put("address_street", "Stalhof");
-		        data.put("address_number", "6");
-		        data.put("address_bus", "");
+                data.put("address.street", "Straat");
+                data.put("address.number", "1");
+                data.put("address.city", "Gent");
+                data.put("address.zipCode", "9000");
 		        data.put("max_enrollees", "10");
 		        data.put("time",session.getTime().plusDays(1).toString());
 		        data.put("type", InfoSessionType.NORMAL.toString());
+                data.put("userId", "" + user.getId());
 		        
 		        // infosession editten
 		        Result result6 = callAction(

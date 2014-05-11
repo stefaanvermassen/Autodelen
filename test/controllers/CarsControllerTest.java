@@ -41,7 +41,9 @@ import database.UserRoleDAO;
 import database.mocking.TestDataAccessProvider;
 
 public class CarsControllerTest {
-	
+
+    // TODO: CarCosts, CarPriviliges, CarAvailabilities
+
 	private List<Car> cars, users;
 	private CarDAO carDAO;
 	private User sharer;
@@ -265,12 +267,17 @@ public class CarsControllerTest {
 			    // Nieuwe auto toevoegen
 			    Map<String,String> data = new HashMap<>();
 			    data.put("name","TestCar");
+                data.put("userId", "" + user.getId());
 			    data.put("brand", "Audi");
 			    data.put("type", "groot");
 			    data.put("seats", "5");
 			    data.put("doors", "5");
 			    data.put("year", "2012");
 			    data.put("comments", "Dit is een test");
+                data.put("address.street", "Straat");
+                data.put("address.number", "1");
+                data.put("address.city", "Gent");
+                data.put("address.zipCode", "9000");
 			    Result result1 = callAction(
 		                controllers.routes.ref.Cars.addNewCar(),
 		                fakeRequest(POST, "/cars/new").withFormUrlEncodedBody(data).withCookies(cookie)
@@ -302,19 +309,24 @@ public class CarsControllerTest {
 			        );
 			    
 			    Map<String,String> data = new HashMap<>();
-			    data.put("name","TestCar");
-			    data.put("brand", "Audi");
-			    data.put("type", "groot");
-			    data.put("seats", "5");
-			    data.put("doors", "4"); // 4 deuren ipv 5
-			    data.put("year", "2012");
-			    data.put("comments", "Dit is een test");
+                data.put("name","TestCar");
+                data.put("userId", "" + user.getId());
+                data.put("brand", "Audi");
+                data.put("type", "groot");
+                data.put("seats", "5");
+                data.put("doors", "4"); // 4 deuren ipv 5
+                data.put("year", "2012");
+                data.put("comments", "Dit is een test");
+                data.put("address.street", "Straat");
+                data.put("address.number", "1");
+                data.put("address.city", "Gent");
+                data.put("address.zipCode", "9000");
 			    Result result2post = callAction(
 		                controllers.routes.ref.Cars.editCarPost(cars.get(0).getId()), 
 		                fakeRequest().withFormUrlEncodedBody(data).withCookies(cookie)
 			        );
 			    assertEquals("Edit car page", OK, status(result2));
-			    assertEquals("Edit car page", OK, status(result2post));
+			    assertEquals("Edit car page", 303, status(result2post));
 			    
 			    // Editeer wagen die niet bestaat
 			    Result result3 = callAction(
@@ -323,7 +335,7 @@ public class CarsControllerTest {
 			        );
 			    Result result4 = callAction(
 		                controllers.routes.ref.Cars.editCarPost(9000),
-		                fakeRequest().withCookies(cookie)
+		                fakeRequest().withFormUrlEncodedBody(data).withCookies(cookie)
 			        );
 			    assertEquals("Edit a not existing car", BAD_REQUEST, status(result3));
 			    assertEquals("Edit a not existing car", BAD_REQUEST, status(result4));
@@ -335,7 +347,7 @@ public class CarsControllerTest {
 			        );
 			    Result result6 = callAction(
 		                controllers.routes.ref.Cars.editCarPost(cars.get(1).getId()),
-		                fakeRequest().withCookies(cookie)
+		                fakeRequest().withFormUrlEncodedBody(data).withCookies(cookie)
 			        );
 			    assertEquals("Edit a foreign car", BAD_REQUEST, status(result5));
 			    assertEquals("Edit a foreign car", BAD_REQUEST, status(result6));
@@ -346,7 +358,8 @@ public class CarsControllerTest {
 		
 		
 	}
-	
+
+    // TODO: Does not work yet
 	@Test
 	public void carDetails(){
 		running(fakeApplication(),new Runnable() {
@@ -359,7 +372,7 @@ public class CarsControllerTest {
 
 			    // details opvragen van auto (zowel eigen auto als auto van iemand anders)
 			    Result result7 = callAction(
-		                controllers.routes.ref.Cars.detail(cars.get(1).getId()),
+		                controllers.routes.ref.Cars.detail(cars.get(0).getId()),
 		                fakeRequest().withCookies(cookie)
 			        );
 			    Result result8 = callAction(
