@@ -41,7 +41,7 @@
     <div id="page-wrapper">
         <h1 class="page-header">@(if (car == null) "Nieuwe auto" else "Bewerk auto") </h1>
         <div class="row">
-        @helper.form(if (car == null) routes.Cars.addNewCar() else routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal") {
+        @helper.form(if (car == null) routes.Cars.addNewCar() else routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
             <div class="col-lg-3">
                 @if(form.hasGlobalErrors) {
                     <div class="alert alert-danger alert-dismissable">
@@ -260,7 +260,7 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
                                             <div class="col-md-12">
-                                               Fileupload placeholder
+                                                <input id="file" name="file" type="file" class="form-control input-md">
                                             </div>
                                         </div>
                                         <div class="form-group">
