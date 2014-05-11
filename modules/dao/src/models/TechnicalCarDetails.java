@@ -6,14 +6,14 @@ package models;
 public class TechnicalCarDetails {
     private Integer id = null;
     private String licensePlate;
-    private FileGroup registration;
+    private File registration;
     private Integer chassisNumber;
 
-    public TechnicalCarDetails(String licensePlate, FileGroup registration, Integer chassisNumber) {
+    public TechnicalCarDetails(String licensePlate, File registration, Integer chassisNumber) {
         this(null, licensePlate, registration, chassisNumber);
     }
 
-    public TechnicalCarDetails(Integer id, String licensePlate, FileGroup registration, Integer chassisNumber) {
+    public TechnicalCarDetails(Integer id, String licensePlate, File registration, Integer chassisNumber) {
         this.id = id;
         this.licensePlate = licensePlate;
         this.registration = registration;
@@ -36,11 +36,11 @@ public class TechnicalCarDetails {
         this.licensePlate = licensePlate;
     }
 
-    public FileGroup getRegistration() {
+    public File getRegistration() {
         return registration;
     }
 
-    public void setRegistration(FileGroup registration) {
+    public void setRegistration(File registration) {
         this.registration = registration;
     }
 
