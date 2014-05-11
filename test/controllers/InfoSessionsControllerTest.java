@@ -40,7 +40,9 @@ import database.UserDAO;
 import database.UserRoleDAO;
 
 public class InfoSessionsControllerTest {
-	
+
+    // TODO: everything related to Approvals
+
 	private UserDAO userDAO;
 	private UserRoleDAO userRoleDAO;
 	private List<User> users;
