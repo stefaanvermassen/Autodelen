@@ -271,10 +271,27 @@ public class Cars extends Controller {
                         owner = context.getUserDAO().getUser(model.userId, false);
                     }
                     TechnicalCarDetails technicalCarDetails = null;
-                    // TODO: registration
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
+                    models.File file = null;
+                    if (registrationFile != null) {
+                        String contentType = registrationFile.getContentType();
+                        if (!FileHelper.isDocumentContentType(contentType)) {
+                            flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                            return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
+                        } else {
+                            try {
+                                Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
+                                FileDAO fdao = context.getFileDAO();
+                                file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex); //no more checked catch -> error page!
+                            }
+                        }
+                    }
                     if((model.licensePlate != null && !model.licensePlate.equals(""))
-                            || (model.chassisNumber != null && model.chassisNumber != 0)) {
-                        technicalCarDetails = new TechnicalCarDetails(model.licensePlate, null, model.chassisNumber);
+                            || (model.chassisNumber != null && model.chassisNumber != 0) || file != null) {
+                        technicalCarDetails = new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber);
                     }
                     CarInsurance insurance = null;
                     if((model.insuranceName != null && !model.insuranceName.equals("")) || (model.expiration != null || (model.polisNr != null && model.polisNr != 0))
@@ -399,11 +416,29 @@ public class Cars extends Controller {
                     car.setOwnerAnnualKm(model.ownerAnnualKm);
                 else
                     car.setOwnerAnnualKm(null);
-                // TODO: registration
+                Http.MultipartFormData body = request().body().asMultipartFormData();
+                Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
+                models.File file = null;
+                if (registrationFile != null) {
+                    String contentType = registrationFile.getContentType();
+                    if (!FileHelper.isDocumentContentType(contentType)) {
+                        flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                        return redirect(routes.Cars.detail(car.getId()));
+                    } else {
+                        try {
+                            Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
+                            FileDAO fdao = context.getFileDAO();
+                            file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex); //no more checked catch -> error page!
+                        }
+                    }
+                }
+
                 if(car.getTechnicalCarDetails() == null) {
                     if((model.licensePlate != null && !model.licensePlate.equals(""))
-                            || (model.chassisNumber != null && model.chassisNumber != 0))
-                        car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, null, model.chassisNumber));
+                            || (model.chassisNumber != null && model.chassisNumber != 0) || file != null)
+                        car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber));
                 }
                 else {
                     if(model.licensePlate != null && !model.licensePlate.equals(""))
@@ -416,6 +451,8 @@ public class Cars extends Controller {
                         car.getTechnicalCarDetails().setChassisNumber(model.chassisNumber);
                     else
                         car.getTechnicalCarDetails().setChassisNumber(null);
+                    if(file != null)
+                        car.getTechnicalCarDetails().setRegistration(file);
                 }
                 if(car.getInsurance() == null) {
                     if(model.insuranceName != null && !model.insuranceName.equals("") || (model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)

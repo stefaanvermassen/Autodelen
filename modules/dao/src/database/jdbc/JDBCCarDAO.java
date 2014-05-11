@@ -27,6 +27,7 @@ public class JDBCCarDAO implements CarDAO{
             "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
             "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
             "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_technical_details " +
+            "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
             "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance ";
 
     public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
@@ -144,8 +145,9 @@ public class JDBCCarDAO implements CarDAO{
                 user = JDBCUserDAO.populateUser(rs, false, false);
                 rs.getInt("car_technical_details");
                 if(!rs.wasNull()) {
-                    FileGroup registration = new FileGroup(rs.getInt("details_car_registration"));
-                    if(rs.wasNull()) registration = null;
+                    File registration = null;
+                    rs.getInt("details_car_registration");
+                    if(!rs.wasNull()) registration = JDBCFileDAO.populateFile(rs);
 
                     Integer chassisNr = rs.getInt("details_car_chassis_number");
                     if(rs.wasNull()) chassisNr = null;

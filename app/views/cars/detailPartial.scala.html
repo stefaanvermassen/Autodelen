@@ -77,7 +77,7 @@
                             <strong>Geschatte huidige waarde: </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
                             <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
                             <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
-                            <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { File placeholder }<br>
+                            <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)">Link</a> }<br>
                             <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
                             <strong>Verzekeraar: </strong> @if(car.getInsurance == null || car.getInsurance.getName == null) { Onbekend } else { @car.getInsurance.getName }<br>
                             <strong>Verzekering vervaldatum: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @car.getInsurance.getExpiration }<br>

@@ -107,7 +107,7 @@ CREATE TABLE `technicalcardetails` (
 	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`details_id`),
 	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`),
-	FOREIGN KEY (`details_car_registration`) REFERENCES filegroups(`file_group_id`)
+	FOREIGN KEY (`details_car_registration`) REFERENCES files(`file_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB;
