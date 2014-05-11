@@ -323,7 +323,7 @@ public class Cars extends Controller {
             } else {
                 User currentUser = DataProvider.getUserProvider().getUser();
                 if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
-                    flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                    flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                     return badRequest(carList());
                 }
 
@@ -362,7 +362,7 @@ public class Cars extends Controller {
 
             User currentUser = DataProvider.getUserProvider().getUser();
             if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
-                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
 
@@ -458,7 +458,7 @@ public class Cars extends Controller {
                 dao.updateCar(car);
 
                 context.commit();
-                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                flash("success", "Jouw wijzigingen werden succesvol toegepast.");
                 return redirect(routes.Cars.detail(car.getId()));
             } catch (DataAccessException ex) {
                 context.rollback();
@@ -486,7 +486,7 @@ public class Cars extends Controller {
 
             User currentUser = DataProvider.getUserProvider().getUser();
             if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
-                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
 
@@ -527,7 +527,7 @@ public class Cars extends Controller {
                 dao.deleteAvailabilties(availabilitiesToDelete);
 
                 context.commit();
-                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                flash("success", "Je wijzigingen werden succesvol toegepast.");
                 return redirect(routes.Cars.detail(car.getId()));
             } catch (DataAccessException ex) {
                 context.rollback();
@@ -555,7 +555,7 @@ public class Cars extends Controller {
 
             User currentUser = DataProvider.getUserProvider().getUser();
             if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
-                flash("danger", "U heeft geen rechten tot het bewerken van deze wagen.");
+                flash("danger", "Je heeft geen rechten tot het bewerken van deze wagen.");
                 return badRequest(carList());
             }
 
@@ -593,7 +593,7 @@ public class Cars extends Controller {
                 dao.deletePriviliged(car, usersToDelete);
 
                 context.commit();
-                flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                flash("success", "Je wijzigingen werden succesvol toegepast.");
                 return redirect(routes.Cars.detail(car.getId()));
             } catch (DataAccessException ex) {
                 context.rollback();
@@ -676,7 +676,7 @@ public class Cars extends Controller {
                     //TODO: this is repeat code, unify with above controllers as extra check
                     User currentUser = DataProvider.getUserProvider().getUser();
                     if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
-                        flash("danger", "U heeft geen rechten tot het verwijderen van deze wagen.");
+                        flash("danger", "Je hebt geen rechten tot het verwijderen van deze wagen.");
                         return badRequest(carList());
                     }
 
@@ -775,7 +775,7 @@ public class Cars extends Controller {
                                             return redirect(routes.Cars.detail(carId));
                                         }
                                         Notifier.sendCarCostRequest(carCost);
-                                        flash("success", "Uw autokost werd toegevoegd.");
+                                        flash("success", "Je autokost werd toegevoegd.");
                                         return redirect(routes.Cars.detail(carId));
                                     } catch (DataAccessException ex) {
                                         context.rollback();
@@ -843,7 +843,7 @@ public class Cars extends Controller {
                     }
                 }
                 if(!isCarOfUser) {
-                    flash("danger", "U bent niet de eigenaar van deze auto.");
+                    flash("danger", "Je bent niet de eigenaar van deze auto.");
                     return badRequest(cars.render(listOfCars));
                 }
 

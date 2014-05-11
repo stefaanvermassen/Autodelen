@@ -156,7 +156,7 @@ public class Damages extends Controller {
             } else {
                 User currentUser = DataProvider.getUserProvider().getUser();
                 if(!(damage.getCarRide().getReservation().getUser().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
-                    flash("danger", "U heeft geen rechten tot het bewerken van dit schadedossier.");
+                    flash("danger", "Je hebt geen rechten tot het bewerken van dit schadedossier.");
                     return badRequest();
                 }
 

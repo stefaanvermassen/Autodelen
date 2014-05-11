@@ -147,7 +147,7 @@ public class UserRoles extends Controller {
 
                 // Check if a superuser did delete his role by accident (SU roles can only be removed by other SU users)
                 if (user.getEmail().equals(session("email")) && removedRoles.contains(UserRole.SUPER_USER)) {
-                    flash("danger", "Als superuser kan u uw eigen superuser rechten niet verwijderen.");
+                    flash("danger", "Als superuser kan je je eigen superuser rechten niet verwijderen.");
                     return badRequest(editroles.render(getUserRolesStatus(oldRoles), user));
                 } else {
                     try {

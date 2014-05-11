@@ -243,7 +243,7 @@ public class InfoSessions extends Controller {
 
                     dao.updateInfoSession(session);
                     context.commit();
-                    flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                    flash("success", "Jouw wijzigingen werden succesvol toegepast.");
                     return redirect(routes.InfoSessions.detail(sessionId));
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -269,14 +269,14 @@ public class InfoSessions extends Controller {
 
             InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
             if (alreadyAttending == null) {
-                flash("danger", "U bent niet ingeschreven voor een toekomstige infosessie.");
+                flash("danger", "Je bent niet ingeschreven voor een toekomstige infosessie.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 try {
                     dao.unregisterUser(alreadyAttending, user);
                     context.commit();
 
-                    flash("success", "U bent succesvol uitgeschreven uit deze infosessie.");
+                    flash("success", "Je bent succesvol uitgeschreven uit deze infosessie.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -416,7 +416,7 @@ public class InfoSessions extends Controller {
     public static Result enrollSession(int sessionId) {
         User user = DataProvider.getUserProvider().getUser();
         if (DataProvider.getUserRoleProvider().isFullUser(user)) {
-            flash("warning", "U bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
+            flash("warning", "Je bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
         }
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -438,8 +438,8 @@ public class InfoSessions extends Controller {
                         dao.registerUser(session, user);
 
                         context.commit();
-                        flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
-                                "U bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
+                        flash("success", alreadyAttending == null ? ("Je bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                                "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
                         Notifier.sendInfoSessionEnrolledMail(user, session);
                         return redirect(routes.InfoSessions.detail(sessionId));
                     } catch (DataAccessException ex) {
@@ -573,7 +573,7 @@ public class InfoSessions extends Controller {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             if (DataProvider.getUserRoleProvider().isFullUser(user)) {
-                flash("warning", "U bent reeds een volwaardige gebruiker.");
+                flash("warning", "Je bent reeds een volwaardige gebruiker.");
                 return redirect(routes.Dashboard.index());
             } else {
                 ApprovalDAO dao = context.getApprovalDAO();
@@ -586,7 +586,7 @@ public class InfoSessions extends Controller {
                     Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
 
                     if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                        flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                        flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         List<String> errors = checkApprovalConditions(user, context);
@@ -601,7 +601,7 @@ public class InfoSessions extends Controller {
     public static Result requestApprovalPost() {
         User user = DataProvider.getUserProvider().getUser();
         if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
-            flash("warning", "U bent reeds een volwaardige gebruiker.");
+            flash("warning", "Je bent reeds een volwaardige gebruiker.");
             return redirect(routes.Dashboard.index());
         } else {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
@@ -616,7 +616,7 @@ public class InfoSessions extends Controller {
                         InfoSessionDAO idao = context.getInfoSessionDAO();
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                         if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                            flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                            flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             List<String> errors = checkApprovalConditions(user, context);
@@ -629,13 +629,13 @@ public class InfoSessions extends Controller {
                     try {
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                         if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                            flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                            flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
                             context.commit();
 
-                            flash("success", "Uw aanvraag werd succesvol ingediend.");
+                            flash("success", "Je aanvraag werd succesvol ingediend.");
                             return redirect(routes.Dashboard.index());
                         }
                     } catch (DataAccessException ex) {
