@@ -30,26 +30,6 @@ $(document).ready(function() {
         }
     });
 
-    $('#reject').on('click', function() {
-        $('#actions1').addClass('hidden');
-        $('#actions2').removeClass('hidden');
-    });
-
-    $('#annulate').on('click', function() {
-        $('#actions2').addClass('hidden');
-        $('#actions1').removeClass('hidden');
-    });
-
-    $('#adjustInfo').on('click', function() {
-        $('#showEnv').addClass('hidden');
-        $('#adjustEnv').removeClass('hidden');
-    });
-
-    $("#annulateAdjustInfo").on('click', function() {
-        $('#showEnv').removeClass('hidden');
-        $('#adjustEnv').addClass('hidden');
-    });
-
     if($('#datetimepickerfrom') === undefined)
         return;
 

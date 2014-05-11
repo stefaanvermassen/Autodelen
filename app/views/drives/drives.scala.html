@@ -1,4 +1,4 @@
-@(beginPage : Int, beginAsc : Int, beginOrder : String, beginFilter : String)
+@(beginPage : Int, beginAsc : Int)
 
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -8,8 +8,8 @@
         // To go to the correct page
         var beginPage = @beginPage;
         var beginAsc = @beginAsc;
-        var beginOrder = "@beginOrder";
-        var beginFilter = "@beginFilter";
+        var beginOrder = "";
+        var beginFilter = "status=" + @ReservationStatus.ACCEPTED.toString();
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
