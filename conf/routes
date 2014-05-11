@@ -138,7 +138,6 @@ GET         /cars/view                              controllers.Cars.detail(id: 
 GET         /cars/edit                              controllers.Cars.editCar(carId: Int)
 POST        /cars/edit                              controllers.Cars.editCarPost(carId: Int)
 GET         /cars/picture                           controllers.Cars.getPicture(carId: Int)
-GET         /cars/delete                            controllers.Cars.removeCar(carId: Int)
 GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
 POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()

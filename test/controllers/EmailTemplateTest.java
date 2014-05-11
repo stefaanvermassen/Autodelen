@@ -26,7 +26,7 @@ import org.junit.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import database.DataAccessContext;
-import database.DataProvider;
+import providers.DataProvider;
 import database.TemplateDAO;
 
 public class EmailTemplateTest {
@@ -83,7 +83,7 @@ public class EmailTemplateTest {
 			                controllers.routes.ref.EmailTemplates.editTemplate(),
 			                fakeRequest(POST,"/emailtemplate/edit")
 			        );
-					assertEquals("Editing template", OK, status(result1));
+					assertEquals("Editing template", 303, status(result1));
 				}
 				helper.logout();
 			}

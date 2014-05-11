@@ -16,6 +16,7 @@ public class TestTemplateDAO implements TemplateDAO{
 		list = new ArrayList<>();
         //VERIFICATION(1), WELCOME(2), INFOSESSION_ENROLLED(3), RESERVATION_APPROVE_REQUEST(4), RESERVATION_APPROVED_BY_OWNER(5), RESERVATION_REFUSED_BY_OWNER(6), PASSWORD_RESET(7);
 
+
         list.add(new EmailTemplate(1, "VERIFICATION", "", new ArrayList<String>(), "VERIFICATION", false, false));
         list.add(new EmailTemplate(2, "WELCOME", "", new ArrayList<String>(), "WELCOME", false, false));
         list.add(new EmailTemplate(3, "INFOSESSION_ENROLLED", "", new ArrayList<String>(), "INFOSESSION_ENROLLED", false, false));
@@ -33,7 +34,8 @@ public class TestTemplateDAO implements TemplateDAO{
 						, template.getSendMailChangeable());
 			}
 		}
-		return null;
+        // For now, let's give a default one when it's not find (so we don't get errors in the controllers)
+		return list.get(0);
 	}
 
 	@Override
@@ -44,7 +46,8 @@ public class TestTemplateDAO implements TemplateDAO{
 						, template.getSendMailChangeable());
 			}
 		}
-		return null;
+        // For now, let's give a default one when it's not find (so we don't get errors in the controllers)
+        return list.get(0);
 	}
 
 	@Override

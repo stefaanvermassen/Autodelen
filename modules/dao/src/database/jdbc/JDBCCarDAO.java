@@ -83,7 +83,6 @@ public class JDBCCarDAO implements CarDAO{
     private PreparedStatement updateCarStatement;
     private PreparedStatement getCarStatement;
     private PreparedStatement getCarsOfUserStatement;
-    private PreparedStatement deleteCarStatement;
     private PreparedStatement getGetCarListPageByNameAscStatement;
     private PreparedStatement getGetCarListPageByNameDescStatement;
     private PreparedStatement getGetCarListPageByBrandAscStatement;
@@ -176,13 +175,6 @@ public class JDBCCarDAO implements CarDAO{
         } else {
             return null;
         }
-    }
-
-    private PreparedStatement getDeleteCarStatement() throws SQLException {
-    	if(deleteCarStatement == null){
-    		deleteCarStatement = connection.prepareStatement("DELETE FROM cars WHERE car_id = ?");
-    	}
-    	return deleteCarStatement;
     }
     
     private PreparedStatement createCarStatement() throws SQLException {
@@ -630,19 +622,6 @@ public class JDBCCarDAO implements CarDAO{
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
     }
-
-	@Override
-	public void deleteCar(Car car) throws DataAccessException {
-		try {
-			PreparedStatement ps = getDeleteCarStatement();
-			ps.setInt(1, car.getId());
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when deleting car.");
-		} catch (SQLException ex){
-			throw new DataAccessException("Could not delete car",ex);
-		}
-		
-	}
 
     @Override
     public List<CarAvailabilityInterval> getAvailabilities(Car car) throws DataAccessException {

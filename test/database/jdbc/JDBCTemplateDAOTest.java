@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import database.DataAccessContext;
-import database.DataProvider;
+import providers.DataProvider;
 import database.TemplateDAO;
 
 public class JDBCTemplateDAOTest {
