@@ -3,7 +3,6 @@ package controllers;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -42,9 +41,10 @@ public class Drives extends Controller {
      * The owner is obligated to inform the loaner why his reservation request
      * is denied.
      */
-    public static class RefuseModel {
+    public static class RemarksModel {
         // String containing the reason for refusing a reservation
-        public String reason;
+        public String status;
+        public String remarks;
 
         /**
          * Validates the form:
@@ -52,8 +52,9 @@ public class Drives extends Controller {
          * @return an error string or null
          */
         public String validate() {
-            if("".equals(reason))
-                return "Gelieve mee te delen waarom u deze aanvraag weigert.";
+            // Should not be possible but you never know
+            if(status == null || "".equals(status))
+                return "Een fout deed zich voor bij het verwerken van de actie. Probeer het opnieuw";
             return null;
         }
     }
@@ -103,7 +104,7 @@ public class Drives extends Controller {
      * @return the html page of the index page
      */
     public static Html showIndex() {
-        return drives.render(1, 1, "", "status=" + ReservationStatus.ACCEPTED.toString());
+        return drives.render(1, 1);
     }
 
     /**
@@ -138,7 +139,7 @@ public class Drives extends Controller {
      * @return the html page
      */
     private static Html detailsPage(int reservationId) {
-        return detailsPage(reservationId, Form.form(Reserve.ReservationModel.class), Form.form(RefuseModel.class), Form.form(InfoModel.class));
+        return detailsPage(reservationId, Form.form(Reserve.ReservationModel.class), Form.form(RemarksModel.class), Form.form(InfoModel.class));
     }
 
     /**
@@ -154,7 +155,7 @@ public class Drives extends Controller {
      * @param detailsForm Form allowing the loaner to provided details about the drive
      * @return the html page
      */
-    private static Html detailsPage(int reservationId, Form<Reserve.ReservationModel> adjustForm, Form<RefuseModel> refuseForm,
+    private static Html detailsPage(int reservationId, Form<Reserve.ReservationModel> adjustForm, Form<RemarksModel> refuseForm,
                                     Form<InfoModel> detailsForm) {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -179,7 +180,7 @@ public class Drives extends Controller {
                 return null;
             }
             if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)) {
-                flash("Errror", "U bent niet gemachtigd om deze informatie op te vragen");
+                flash("Errror", "Je bent niet gemachtigd om deze informatie op te vragen");
                 return null;
             }
             CarRide driveInfo = null;
@@ -217,7 +218,7 @@ public class Drives extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     public static Result adjustDetails(int reservationId) {
         User user = DataProvider.getUserProvider().getUser();
-        Form<RefuseModel> refuseModel = Form.form(RefuseModel.class);
+        Form<RemarksModel> refuseModel = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
         if(adjustForm.hasErrors())
@@ -230,7 +231,7 @@ public class Drives extends Controller {
                 return badRequest(showIndex());
             }
             if(!isLoaner(reservation, user)) {
-                adjustForm.reject("U bent niet gemachtigd deze actie uit te voeren.");
+                adjustForm.reject("Je bent niet gemachtigd deze actie uit te voeren.");
                 return badRequest(showIndex());
             }
             DateTime from = adjustForm.get().getTimeFrom();
@@ -240,7 +241,7 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
             }
             if(reservation.getStatus() != ReservationStatus.ACCEPTED && reservation.getStatus() != ReservationStatus.REQUEST) {
-                adjustForm.reject("U kan deze reservatie niet aanpassen.");
+                adjustForm.reject("Je kan deze reservatie niet aanpassen.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseModel, detailsForm));
             }
             reservation.setFrom(from);
@@ -264,45 +265,39 @@ public class Drives extends Controller {
         }
     }
 
-
-    /**
-     * Method: GET
-     *
-     * Called when a reservation of a car is approved by the owner.
-     *
-     * @param reservationId The id of the reservation being approved
-     * @return the drives index page
-     */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
-    public static Result approveReservation(int reservationId) {
-        Reservation reservation = adjustStatus(reservationId, ReservationStatus.ACCEPTED);
-        if(reservation == null)
-            return badRequest(showIndex());
-
-        Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "", reservation);
-        return details(reservationId);
-    }
-
     /**
      * Method: POST
      *
-     * Called when a reservation of a car is refused by the owner.
+     * Called when a reservation of a car is refused/accepted by the owner.
      *
-     * @param reservationId the id of the reservation being refused
+     * @param reservationId the id of the reservation being refused/accepted
      * @return the drives index page
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
-    public static Result refuseReservation(int reservationId) {
+    public static Result setReservationStatus(int reservationId) {
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class).bindFromRequest();
-        if(refuseForm.hasErrors())
-            return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
-        Reservation reservation = adjustStatus(reservationId, ReservationStatus.REFUSED);
+        Form<RemarksModel> remarksForm = Form.form(RemarksModel.class).bindFromRequest();
+        if(remarksForm.hasErrors())
+            return badRequest(detailsPage(reservationId, adjustForm, remarksForm, detailsForm));
+        ReservationStatus status = ReservationStatus.valueOf(remarksForm.get().status);
+        String remarks = remarksForm.get().remarks;
+        if(status == ReservationStatus.REFUSED && (remarks == null || "".equals(remarks))) {
+            remarksForm.reject("Gelieve aan te geven waarom je de reservatie weigert.");
+            return badRequest(detailsPage(reservationId, adjustForm, remarksForm, detailsForm));
+        }
+        if(status != ReservationStatus.REFUSED && status != ReservationStatus.ACCEPTED)  {
+            remarksForm.reject("Het is niet toegestaan om de status van de reservatie aan te passen naar: " + status.toString());
+            return badRequest(detailsPage(reservationId, adjustForm, remarksForm, detailsForm));
+        }
+        Reservation reservation = adjustStatus(reservationId, status);
         if(reservation == null) {
             return badRequest(showIndex());
         }
-        Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), reservation, refuseForm.get().reason);
+        if(status == ReservationStatus.REFUSED)
+            Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), remarks, reservation);
+        else
+            Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), remarks, reservation);
         return details(reservationId);
     }
 
@@ -335,7 +330,7 @@ public class Drives extends Controller {
             ReservationDAO dao = context.getReservationDAO();
             Reservation reservation = dao.getReservation(reservationId);
             if(reservation == null) {
-                flash("danger", "De actie die u wilt uitvoeren is ongeldig: reservatie onbestaand");
+                flash("danger", "De actie die je wil uitvoeren is ongeldig: reservatie onbestaand");
                 return null;
             }
             // Both super user and reservation admin are allowed to adjust the status of a reservation
@@ -380,13 +375,14 @@ public class Drives extends Controller {
     public static Result provideDriveInfo(int reservationId) {
         User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class);
+        Form<RemarksModel> refuseForm = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
         if(detailsForm.hasErrors())
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO dao = context.getCarRideDAO();
             ReservationDAO rdao = context.getReservationDAO();
+            CarDAO carDAO = context.getCarDAO();
             Reservation reservation = rdao.getReservation(reservationId);
             // Test if reservation exists
             if(reservation == null) {
@@ -396,7 +392,7 @@ public class Drives extends Controller {
             // Test if user is authorized
             boolean isOwner = isOwnerOfReservedCar(context, user, reservation);
             if(!isLoaner(reservation, user) && !isOwner) {
-                detailsForm.reject("U bent niet geauthoriseerd voor het uitvoeren van deze actie.");
+                detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             // Test if ride already exists
@@ -430,10 +426,13 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             // Adjust the status of the reservation
-            if(isOwner)
+            if(isOwner){
                 reservation.setStatus(ReservationStatus.FINISHED);
-            else
+            }else{
                 reservation.setStatus(ReservationStatus.DETAILS_PROVIDED);
+                Notifier.sendReservationDetailsProvidedMail(carDAO.getCar(reservation.getCar().getId()).getOwner(), reservation);
+            }
+
             rdao.updateReservation(reservation);
             // Commit changes
             context.commit();
@@ -447,7 +446,7 @@ public class Drives extends Controller {
     public static Result approveDriveInfo(int reservationId) {
         User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
-        Form<RefuseModel> refuseForm = Form.form(RefuseModel.class);
+        Form<RemarksModel> refuseForm = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO dao = context.getCarRideDAO();
@@ -459,7 +458,7 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             if(!isOwnerOfReservedCar(context, user, reservation)) {
-                detailsForm.reject("U bent niet geauthoriseerd voor het uitvoeren van deze actie.");
+                detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             CarRide ride = dao.getCarRide(reservationId);
@@ -558,7 +557,7 @@ public class Drives extends Controller {
             int amountOfResults = dao.getAmountOfReservations(filter);
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
-            return ok(drivespage.render(user.getId(), Form.form(RefuseModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+            return ok(drivespage.render(user.getId(), Form.form(RemarksModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
         } catch (DataAccessException ex) {
             throw ex;
         }

@@ -240,7 +240,7 @@ public class Login extends Controller {
                         context.commit();
 
                         DataProvider.getUserProvider().invalidateUser(user);
-                        flash("success", "Uw wachtwoord werd succesvol gewijzigd.");
+                        flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
                         LoginModel model = new LoginModel();
                         model.email = user.getEmail();
 
@@ -343,7 +343,7 @@ public class Login extends Controller {
                     context.commit();
                     DataProvider.getUserProvider().invalidateUser(user);
 
-                    flash("success", "Uw email werd succesvol geverifieerd. Gelieve aan te melden.");
+                    flash("success", "Je email werd succesvol geverifieerd. Gelieve aan te melden.");
                     LoginModel model = new LoginModel();
                     model.email = user.getEmail();
                     Notifier.sendWelcomeMail(user);

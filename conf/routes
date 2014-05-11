@@ -19,9 +19,8 @@ POST        /userroles/edit                         controllers.UserRoles.editPo
 GET         /drives                                 controllers.Drives.index()
 GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drive_details                          controllers.Drives.details(reservationId: Int)
+POST        /drive_details/status                   controllers.Drives.setReservationStatus(reservationId: Int)
 POST        /drive_details/adjusted                 controllers.Drives.adjustDetails(reservationId: Int)
-GET         /drive_details/approved                 controllers.Drives.approveReservation(reservationId: Int)
-POST        /drive_details/refused                  controllers.Drives.refuseReservation(reservationId: Int)
 POST        /drive_details/provide_info             controllers.Drives.provideDriveInfo(reservationId: Int)
 GET         /drive_details/approve_info             controllers.Drives.approveDriveInfo(reservationId: Int)
 GET         /drives-cancelled                       controllers.Drives.cancelReservation(reservationId: Int)
@@ -29,6 +28,7 @@ GET         /drives/admin                           controllers.Drives.drivesAdm
 
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
+GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
 GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
 POST        /reserve/reservation                    controllers.Reserve.confirmReservation(cardId: Int)
@@ -169,6 +169,9 @@ GET         /damages/edit                           controllers.Damages.editDama
 GET         /damages/status                         controllers.Damages.addStatus(damageId: Int)
 POST        /damages/status                         controllers.Damages.addStatusPost(damageId: Int)
 GET         /damages/proof                          controllers.Damages.addProof(damageId: Int)
+POST        /damages/proof                          controllers.Damages.addProofPost(damageId: Int)
+GET         /damages/proof/file                     controllers.Damages.getProof(proofId: Int)
+GET         /damages/proof/deletefile               controllers.Damages.deleteProof(damageId: Int, fileId: Int)
 POST        /damages/edit                           controllers.Damages.editDamagePost(damageId: Int)
 GET         /damages/finished                       controllers.Damages.setDamageFinished(damageId: Int, status: Int)
 

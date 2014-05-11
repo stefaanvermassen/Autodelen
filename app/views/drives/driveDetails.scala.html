@@ -1,4 +1,4 @@
-@(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RefuseModel],
+@(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RemarksModel],
         infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
         car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 @import providers.DataProvider;
@@ -226,13 +226,19 @@
                                                 <div class="col-sm-4">
                                                     <strong>Kilometerstand na rit:</strong> @driveInfo.getEndMileage
                                                 </div>
+                                                <div class="col-sm-4">
+                                                    <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
+                                                </div>
+                                            </div>
+                                            <div class="row">
                                                 @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && owner.getId == userId) {
                                                     <div class="col-sm-4 btn-group btn-group-xs">
                                                         <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
                                                         <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
                                                     </div>
                                                 }
-                                            </div><br />
+                                            </div>
+                                            <br />
                                         </div>
                                     </div>
                                     <div id="adjustEnv" @if(!infoForm.hasGlobalErrors) { class="hidden" }>

@@ -61,7 +61,7 @@ public class RoleSecured {
                 if(user == null) {
                     return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
                 } else if(UserProvider.isBlocked(user)) {
-                    ctx.flash().put("danger", "Deze account is not niet geactiveerd of geblokkeerd.");
+                    ctx.flash().put("danger", "Dit account is not niet geactiveerd of geblokkeerd.");
                     return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
                 }
 

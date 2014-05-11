@@ -59,7 +59,7 @@ public class Settings extends Controller {
             UserRoleDAO dao = context.getUserRoleDAO();
             Set<UserRole> roles = dao.getUserRoles(user.getId());
             if (roles.contains(UserRole.SUPER_USER)) {
-                flash("warning", "U heeft reeds superuser rechten.");
+                flash("warning", "Je hebt reeds superuser rechten.");
                 return badRequest(views.html.dashboard.render(user, Profile.getProfileCompleteness(user)));
             } else {
                 try {
@@ -68,7 +68,7 @@ public class Settings extends Controller {
                     DataProvider.getUserRoleProvider().invalidateRoles(user);
                     roles.add(UserRole.SUPER_USER);
 
-                    flash("success", "U heeft nu superuserrechten. Gelieve je extra rechten aan te duiden.");
+                    flash("success", "Je hebt nu superuserrechten. Gelieve je extra rechten aan te duiden.");
                     return ok(views.html.userroles.editroles.render(UserRoles.getUserRolesStatus(roles), user));
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -87,9 +87,9 @@ public class Settings extends Controller {
 
         public String validate(){
             if(oldpw == null || oldpw.isEmpty()){
-                return "Gelieve uw oud wachtwoord op te geven.";
+                return "Gelieve je oud wachtwoord op te geven.";
             } else if(newpw == null || newpw.length() < 6){
-                return "Uw nieuw wachtwoord moet minstens 6 tekens bevatten.";
+                return "Je nieuw wachtwoord moet minstens 6 tekens bevatten.";
             } else if(!newpw.equals(repeatpw)){
                 return "Wachtwoorden komen niet overeen";
             } else return null;
@@ -113,7 +113,7 @@ public class Settings extends Controller {
                 User user = DataProvider.getUserProvider().getUser(false);
 
                 if(!UserProvider.hasValidPassword(user, model.oldpw)){
-                    form.reject("Uw oude wachtwoord is incorrect.");
+                    form.reject("Je oude wachtwoord is incorrect.");
                     return badRequest(changepass.render(form));
                 } else {
                     user.setPassword(UserProvider.hashPassword(model.newpw));
@@ -121,7 +121,7 @@ public class Settings extends Controller {
                     context.commit();
 
                     DataProvider.getUserProvider().invalidateUser(user);
-                    flash("success", "Uw wachtwoord werd succesvol gewijzigd.");
+                    flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
                     return redirect(routes.Settings.index());
                 }
             }

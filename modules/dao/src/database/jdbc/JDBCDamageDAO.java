@@ -121,7 +121,7 @@ public class JDBCDamageDAO implements DamageDAO {
     private PreparedStatement getUpdateDamageStatement() throws SQLException {
         if (updateDamageStatement == null) {
             updateDamageStatement = connection.prepareStatement("UPDATE damages SET damage_car_ride_id = ? ," +
-                    "damage_description = ? , damage_finished = ? , damage_time = ? "
+                    "damage_description = ? , damage_finished = ? , damage_time = ?, damage_filegroup_id = ? "
                     + "WHERE damage_id = ?");
         }
         return updateDamageStatement;
@@ -178,7 +178,12 @@ public class JDBCDamageDAO implements DamageDAO {
             ps.setString(2, damage.getDescription());
             ps.setBoolean(3, damage.getFinished());
             ps.setTimestamp(4, new Timestamp(damage.getTime().getMillis()));
-            ps.setInt(5, damage.getId());
+            if(damage.getProofId() != 0){
+                ps.setInt(5, damage.getProofId());
+            }else{
+                ps.setNull(5, Types.INTEGER);
+            }
+            ps.setInt(6, damage.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Damage update affected 0 rows.");
         } catch (SQLException e){

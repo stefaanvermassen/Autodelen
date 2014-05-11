@@ -461,7 +461,7 @@ public class DrivesControllerTest {
                 Reservation reservation = helper.createReservation(from, to, car, user);
 
                 Map<String,String> data = new HashMap<>();
-                data.put("reason", "Test reden");
+                data.put("remarks", "Test reden");
                 Result result1 = callAction(
                         controllers.routes.ref.Drives.refuseReservation(reservation.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
@@ -469,14 +469,14 @@ public class DrivesControllerTest {
                 assertEquals("Refusing reservation of own car", OK, status(result1));
 
                 // With empty reason
-                data.put("reason", "");
+                data.put("remarks", "");
                 Result result2 = callAction(
                         controllers.routes.ref.Drives.refuseReservation(reservation.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(data)
                 );
-                assertEquals("Refusing reservation without reason", BAD_REQUEST, status(result2));
+                assertEquals("Refusing reservation without remarks", BAD_REQUEST, status(result2));
 
-                data.put("reason", "Test reden");
+                data.put("remarks", "Test reden");
                 // Reservation of other car that I reserved
                 User user2 = helper.createRegisteredUser("test2@test.com", "1234piano", "Niet", "Ik");
                 Car car2 = helper.createCar("NietMijnenAuto", "Opel", "Corsa", address, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user2, "");

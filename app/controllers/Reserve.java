@@ -104,10 +104,27 @@ public class Reserve extends Controller {
     }
 
     /**
+     * Method: GET
+     *
+     * @return the reservation index page containing one specific car
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    public static Result indexWithCar(String carName, int id) {
+        return ok(showIndex(carName, id));
+    }
+
+    /**
+     * @return The html context of the reservations index page for one specific car
+     */
+    public static Html showIndex(String carName, int id) {
+        return reservations.render("", carName, id);
+    }
+
+    /**
      * @return The html context of the reservations index page
      */
     public static Html showIndex() {
-        return reservations.render("");
+        return reservations.render("", "", -1);
     }
 
     /**
@@ -163,7 +180,7 @@ public class Reserve extends Controller {
             // Request the form
             Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
             if(reservationForm.hasErrors()) {
-                return badRequest(reservations.render(reservationForm.globalError().message()));
+                return badRequest(reservations.render(reservationForm.globalError().message(), "", -1));
             }
             try {
                 // Test whether the reservation is valid
@@ -172,7 +189,7 @@ public class Reserve extends Controller {
                 for(Reservation reservation : res) {
                     if((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                             (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
-                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!"));
+                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1));
                     }
                 }
 
@@ -199,7 +216,7 @@ public class Reserve extends Controller {
                     }
                     return redirect(routes.Drives.index());
                 } else
-                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator"));
+                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator", "", -1));
             } catch(DataAccessException ex) {
                 throw ex;
             }

@@ -68,7 +68,7 @@ public class Users extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     public static Result impersonate(int userId){
         if(session("impersonated") != null && !session("impersonated").isEmpty()) {
-            flash("danger", "U bent reeds in impersoneermodus.");
+            flash("danger", "Je bent reeds in impersoneermodus.");
             return redirect(routes.Dashboard.index());
         } else {
             try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -76,7 +76,7 @@ public class Users extends Controller {
                 User user = dao.getUser(userId, false);
                 if (user != null) {
                     if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)){
-                        flash("danger", "U kan geen superuser impersoneren.");
+                        flash("danger", "Je kan geen superuser impersoneren.");
                         return redirect(routes.Dashboard.index());
                     } else {
                         String originalEmail = session("email"); //TODO: migrate to userprovider also

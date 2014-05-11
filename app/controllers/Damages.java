@@ -1,6 +1,9 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.ConfigurationHelper;
+import controllers.util.FileAction;
+import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
 import models.*;
@@ -8,12 +11,18 @@ import org.joda.time.DateTime;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.cars.detail;
 import views.html.cars.edit;
 import views.html.damages.*;
+import views.html.profile.identitycard;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import static controllers.util.Addresses.getCountryList;
@@ -31,7 +40,7 @@ public class Damages extends Controller {
         public DateTime time;
 
         public String validate() {
-            if("".equals(description))
+            if ("".equals(description))
                 return "Geef aub een beschrijving op.";
             return null;
         }
@@ -48,7 +57,7 @@ public class Damages extends Controller {
         public String status;
 
         public String validate() {
-            if("".equals(status))
+            if ("".equals(status))
                 return "Geef aub een status op.";
             return null;
         }
@@ -103,14 +112,14 @@ public class Damages extends Controller {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             DamageDAO dao = context.getDamageDAO();
 
-            if(orderBy == null) {
+            if (orderBy == null) {
                 orderBy = FilterField.DAMAGE_FINISHED;
             }
 
             List<Damage> listOfResults = dao.getDamages(orderBy, asc, page, PAGE_SIZE, filter);
 
             int amountOfResults = dao.getAmountOfDamages(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
 
             return damagespage.render(listOfResults, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
@@ -130,11 +139,18 @@ public class Damages extends Controller {
             UserDAO userDAO = context.getUserDAO();
             CarDAO carDAO = context.getCarDAO();
             DamageLogDAO damageLogDAO = context.getDamageLogDAO();
+            FileDAO fileDAO = context.getFileDAO();
             Damage damage = dao.getDamage(damageId);
+            List<File> proofList;
+            if (damage.getProofId() != 0) {
+                proofList = fileDAO.getFiles(damage.getProofId()).getList();
+            } else {
+                proofList = new ArrayList<>();
+            }
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            return ok(details.render(damage, owner, damagedCar, damageLogList));
+            return ok(details.render(damage, owner, damagedCar, damageLogList, proofList));
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -142,6 +158,7 @@ public class Damages extends Controller {
 
     /**
      * Method: GET
+     *
      * @return modal to edit damage information
      */
     @RoleSecured.RoleAuthenticated()
@@ -155,8 +172,8 @@ public class Damages extends Controller {
                 return badRequest();
             } else {
                 User currentUser = DataProvider.getUserProvider().getUser();
-                if(!(damage.getCarRide().getReservation().getUser().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
-                    flash("danger", "U heeft geen rechten tot het bewerken van dit schadedossier.");
+                if (!(damage.getCarRide().getReservation().getUser().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))) {
+                    flash("danger", "Je hebt geen rechten tot het bewerken van dit schadedossier.");
                     return badRequest();
                 }
 
@@ -166,13 +183,14 @@ public class Damages extends Controller {
                 Form<DamageModel> editForm = Form.form(DamageModel.class).fill(model);
                 return ok(editmodal.render(editForm, damageId));
             }
-        }catch (DataAccessException ex) {
+        } catch (DataAccessException ex) {
             throw ex;
         }
     }
 
     /**
      * Method: GET
+     *
      * @return modal to provide new damage log status
      */
     @RoleSecured.RoleAuthenticated()
@@ -182,6 +200,7 @@ public class Damages extends Controller {
 
     /**
      * Method: GET
+     *
      * @return modal to provide new damage proof
      */
     @RoleSecured.RoleAuthenticated()
@@ -191,9 +210,10 @@ public class Damages extends Controller {
 
     /**
      * Method: POST
+     *
      * @return redirect to the damage detail page
      */
-   @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated()
     public static Result editDamagePost(int damageId) {
         Form<DamageModel> damageForm = Form.form(DamageModel.class).bindFromRequest();
         if (damageForm.hasErrors()) {
@@ -201,14 +221,21 @@ public class Damages extends Controller {
                 DamageDAO dao = context.getDamageDAO();
                 UserDAO userDAO = context.getUserDAO();
                 CarDAO carDAO = context.getCarDAO();
+                FileDAO fileDAO = context.getFileDAO();
                 DamageLogDAO damageLogDAO = context.getDamageLogDAO();
                 Damage damage = dao.getDamage(damageId);
                 Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
                 User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
                 List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
+                List<File> proofList;
+                if (damage.getProofId() != 0) {
+                    proofList = fileDAO.getFiles(damage.getProofId()).getList();
+                } else {
+                    proofList = new ArrayList<>();
+                }
                 flash("danger", "Beschrijving aanpassen mislukt.");
-                return badRequest(details.render(damage, owner, damagedCar, damageLogList));
-            }catch(DataAccessException ex){
+                return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
+            } catch (DataAccessException ex) {
                 throw ex; //log?
             }
         } else {
@@ -234,6 +261,7 @@ public class Damages extends Controller {
 
     /**
      * Method: POST
+     *
      * @return redirect to the damage detail page
      */
     @RoleSecured.RoleAuthenticated()
@@ -244,14 +272,21 @@ public class Damages extends Controller {
                 DamageDAO dao = context.getDamageDAO();
                 UserDAO userDAO = context.getUserDAO();
                 CarDAO carDAO = context.getCarDAO();
+                FileDAO fileDAO = context.getFileDAO();
                 DamageLogDAO damageLogDAO = context.getDamageLogDAO();
                 Damage damage = dao.getDamage(damageId);
                 Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
                 User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
                 List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
+                List<File> proofList;
+                if (damage.getProofId() != 0) {
+                    proofList = fileDAO.getFiles(damage.getProofId()).getList();
+                } else {
+                    proofList = new ArrayList<>();
+                }
                 flash("danger", "Status toevoegen mislukt.");
-                return badRequest(details.render(damage, owner, damagedCar, damageLogList));
-            }catch(DataAccessException ex){
+                return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
+            } catch (DataAccessException ex) {
                 throw ex;
             }
         } else {
@@ -261,7 +296,7 @@ public class Damages extends Controller {
                 DamageLogDAO damageLogDAO = context.getDamageLogDAO();
                 Damage damage = damageDAO.getDamage(damageId);
                 DamageStatusModel model = damageStatusForm.get();
-                DamageLog damageLog = damageLogDAO.createDamageLog(damage,model.status);
+                DamageLog damageLog = damageLogDAO.createDamageLog(damage, model.status);
                 context.commit();
                 if (damageLog == null) {
                     flash("danger", "Kon de damagelog niet toevoegen aan de database.");
@@ -280,10 +315,10 @@ public class Damages extends Controller {
 
     /**
      * Method: GET
-     *
+     * <p/>
      * Called when a damage is closed/opened
      *
-     * @param damageId  The carCost being approved
+     * @param damageId The carCost being approved
      * @return the carcost index page
      */
     public static Result setDamageFinished(int damageId, int status) {
@@ -295,8 +330,99 @@ public class Damages extends Controller {
             context.commit();
             flash("success", "Status van schadedossier succesvol aangepast");
             return redirect(routes.Damages.showDamageDetails(damageId));
-        }catch(DataAccessException ex) {
+        } catch (DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     * Processes the request to add files
+     *
+     * @param damageId The damage to edit
+     * @return The detials page of a damage
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result addProofPost(int damageId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            DamageDAO damageDAO = context.getDamageDAO();
+            Damage damage = damageDAO.getDamage(damageId);
+            FileDAO fdao = context.getFileDAO();
+            if (damage == null) {
+                return redirect(routes.Damages.showDamageDetails(damageId));
+            }
+            try {
+                boolean updateDamage = false; // Only perform a damage update when filegroup doesn't exist
+                Http.MultipartFormData body = request().body().asMultipartFormData();
+                Http.MultipartFormData.FilePart newFile = body.getFile("file");
+                if (newFile != null) {
+                    if (!FileHelper.isDocumentContentType(newFile.getContentType())) {
+                        flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
+                        return badRequest();
+                    } else {
+                        FileGroup group;
+                        if (damage.getProofId() == 0) {
+                            // Create new filegroup
+                            group = fdao.createFileGroup();
+                            damage.setProofId(group.getId());
+                            updateDamage = true;
+
+                        } else {
+                            group = fdao.getFiles(damage.getProofId());
+                        }
+                        // Now we add the file to the group
+                        Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.damages"));
+                        models.File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
+                        group.addFile(file);
+                    }
+                }
+                if (updateDamage) {
+                    damageDAO.updateDamage(damage);
+                }
+                context.commit();
+                flash("success", "Bestand succesvol toegevoegd.");
+                return redirect(routes.Damages.showDamageDetails(damageId));
+            } catch (DataAccessException | IOException ex) { //IO or database error causes a rollback
+                context.rollback();
+                throw new RuntimeException(ex); //unchecked
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     * @return proof url
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result getProof(int proofId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), proofId);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     * Deletes a file from the damage filegroup
+     * @param damageId The damage to delete from
+     * @param fileId The file to delete
+     * @return A redirect to the damage details
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result deleteProof(int damageId, int fileId){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            FileDAO fileDAO = context.getFileDAO();
+            File file = fileDAO.getFile(fileId);
+            fileDAO.deleteFile(file.getId());
+            FileHelper.deleteFile(Paths.get(file.getPath()));
+            context.commit();
+            flash("success", "Bestand succesvol verwijderd.");
+            return redirect(routes.Damages.showDamageDetails(damageId));
+        }catch (DataAccessException | IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }
