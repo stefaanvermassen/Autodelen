@@ -29,7 +29,7 @@
                                     <h1><span class="glyphicon glyphicon-ban-circle"></span> Oeps!!</h1>
                                     <h2> Toegang geweigerd</h2>
                                     <div class="error-details">
-                                        <p>Je hebt een van volgende recht(en) nodig om deze pagina te openen:</p>
+                                        <p>U heeft een van volgende recht(en) nodig om deze pagina te openen:</p>
                                         <ul>
                                             @for(role <- roles){
                                                 <li>@role</li>
