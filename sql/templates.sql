@@ -92,10 +92,11 @@
   "Reservatie bevestigen",
   "Beste %user_firstname% %user_lastname%,<br>
   <br>
-  Iemand wil jouw auto reserven van %reservation_from% tot %reservation_to%.<br>
+  %reservation_user_firstname% %reservation_user_lastname% wil jouw auto reserven van %reservation_from% tot %reservation_to%.<br>
   <br>
   Gelieve deze reservatie zo snel mogelijk goed te keuren. Klik <a href=\"%reservation_url%\">hier</a> om naar de reservatie te gaan.<br>
   <br>
+  Commentaar van de lener: %comment%.
   Met vriendelijke groeten,<br>
   Dégage");
 
@@ -109,6 +110,12 @@
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_to";
   INSERT INTO templatetagassociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_url";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "comment";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Reservatie bevestigen" AND template_tag_body = "reservation_user_lastname";
 
   #--Reservatie bevestigd
   INSERT INTO templates(template_id, template_title, template_body) VALUES (
@@ -438,3 +445,30 @@
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Lidmaatschap bevestigd" AND template_tag_body = "user_lastname";
   INSERT INTO templatetagassociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Contractmanager toegewezen" AND template_tag_body = "admin_name";
+
+  INSERT INTO templates(template_id, template_title, template_body) VALUES (
+  19,
+  "Ritdetails aangevuld",
+  "Beste %user_firstname% %user_lastname%,<br>
+  <br>
+  Er zijn zonet nieuwe ritdetails aangevuld voor uw auto voor de reservatie van %reservation_from% tot %reservation_to% door %reservation_user_firstname% %reservation_user_lastname%<br>
+  <br>
+  Gelieve deze details zo snel mogelijk goed te keuren. Klik <a href=\"%reservation_url%\">hier</a> om naar de reservatie te gaan.<br>
+  <br>
+  Met vriendelijke groeten,<br>
+  Dégage");
+
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "user_lastname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "reservation_from";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "reservation_to";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "reservation_url";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "reservation_user_firstname";
+  INSERT INTO templatetagassociations(template_id, template_tag_id)
+  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Ritdetails aangevuld" AND template_tag_body = "reservation_user_lastname";

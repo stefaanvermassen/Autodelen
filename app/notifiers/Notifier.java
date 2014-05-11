@@ -229,6 +229,27 @@ public class Notifier extends Mailer {
         }
     }
 
+    public static void sendReservationDetailsProvidedMail(User user, Reservation carReservation) {
+        String mail = "";
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            TemplateDAO dao = context.getTemplateDAO();
+            EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
+            mail = replaceUserTags(user, template.getBody());
+            mail = replaceCarReservationTags(carReservation, mail);
+            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
+            NotificationDAO notificationDAO = context.getNotificationDAO();
+            createNotification(notificationDAO, user, template.getSubject(), mail);
+            if(template.getSendMail()){
+                setSubject(template.getSubject());
+                addRecipient(user.getEmail());
+                addFrom(NOREPLY);
+                send(mail);
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 
     public static void sendReservationApprovedByOwnerMail(User user, String remarks, Reservation carReservation) {
         String mail = "";
@@ -353,7 +374,9 @@ public class Notifier extends Mailer {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
         template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
         template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));
-        //TODO: reservation_url
+        template = template.replace("%comment%", carReservation.getMessage());
+        template = template.replace("%reservation_user_firstname%", carReservation.getUser().getFirstName());
+        template = template.replace("%reservation_user_lastname%", carReservation.getUser().getLastName());
         return template;
     }
 

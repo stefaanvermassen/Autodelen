@@ -382,6 +382,7 @@ public class Drives extends Controller {
         try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO dao = context.getCarRideDAO();
             ReservationDAO rdao = context.getReservationDAO();
+            CarDAO carDAO = context.getCarDAO();
             Reservation reservation = rdao.getReservation(reservationId);
             // Test if reservation exists
             if(reservation == null) {
@@ -425,10 +426,13 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             // Adjust the status of the reservation
-            if(isOwner)
+            if(isOwner){
                 reservation.setStatus(ReservationStatus.FINISHED);
-            else
+            }else{
                 reservation.setStatus(ReservationStatus.DETAILS_PROVIDED);
+                Notifier.sendReservationDetailsProvidedMail(carDAO.getCar(reservation.getCar().getId()).getOwner(), reservation);
+            }
+
             rdao.updateReservation(reservation);
             // Commit changes
             context.commit();
