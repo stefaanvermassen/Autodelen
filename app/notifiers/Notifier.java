@@ -21,7 +21,7 @@ public class Notifier extends Mailer {
 
     public static void sendVerificationMail(User user, String verificationUrl) {
         String mail = "";
-        setSubject("Verifieer uw Dégage-account");
+        setSubject("Verifieer jouw Dégage-account");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -295,7 +295,7 @@ public class Notifier extends Mailer {
 
     public static void sendPasswordResetMail(User user, String verificationUrl) {
         String mail = "";
-        setSubject("Uw wachtwoord opnieuw instellen");
+        setSubject("Wachtwoord opnieuw instellen");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
