@@ -7,6 +7,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel">Nieuw bewijsstuk</h4>
             </div>
+            @helper.form(routes.Damages.addProofPost(damageId), 'enctype -> "multipart/form-data") {
             <fieldset>
                 <div id="modalBody" class="modal-body">
                     <div class="panel-body">
@@ -14,7 +15,7 @@
                         <div class="form-group">
                             <label class="col-md-1 control-label" for="picture">Bewijsmateriaal</label>
                             <div class="col-md-12">
-                                <input id="picture" name="picture" type="file" class="form-control input-md" required>
+                                <input id="file" name="file" type="file" class="form-control input-md" required>
                             </div>
                         </div>
 
@@ -27,7 +28,7 @@
                 </div>
 
             </fieldset>
-
+            }
 
         </div>
     </div>
