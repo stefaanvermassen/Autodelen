@@ -68,7 +68,7 @@
                     <div class="panel-body">
                         <button class="btn btn-primary" onclick="loadDescriptionModal(@damage.getId)">Tijd/beschrijving aanpassen</button>
                         <button class="btn btn-primary" onclick="loadStatusModal(@damage.getId)">Nieuwe status</button>
-                        <button class="btn btn-primary" onclick="loadProofModal(@damage.getId)">Nieuwe bewijsstuk</button>
+                        <button class="btn btn-primary" onclick="loadProofModal(@damage.getId)">Nieuw bewijsstuk</button>
                         @if(!damage.getFinished){
                             <a class="btn btn-primary" href="@routes.Damages.setDamageFinished(damage.getId, 1)">Schadedossier sluiten</a>
                         }else{
