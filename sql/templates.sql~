@@ -35,7 +35,7 @@
   "Verificatie",
   "Beste %user_firstname% %user_lastname%,<br>
   <br>
-  Om jouw e-mailadres te controleren vragen we je om op onderstaande link te klikken:<br>
+  Om uw e-mailadres te controleren vragen we u om op onderstaande link te klikken:<br>
   %verification_url% <br>
   <br>
   Met vriendelijke groeten,<br>
@@ -70,7 +70,7 @@
   "Infosessie ingeschreven",
   "Beste %user_firstname% %user_lastname%,<br>
   <br>
-  Je heebt je ingeschreven voor een infosessie op %infosession_date%. <br>
+  U heeft zich ingeschreven voor een infosessie op %infosession_date%. <br>
   Deze infosessie zal doorgaan op het volgende adres:<br>
   %infosession_address%<br>
   <br>
@@ -92,7 +92,7 @@
   "Reservatie bevestigen",
   "Beste %user_firstname% %user_lastname%,<br>
   <br>
-  Iemand wil jouw auto reserven van %reservation_from% tot %reservation_to%.<br>
+  Iemand wilt uw auto reserven van %reservation_from% tot %reservation_to%.<br>
   <br>
   Gelieve deze reservatie zo snel mogelijk goed te keuren. Klik <a href=\"%reservation_url%\">hier</a> om naar de reservatie te gaan.<br>
   <br>
@@ -116,7 +116,7 @@
   "Reservatie bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw reservatie is bevestigd, de auto is gereserveerd van %reservation_from% tot %reservation_to%.<br>
+  Uw reservatie is bevestigd, de auto is gereserveerd van %reservation_from% tot %reservation_to%.<br>
   <br>
   Adres van de auto:<br>
   %reservation_car_address%<br>
@@ -151,7 +151,7 @@
   "Reservatie geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw reservatie, van %reservation_from% tot %reservation_to%, werd geweigerd door de eigenaar om volgende reden:<br>
+  Uw reservatie, van %reservation_from% tot %reservation_to%, werd geweigerd door de eigenaar om volgende reden:<br>
   <br>
   <i>%reservation_reason%</i><br>
   <br>
@@ -202,7 +202,7 @@
   "Lidmaatschap bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Gefeliciteerd! Jouw lidmaatschap bij Dégage werd zonet bevestgd.<br>
+  Gefeliciteerd! Uw lidmaatschap bij Dégage werd zonet bevestgd.<br>
   %comment%
   <br>
   Met vriendelijke groeten,<br>
@@ -222,7 +222,7 @@
   "Lidmaatschap geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw lidmaatschap bij Dégage werd zonet geweigerd.<br>
+  Uw lidmaatschap bij Dégage werd zonet geweigerd.<br>
   %comment%
   <br>
   Met vriendelijke groeten,<br>
@@ -242,7 +242,7 @@
   "Autokost bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw autokost werd zonet bevestigd door een admin.<br>
+  Uw autokost werd zonet bevestigd door een admin.<br>
   %car_name%
   <br>
   %car_cost_description%
@@ -274,7 +274,7 @@
   "Autokost geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw autokost werd helaas geweigerd door een admin.<br>
+  Uw autokost werd helaas geweigerd door een admin.<br>
   %car_name%
   <br>
   %car_cost_description%
@@ -307,7 +307,7 @@
   "Tankbeurt bevestigd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw tankbeurt werd zonet bevestigd door de auto-eigenaar.<br>
+  Uw tankbeurt werd zonet bevestigd door de auto-eigenaar.<br>
   %car_name%
   <br>
   %amount%
@@ -332,7 +332,7 @@
   "Tankbeurt geweigerd",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Jouw tankbeurt werd helaas geweigerd door de auto-eigenaar.<br>
+  Uw tankbeurt werd helaas geweigerd door de auto-eigenaar.<br>
   %car_name%
   <br>
   %amount%
@@ -355,7 +355,7 @@
   "Ongelezen berichten",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Je hebt ongelezen berichten. Gelieve in te loggen op jouw Dégage-account.<br>
+  U heeft ongelezen berichten. Gelieve in te loggen op uw Dégage-account.<br>
   <br>
   Met vriendelijke groeten,<br>
   Dégage", 0);
@@ -372,7 +372,7 @@
   "Tankbeurt aanvraag",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  Er werd zonet een tankbeurt ingegeven voor jouw wagen. Gelieve deze zo snel mogelijk goed te keuren.<br>
+  Er werd zonet een tankbeurt ingegeven voor uw wagen. Gelieve deze zo snel mogelijk goed te keuren.<br>
   %car_name%
   <br>
   %amount%
@@ -427,7 +427,7 @@
   "Contractmanager toegewezen",
   "Beste %user_firstname% %user_lastname%,<br>
 
-  %admin_name% werd zojuist toegewezen als jouw contractverantwoordelijke. Deze persoon zal jouw registratie verder afhandelen.<br>
+  %admin_name% werd zojuist toegewezen als uw contractverantwoordelijke. Deze persoon zal uw registratie verder afhandelen.<br>
   <br>
   Met vriendelijke groeten,<br>
   Dégage", 1);
