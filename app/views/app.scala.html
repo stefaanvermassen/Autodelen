@@ -131,10 +131,10 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString</span>
-                            @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) {
-                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                            <!-- @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) { -->
+                               <img class="avatar" src="" alt="small profile picture">
                                 <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
-                            }
+                            <!-- } -->
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -164,9 +164,11 @@
                         <li @if(title == "Dashboard") {class="active"}>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
+                        @if(!DataProvider.getUserRoleProvider.isFullUser(user)){
                         <li @if(title == "Infosessies") {class="active"}>
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
+                        }
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_USER)){
                         <li @if(title == "Reserveren") {class="active"}>
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
@@ -233,8 +235,8 @@
 
 
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.MAIL_ADMIN)){
-                        <li @if(title == "Emailtemplates") {class="active"}>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
+                        <li @if(title == "Templates") {class="active"}>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Templates</a>
                         </li>
                         }
 
@@ -286,7 +288,8 @@
                             <a href=""><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
                         }
-                                }
+                        }
+                        <li id="logoutbutton"><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                     </ul>
                     <!-- /#side-menu -->
                 </div>
