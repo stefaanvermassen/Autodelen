@@ -598,6 +598,22 @@ public class InfoSessions extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
+    public static Boolean approvalRequestSent() {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ApprovalDAO dao = context.getApprovalDAO();
+            List<Approval> approvals = dao.getPendingApprovals(user);
+            if (!approvals.isEmpty()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
     public static Result requestApprovalPost() {
         User user = DataProvider.getUserProvider().getUser();
         if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
@@ -859,6 +875,25 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     * Returns if the user had been to an infosession
+     *
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static boolean didUserGoToInfoSession(){
+        final User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
+            final boolean didUserGoToInfoSession = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
+            return didUserGoToInfoSession;
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
      * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
      *
      * @return
@@ -870,12 +905,12 @@ public class InfoSessions extends Controller {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
 
-            final boolean showApprovalButton = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
+            final boolean didUserGoToInfoSession = didUserGoToInfoSession();
             if (enrolled == null || !DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
-                        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, showApprovalButton));
+                        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
                     }
                 });
             } else {
@@ -885,7 +920,7 @@ public class InfoSessions extends Controller {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
                                 return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(),
                                         coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getFirst().getTime().toString("dd-MM-yyyy") + " om " + enrolled.getFirst().getTime().toString("HH:mm")),
-                                        showApprovalButton));
+                                        didUserGoToInfoSession));
                             }
                         }
                 );
