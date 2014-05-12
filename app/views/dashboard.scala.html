@@ -38,7 +38,7 @@
                     @if(userWentToInfoSession){
                     <div class="panel panel-success">
                     } else {
-                    <div class="panel panel-warning">
+                    <div class="panel panel-danger">
                     }
                         <div class="panel-heading">
                             ① Volg een infosessie
@@ -55,7 +55,7 @@
                     @if(completeness == 100){
                     <div class="panel panel-success">
                     } else {
-                    <div class="panel panel-warning">
+                    <div class="panel panel-danger">
                     }
                         <div class="panel-heading">
                             ② Vul je profiel verder aan
@@ -63,7 +63,11 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="progress">
-                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                @if(completeness == 100){
+                                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                } else {
+                                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                }
                             </div>
 
                             De volgende dingen kan je best aanvullen voordat je je volwaardig lidmaatschap aanvraagt:
@@ -82,7 +86,7 @@
                     @if(approvalRequestSent){
                     <div class="panel panel-success">
                     } else {
-                    <div class="panel panel-warning">
+                    <div class="panel panel-danger">
                     }
                         <div class="panel-heading">
                             ③ Vraag je volwaardig lidmaatschap aan!
