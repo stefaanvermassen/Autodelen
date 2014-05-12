@@ -590,7 +590,7 @@ public class InfoSessions extends Controller {
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         List<String> errors = checkApprovalConditions(user, context);
-                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context)));
+                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
                     }
                 }
             }
@@ -636,7 +636,7 @@ public class InfoSessions extends Controller {
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             List<String> errors = checkApprovalConditions(user, context);
-                            return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
+                            return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context), didUserGoToInfoSession()));
                         }
                     }
                 } else {
@@ -650,8 +650,6 @@ public class InfoSessions extends Controller {
                         } else {
                             Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
                             context.commit();
-
-                            flash("success", "Je aanvraag werd succesvol ingediend.");
                             return redirect(routes.Dashboard.index());
                         }
                     } catch (DataAccessException ex) {

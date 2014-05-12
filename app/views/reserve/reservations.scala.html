@@ -78,13 +78,13 @@
                                         <br />
                                         <div class="btn-group btn-group-sm">
                                             <button id="searchButton" type="button" class="btn btn-success">
-                                            @if(carId != -1) { Zoek @carName } else { Zoeken }</button>
+                                            @if(carId != -1) { zoek @carName } else { zoeken }</button>
                                             @if(carId == -1) {
                                                 <a id="extraButton" type="button" class="btn btn-primary" data-toggle="collapse" href="#extraFiltering">
-                                                    Meer filteropties</a>
+                                                    meer filteropties</a>
                                             } else {
                                                 <a class="btn btn-primary" href="@routes.Reserve.index()">
-                                                    Zoek meer auto's
+                                                    zoek meer auto's
                                                 </a>
                                             }
                                         </div>

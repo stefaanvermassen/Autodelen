@@ -32,13 +32,13 @@
                         <div class="panel-body">
                             Je zal een mailtje ontvangen wanneer je aanvraag wordt goed- of afgekeurd.
                         </div>
-                            <!-- /.panel-body -->
+                        <!-- /.panel-body -->
                     </div>
                 } else {
                     @if(userWentToInfoSession){
                     <div class="panel panel-success">
                     } else {
-                    <div class="panel panel-warning">
+                    <div class="panel panel-danger">
                     }
                         <div class="panel-heading">
                             ① Volg een infosessie
@@ -47,7 +47,7 @@
                         <div class="panel-body">
                             Door een infosessie te volgen word je op de hoogte gebracht over het reilen en zeilen van ons systeem. Je inschrijven voor een infosessie kan <a href="@routes.InfoSessions.showUpcomingSessions">hier</a>.
                         </div>
-                        <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                     </div>
 
 
@@ -55,7 +55,7 @@
                     @if(completeness == 100){
                     <div class="panel panel-success">
                     } else {
-                    <div class="panel panel-warning">
+                    <div class="panel panel-danger">
                     }
                         <div class="panel-heading">
                             ② Vul je profiel verder aan
@@ -63,7 +63,11 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="progress">
-                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                @if(completeness == 100){
+                                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                } else {
+                                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                }
                             </div>
 
                             De volgende dingen kan je best aanvullen voordat je je volwaardig lidmaatschap aanvraagt:
@@ -76,13 +80,13 @@
 
                             Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
                         </div>
-                        <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                     </div>
 
                     @if(approvalRequestSent){
                     <div class="panel panel-success">
                     } else {
-                    <div class="panel panel-warning">
+                    <div class="panel panel-danger">
                     }
                         <div class="panel-heading">
                             ③ Vraag je volwaardig lidmaatschap aan!
@@ -91,31 +95,89 @@
                         <div class="panel-body">
                             Als je alles hebt aangevuld kan je je volwaardig lidmaatschap <a href="@routes.InfoSessions.requestApproval">hier</a> aanvragen.
                         </div>
-                            <!-- /.panel-body -->
+                        <!-- /.panel-body -->
                     </div>
                 }
             } else {
-                <!-- FULL USER -->
+                <!-- FULL USER: WARNINGS -->
                 <div class="panel panel-default">
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        Alle belangrijke informatie is aangevuld, dus je hoeft je geen zorgen te maken!
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+
+                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
+                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { requests =>
+                    @if(requests > 0) {
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <i class="fa fa-info-circle"></i> Ritdetails
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                Je moet nog ritdetails van <strong>@requests</strong> rit(en) toevoegen, dat kan je <a href="@routes.Drives.index">hier</a> doen.
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                    }
+                }
+                <div class="panel panel-info">
                     <div class="panel-heading">
-                        titel
+                        <i class="fa fa-info-circle"></i> Tankbeurten
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        body
+                        Je moet nog bewijsjes uploaden van <strong>4</strong> tankbeurt(en), dat kan je <a href="">hier</a> doen.
                     </div>
-                        <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                 </div>
-                <div class="panel panel-default">
+                <div class="panel panel-info">
                     <div class="panel-heading">
-                        titel
+                        <i class="fa fa-info-circle"></i> Schadedossiers
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        body
+                        Er is nieuwe informatie toegevoegd aan een schadedossier. Bekijk de wijzigingen <a href="">hier</a>.
                     </div>
-                        <!-- /.panel-body -->
+                    <!-- /.panel-body -->
                 </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <i class="fa fa-info-circle"></i> Aangevraagde ritten
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        Er staan nog <strong>4</strong> aangevraagde ritten op bevestiging te wachten, je kan ze <a href="">hier</a> bekijken.
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <i class="fa fa-info-circle"></i> Aangevraagde tankbeurten
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        Er staan nog <strong>4</strong> aangevraagde tankbeurten op bevestiging te wachten, je kan ze <a href="">hier</a> bekijken.
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+
+                <!-- FULL USER: INFORMATIVE -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-info-circle"></i> Eerstvolgende reservatie
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        Je eerstvolgende reservatie is op 13 juli 2014 van 00:00 tot 00:00. Bekijk <a href="">hier</a> meer informatie.
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+
+
             }
         </div>
         <!-- /col-lg-12 -->

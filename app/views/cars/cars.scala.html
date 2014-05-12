@@ -24,12 +24,8 @@
                         DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_OWNER)) { isAdmin =>
                     @if(isAdmin) {
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
-                            </div>
-                                <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <a class="btn btn-primary btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
+                                <a class="btn btn-default btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
                             </div>
                                 <!-- /.panel-body -->
                         </div>
