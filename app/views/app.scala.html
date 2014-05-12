@@ -9,7 +9,30 @@
     <head>
         <script src="@routes.Assets.at("javascripts/jquery-1.11.0.min.js")" type="text/javascript"></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
-
+<script type="text/javascript">
+            // There is a lot of field experience data, so this will always make the table responsive.
+            function forceResponsiveTables() {
+              var windowSize = $(window).width();
+              if ($('.table-responsive > .table').length > 0) {
+                $.each($('.table-responsive > .table'), function (index, value) {
+                  var thisTable = $(value);
+                  var tableSize = thisTable.width();
+                  var parent = thisTable.parent('.table-responsive');
+                  // 768px is the default for bootstrap 3's responsive-table, modify if needed
+                  if (windowSize <= 768) {
+                    parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                  } else {
+                    if (tableSize >= windowSize) {
+                      // Change the border color based on the bootstrap theme colors
+                      parent.css('width', '100%').css('overflow-x', 'scroll').css('overflow-y', 'hidden').css('margin-bottom', '15px').css('border', '1px solid #DDDDDD');
+                    } else {
+                      parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                    }
+                  }
+                });
+              }
+            }
+        </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -306,7 +329,7 @@
         <script src="@routes.Assets.at("javascripts/less-1.7.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
-
+        
         <!-- Page-Level Plugin Scripts - Main -->
 
         <!-- Page-Level Demo Scripts - Main - Use for reference -->
