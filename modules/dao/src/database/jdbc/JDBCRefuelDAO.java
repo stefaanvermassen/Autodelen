@@ -26,7 +26,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
             "LEFT JOIN users owners ON car_owner_user_id = owners.user_id " +
             "LEFT JOIN FILES ON refuel_file_id = file_id ";
 
-    private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND refuel_status <> ?";
+    private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND car_id LIKE ? AND refuel_status <> ?";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -45,7 +45,13 @@ public class JDBCRefuelDAO implements RefuelDAO {
         }
         ps.setString(start+1, ownerId);
 
-        ps.setString(start+2, filter.getValue(FilterField.REFUEL_NOT_STATUS));
+        String carId = filter.getValue(FilterField.REFUEL_CAR_ID);
+        if(carId.equals("")) { // Not very nice programming, but works :D
+            carId = "%%";
+        }
+        ps.setString(start+2, carId);
+
+        ps.setString(start+3, filter.getValue(FilterField.REFUEL_NOT_STATUS));
     }
 
     private Connection connection;
@@ -280,8 +286,8 @@ public class JDBCRefuelDAO implements RefuelDAO {
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(4, first);
-            ps.setInt(5, pageSize);
+            ps.setInt(5, first);
+            ps.setInt(6, pageSize);
             return getRefuelList(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of refuels", ex);

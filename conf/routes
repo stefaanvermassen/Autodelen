@@ -153,6 +153,8 @@ GET         /refuels                                controllers.Refuels.showRefu
 GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
 GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/admin                          controllers.Refuels.showAllRefuels()
+GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
 POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
