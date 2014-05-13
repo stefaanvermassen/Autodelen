@@ -223,11 +223,24 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     private String getReservationsPageStatement(boolean getAmount, String amount, Filter filter) {
+        String id;
+        if(filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
+            id = "'%%'";
+        } else {
+            id = filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID);
+        }
+        String carId;
+        if(filter.getValue(FilterField.RESERVATION_CAR_ID).equals("")) {
+            carId = "'%%'";
+        } else {
+            carId = filter.getValue(FilterField.RESERVATION_CAR_ID);
+        }
         String sql = "SELECT " + (getAmount ? " COUNT(reservation_id) AS " + amount : " * ") +
                 " FROM CarReservations INNER JOIN Cars ON CarReservations.reservation_car_id = Cars.car_id " +
                 " INNER JOIN Users ON CarReservations.reservation_user_id = Users.user_id " +
-                " WHERE (car_owner_user_id = " + filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID) +
-                " OR reservation_user_id= " + filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID) + ") AND ";
+                " WHERE (car_owner_user_id LIKE " + id +
+                " OR reservation_user_id LIKE " + id + ") AND " +
+                " reservation_car_id LIKE " + carId + " AND ";
         if("".equals(filter.getValue(FilterField.RESERVATION_STATUS)))
             sql += " reservation_status != '" + ReservationStatus.ACCEPTED.toString() +
                     "' AND reservation_status != '" + ReservationStatus.REQUEST.toString() + "' ";
@@ -272,7 +285,7 @@ public class JDBCReservationDAO implements ReservationDAO{
             sql += " LIMIT " + (page-1)*pageSize + ", " + pageSize;
             return getReservationList(statement, sql);
         } catch (Exception ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
+            throw new DataAccessException("Could not retrieve a list of reservations", ex);
         }
     }
 
