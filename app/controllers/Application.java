@@ -20,7 +20,7 @@ public class Application extends Controller {
         return ok(
                 Routes.javascriptRouter("myJsRoutes",
                         // Routes
-                        controllers.routes.javascript.Cars.showCarsPage(),
+                        routes.javascript.Cars.showCarsPage(),
                         routes.javascript.Cars.showCarCostsPage(),
                         routes.javascript.Cars.getCarCostModal(),
                         routes.javascript.Cars.updateAvailabilities(),
@@ -29,6 +29,7 @@ public class Application extends Controller {
                         routes.javascript.Refuels.showUserRefuelsPage(),
                         routes.javascript.Refuels.showOwnerRefuelsPage(),
                         routes.javascript.Damages.showDamagesPage(),
+                        routes.javascript.Damages.showDamagesPageOwner(),
                         routes.javascript.Damages.showDamagesPageAdmin(),
                         routes.javascript.Damages.editDamage(),
                         routes.javascript.Damages.addStatus(),

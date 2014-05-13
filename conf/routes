@@ -162,6 +162,8 @@ GET         /refuels/owner/refused                  controllers.Refuels.refuseRe
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
 GET         /damages/page                           controllers.Damages.showDamagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/owner                          controllers.Damages.showDamagesOwner()
+GET         /damages/owner/page                     controllers.Damages.showDamagesPageOwner(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/admin                          controllers.Damages.showAllDamages()
 GET         /damages/admin/page                     controllers.Damages.showDamagesPageAdmin(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/details                        controllers.Damages.showDamageDetails(damageId: Int)

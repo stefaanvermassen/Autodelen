@@ -116,7 +116,7 @@ function loadPage(page, asc, orderBy, search) {
                     .attr('colspan', cols)
                     .attr('style', 'text-align: center; background-color: #FFFFFF; padding: 8px;')
                     .append($('<img>')
-                        .attr('alt', 'Loading...')
+                        .attr('alt', 'Laden...')
                         .attr('src', loadingImage)
                 )
             )
@@ -126,11 +126,11 @@ function loadPage(page, asc, orderBy, search) {
         $("#resultsTable").append($('<div class="loading">')
             .attr('style', 'text-align: center;')
             .append($('<img>')
-                .attr('alt', 'Loading...')
+                .attr('alt', 'Laden...')
                 .attr('src', loadingImage)
                 )
             .append($('<p>')
-                .text('Loading table'))
+                .text('De tabel is onderweg...'))
         );
     }
 
