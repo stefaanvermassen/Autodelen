@@ -85,6 +85,10 @@
                                                 </div>
                                             }
                                         }
+                                    } else {
+                                        @defining(DataProvider.getUserProvider().getUser()) { user =>
+                                            <input type="hidden" name="userId" value="@user.getId"/>
+                                        }
                                     }
                                 }
                             </fieldset>
