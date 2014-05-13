@@ -510,6 +510,7 @@ public class Cars extends Controller {
      * Method: POST
      * @return redirect to the car detailPage
      */
+    // TODO: Merge overlapping availabilities
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     public static Result updateAvailabilities(int carId, String valuesString) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {

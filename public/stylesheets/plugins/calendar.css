@@ -51,6 +51,10 @@ table.custom_calendar td.selected {
     background-color: #e3e0ff;
 }
 
+table.custom_calendar td.today.selected {
+    background-color: #b9e6bb;
+}
+
 table.custom_calendar td.selected.disabled {
     background-color: #ffd6d6;
 }
