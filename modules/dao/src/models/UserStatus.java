@@ -14,5 +14,6 @@ public enum UserStatus {
     FULL_VALIDATING,
     FULL,
     BLOCKED,
-    DROPPED
+    DROPPED,
+    INACTIVE
 }

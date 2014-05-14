@@ -57,7 +57,7 @@ CREATE TABLE `users` (
 	`user_identity_card_id` VARCHAR(32), # Identiteitskaartnr
 	`user_identity_card_registration_nr` VARCHAR(32), # Rijksregisternummer
 	`user_identity_card_file_group_id` INT,
-	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
+	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
 	`user_damage_history` TEXT,
 	`user_payed_deposit` BIT(1),
 	`user_agree_terms` BIT(1),
