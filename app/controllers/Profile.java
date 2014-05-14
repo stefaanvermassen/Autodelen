@@ -700,7 +700,7 @@ public class Profile extends Controller {
     public static Result editUserStatus(int userId){
         try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
             UserDAO udao = context.getUserDAO();
-            User user = udao.getUser(userId, false);
+            User user = udao.getUser(userId, true);
             if(user == null){
                 flash("danger", "GebruikersID bestaat niet.");
                 return redirect(routes.Users.showUsers());
@@ -712,9 +712,28 @@ public class Profile extends Controller {
 
     @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
     public static Result editUserStatusPost(int userId){
-        return ok("Post received");
-    }
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if(user == null){
+                flash("danger", "GebruikersID bestaat niet.");
+                return redirect(routes.Users.showUsers());
+            } else {
+                String strStatus = Form.form().bindFromRequest().get("status");
+                UserStatus status = Enum.valueOf(UserStatus.class, strStatus);
+                if(user.getStatus() != status) {
+                    user.setStatus(status);
+                    udao.updateUser(user, true);
+                    context.commit();
 
+                    flash("success", "De gebruikersstatus werd succesvol aangepast.");
+                } else {
+                    flash("warning", "De gebruiker had reeds de opgegeven status.");
+                }
+                return ok(editstatus.render(user));
+            }
+        }
+    }
 
 
     /**

@@ -446,7 +446,7 @@ public class InfoSessions extends Controller {
                     idao.registerUser(is, user);
                     context.commit();
 
-                    flash("De gebruiker werd succesvol toegevoegd aan deze infosessie.");
+                    flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
                     return redirect(routes.InfoSessions.detail(sessionId));
                 }
             }
