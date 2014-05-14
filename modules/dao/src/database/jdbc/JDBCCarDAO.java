@@ -46,7 +46,7 @@ public class JDBCCarDAO implements CarDAO{
             "AND caravailabilities.car_availability_begin_time >= caravailabilities.car_availability_end_time " +
             "AND TIMEDIFF(caravailabilities.car_availability_begin_time, caravailabilities.car_availability_end_time) <= TIME('0:05')) " +
             // Car is always available (e.g. Monday 0:00 -> Sunday 23:55)
-            "OR (caravailabilities.car_availability_begin_day_of_week = (caravailabilities.car_availability_end_day_of_week + 1) % 7 " +
+            "OR (caravailabilities.car_availability_begin_day_of_week - 1 = caravailabilities.car_availability_end_day_of_week % 7 " +
             "AND caravailabilities.car_availability_begin_time = TIME('0:00') AND caravailabilities.car_availability_end_time >= TIME('23:55')) " +
             // Car is only available in certain intervals
             "OR (TIMEDIFF(?, ?) < TIME('7 0:0') " +
