@@ -726,6 +726,8 @@ public class Profile extends Controller {
                     udao.updateUser(user, true);
                     context.commit();
 
+                    DataProvider.getUserProvider().invalidateUser(user); //wipe the status from ram
+
                     flash("success", "De gebruikersstatus werd succesvol aangepast.");
                 } else {
                     flash("warning", "De gebruiker had reeds de opgegeven status.");

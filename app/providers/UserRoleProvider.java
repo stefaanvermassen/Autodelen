@@ -3,6 +3,7 @@ package providers;
 import database.*;
 import models.User;
 import models.UserRole;
+import models.UserStatus;
 import play.cache.Cache;
 
 import java.util.EnumSet;
@@ -77,8 +78,7 @@ public class UserRoleProvider {
     }
 
     public boolean isFullUser(User user) {
-        //TODO: review what to do with admins
-        return hasRole(user, UserRole.CAR_OWNER) || hasRole(user, UserRole.CAR_USER);
+        return user.getStatus() == UserStatus.FULL;
     }
 
     public boolean isFullUser() {
