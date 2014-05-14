@@ -696,6 +696,25 @@ public class Profile extends Controller {
         return (int) (((float) total / 8) * 100); //9 records
     }
 
+    @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
+    public static Result editUserStatus(int userId){
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, false);
+            if(user == null){
+                flash("danger", "GebruikersID bestaat niet.");
+                return redirect(routes.Users.showUsers());
+            } else {
+                return ok(editstatus.render(user));
+            }
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
+    public static Result editUserStatusPost(int userId){
+        return ok("Post received");
+    }
+
 
 
     /**

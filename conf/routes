@@ -65,6 +65,8 @@ GET         /profile/identitycard/deletefile        controllers.Profile.deleteFi
 GET         /profile/identitycard/file              controllers.Profile.viewFile(userId: Int, fileId: Int, group: String)
 GET         /profile/driverslicense                 controllers.Profile.editDriversLicense(userId: Int)
 POST        /profile/driverslicense                 controllers.Profile.editDriversLicensePost(userId: Int)
+GET         /profile/editstatus                     controllers.Profile.editUserStatus(userId: Int)
+POST        /profile/editstatus                     controllers.Profile.editUserStatusPost(userId: Int)
 
 # Users
 GET         /users                                  controllers.Users.showUsers()

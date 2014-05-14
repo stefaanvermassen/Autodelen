@@ -24,6 +24,10 @@
                             <a class="smallprofile-static btn btn-default btn-sm" class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijs wijzigen</a>
                             <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitskaart wijzigen</a>
 
+                            @if(DataProvider.getUserRoleProvider.isAdmin){
+                                <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editUserStatus(user.getId)">Gebruikersstatus wijzigen</a>
+                            }
+
                         }
                     </div>
                 </div>
