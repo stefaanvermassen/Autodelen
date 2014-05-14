@@ -693,11 +693,7 @@ public class Profile extends Controller {
         if (user.getIdentityCard() != null) {
             total++;
         }
-        if (user.getProfilePictureId() != -1) {
-            total++;
-        }
-
-        return (int) (((float) total / 9) * 100); //9 records
+        return (int) (((float) total / 8) * 100); //9 records
     }
 
 
