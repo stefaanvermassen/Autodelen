@@ -10,6 +10,7 @@
     <script src="@routes.Assets.at("javascripts/jquery.hotkeys.js")"></script>
     <script src="@routes.Assets.at("javascripts/plugins/editor/prettify.js")"></script>
     <script src="@routes.Assets.at("javascripts/plugins/editor/bootstrap-wysiwyg.js")"></script>
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
 
     <script>
         $(function(){
@@ -60,7 +61,7 @@
     <script>
         $ ("#create").click ( function () {
             $.ajax ( {
-                url : '/dev/emailtemplate/edit',
+                url: myJsRoutes.controllers.EmailTemplates.editTemplate( ).url,
                 type : 'POST',
                 data : { 'template_id':$ ( '#editor' ).data('status'), 'template_body' : $ ( '#editor' ).cleanHtml(), 'template_subject' : $ ( '#subject' ).val(), 'template_send_mail' : $("#sendMail").is(':checked') },
                 success: function(data, textStatus, request) {

@@ -41,6 +41,7 @@ public class Application extends Controller {
                         routes.javascript.Users.showUsersPage(),
                         routes.javascript.UserRoles.showUsersPage(),
                         routes.javascript.EmailTemplates.showExistingTemplatesPage(),
+                        routes.javascript.EmailTemplates.editTemplate(),
                         routes.javascript.Notifications.showNotificationsPage(),
                         routes.javascript.Messages.showReceivedMessagesPage(),
                         routes.javascript.Messages.showSentMessagesPage(),
