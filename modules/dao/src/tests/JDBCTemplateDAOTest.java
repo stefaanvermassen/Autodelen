@@ -29,7 +29,7 @@ public class JDBCTemplateDAOTest {
      */
 	@Before
     public void setUp() throws Exception {
-        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("tests/testdb.properties"));
+        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("/tests/testdb.properties"));
         context = provider.getDataAccessContext();
 
         templateDAO = context.getTemplateDAO();
@@ -52,7 +52,7 @@ public class JDBCTemplateDAOTest {
 	
 	private void updateTemplateTest() throws Exception{
 		Iterator<EmailTemplate> it = templates.iterator();
-		Scanner sc = new Scanner(new File("test/database/random_text.txt"));
+		Scanner sc = new Scanner(JDBCTemplateDAOTest.class.getResourceAsStream("/tests/random/random_text.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         while(sc.hasNext() && it.hasNext()) {
