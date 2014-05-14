@@ -32,6 +32,14 @@ public class DatabaseConfiguration {
         }
     }
 
+    public static DatabaseConfiguration getResourceConfiguration(String path) throws IOException {
+        try(InputStream fi = DatabaseConfiguration.class.getResourceAsStream(path)){
+            return getConfiguration(fi);
+        } catch(IOException ex){
+            throw ex;
+        }
+    }
+
     public static DatabaseConfiguration getConfiguration(InputStream stream) throws IOException {
         Properties p = new Properties();
         p.load(stream);

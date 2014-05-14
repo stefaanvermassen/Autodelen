@@ -1,26 +1,26 @@
-package database.jdbc;
+package tests;
 
-import static org.junit.Assert.*;
+import database.DataAccessContext;
+import database.DataAccessProvider;
+import database.DatabaseConfiguration;
+import database.TemplateDAO;
+import database.jdbc.JDBCDataAccessProvider;
+import models.EmailTemplate;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
-import models.EmailTemplate;
-import models.User;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import database.DataAccessContext;
-import providers.DataProvider;
-import database.TemplateDAO;
+import static org.junit.Assert.*;
 
 public class JDBCTemplateDAOTest {
 
     private DataAccessContext context;
-	private TemplateDAO templateDAO;
+
+    private TemplateDAO templateDAO;
 	private List<EmailTemplate> templates;
 
     /**
@@ -29,7 +29,9 @@ public class JDBCTemplateDAOTest {
      */
 	@Before
     public void setUp() throws Exception {
-        context = DataProvider.getDataAccessProvider().getDataAccessContext();
+        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("tests/testdb.properties"));
+        context = provider.getDataAccessContext();
+
         templateDAO = context.getTemplateDAO();
         templates = templateDAO.getAllTemplates();
     }
