@@ -377,7 +377,7 @@ public class InfoSessions extends Controller {
      * @param status    New status of the user.
      * @return Redirect to the session detail page if successful.
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
 
@@ -403,6 +403,53 @@ public class InfoSessions extends Controller {
             return redirect(routes.InfoSessions.detail(sessionId));
         } catch (DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     * Adds a user to the given infosession
+     * @param sessionId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    public static Result addUserToSession(int sessionId){
+        int userId = 0;
+        try {
+            userId = Integer.parseInt(Form.form().bindFromRequest().get("userid"));
+        } catch(Exception ex){
+            flash("danger", "Gebruiker bestaat niet.");
+            return redirect(routes.InfoSessions.detail(sessionId));
+        }
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            InfoSessionDAO idao = context.getInfoSessionDAO();
+            InfoSession is = idao.getInfoSession(sessionId, true);
+            if(is == null){
+                flash("danger", "InfoSessie bestaat niet.");
+                return redirect(routes.InfoSessions.pendingApprovalList());
+            } else {
+                User user = udao.getUser(userId, false);
+                if (user == null) {
+                    flash("danger", "GebruikersID bestaat niet.");
+                    return redirect(routes.InfoSessions.detail(sessionId));
+                } else {
+                    // TODO: simplify the user equals only by id
+                    for(Enrollee others : is.getEnrolled()) {
+                        if(others.getUser().getId() == user.getId()){
+                            flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
+                            return redirect(routes.InfoSessions.detail(sessionId));
+                        }
+                    }
+
+                    // Now we enroll
+                    idao.registerUser(is, user);
+                    context.commit();
+
+                    flash("De gebruiker werd succesvol toegevoegd aan deze infosessie.");
+                    return redirect(routes.InfoSessions.detail(sessionId));
+                }
+            }
         }
     }
 

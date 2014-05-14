@@ -110,6 +110,7 @@ GET         /infosession/approval/details           controllers.InfoSessions.app
 POST        /infosession/approval/details           controllers.InfoSessions.approvalAdminAction(id: Int)
 GET         /infosession/approval/admin             controllers.InfoSessions.approvalAdmin(id: Int)
 POST        /infosession/approval/admin             controllers.InfoSessions.approvalAdminPost(id: Int)
+POST        /infosession/adduser                    controllers.InfoSessions.addUserToSession(sessionId: Int)
 
 # Settings
 # TODO: REMOVE THIS!!!
