@@ -778,16 +778,22 @@ public class InfoSessions extends Controller {
             } else {
                 UserDAO udao = context.getUserDAO();
                 User contractManager = udao.getUser(userId, false);
-                if(contractManager != null){
-                    app.setAdmin(contractManager);
-                    adao.setApprovalAdmin(app, contractManager);
-                    context.commit();
 
-                    Notifier.sendContractManagerAssignedMail(app.getUser(), app);
-                    flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
-                    return redirect(routes.InfoSessions.pendingApprovalList());
+                if(contractManager != null){
+                    if(!DataProvider.getUserRoleProvider().hasRole(contractManager, UserRole.INFOSESSION_ADMIN)){
+                        flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
+                        return redirect(routes.InfoSessions.approvalAdmin(id));
+                    } else {
+                        app.setAdmin(contractManager);
+                        adao.setApprovalAdmin(app, contractManager);
+                        context.commit();
+
+                        Notifier.sendContractManagerAssignedMail(app.getUser(), app);
+                        flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
+                        return redirect(routes.InfoSessions.pendingApprovalList());
+                    }
                 } else {
-                    flash("danger", "Gebruiker bestaat niet.");
+                    flash("danger", "Contractmanager ID bestaat niet.");
                     return redirect(routes.InfoSessions.approvalAdmin(id));
                 }
             }
@@ -872,7 +878,6 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated()
     public static boolean didUserGoToInfoSession(){
         final User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
