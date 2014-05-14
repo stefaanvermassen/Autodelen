@@ -16,7 +16,7 @@ public class Damage {
     public Damage(Integer id, CarRide carRide) {
         this.id = id;
         this.carRide = carRide;
-        proofId=-1;
+        proofId=0;
         time = carRide.getReservation().getFrom();
     }
 

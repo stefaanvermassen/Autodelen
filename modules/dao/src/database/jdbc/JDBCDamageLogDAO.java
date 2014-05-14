@@ -26,7 +26,7 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
 
     private PreparedStatement getCreateDamageLogStatement() throws SQLException {
         if (createDamageLogStatement == null) {
-            createDamageLogStatement = connection.prepareStatement("INSERT INTO DamageLogs " +
+            createDamageLogStatement = connection.prepareStatement("INSERT INTO damagelogs " +
                     "(damage_log_damage_id, damage_log_description, damage_log_created_at) " +
                     "VALUES(?, ?, ?)", AUTO_GENERATED_KEYS);
         }
@@ -35,13 +35,13 @@ public class JDBCDamageLogDAO implements DamageLogDAO {
 
     private PreparedStatement getGetDamageLogsStatement() throws SQLException {
         if (getDamageLogsStatement == null) {
-            getDamageLogsStatement = connection.prepareStatement("SELECT * FROM DamageLogs " +
-                "JOIN Damages ON damage_log_damage_id = damage_id " +
-                "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
-                "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
-                "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
-                "JOIN Cars ON reservation_car_id = car_id " +
-                "JOIN Users ON reservation_user_id = user_id " +
+            getDamageLogsStatement = connection.prepareStatement("SELECT * FROM damagelogs " +
+                "JOIN damages ON damage_log_damage_id = damage_id " +
+                "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
+                "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+                "LEFT JOIN filegroups ON damage_filegroup_id = file_group_id " +
+                "JOIN cars ON reservation_car_id = car_id " +
+                "JOIN users ON reservation_user_id = user_id " +
                 "WHERE damage_log_damage_id = ? ORDER BY damage_log_created_at DESC"
             );
         }

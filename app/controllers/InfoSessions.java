@@ -7,6 +7,7 @@ import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
 import org.joda.time.MutableDateTime;
+import play.data.DynamicForm;
 import providers.DataProvider;
 import models.*;
 import notifiers.Notifier;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
+
 import java.util.Set;
 
 /**
@@ -36,10 +38,10 @@ public class InfoSessions extends Controller {
     private static List<String> typeList = null;
 
     private static List<String> getTypeList() {
-        if(typeList == null) {
+        if (typeList == null) {
             typeList = new ArrayList<>();
             InfoSessionType[] types = InfoSessionType.values();
-            for(InfoSessionType t : types) {
+            for (InfoSessionType t : types) {
                 typeList.add(t.getDescription());
             }
         }
@@ -61,21 +63,21 @@ public class InfoSessions extends Controller {
 
         public String validate() {
             String error = "";
-            if(userId == null || userId == 0) {
+            if (userId == null || userId == 0) {
                 error += "Gelieve een host te selecteren. ";
             }
             if (time == null) {
                 error += "Gelieve het tijdsveld in te vullen. ";
             }
-            if(InfoSessionType.getTypeFromString(type) == InfoSessionType.OTHER && (type_alternative == null || type_alternative.equals(""))) {
+            if (InfoSessionType.getTypeFromString(type) == InfoSessionType.OTHER && (type_alternative == null || type_alternative.equals(""))) {
                 error += "Gelieve een alternatief type in te geven of een ander type te selecteren. ";
             }
-            if("".equals(error)) return null;
+            if ("".equals(error)) return null;
             else return error;
         }
 
         public void populate(InfoSession i) {
-            if(i == null) return;
+            if (i == null) return;
 
             userId = i.getHost().getId();
             time = i.getTime();
@@ -205,7 +207,7 @@ public class InfoSessions extends Controller {
 
                     // update time
                     DateTime time = editForm.get().time.withSecondOfMinute(0);
-                    if(!session.getTime().equals(time)) {
+                    if (!session.getTime().equals(time)) {
                         session.setTime(time);
 
                         // Schedule the reminder
@@ -220,7 +222,7 @@ public class InfoSessions extends Controller {
 
                     // check if amountOfAttendees < new max
                     int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
-                    if(editForm.get().max_enrollees != 0 && editForm.get().max_enrollees < amountOfAttendees) {
+                    if (editForm.get().max_enrollees != 0 && editForm.get().max_enrollees < amountOfAttendees) {
                         flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
                         return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
                     } else {
@@ -231,7 +233,7 @@ public class InfoSessions extends Controller {
                     InfoSessionType type = InfoSessionType.getTypeFromString(editForm.get().type);
                     session.setType(type);
                     String typeAlternative = null;
-                    if(type.equals(InfoSessionType.OTHER)) {
+                    if (type.equals(InfoSessionType.OTHER)) {
                         typeAlternative = editForm.get().type_alternative;
                     }
                     session.setTypeAlternative(typeAlternative);
@@ -241,7 +243,7 @@ public class InfoSessions extends Controller {
 
                     dao.updateInfoSession(session);
                     context.commit();
-                    flash("success", "Uw wijzigingen werden succesvol toegepast.");
+                    flash("success", "Jouw wijzigingen werden succesvol toegepast.");
                     return redirect(routes.InfoSessions.detail(sessionId));
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -267,14 +269,14 @@ public class InfoSessions extends Controller {
 
             InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
             if (alreadyAttending == null) {
-                flash("danger", "U bent niet ingeschreven voor een toekomstige infosessie.");
+                flash("danger", "Je bent niet ingeschreven voor een toekomstige infosessie.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 try {
                     dao.unregisterUser(alreadyAttending, user);
                     context.commit();
 
-                    flash("success", "U bent succesvol uitgeschreven uit deze infosessie.");
+                    flash("success", "Je bent succesvol uitgeschreven uit deze infosessie.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } catch (DataAccessException ex) {
                     context.rollback();
@@ -414,7 +416,7 @@ public class InfoSessions extends Controller {
     public static Result enrollSession(int sessionId) {
         User user = DataProvider.getUserProvider().getUser();
         if (DataProvider.getUserRoleProvider().isFullUser(user)) {
-            flash("warning", "U bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
+            flash("warning", "Je bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
         }
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -436,8 +438,8 @@ public class InfoSessions extends Controller {
                         dao.registerUser(session, user);
 
                         context.commit();
-                        flash("success", alreadyAttending == null ? ("U bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
-                                "U bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
+                        flash("success", alreadyAttending == null ? ("Je bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                                "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
                         Notifier.sendInfoSessionEnrolledMail(user, session);
                         return redirect(routes.InfoSessions.detail(sessionId));
                     } catch (DataAccessException ex) {
@@ -473,7 +475,7 @@ public class InfoSessions extends Controller {
 
                     InfoSessionType type = InfoSessionType.getTypeFromString(createForm.get().type);
                     String typeAlternative = null;
-                    if(type.equals(InfoSessionType.OTHER)) {
+                    if (type.equals(InfoSessionType.OTHER)) {
                         typeAlternative = createForm.get().type_alternative;
                     }
 
@@ -546,7 +548,7 @@ public class InfoSessions extends Controller {
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
         if (user.getDriverLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
-        if(!user.isPayedDeposit())
+        if (!user.isPayedDeposit())
             errors.add("Lidgeld nog niet betaald.");
         if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
             if (user.getCellphone() == null && user.getPhone() == null)
@@ -571,7 +573,7 @@ public class InfoSessions extends Controller {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             if (DataProvider.getUserRoleProvider().isFullUser(user)) {
-                flash("warning", "U bent reeds een volwaardige gebruiker.");
+                flash("warning", "Je bent reeds een volwaardige gebruiker.");
                 return redirect(routes.Dashboard.index());
             } else {
                 ApprovalDAO dao = context.getApprovalDAO();
@@ -584,11 +586,11 @@ public class InfoSessions extends Controller {
                     Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
 
                     if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                        flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                        flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         List<String> errors = checkApprovalConditions(user, context);
-                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context)));
+                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
                     }
                 }
             }
@@ -596,10 +598,26 @@ public class InfoSessions extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
+    public static Boolean approvalRequestSent() {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ApprovalDAO dao = context.getApprovalDAO();
+            List<Approval> approvals = dao.getPendingApprovals(user);
+            if (!approvals.isEmpty()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated()
     public static Result requestApprovalPost() {
         User user = DataProvider.getUserProvider().getUser();
         if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
-            flash("warning", "U bent reeds een volwaardige gebruiker.");
+            flash("warning", "Je bent reeds een volwaardige gebruiker.");
             return redirect(routes.Dashboard.index());
         } else {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
@@ -614,11 +632,11 @@ public class InfoSessions extends Controller {
                         InfoSessionDAO idao = context.getInfoSessionDAO();
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                         if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                            flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                            flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             List<String> errors = checkApprovalConditions(user, context);
-                            return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context)));
+                            return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context), didUserGoToInfoSession()));
                         }
                     }
                 } else {
@@ -626,14 +644,12 @@ public class InfoSessions extends Controller {
                     InfoSessionDAO idao = context.getInfoSessionDAO();
                     try {
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
-                        if(lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                            flash("danger", "U bent nog niet aanwezig geweest op een infosessie.");
+                        if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
+                            flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
                             context.commit();
-
-                            flash("success", "Uw aanvraag werd succesvol ingediend.");
                             return redirect(routes.Dashboard.index());
                         }
                     } catch (DataAccessException ex) {
@@ -666,7 +682,6 @@ public class InfoSessions extends Controller {
     public static class ApprovalAdminModel {
         public String message;
         public String status;
-        public String contractManager;
         public boolean sharer;
         public boolean user;
 
@@ -710,19 +725,76 @@ public class InfoSessions extends Controller {
                 flash("danger", "Er is geen aanvraag met deze id.");
                 return redirect(routes.InfoSessions.pendingApprovalList());
             } else {
-                ApprovalAdminModel model = new ApprovalAdminModel();
-                model.message = ap.getAdminMessage();
-                model.status = (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING
-                        ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
-                model.sharer = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
-                model.user = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
+                if(ap.getAdmin() == null){
+                    flash("danger", "Gelieve eerst een contractverantwoordelijke op te geven.");
+                    return redirect(routes.InfoSessions.approvalAdmin(approvalId));
+                } else {
+                    ApprovalAdminModel model = new ApprovalAdminModel();
+                    model.message = ap.getAdminMessage();
+                    model.status = (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING
+                            ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
+                    model.sharer = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
+                    model.user = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
 
-                // Get the contact admin
+                    // Get the contact admin
+                    UserDAO udao = context.getUserDAO();
+                    ap.setUser(udao.getUser(ap.getUser().getId(), true));
+
+                    return approvalForm(ap, context, Form.form(ApprovalAdminModel.class).fill(model), false);
+                }
+            }
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    public static Result approvalAdmin(int approvalId){
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ApprovalDAO dao = context.getApprovalDAO();
+            Approval ap = dao.getApproval(approvalId);
+            if (ap == null) {
+                flash("danger", "Er is geen aanvraag met deze id.");
+                return redirect(routes.InfoSessions.pendingApprovalList());
+            } else {
+
                 UserDAO udao = context.getUserDAO();
                 ap.setUser(udao.getUser(ap.getUser().getId(), true));
-                model.contractManager = ap.getUser().getContractManager() != null ? ap.getUser().getContractManager().getEmail() : null;
+                EnrollementStatus status = EnrollementStatus.ABSENT;
+                if (ap.getSession() != null) {
+                    InfoSessionDAO idao = context.getInfoSessionDAO();
+                    InfoSession is = idao.getInfoSession(ap.getSession().getId(), true);
+                    status = is.getEnrollmentStatus(ap.getUser());
+                }
 
-                return approvalForm(ap, context, Form.form(ApprovalAdminModel.class).fill(model), false);
+                return ok(setcontractadmin.render(ap, status, ap.getAdmin()));
+            }
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    public static Result approvalAdminPost(int id){
+        DynamicForm form = Form.form().bindFromRequest();
+        int userId = Integer.valueOf(form.get("manager"));
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+            ApprovalDAO adao = context.getApprovalDAO();
+            Approval app = adao.getApproval(id);
+            if(app == null){
+                flash("danger", "Er is geen aanvraag met deze id.");
+                return redirect(routes.InfoSessions.pendingApprovalList());
+            } else {
+                UserDAO udao = context.getUserDAO();
+                User contractManager = udao.getUser(userId, false);
+                if(contractManager != null){
+                    app.setAdmin(contractManager);
+                    adao.setApprovalAdmin(app, contractManager);
+                    context.commit();
+
+                    Notifier.sendContractManagerAssignedMail(app.getUser(), app);
+                    flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
+                    return redirect(routes.InfoSessions.pendingApprovalList());
+                } else {
+                    flash("danger", "Gebruiker bestaat niet.");
+                    return redirect(routes.InfoSessions.approvalAdmin(id));
+                }
             }
         }
     }
@@ -756,40 +828,33 @@ public class InfoSessions extends Controller {
 
                     if (action == ApprovalAdminModel.Action.ACCEPT) {
                         UserDAO udao = context.getUserDAO();
-                        User contactManager = udao.getUser(m.contractManager);
-                        if (contactManager == null) {
-                            form.reject("Gelieve een contactbeheerder op te geven.");
-                            return approvalForm(ap, context, form, true);
-                        } else {
 
-                            // Set approval status
-                            ap.setStatus(Approval.ApprovalStatus.ACCEPTED);
-                            dao.updateApproval(ap);
+                        ap.setStatus(Approval.ApprovalStatus.ACCEPTED);
+                        dao.updateApproval(ap);
 
-                            // Set contact admin
-                            User user = udao.getUser(ap.getUser().getId(), true);
-                            user.setContractManager(contactManager);
-                            udao.updateUser(user, true);
+                        // Set contact admin
+                        User user = udao.getUser(ap.getUser().getId(), true);
 
-                            // Add the new user roles
-                            UserRoleDAO roleDao = context.getUserRoleDAO();
-                            Set<UserRole> hasRoles = DataProvider.getUserRoleProvider().getRoles(user.getId());
-                            if (m.sharer && !hasRoles.contains(UserRole.CAR_OWNER))
-                                roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
-                            if (m.user && !hasRoles.contains(UserRole.CAR_USER))
-                                roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
-                            context.commit();
+                        // Add the new user roles
+                        UserRoleDAO roleDao = context.getUserRoleDAO();
+                        Set<UserRole> hasRoles = DataProvider.getUserRoleProvider().getRoles(user.getId());
+                        if (m.sharer && !hasRoles.contains(UserRole.CAR_OWNER))
+                            roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
+                        if (m.user && !hasRoles.contains(UserRole.CAR_USER))
+                            roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
+                        context.commit();
 
-                            DataProvider.getUserRoleProvider().invalidateRoles(ap.getUser());
-                            flash("success", "De gebruikersrechten werden succesvol aangepast.");
+                        DataProvider.getUserRoleProvider().invalidateRoles(ap.getUser());
+                        Notifier.sendMembershipStatusChanged(ap.getUser(), true, m.message);
+                        flash("success", "De gebruikersrechten werden succesvol aangepast.");
 
-                            return redirect(routes.InfoSessions.pendingApprovalList());
-                        }
+                        return redirect(routes.InfoSessions.pendingApprovalList());
                     } else if (action == ApprovalAdminModel.Action.DENY) {
                         //TODO Warning, if status was not pending, possibly have to remove user roles
                         ap.setStatus(Approval.ApprovalStatus.DENIED);
                         dao.updateApproval(ap);
                         context.commit();
+                        Notifier.sendMembershipStatusChanged(ap.getUser(), false, m.message);
                         flash("success", "De aanvraag werd met succes afgekeurd.");
 
                         return redirect(routes.InfoSessions.pendingApprovalList());
@@ -808,6 +873,25 @@ public class InfoSessions extends Controller {
 
     /**
      * Method: GET
+     * Returns if the user had been to an infosession
+     *
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static boolean didUserGoToInfoSession(){
+        final User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            InfoSessionDAO dao = context.getInfoSessionDAO();
+            final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
+            final boolean didUserGoToInfoSession = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
+            return didUserGoToInfoSession;
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
      * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
      *
      * @return
@@ -819,12 +903,12 @@ public class InfoSessions extends Controller {
             InfoSessionDAO dao = context.getInfoSessionDAO();
             final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
 
-            final boolean showApprovalButton = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
+            final boolean didUserGoToInfoSession = didUserGoToInfoSession();
             if (enrolled == null || !DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
-                        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, showApprovalButton));
+                        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
                     }
                 });
             } else {
@@ -834,7 +918,7 @@ public class InfoSessions extends Controller {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
                                 return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(),
                                         coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getFirst().getTime().toString("dd-MM-yyyy") + " om " + enrolled.getFirst().getTime().toString("HH:mm")),
-                                        showApprovalButton));
+                                        didUserGoToInfoSession));
                             }
                         }
                 );

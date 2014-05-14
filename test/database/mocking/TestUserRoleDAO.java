@@ -3,10 +3,12 @@ package database.mocking;
 import database.DataAccessException;
 import database.UserDAO;
 import database.UserRoleDAO;
+import models.User;
 import models.UserRole;
 
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +39,11 @@ public class TestUserRoleDAO implements UserRoleDAO {
             r.add(UserRole.USER);
             return r;
         }
+    }
+
+    @Override
+    public List<User> getUsersByRole(UserRole userRole) throws DataAccessException {
+        return null;
     }
 
     @Override

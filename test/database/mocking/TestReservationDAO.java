@@ -27,8 +27,8 @@ public class TestReservationDAO implements ReservationDAO{
 	}
 
 	@Override
-	public Reservation createReservation(DateTime from, DateTime to, Car car, User user) throws DataAccessException {
-		Reservation reservation = new Reservation(idCounter++, car, user,from,to);
+	public Reservation createReservation(DateTime from, DateTime to, Car car, User user, String message) throws DataAccessException {
+		Reservation reservation = new Reservation(idCounter++, car, user,from,to, message);
 		reservations.add(reservation);
 		return reservation;
 	}
@@ -46,7 +46,7 @@ public class TestReservationDAO implements ReservationDAO{
 	public Reservation getReservation(int id) throws DataAccessException {
 		for(Reservation reservation : reservations){
 			if(reservation.getId()==id){
-                Reservation r = new Reservation(reservation.getId(), reservation.getCar(), reservation.getUser(), reservation.getFrom(), reservation.getTo());
+                Reservation r = new Reservation(reservation.getId(), reservation.getCar(), reservation.getUser(), reservation.getFrom(), reservation.getTo(), reservation.getMessage());
                 r.setStatus(reservation.getStatus());
                 return r;
 			}
@@ -54,7 +54,17 @@ public class TestReservationDAO implements ReservationDAO{
 		return null;
 	}
 
-	@Override
+    @Override
+    public Reservation getNextReservation(Reservation reservation) throws DataAccessException {
+        return null;
+    }
+
+    @Override
+    public Reservation getPreviousReservation(Reservation reservation) throws DataAccessException {
+        return null;
+    }
+
+    @Override
 	public void deleteReservation(Reservation reservation) throws DataAccessException {
 		if(reservations.contains(reservation)){
 			reservations.remove(reservation);

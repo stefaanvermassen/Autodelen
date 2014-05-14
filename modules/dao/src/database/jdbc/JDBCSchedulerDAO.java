@@ -30,10 +30,10 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
                     "a.number_of_notifications, COUNT(b.message_id) AS number_of_messages " +
                     "FROM (SELECT p.user_id AS user_id, p.user_email AS user_email, p.user_firstname " +
                     "AS user_firstname, p.user_lastname AS user_lastname, p.user_last_notified AS user_last_notified, " +
-                    "COUNT(o.notification_id) AS number_of_notifications FROM Users p " +
-                    "LEFT JOIN (SELECT * FROM Notifications WHERE notification_read=0) o " +
+                    "COUNT(o.notification_id) AS number_of_notifications FROM users p " +
+                    "LEFT JOIN (SELECT * FROM notifications WHERE notification_read=0) o " +
                     "ON o.notification_user_id = p.user_id GROUP BY p.user_id) a " +
-                    "LEFT JOIN (SELECT * FROM Messages WHERE message_read=0) b " +
+                    "LEFT JOIN (SELECT * FROM messages WHERE message_read=0) b " +
                     "ON a.user_id = b.message_to_user_id GROUP BY a.user_id) AS Reminder " +
                     "WHERE (number_of_notifications > ? OR number_of_messages > ?) " +
                     "AND user_last_notified < DATE_SUB(NOW(),INTERVAL 7 DAY)");
@@ -43,7 +43,7 @@ public class JDBCSchedulerDAO implements SchedulerDAO {
 
     private PreparedStatement getSetRemindedStatement() throws SQLException {
         if (setRemindedStatement == null) {
-            setRemindedStatement = connection.prepareStatement("UPDATE Users SET user_last_notified = ? WHERE user_id = ?");
+            setRemindedStatement = connection.prepareStatement("UPDATE users SET user_last_notified = ? WHERE user_id = ?");
         }
         return setRemindedStatement;
     }

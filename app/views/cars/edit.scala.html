@@ -41,7 +41,7 @@
     <div id="page-wrapper">
         <h1 class="page-header">@(if (car == null) "Nieuwe auto" else "Bewerk auto") </h1>
         <div class="row">
-        @helper.form(if (car == null) routes.Cars.addNewCar() else routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal") {
+        @helper.form(if (car == null) routes.Cars.addNewCar() else routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
             <div class="col-lg-3">
                 @if(form.hasGlobalErrors) {
                     <div class="alert alert-danger alert-dismissable">
@@ -134,14 +134,14 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="address.street">Straat</label>
                                             <div class="col-md-12">
-                                                <input id="address.street" name="address.street" type="text" class="form-control input-md" value="@form("address.street").value">
+                                                <input id="address.street" name="address.street" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.street").value">
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label class="col-md-12" for="address.number">Nummer</label>
                                             <div class="col-md-12">
-                                                <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" value="@form("address.number").value">
+                                                <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.number").value">
                                             </div>
                                         </div>
 
@@ -155,18 +155,18 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="address.zipCode">Postcode</label>
                                             <div class="col-md-12">
-                                                <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" value="@form("address.zipCode").value">
+                                                <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.zipCode").value">
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label class="col-md-12" for="address.city">Stad</label>
                                             <div class="col-md-12">
-                                                <input id="address.city" name="address.city" type="text" class="form-control input-md" value="@form("address.city").value">
+                                                <input id="address.city" name="address.city" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.city").value">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                        @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land")
+                                            @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
                                         </div>
                                     </fieldset>
                                 </div>
@@ -182,15 +182,18 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="seats">Aantal zitplaatsen</label>
                                             <div class="col-md-12">
-                                                <input id="seats" name="seats" type="number" class="form-control input-md" value="@form("seats").value">
+                                                <input id="seats" name="seats" type="number" class="form-control input-md" placeholder="Verplicht" value="@form("seats").value">
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-md-12" for="doors">Aantal deuren</label>
                                             <div class="col-md-12">
-                                                <input id="doors" name="doors" type="number" class="form-control input-md" value="@form("doors").value">
+                                                <input id="doors" name="doors" type="number" class="form-control input-md" placeholder="Verplicht" value="@form("doors").value">
                                             </div>
                                         </div>
+                                            <div class="col-md-12">
+                                                @helper.checkbox(form("manual"), '_label -> "Manueel?")
+                                            </div>
                                             <div class="col-md-12">
                                                 @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
                                             </div>
@@ -198,7 +201,7 @@
                                                 @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
                                             </div>
                                             <div class="col-md-12">
-                                                @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof")
+                                                @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof", 'class -> "form-control")
                                             </div>
 
                                         <div class="form-group">
@@ -257,7 +260,7 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
                                             <div class="col-md-12">
-                                               Fileupload placeholder
+                                                <input id="file" name="file" type="file" class="form-control input-md">
                                             </div>
                                         </div>
                                         <div class="form-group">

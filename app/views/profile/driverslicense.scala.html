@@ -23,7 +23,7 @@
 
                         <div class="panel-body">
                             @helper.inputText(form("cardNumber"), '_label -> "Kaartnummer", 'placeholder -> "Kaartnummer")
-                            <input type="submit" value="Opslaan">
+                            <input class="btn btn-sm btn-default" type="submit" value="Opslaan">
                         </div>
                     </div>
 
@@ -34,9 +34,8 @@
 
                         <div class="panel-body">
                             <input type="file" name="file">
-                            <p>
-                                <input type="submit" value="Verzenden">
-                            </p>
+                            <br>
+                            <input class="btn btn-sm btn-default" type="submit" value="Verzenden">
                         </div>
                             <!-- /.panel-body -->
                     </div>

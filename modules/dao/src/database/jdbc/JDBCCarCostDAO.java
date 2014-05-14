@@ -19,8 +19,8 @@ public class JDBCCarCostDAO implements CarCostDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"carcost_id"};
 
-    public static final String CAR_COST_QUERY = "SELECT * FROM CarCosts " +
-            "JOIN Cars ON car_cost_car_id = car_id ";
+    public static final String CAR_COST_QUERY = "SELECT * FROM carcosts " +
+            "JOIN cars ON car_cost_car_id = car_id ";
 
     public static final String FILTER_FRAGMENT = " WHERE car_cost_status LIKE ? AND car_cost_car_id LIKE ?";
 
@@ -50,16 +50,16 @@ public class JDBCCarCostDAO implements CarCostDAO {
 
     private PreparedStatement getGetCarCostStatement() throws SQLException {
         if (getCarCostStatement == null) {
-            getCarCostStatement = connection.prepareStatement("SELECT * FROM CarCosts JOIN Cars ON car_cost_car_id = car_id " +
-                    "JOIN Users ON car_owner_user_id = user_id LEFT JOIN Addresses ON user_address_domicile_id = address_id " +
-                    "LEFT JOIN TechnicalCarDetails ON car_technical_details = details_id WHERE car_cost_id=?");
+            getCarCostStatement = connection.prepareStatement("SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
+                    "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
+                    "LEFT JOIN technicalcardetails ON car_technical_details = details_id WHERE car_cost_id=?");
         }
         return getCarCostStatement;
     }
 
     private PreparedStatement getCreateCarCostStatement() throws SQLException {
         if (createCarCostStatement == null) {
-            createCarCostStatement = connection.prepareStatement("INSERT INTO CarCosts (car_cost_car_id, car_cost_amount, " +
+            createCarCostStatement = connection.prepareStatement("INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
                     "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof) VALUES (?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarCostStatement;
@@ -75,15 +75,15 @@ public class JDBCCarCostDAO implements CarCostDAO {
 
     private PreparedStatement getGetAmountOfCarCostsStatement() throws SQLException {
         if(getGetAmountOfCarCostsStatement == null) {
-            getGetAmountOfCarCostsStatement = connection.prepareStatement("SELECT count(car_cost_id) AS amount_of_carcosts FROM CarCosts " +
-                    "JOIN Cars ON car_cost_car_id = car_id " + FILTER_FRAGMENT);
+            getGetAmountOfCarCostsStatement = connection.prepareStatement("SELECT count(car_cost_id) AS amount_of_carcosts FROM carcosts " +
+                    "JOIN cars ON car_cost_car_id = car_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfCarCostsStatement;
     }
 
     private PreparedStatement getUpdateCarCostStatement() throws SQLException {
         if (updateCarCostStatement == null) {
-            updateCarCostStatement = connection.prepareStatement("UPDATE CarCosts SET car_cost_amount = ? , car_cost_description = ? , car_cost_status = ? , car_cost_time = ? , car_cost_mileage = ?"
+            updateCarCostStatement = connection.prepareStatement("UPDATE carcosts SET car_cost_amount = ? , car_cost_description = ? , car_cost_status = ? , car_cost_time = ? , car_cost_mileage = ?"
                     + " WHERE car_cost_id = ?");
         }
         return updateCarCostStatement;

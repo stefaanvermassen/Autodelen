@@ -71,20 +71,20 @@
         } ) ;
     </script>
 }
-@app("Emailtemplate bewerken",stylesheets, scripts) {
+@app("Template bewerken",stylesheets, scripts) {
 
 <div id="page-header-wrapper">
     <ol class="breadcrumb">
         <li><a href="@routes.Dashboard.index">Dashboard</a></li>
-        <li><a href="@routes.EmailTemplates.showExistingTemplates">Emailtemplates</a></li>
-        <li class="active">Emailtemplate bewerken</li>
+        <li><a href="@routes.EmailTemplates.showExistingTemplates">Templates</a></li>
+        <li class="active">Template bewerken</li>
     </ol>
 </div>
 
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header">Emailtemplate bewerken</h1>
+            <h1 class="page-header">Template bewerken</h1>
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart-o fa-fw"></i> Bewerken
@@ -102,7 +102,7 @@
 
                     <div class="form-group">
                         <div class="col-md-12">
-                            <input type="checkbox" name="sendMail" id="sendMail" value="sendMail" data-status="@template.getSendMail" data-enabled="@template.getSendMailChangeable">Verzend als mail
+                            <input type="checkbox" name="sendMail" id="sendMail" value="sendMail" data-status="@template.getSendMail" data-enabled="@template.getSendMailChangeable"> ook verzenden als mail
                         </div>
                     </div>
                     <div id="alerts"></div>
@@ -163,10 +163,12 @@
                             <a class="btn" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="icon-repeat"></i></a>
                         </div>
                     </div>
-                    <div id="editor" data-status="@template.getId">
-                        @Html(template.getBody)
+                    <div class="form-group col-md-12">
+                        <div id="editor" data-status="@template.getId" class="">
+                            @Html(template.getBody)
+                        </div> <br>
+                        <button type="submit" id="create" name="create" class="btn btn-block btn-success">Wijzigingen opslaan</button>
                     </div>
-                    <button type="submit" id="create" name="create" class="btn btn-block btn-success">Wijzigingen opslaan</button>
                 </div>
                 <!-- /.panel-body -->
             </div>

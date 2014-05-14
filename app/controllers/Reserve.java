@@ -4,11 +4,10 @@ import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
 import database.FilterField;
-import database.jdbc.JDBCFilter;
 import models.*;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.IllegalFieldValueException;
+import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.api.templates.Html;
@@ -21,7 +20,6 @@ import views.html.reserve.reservations;
 import views.html.reserve.reservationspage;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -50,6 +48,8 @@ public class Reserve extends Controller {
         public String from;
         // Date and time the user will return the car to the owner
         public String until;
+
+        public String message;
 
         /**
          * @return the start datetime of the reservation
@@ -104,10 +104,27 @@ public class Reserve extends Controller {
     }
 
     /**
+     * Method: GET
+     *
+     * @return the reservation index page containing one specific car
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    public static Result indexWithCar(String carName, int id) {
+        return ok(showIndex(carName, id));
+    }
+
+    /**
+     * @return The html context of the reservations index page for one specific car
+     */
+    public static Html showIndex(String carName, int id) {
+        return reservations.render("", carName, id);
+    }
+
+    /**
      * @return The html context of the reservations index page
      */
     public static Html showIndex() {
-        return reservations.render("");
+        return reservations.render("", "", -1);
     }
 
     /**
@@ -163,7 +180,7 @@ public class Reserve extends Controller {
             // Request the form
             Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
             if(reservationForm.hasErrors()) {
-                return badRequest(reservations.render(reservationForm.globalError().message()));
+                return badRequest(reservations.render(reservationForm.globalError().message(), "", -1));
             }
             try {
                 // Test whether the reservation is valid
@@ -172,13 +189,21 @@ public class Reserve extends Controller {
                 for(Reservation reservation : res) {
                     if((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                             (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
-                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!"));
+                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1));
                     }
                 }
 
                 // Create the reservation
                 User user = DataProvider.getUserProvider().getUser();
-                Reservation reservation = rdao.createReservation(from, until, car, user);
+                Reservation reservation = rdao.createReservation(from, until, car, user, reservationForm.get().message);
+
+                // Schedule the auto accept
+                JobDAO jdao = context.getJobDAO();
+                int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+                MutableDateTime autoAcceptDate = new MutableDateTime();
+                autoAcceptDate.addMinutes(minutesAfterNow);
+                jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+
                 context.commit();
 
                 if (reservation != null) {
@@ -191,7 +216,7 @@ public class Reserve extends Controller {
                     }
                     return redirect(routes.Drives.index());
                 } else
-                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator"));
+                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator", "", -1));
             } catch(DataAccessException ex) {
                 throw ex;
             }
@@ -236,6 +261,7 @@ public class Reserve extends Controller {
             } catch(IllegalArgumentException ex) {
                 return ok(reservationspage.render(new ArrayList<Car>(), page, 0, 0, false));
             }
+            filter.putValue(FilterField.CAR_ACTIVE, "1");
 
             List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
 

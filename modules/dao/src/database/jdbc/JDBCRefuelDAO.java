@@ -18,12 +18,12 @@ public class JDBCRefuelDAO implements RefuelDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"refuel_id"};
 
-    private static final String REFUEL_QUERY = "SELECT * FROM Refuels " +
-            "LEFT JOIN CarRides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-            "LEFT JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
-            "LEFT JOIN Cars ON reservation_car_id = car_id " +
-            "LEFT JOIN Users ON reservation_user_id = user_id " +
-            "LEFT JOIN Users owners ON car_owner_user_id = owners.user_id " +
+    private static final String REFUEL_QUERY = "SELECT * FROM refuels " +
+            "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
+            "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+            "LEFT JOIN cars ON reservation_car_id = car_id " +
+            "LEFT JOIN users ON reservation_user_id = user_id " +
+            "LEFT JOIN users owners ON car_owner_user_id = owners.user_id " +
             "LEFT JOIN FILES ON refuel_file_id = file_id ";
 
     private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND refuel_status <> ?";
@@ -72,7 +72,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
 
     private PreparedStatement getUpdateRefuelStatement() throws SQLException {
         if (updateRefuelStatement == null) {
-            updateRefuelStatement = connection.prepareStatement("UPDATE Refuels SET refuel_file_id = ? , refuel_amount = ? , refuel_status = ?"
+            updateRefuelStatement = connection.prepareStatement("UPDATE refuels SET refuel_file_id = ? , refuel_amount = ? , refuel_status = ?"
                     + " WHERE refuel_id = ?");
         }
         return updateRefuelStatement;
@@ -80,14 +80,14 @@ public class JDBCRefuelDAO implements RefuelDAO {
 
     private PreparedStatement getCreateRefuelStatement() throws SQLException {
         if (createRefuelStatement == null) {
-            createRefuelStatement = connection.prepareStatement("INSERT INTO Refuels (refuel_car_ride_id) VALUES (?)", AUTO_GENERATED_KEYS);
+            createRefuelStatement = connection.prepareStatement("INSERT INTO refuels (refuel_car_ride_id) VALUES (?)", AUTO_GENERATED_KEYS);
         }
         return createRefuelStatement;
     }
 
     private PreparedStatement getStatusRefuelStatement() throws SQLException {
         if (statusRefuelStatement == null) {
-            statusRefuelStatement = connection.prepareStatement("UPDATE Refuels SET refuel_status = ?"
+            statusRefuelStatement = connection.prepareStatement("UPDATE refuels SET refuel_status = ?"
                     + " WHERE refuel_id = ?");
         }
         return statusRefuelStatement;
@@ -95,18 +95,18 @@ public class JDBCRefuelDAO implements RefuelDAO {
 
     private PreparedStatement getDeleteRefuelStatement() throws SQLException {
         if (deleteRefuelStatement == null) {
-            deleteRefuelStatement = connection.prepareStatement("DELETE FROM Refuels WHERE refuel_id = ?");
+            deleteRefuelStatement = connection.prepareStatement("DELETE FROM refuels WHERE refuel_id = ?");
         }
         return deleteRefuelStatement;
     }
 
     private PreparedStatement getGetAmountOfRefuelsStatement() throws SQLException {
         if(getGetAmountOfRefuelsStatement == null) {
-            getGetAmountOfRefuelsStatement = connection.prepareStatement("SELECT count(refuel_id) AS amount_of_refuels FROM Refuels " +
-                    "LEFT JOIN CarRides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-                    "LEFT JOIN CarReservations ON refuel_car_ride_id = reservation_id " +
-                    "LEFT JOIN Cars ON reservation_car_id = car_id " +
-                    "LEFT JOIN Users ON reservation_user_id = user_id " +
+            getGetAmountOfRefuelsStatement = connection.prepareStatement("SELECT count(refuel_id) AS amount_of_refuels FROM refuels " +
+                    "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
+                    "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                    "LEFT JOIN cars ON reservation_car_id = car_id " +
+                    "LEFT JOIN users ON reservation_user_id = user_id " +
                     "LEFT JOIN FILES ON refuel_file_id = file_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfRefuelsStatement;

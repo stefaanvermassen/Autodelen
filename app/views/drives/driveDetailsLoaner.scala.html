@@ -28,6 +28,13 @@
             </div>
         </div>
     </div><br />
+    <!-- row -->
+    <div class="row">
+        <div class="col-sm-12">
+            <strong>Commentaar:</strong> @reservation.getMessage
+        </div>
+    </div><br />
+    <!-- /row -->
     @if(reservation.getStatus == ReservationStatus.ACCEPTED || reservation.getStatus == ReservationStatus.REQUEST) {
         <div class="row">
             <div class="col-lg-12">

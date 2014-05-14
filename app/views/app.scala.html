@@ -9,7 +9,30 @@
     <head>
         <script src="@routes.Assets.at("javascripts/jquery-1.11.0.min.js")" type="text/javascript"></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
-
+<script type="text/javascript">
+            // There is a lot of field experience data, so this will always make the table responsive.
+            function forceResponsiveTables() {
+              var windowSize = $(window).width();
+              if ($('.table-responsive > .table').length > 0) {
+                $.each($('.table-responsive > .table'), function (index, value) {
+                  var thisTable = $(value);
+                  var tableSize = thisTable.width();
+                  var parent = thisTable.parent('.table-responsive');
+                  // 768px is the default for bootstrap 3's responsive-table, modify if needed
+                  if (windowSize <= 768) {
+                    parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                  } else {
+                    if (tableSize >= windowSize) {
+                      // Change the border color based on the bootstrap theme colors
+                      parent.css('width', '100%').css('overflow-x', 'scroll').css('overflow-y', 'hidden').css('margin-bottom', '15px').css('border', '1px solid #DDDDDD');
+                    } else {
+                      parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                    }
+                  }
+                });
+              }
+            }
+        </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -131,10 +154,10 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString</span>
-                            @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) {
-                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                            <!-- @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) { -->
+                               <img class="avatar" src="" alt="small profile picture">
                                 <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
-                            }
+                            <!-- } -->
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -154,7 +177,7 @@
             <!-- /.navbar-static-top -->
 
             @if(session.get("impersonated") != null){
-                <div class="impersonating">You are impersonating @user.toString!</div>
+                <div class="impersonating">Je impersoneert @user.toString!</div>
             }
 
             <nav class="navbar-default navbar-static-side" role="navigation">
@@ -164,9 +187,11 @@
                         <li @if(title == "Dashboard") {class="active"}>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
+                        @if(!DataProvider.getUserRoleProvider.isFullUser(user)){
                         <li @if(title == "Infosessies") {class="active"}>
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
+                        }
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_USER)){
                         <li @if(title == "Reserveren") {class="active"}>
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
@@ -233,8 +258,8 @@
 
 
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.MAIL_ADMIN)){
-                        <li @if(title == "Emailtemplates") {class="active"}>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
+                        <li @if(title == "Templates") {class="active"}>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Templates</a>
                         </li>
                         }
 
@@ -286,7 +311,8 @@
                             <a href=""><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
                         }
-                                }
+                        }
+                        <li id="logoutbutton"><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                     </ul>
                     <!-- /#side-menu -->
                 </div>
@@ -303,7 +329,7 @@
         <script src="@routes.Assets.at("javascripts/less-1.7.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
-
+        
         <!-- Page-Level Plugin Scripts - Main -->
 
         <!-- Page-Level Demo Scripts - Main - Use for reference -->

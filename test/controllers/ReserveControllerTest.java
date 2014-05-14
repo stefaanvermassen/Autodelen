@@ -2,7 +2,7 @@ package controllers;
 
 import controllers.util.TestHelper;
 import database.DataAccessContext;
-import database.DataProvider;
+import providers.DataProvider;
 import models.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,35 +33,6 @@ public class ReserveControllerTest {
         user = helper.createRegisteredUser("test@test.com", "1234piano", "Pol", "Thijs",new UserRole[]{UserRole.CAR_USER});
     }
 
-    @Test
-    public void testGetCarModal() {
-        running(fakeApplication(), new Runnable() {
-
-            @Override
-            public void run() {
-                helper.setTestProvider();
-                loginCookie = helper.login(user,"1234piano");
-
-                // Test if we can see a reservation-screen of a car
-                // First create a car
-                Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
-                Result result2 = callAction(
-                        controllers.routes.ref.Reserve.getCarModal(car.getId()),
-                        fakeRequest().withCookies(loginCookie)
-                );
-                assertEquals("Requesting carModal", OK, status(result2));
-
-                // Test if we can see a reservation-screen of a car that doesn't exist
-                Result result3 = callAction(
-                        controllers.routes.ref.Reserve.reserve(car.getId()-1),
-                        fakeRequest().withCookies(loginCookie)
-                );
-                assertEquals("Requesting carModal for unexisting car", BAD_REQUEST, status(result3));
-                helper.logout();
-            }
-        });
-    }
-
     /**
      * Tests method Reserve.reserve()
      * Once with an existing car, and once with a non-existing car
@@ -79,14 +50,14 @@ public class ReserveControllerTest {
                 // First create a car
                 Car car = helper.createCar("MijnenAuto", "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
                 Result result2 = callAction(
-                        controllers.routes.ref.Reserve.reserve(car.getId()),
+                        controllers.routes.ref.Reserve.reserve(car.getId(), "1993-09-26 03:00", "1993-09-26 04:00"),
                         fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("Requesting reserve", OK, status(result2));
 
                 // Test if we can see a reservation-screen of a car that doesn't exist
                 Result result3 = callAction(
-                        controllers.routes.ref.Reserve.reserve(car.getId()-1),
+                        controllers.routes.ref.Reserve.reserve(car.getId()-1, "1993-09-26 03:00", "1993-09-26 04:00"),
                         fakeRequest().withCookies(loginCookie)
                 );
                 assertEquals("Requesting reserve for unexisting car", BAD_REQUEST, status(result3));
@@ -114,6 +85,7 @@ public class ReserveControllerTest {
                 Map<String,String> reserveData = new HashMap<>();
                 reserveData.put("from", "2015-01-01 00:00");
                 reserveData.put("until", "2015-01-02 00:00");
+                reserveData.put("message", "Dankuwel");
                 Result result2 = callAction(
                         controllers.routes.ref.Reserve.confirmReservation(car.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
@@ -154,7 +126,7 @@ public class ReserveControllerTest {
                         controllers.routes.ref.Reserve.confirmReservation(car.getId()),
                         fakeRequest().withCookies(loginCookie).withFormUrlEncodedBody(reserveData)
                 );
-                assertEquals("Creating reservation on nonexisting date", BAD_REQUEST, status(result6));
+                assertEquals("Creating reservation on old date", 303, status(result6));
 
                 // Test if we can make a reservation of a car that doesn't exist
                 reserveData.put("from", "2015-01-01 00:00");
@@ -218,18 +190,10 @@ public class ReserveControllerTest {
 
                     // getCarModal()
                     Car car = helper.createCar("MijnenAuto" + i, "Opel", "Corsa", null, 5, 3, 2005, false, false, CarFuel.GAS, 1, 1, 1, user, "");
-                    Result resultGetCarModal = callAction(
-                            controllers.routes.ref.Reserve.getCarModal(car.getId()),
-                            fakeRequest().withCookies(loginCookie)
-                    );
-                    if(userRoles[i] == UserRole.CAR_USER || userRoles[i] == UserRole.SUPER_USER)
-                        assertEquals("Requesting carModal as as " + userRoles[i].toString(), OK, status(resultGetCarModal));
-                    else
-                        assertEquals("Requesting carModel as " + userRoles[i].toString(), UNAUTHORIZED, status(resultGetCarModal));
 
                     // reserve()
                     Result result1 = callAction(
-                            controllers.routes.ref.Reserve.reserve(car.getId()),
+                            controllers.routes.ref.Reserve.reserve(car.getId(), "1993-09-26 03:00", "1993-09-26 04:00"),
                             fakeRequest().withCookies(loginCookie)
                     );
                     if(userRoles[i] == UserRole.CAR_USER || userRoles[i] == UserRole.SUPER_USER)

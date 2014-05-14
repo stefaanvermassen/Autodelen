@@ -21,10 +21,10 @@ public class JDBCApprovalDAO implements ApprovalDAO {
             "admins.user_id, admins.user_password, admins.user_firstname, admins.user_lastname, admins.user_email, " +
             "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_type_alternative, infosession_comments ";
 
-    private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM Approvals " +
-            "LEFT JOIN Users users ON approval_user = users.user_id " +
-            "LEFT JOIN Users admins ON approval_admin = admins.user_id " +
-            "LEFT JOIN Infosessions ON approval_infosession = infosession_id ";
+    private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +
+            "LEFT JOIN users users ON approval_user = users.user_id " +
+            "LEFT JOIN users admins ON approval_admin = admins.user_id " +
+            "LEFT JOIN infosessions ON approval_infosession = infosession_id ";
 
     private Connection connection;
 
@@ -36,9 +36,17 @@ public class JDBCApprovalDAO implements ApprovalDAO {
     private PreparedStatement updateApprovalStatement;
     private PreparedStatement getPagedApprovalsStatement;
     private PreparedStatement countApprovalsStatement;
+    private PreparedStatement setApprovalAdminStatement;
 
     public JDBCApprovalDAO(Connection connection){
         this.connection = connection;
+    }
+
+    private PreparedStatement getSetApprovalAdminStatement() throws SQLException {
+        if(setApprovalAdminStatement == null){
+            setApprovalAdminStatement = connection.prepareStatement("UPDATE approvals SET approval_admin=? WHERE approval_id=?");
+        }
+        return setApprovalAdminStatement;
     }
 
     private PreparedStatement getCountApprovalsStatement() throws SQLException {
@@ -178,6 +186,19 @@ public class JDBCApprovalDAO implements ApprovalDAO {
             }
         } catch(SQLException ex){
             throw new DataAccessException("Failed to prepare count query.", ex);
+        }
+    }
+
+    @Override
+    public void setApprovalAdmin(Approval approval, User admin) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSetApprovalAdminStatement();
+            ps.setInt(1, admin.getId());
+            ps.setInt(2, approval.getId());
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Failed to update approval admin, no rows affected.");
+        } catch(SQLException ex){
+            throw new DataAccessException("Failed to prepare change approval admin query.", ex);
         }
     }
 

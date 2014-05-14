@@ -46,14 +46,14 @@
                 @if(showApprovalButton) {
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <h3 class="panel-title"><i class="fa fa-check-square-o"></i> Goedkeuringsaanvraag</h3>
+                            <i class="fa fa-check-square-o"></i> Aanwezigheid goedgekeurd!
                         </div>
                         <div class="panel-body">
-                            <p>Uw aanwezigheid werd bevestigd op onze infosessie.</p>
-                            <a href="@routes.InfoSessions.requestApproval">Dien een goedkeuringsaanvraag in.</a>
+                            Jouw aanwezigheid op deze infosessie werd bevestigd.
                         </div>
                     </div>
                 }
+                
                 @if(enrolled != null) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -63,24 +63,28 @@
                         <div class="panel-body">
                             @detailPartial(enrolled, fullUser, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
-                            <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
+                            @if(!showApprovalButton) {
+                                <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
+                            }
                         </div>
                     </div>
                 }
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Geplande infosessies
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div id="resultsTable" class="table-responsive">
-                            <!-- Here comes the loaded table-->
+                @if(!showApprovalButton) {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Geplande infosessies
                         </div>
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
                     </div>
-                    <!-- /.panel-body -->
-                </div>
-                <!-- /.panel -->
+                    <!-- /.panel -->
+                }
             </div>
             <!-- /col-lg-12 -->
         </div>

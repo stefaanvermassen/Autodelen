@@ -8,3 +8,4 @@ source random_cars.sql;
 source random_reservations.sql;
 source random_infosessions.sql;
 source random_infosession_enrollees.sql;
+source userroles.sql;

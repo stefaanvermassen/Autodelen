@@ -27,28 +27,28 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
 	
     private PreparedStatement getRemoveUserRolesStatement() throws SQLException{
     	if(removeUserRolesStatement == null){
-    		removeUserRolesStatement = connection.prepareStatement("DELETE FROM UserRoles WHERE userrole_userid=? AND userrole_role=?");    		
+    		removeUserRolesStatement = connection.prepareStatement("DELETE FROM userroles WHERE userrole_userid=? AND userrole_role=?");
     	}
     	return removeUserRolesStatement;
     }   
 
 	private PreparedStatement getInsertUserRolesStatement() throws SQLException{
     	if(insertUserRolesStatement == null){
-    		insertUserRolesStatement = connection.prepareStatement("INSERT INTO UserRoles(userrole_userid, userrole_role) VALUES (?,?)");
+    		insertUserRolesStatement = connection.prepareStatement("INSERT INTO userroles(userrole_userid, userrole_role) VALUES (?,?)");
     	}
     	return insertUserRolesStatement;
     }
     
     private PreparedStatement getUserRolesStatement() throws SQLException {
     	if(getUserRolesStatement == null){
-    		getUserRolesStatement = connection.prepareStatement("SELECT userrole_role FROM UserRoles WHERE userrole_userid = ?");
+    		getUserRolesStatement = connection.prepareStatement("SELECT userrole_role FROM userroles WHERE userrole_userid = ?");
     	}
     	return getUserRolesStatement;
     }
 
     private PreparedStatement getGetUsersByRoleStatement() throws SQLException {
         if(getUsersByRoleStatement == null){
-            getUsersByRoleStatement = connection.prepareStatement("SELECT * FROM UserRoles JOIN Users ON userrole_userid = userrole_userid WHERE userrole_role = ? OR userrole_role = 'SUPER_USER'");
+            getUsersByRoleStatement = connection.prepareStatement("SELECT * FROM userroles JOIN users ON userrole_userid = userrole_userid WHERE userrole_role = ? OR userrole_role = 'SUPER_USER'");
         }
         return getUsersByRoleStatement;
     }
@@ -81,7 +81,7 @@ public class JDBCUserRoleDAO implements UserRoleDAO{
             List<User> userList = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
-                    userList.add(JDBCUserDAO.populateUser(rs, false, false, "Users"));
+                    userList.add(JDBCUserDAO.populateUser(rs, false, false, "users"));
                 }
                 return userList;
             } catch (SQLException ex){

@@ -79,13 +79,13 @@ public class TestHelper {
                                 boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue,
                                 int ownerAnnualKm, User owner, String comments) {
         CarDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getCarDAO();
-        Car car = dao.createCar(name, brand, type, location, seats, doors, year, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, owner, comments);
+        Car car = dao.createCar(name, brand, type, location, seats, doors, year, false, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, owner, comments, true);
         return car;
     }
 
     public Reservation createReservation(DateTime from, DateTime to, Car car, User user) {
         ReservationDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getReservationDAO();
-        Reservation reservation = dao.createReservation(from, to, car, user);
+        Reservation reservation = dao.createReservation(from, to, car, user, "");
         return reservation;
     }
 
@@ -96,7 +96,7 @@ public class TestHelper {
 	
 	public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int max){
 		InfoSessionDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getInfoSessionDAO();
-		InfoSession session = dao.createInfoSession(type, "", host, address, time, max);
+		InfoSession session = dao.createInfoSession(type, "", host, address, time, max, "");
 		return session;
 	}
 	

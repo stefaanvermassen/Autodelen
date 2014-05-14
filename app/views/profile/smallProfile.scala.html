@@ -1,28 +1,29 @@
 @(user: User, editable: Boolean)
 @import providers.DataProvider;
-<!-- TODO: These are no form groups! -->
-<div class="form-group">
-    <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-    @if(editable){
-        <a href="@routes.Profile.profilePictureUpload(user.getId)">Wijzig profielfoto</a> <!-- TODO: only show to admin or user itself -->
+<img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
+<h2>@user.getFirstName @user.getLastName</h2>
+<p>
+    <strong>Email:</strong> @user.getEmail
+    <br>
+
+    <strong>Telefoon (vast):</strong>
+    @if(user.getPhone != null && !user.getPhone.isEmpty) {
+        <a href="tel:@user.getPhone">@user.getPhone</a>
+    } else {
+        /
     }
-</div>
-<div class="form-group">
-    <p class="form-control-static h2">@user.getFirstName @user.getLastName @if(DataProvider.getUserRoleProvider.isAdmin(user)) { <span class="badge badge-important"><i class="fa fa-star" style="color: yellow;"></i> Admin</span> }
-    </p><br>
-    <p><strong>Status: </strong> <span class="label label-default">@user.getStatus</span></p>
-</div>
-<div class="form-group">
-    <p class="form-control-static"><strong>Email:</strong> @user.getEmail <br>
-        <span><strong>Telefoon (vast):</strong> @if(user.getPhone != null && !user.getPhone.isEmpty) {
-            <a href="tel:@user.getPhone">@user.getPhone</a>
-        } else { / }</span>
-        <br/>
-        <span><strong>GSM:</strong> @if(user.getCellphone != null && !user.getCellphone.isEmpty) {
-            <a href="tel:@user.getCellphone">@user.getCellphone</a>
-        } else { / }</span>
-    </p>
-</div>
-    @if(editable) {
-        <a class="btn btn-default btn-sm smallprofile-static" href="@routes.Profile.edit(user.getId)" >Wijzigen</a>
+    <br>
+
+    <strong>GSM:</strong>
+    @if(user.getCellphone != null && !user.getCellphone.isEmpty) {
+        <a href="tel:@user.getCellphone">@user.getCellphone</a>
+    } else {
+        /
     }
+</p>
+<p>
+    <strong>Status: </strong> <span class="label label-default">@user.getStatus</span>
+    @if(DataProvider.getUserRoleProvider.isAdmin(user)){
+        <span class="label label-default"><i class="fa fa-star" style="color: yellow;"></i> Admin</span>
+    }
+</p>

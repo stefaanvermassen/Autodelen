@@ -145,7 +145,7 @@ public class Profile extends Controller {
                     } catch(IIOException ex){
                         // This means imagereader failed.
                         Logger.error("Failed profile picture resize: " + ex.getMessage());
-                        flash("danger", "Uw afbeelding is corrupt / niet ondersteund. Gelieve het opnieuw te proberen of een administrator te contacteren.");
+                        flash("danger", "Jouw afbeelding is corrupt / niet ondersteund. Gelieve het opnieuw te proberen of een administrator te contacteren.");
                         return badRequest(uploadPicture.render(userId));
                     }
 
@@ -457,7 +457,7 @@ public class Profile extends Controller {
                     Http.MultipartFormData.FilePart newFile = body.getFile("file");
                     if (newFile != null) {
                         if(!FileHelper.isDocumentContentType(newFile.getContentType())){
-                            flash("danger", "Het documentstype dat u bijgevoegd heeft is niet toegestaan. (" + newFile.getContentType() + ").");
+                            flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
                             return badRequest(identitycard.render(user, form));
                         } else {
                             FileGroup group = card.getFileGroup();
@@ -489,7 +489,7 @@ public class Profile extends Controller {
                     }
                     context.commit();
 
-                    flash("success", "Uw identiteitskaart werd succesvol bijgewerkt.");
+                    flash("success", "Jouw identiteitskaart werd succesvol bijgewerkt.");
                     return ok(identitycard.render(user, form));
                 } catch(DataAccessException | IOException ex){ //IO or database error causes a rollback
                     context.rollback();
@@ -590,7 +590,7 @@ public class Profile extends Controller {
                     Http.MultipartFormData.FilePart newFile = body.getFile("file");
                     if (newFile != null) {
                         if(!FileHelper.isDocumentContentType(newFile.getContentType())){
-                            flash("danger", "Het documentstype dat u bijgevoegd heeft is niet toegestaan. (" + newFile.getContentType() + ").");
+                            flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
                             return badRequest(driverslicense.render(user, form));
                         } else {
                             FileGroup group = card.getFileGroup();
@@ -619,7 +619,7 @@ public class Profile extends Controller {
                     }
                     context.commit();
 
-                    flash("success", "Uw rijbewijs werd succesvol bijgewerkt.");
+                    flash("success", "Je rijbewijs werd succesvol bijgewerkt.");
                     return ok(driverslicense.render(user, form));
                 } catch(DataAccessException | IOException ex){ //IO or database error causes a rollback
                     context.rollback();
@@ -666,7 +666,7 @@ public class Profile extends Controller {
      * @param user The user to quote
      * @return Completeness in percents
      */
-    private static int getProfileCompleteness(User user) {
+    public static int getProfileCompleteness(User user) {
         int total = 0;
 
         if (user.getAddressDomicile() != null) {
@@ -693,14 +693,11 @@ public class Profile extends Controller {
         if (user.getIdentityCard() != null) {
             total++;
         }
-        if (user.getContractManager() != null) {
-            total++;
-        }
         if (user.getProfilePictureId() != -1) {
             total++;
         }
 
-        return (int) (((float) total / 10) * 100); //10 records
+        return (int) (((float) total / 9) * 100); //9 records
     }
 
 
@@ -769,6 +766,8 @@ public class Profile extends Controller {
 
                     context.commit();
                     flash("success", "Het profiel werd succesvol aangepast.");
+
+                    DataProvider.getUserProvider().invalidateUser(user); //invalidate cache
                     return redirect(routes.Profile.index(userId));
                 } catch (DataAccessException ex) {
                     context.rollback();
