@@ -590,24 +590,19 @@ public class InfoSessions extends Controller {
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         List<String> errors = checkApprovalConditions(user, context);
-                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
+                        return ok(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
                     }
                 }
             }
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
-    public static Boolean approvalRequestSent() {
+    public static boolean approvalRequestSent() {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             List<Approval> approvals = dao.getPendingApprovals(user);
-            if (!approvals.isEmpty()) {
-                return true;
-            } else {
-                return false;
-            }
+            return !approvals.isEmpty();
         } catch (DataAccessException ex) {
             throw ex;
         }
