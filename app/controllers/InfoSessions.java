@@ -446,7 +446,7 @@ public class InfoSessions extends Controller {
                     idao.registerUser(is, user);
                     context.commit();
 
-                    flash("De gebruiker werd succesvol toegevoegd aan deze infosessie.");
+                    flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
                     return redirect(routes.InfoSessions.detail(sessionId));
                 }
             }
@@ -684,6 +684,8 @@ public class InfoSessions extends Controller {
                 } else {
                     ApprovalDAO dao = context.getApprovalDAO();
                     InfoSessionDAO idao = context.getInfoSessionDAO();
+                    UserDAO udao = context.getUserDAO();
+                    user = udao.getUser(user.getId(), true); //get full user
                     try {
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                         if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
@@ -691,6 +693,8 @@ public class InfoSessions extends Controller {
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
+                            user.setStatus(UserStatus.FULL_VALIDATING); //set to validation
+                            udao.updateUser(user, true); //full update
                             context.commit();
                             return redirect(routes.Dashboard.index());
                         }
@@ -882,6 +886,9 @@ public class InfoSessions extends Controller {
 
                         // Set contact admin
                         User user = udao.getUser(ap.getUser().getId(), true);
+                        user.setStatus(UserStatus.FULL);
+                        user.setAgreeTerms(true); //TODO: check if we can accept this earlier, as it is accepted once approval is submitted
+                        udao.updateUser(user, true); //full update
 
                         // Add the new user roles
                         UserRoleDAO roleDao = context.getUserRoleDAO();
