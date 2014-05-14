@@ -21,6 +21,7 @@ import views.html.refuels.editmodal;
 import views.html.refuels.refuels;
 import views.html.refuels.refuelspage;
 import views.html.refuels.refuelsOwner;
+import views.html.refuels.refuelsAdmin;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -70,6 +71,16 @@ public class Refuels extends Controller {
 
     }
 
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the refuel requests to a specific owner
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result showOwnerRefuels() {
+        return ok(refuelsOwner.render());
+    }
+
     public static Result showOwnerRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
@@ -84,8 +95,30 @@ public class Refuels extends Controller {
         // TODO: Check if admin or car owner/user
 
         return ok(refuelList(page, field, asc, filter));
-
     }
+
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the refuel requests to a specific owner
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showAllRefuels() {
+        return ok(refuelsAdmin.render());
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showAllRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        return ok(refuelList(page, field, asc, filter));
+    }
+
+
 
     private static Html refuelList(int page, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -103,17 +136,6 @@ public class Refuels extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
-    }
-
-
-    /**
-     * Method: GET
-     *
-     * @return index page containing all the refuel requests to a specific owner
-     */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
-    public static Result showOwnerRefuels() {
-        return ok(refuelsOwner.render());
     }
 
     /**

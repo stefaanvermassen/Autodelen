@@ -3,8 +3,7 @@
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-drives">
     <thead>
         <tr role="row">
-            <th>Automerk</th>
-            <th>Type</th>
+            <th>Autonaam</th>
             <th class="sortable" name="from" >Van</th>
             <th>Tot</th>
             <th>Ontlener</th>
@@ -20,8 +19,7 @@
         } else {
             @for((reservation, index) <- reservations.zipWithIndex) {
                 <tr>
-                    <td>@reservation.getCar.getBrand</td>
-                    <td>@reservation.getCar.getType</td>
+                    <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
                     <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
                     <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
                     @if(reservation.getUser.getId == userId) {
