@@ -887,6 +887,7 @@ public class InfoSessions extends Controller {
                         // Set contact admin
                         User user = udao.getUser(ap.getUser().getId(), true);
                         user.setStatus(UserStatus.FULL);
+                        user.setAgreeTerms(true); //TODO: check if we can accept this earlier, as it is accepted once approval is submitted
                         udao.updateUser(user, true); //full update
 
                         // Add the new user roles
