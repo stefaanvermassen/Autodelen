@@ -133,15 +133,17 @@
                                                     <input class="availability_id hidden" value="@availability.getId">
                                                 </td>
                                                 <td>
-                                                    <select class="beginDayOfWeek">
-                                                        <option value="2" @if(availability.getBeginDayOfWeek.getI == 2) { selected }>Maandag</option>
-                                                        <option value="3" @if(availability.getBeginDayOfWeek.getI == 3) { selected }>Dinsdag</option>
-                                                        <option value="4" @if(availability.getBeginDayOfWeek.getI == 4) { selected }>Woensdag</option>
-                                                        <option value="5" @if(availability.getBeginDayOfWeek.getI == 5) { selected }>Donderdag</option>
-                                                        <option value="6" @if(availability.getBeginDayOfWeek.getI == 6) { selected }>Vrijdag</option>
-                                                        <option value="7" @if(availability.getBeginDayOfWeek.getI == 7) { selected }>Zaterdag</option>
-                                                        <option value="1" @if(availability.getBeginDayOfWeek.getI == 1) { selected }>Zondag</option>
-                                                    </select>
+                                                    <form class="form-inline">
+                                                        <select class="beginDayOfWeek form-control">
+                                                            <option value="2" @if(availability.getBeginDayOfWeek.getI == 2) { selected }>Maandag</option>
+                                                            <option value="3" @if(availability.getBeginDayOfWeek.getI == 3) { selected }>Dinsdag</option>
+                                                            <option value="4" @if(availability.getBeginDayOfWeek.getI == 4) { selected }>Woensdag</option>
+                                                            <option value="5" @if(availability.getBeginDayOfWeek.getI == 5) { selected }>Donderdag</option>
+                                                            <option value="6" @if(availability.getBeginDayOfWeek.getI == 6) { selected }>Vrijdag</option>
+                                                            <option value="7" @if(availability.getBeginDayOfWeek.getI == 7) { selected }>Zaterdag</option>
+                                                            <option value="1" @if(availability.getBeginDayOfWeek.getI == 1) { selected }>Zondag</option>
+                                                        </select>
+                                                    </form>
                                                 </td>
                                                 <td>
                                                     <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">
@@ -150,15 +152,17 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <select class="endDayOfWeek">
-                                                        <option value="2" @if(availability.getEndDayOfWeek.getI == 2) { selected }>Maandag</option>
-                                                        <option value="3" @if(availability.getEndDayOfWeek.getI == 3) { selected }>Dinsdag</option>
-                                                        <option value="4" @if(availability.getEndDayOfWeek.getI == 4) { selected }>Woensdag</option>
-                                                        <option value="5" @if(availability.getEndDayOfWeek.getI == 5) { selected }>Donderdag</option>
-                                                        <option value="6" @if(availability.getEndDayOfWeek.getI == 6) { selected }>Vrijdag</option>
-                                                        <option value="7" @if(availability.getEndDayOfWeek.getI == 7) { selected }>Zaterdag</option>
-                                                        <option value="1" @if(availability.getEndDayOfWeek.getI == 1) { selected }>Zondag</option>
-                                                    </select>
+                                                    <form class="form-inline">
+                                                        <select class="endDayOfWeek form-control">
+                                                            <option value="2" @if(availability.getEndDayOfWeek.getI == 2) { selected }>Maandag</option>
+                                                            <option value="3" @if(availability.getEndDayOfWeek.getI == 3) { selected }>Dinsdag</option>
+                                                            <option value="4" @if(availability.getEndDayOfWeek.getI == 4) { selected }>Woensdag</option>
+                                                            <option value="5" @if(availability.getEndDayOfWeek.getI == 5) { selected }>Donderdag</option>
+                                                            <option value="6" @if(availability.getEndDayOfWeek.getI == 6) { selected }>Vrijdag</option>
+                                                            <option value="7" @if(availability.getEndDayOfWeek.getI == 7) { selected }>Zaterdag</option>
+                                                            <option value="1" @if(availability.getEndDayOfWeek.getI == 1) { selected }>Zondag</option>
+                                                        </select>
+                                                    </form>
                                                 </td>
                                                 <td>
                                                     <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">

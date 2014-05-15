@@ -8,6 +8,7 @@
                 <tr role="row">
                     <th>Auto</th>
                     <th>Autorit</th>
+                    <th>Bestuurder</th>
                     <th>Bedrag</th>
                     <th>Status</th>
                     <th>Bewijs</th>
@@ -17,15 +18,16 @@
             <tbody>
             @if(refuelList.isEmpty) {
                 <tr>
-                    <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="6">
+                    <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
                         Je hebt momenteel geen tankbeurten in het systeem. Deze zullen automatisch worden aangevuld na het invullen van ritdetails.
                     </td>
                 </tr>
             } else {
                 @for(refuel <- refuelList) {
                     <tr>
-                        <td>@refuel.getCarRide.getReservation.getCar.getName</td>
-                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(refuel.getCarRide.getReservation.getFrom)</td>
+                        <td><a href="@routes.Cars.detail(refuel.getCarRide.getReservation.getCar.getId)">@refuel.getCarRide.getReservation.getCar.getName</a></td>
+                        <td><a href="@routes.Drives.details(refuel.getCarRide.getReservation.getId)">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(refuel.getCarRide.getReservation.getFrom)</a></td>
+                        <td><a href="@routes.Profile.index(refuel.getCarRide.getReservation.getUser.getId)">@refuel.getCarRide.getReservation.getUser</a></td>
                         @if(refuel.getStatus == RefuelStatus.CREATED) {
                             <td colspan="4">
                                 <div class="btn-group btn-group-xs">
@@ -52,7 +54,7 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-xs">
-                                    <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getProof.getId)">Link</a>
+                                    <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getProof.getId)" target="_blank">Link</a>
                                 </div>
 
                             </td>

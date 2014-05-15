@@ -137,12 +137,13 @@ public class JDBCCarDAO implements CarDAO{
                 car.setOwnerAnnualKm(ownerAnnualKm);
             car.setComments(rs.getString("car_comments"));
             car.setActive(rs.getBoolean("car_active"));
-            car.setPhoto(JDBCFileDAO.populateFile(rs, "pictures"));
+            File photo = null;
             Address location = null;
             User user = null;
             TechnicalCarDetails technicalCarDetails = null;
             CarInsurance insurance = null;
             if(withRest) {
+                photo = JDBCFileDAO.populateFile(rs, "pictures");
                 location = JDBCAddressDAO.populateAddress(rs);
                 user = JDBCUserDAO.populateUser(rs, false, false);
                 rs.getInt("car_technical_details");
@@ -168,6 +169,7 @@ public class JDBCCarDAO implements CarDAO{
                     insurance = new CarInsurance(rs.getInt("insurance_id"), name, expiration, bonusMalus, contractId);
                 }
             }
+            car.setPhoto(photo);
             car.setLocation(location);
             car.setOwner(user);
             car.setTechnicalCarDetails(technicalCarDetails);
@@ -196,7 +198,7 @@ public class JDBCCarDAO implements CarDAO{
             updateCarStatement = connection.prepareStatement("UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=?, car_active=?, car_images_id WHERE car_id = ?");
+                    "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
         }
         return updateCarStatement;
     }
@@ -855,7 +857,6 @@ public class JDBCCarDAO implements CarDAO{
             throw new DataAccessException("Could not retrieve a list of cars for user with id " + user_id, ex);
         }
     }
-
 
     private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();

@@ -1,10 +1,8 @@
 package tests;
 
-import database.DataAccessContext;
-import database.DataAccessProvider;
-import database.DatabaseConfiguration;
-import database.TemplateDAO;
+import database.*;
 import database.jdbc.JDBCDataAccessProvider;
+import database.jdbc.JDBCFilter;
 import models.EmailTemplate;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +31,7 @@ public class JDBCTemplateDAOTest {
         context = provider.getDataAccessContext();
 
         templateDAO = context.getTemplateDAO();
-        templates = templateDAO.getAllTemplates();
+        templates = templateDAO.getTemplateList(FilterField.TEMPLATE_NAME, true, 1, 100, new JDBCFilter());
     }
 
     /**
@@ -65,7 +63,7 @@ public class JDBCTemplateDAOTest {
             EmailTemplate template2 = templateDAO.getTemplate(template.getId());
             
             assertEquals(template2.getBody(), body);
-            assertNotEquals(template.getBody(), template2.getBody());
+            assertFalse(template.getBody().equals(template2.getBody()));
         }
         sc.close();
 	}

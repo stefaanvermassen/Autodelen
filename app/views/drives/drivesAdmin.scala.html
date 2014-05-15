@@ -72,21 +72,10 @@
                     </li>
                     <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
                         Voorbij
-                        @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
-                                Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { amount =>
-                            @if(amount > 0) {
-                                (@amount)
-                    }
-                    }
                     </a>
                     </li>
                     <li id="tab_request"><a href="#resultpanel" data-toggle="tab">
                         Aanvragen
-                        @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { amount =>
-                            @if(amount > 0) {
-                                (@amount)
-                    }
-                    }
                     </a>
                         <input name="status" value="@ReservationStatus.REQUEST.toString" class="hidden">
                     </li>
