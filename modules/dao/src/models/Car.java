@@ -37,6 +37,7 @@ public class Car {
     private List<CarAvailabilityInterval> availabilities;
     private boolean active;
     private List<User> priviliged;
+    private File photo;
 
     public Car() {
         this(0, null, null, null, null, null, null, null, false, false, false, null, null, null, null, null, null, null, null);
@@ -234,6 +235,14 @@ public class Car {
 
     public void setPriviliged(List<User> priviliged) {
         this.priviliged = priviliged;
+    }
+
+    public File getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(File photo) {
+        this.photo = photo;
     }
 
     @Override
