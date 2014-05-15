@@ -262,7 +262,7 @@ public class Notifier extends Mailer {
             mail = replaceCarReservationTags(carReservation, mail);
             mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
             mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
-            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
+            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).toString());
             NotificationDAO notificationDAO = context.getNotificationDAO();
             createNotification(notificationDAO, user, template.getSubject(), mail);
             if(template.getSendMail()){
@@ -374,7 +374,7 @@ public class Notifier extends Mailer {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
         template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
         template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));
-        template = template.replace("%comment%", carReservation.getMessage());
+        template = template.replace("%comment%", carReservation.getMessage() == null ? "[Geen commentaar]" : carReservation.getMessage());
         template = template.replace("%reservation_user_firstname%", carReservation.getUser().getFirstName());
         template = template.replace("%reservation_user_lastname%", carReservation.getUser().getLastName());
         return template;

@@ -69,7 +69,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getUpdateReservationStatement() throws SQLException {
         if (updateReservationStatement == null) {
             updateReservationStatement = connection.prepareStatement("UPDATE carreservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
-                    + "reservation_from=? , reservation_to=?, reservation_message = ?WHERE reservation_id = ?");
+                    + "reservation_from=? , reservation_to=?, reservation_message = ? WHERE reservation_id = ?");
         }
         return updateReservationStatement;
     }
