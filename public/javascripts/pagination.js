@@ -45,7 +45,6 @@ var previousBtnTxt = "<";
 var nextBtnTxt = ">";
 var firstBtnTxt = "<<";
 var lastBtnTxt = ">>";
-var loadingImage = '/assets/images/ajax-loader.gif';
 var errorMessageFilter = "Zoekvelden mogen geen komma's (,) of gelijk-aan-tekens (=) bevatten!";
 
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5

@@ -9,7 +9,7 @@
     <head>
         <script src="@routes.Assets.at("javascripts/jquery-1.11.0.min.js")" type="text/javascript"></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
-<script type="text/javascript">
+        <script type="text/javascript">
             // There is a lot of field experience data, so this will always make the table responsive.
             function forceResponsiveTables() {
               var windowSize = $(window).width();
@@ -32,6 +32,10 @@
                 });
               }
             }
+        </script>
+        <script>
+            // Loadingimage to use in pagination.js
+            var loadingImage = '@routes.Assets.at("images/car-loader.gif")'
         </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

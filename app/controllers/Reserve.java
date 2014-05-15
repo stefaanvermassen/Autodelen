@@ -204,7 +204,15 @@ public class Reserve extends Controller {
                 context.commit();
 
                 if (reservation != null) {
-                    if(car.getOwner().getId() == user.getId()) {
+                    // Check if user is owner or priviliged
+                    boolean autoAccept = car.getOwner().getId() == user.getId();
+                    int i = 0;
+                    while(!autoAccept && i < car.getPriviliged().size()) {
+                        if(car.getPriviliged().get(i).getId() == user.getId()) {
+                            autoAccept = true;
+                        }
+                    }
+                    if(autoAccept) {
                         reservation.setStatus(ReservationStatus.ACCEPTED);
                         rdao.updateReservation(reservation);
                         context.commit();

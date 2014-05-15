@@ -8,6 +8,7 @@
                 <tr role="row">
                     <th>Auto</th>
                     <th>Autorit</th>
+                    <th>Bestuurder</th>
                     <th>Bedrag</th>
                     <th>Status</th>
                     <th>Bewijs</th>
@@ -24,8 +25,9 @@
             } else {
                 @for(refuel <- refuelList) {
                     <tr>
-                        <td>@refuel.getCarRide.getReservation.getCar.getName</td>
-                        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(refuel.getCarRide.getReservation.getFrom)</td>
+                        <td><a href="@routes.Cars.detail(refuel.getCarRide.getReservation.getCar.getId)">@refuel.getCarRide.getReservation.getCar.getName</a></td>
+                        <td><a href="@routes.Drives.details(refuel.getCarRide.getReservation.getId)">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(refuel.getCarRide.getReservation.getFrom)</a></td>
+                        <td><a href="@routes.Profile.index(refuel.getCarRide.getReservation.getUser.getId)">@refuel.getCarRide.getReservation.getUser</a></td>
                         @if(refuel.getStatus == RefuelStatus.CREATED) {
                             <td colspan="4">
                                 <div class="btn-group btn-group-xs">
