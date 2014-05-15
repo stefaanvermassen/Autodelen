@@ -319,7 +319,7 @@
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
                         </li>
 
-                        <li>
+                        <li @if(title == "Systeemvariabelen") {class="active"}>
                             <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
                         </li>
 
