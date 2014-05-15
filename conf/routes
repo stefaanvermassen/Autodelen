@@ -187,6 +187,9 @@ GET         /damages/finished                       controllers.Damages.setDamag
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                              controllers.Maps.showMap()
 
+# Reports
+GET         /reports                                controllers.Reports.index()
+
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
 # Car Picker
