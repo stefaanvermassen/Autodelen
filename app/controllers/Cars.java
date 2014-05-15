@@ -238,7 +238,7 @@ public class Cars extends Controller {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO carDao = context.getCarDAO();
             Car car = carDao.getCar(carId);
-            if (car != null && car.getPhoto() != null) {
+            if (car != null && car.getPhoto() != null && car.getPhoto().getId() > 0) {
                 return FileHelper.getFileStreamResult(context.getFileDAO(), car.getPhoto().getId());
             } else {
                 return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
