@@ -70,7 +70,7 @@
   "Infosessie ingeschreven",
   "Beste %user_firstname% %user_lastname%,<br>
   <br>
-  Je heebt je ingeschreven voor een infosessie op %infosession_date%. <br>
+  Je hebt je ingeschreven voor een infosessie op %infosession_date%. <br>
   Deze infosessie zal doorgaan op het volgende adres:<br>
   %infosession_address%<br>
   <br>
