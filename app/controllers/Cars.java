@@ -234,7 +234,6 @@ public class Cars extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result getPicture(int carId) {
         //TODO: checks on whether other person can see this
-        // TODO: actual car picture
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO carDao = context.getCarDAO();
             Car car = carDao.getCar(carId);
