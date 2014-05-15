@@ -214,7 +214,7 @@
                                         <ul>
                                             @for(file <- proofList){
                                                 <li>
-                                                    <a href="@routes.Damages.getProof(file.getId)">@file.getFileName</a>
+                                                    <a href="@routes.Damages.getProof(file.getId)" target="_blank">@file.getFileName</a>
                                                     <a href="@routes.Damages.deleteProof(damage.getId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
                                                 </li>
                                             }
