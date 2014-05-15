@@ -403,7 +403,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook, null);
             cars.add(car);
         }
         sc.close();
@@ -438,7 +438,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook, null);
         cars.add(car);
         sc.close();
     }
@@ -474,7 +474,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook, null);
             cars.add(car);
         }
         sc.close();

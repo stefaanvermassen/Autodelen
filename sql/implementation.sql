@@ -140,7 +140,7 @@ CREATE TABLE `cars` (
 	PRIMARY KEY (`car_id`),
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES addresses(`address_id`) ON DELETE CASCADE,
-	FOREIGN KEY (`car_images_id`) REFERENCES filegroups(`file_group_id`),
+	FOREIGN KEY (`car_images_id`) REFERENCES files(`file_id`),
 	FOREIGN KEY (`car_technical_details`) REFERENCES technicalcardetails(`details_id`),
 	FOREIGN KEY (`car_insurance`) REFERENCES carinsurances(`insurance_id`)
 )

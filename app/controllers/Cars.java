@@ -235,7 +235,17 @@ public class Cars extends Controller {
     public static Result getPicture(int carId) {
         //TODO: checks on whether other person can see this
         // TODO: actual car picture
-        return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO carDao = context.getCarDAO();
+            Car car = carDao.getCar(carId);
+            if (car != null && car.getPhoto() != null) {
+                return FileHelper.getFileStreamResult(context.getFileDAO(), car.getPhoto().getId());
+            } else {
+                return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     /**
@@ -273,7 +283,9 @@ public class Cars extends Controller {
                     TechnicalCarDetails technicalCarDetails = null;
                     Http.MultipartFormData body = request().body().asMultipartFormData();
                     Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
+                    Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
                     models.File file = null;
+                    models.File picture = null;
                     if (registrationFile != null) {
                         String contentType = registrationFile.getContentType();
                         if (!FileHelper.isDocumentContentType(contentType)) {
@@ -284,6 +296,21 @@ public class Cars extends Controller {
                                 Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                                 FileDAO fdao = context.getFileDAO();
                                 file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex); //no more checked catch -> error page!
+                            }
+                        }
+                    }
+                    if (photoFilePart != null) {
+                        String contentType = photoFilePart.getContentType();
+                        if (!FileHelper.isImageContentType(contentType)) {
+                            flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                            return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
+                        } else {
+                            try {
+                                Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
+                                FileDAO fdao = context.getFileDAO();
+                                picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
                             } catch (IOException ex) {
                                 throw new RuntimeException(ex); //no more checked catch -> error page!
                             }
@@ -300,7 +327,7 @@ public class Cars extends Controller {
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.manual, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active);
+                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, picture);
 
                     context.commit();
 
@@ -418,7 +445,9 @@ public class Cars extends Controller {
                     car.setOwnerAnnualKm(null);
                 Http.MultipartFormData body = request().body().asMultipartFormData();
                 Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
+                Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
                 models.File file = null;
+                models.File picture = null;
                 if (registrationFile != null) {
                     String contentType = registrationFile.getContentType();
                     if (!FileHelper.isDocumentContentType(contentType)) {
@@ -435,6 +464,21 @@ public class Cars extends Controller {
                     }
                 }
 
+                if (photoFilePart != null) {
+                    String contentType = photoFilePart.getContentType();
+                    if (!FileHelper.isImageContentType(contentType)) {
+                        flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten als foto. (ontvangen MIME-type: " + contentType + ")");
+                        return redirect(routes.Cars.detail(car.getId()));
+                    } else {
+                        try {
+                            Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
+                            FileDAO fdao = context.getFileDAO();
+                            picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex); //no more checked catch -> error page!
+                        }
+                    }
+                }
                 if(car.getTechnicalCarDetails() == null) {
                     if((model.licensePlate != null && !model.licensePlate.equals(""))
                             || (model.chassisNumber != null && model.chassisNumber != 0) || file != null)
@@ -484,6 +528,9 @@ public class Cars extends Controller {
                 car.setComments(model.comments);
 
                 car.setActive(model.active);
+                if(picture != null){
+                    car.setPhoto(picture);
+                }
 
                 User user = DataProvider.getUserProvider().getUser();
                 if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
