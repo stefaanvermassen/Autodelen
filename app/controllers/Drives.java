@@ -104,7 +104,7 @@ public class Drives extends Controller {
      * @return the html page of the index page
      */
     public static Html showIndex() {
-        return drives.render(1, 1);
+        return drives.render();
     }
 
     /**
@@ -551,6 +551,40 @@ public class Drives extends Controller {
 
             // We only want reservations from the current user (or his car(s))
             filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
+
+            List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, PAGE_SIZE, filter);
+
+            int amountOfResults = dao.getAmountOfReservations(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+
+            return ok(drivespage.render(user.getId(), Form.form(RemarksModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * @param page The page in the drivelists
+     * @param ascInt An integer representing ascending (1) or descending (0)
+     * @param orderBy A field representing the field to order on
+     * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
+     * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.RESERVATION_ADMIN})
+    public static Result showDrivesAdminPage(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ReservationDAO dao = context.getReservationDAO();
+
+            if(field == null) {
+                field = FilterField.FROM;
+            }
 
             List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, PAGE_SIZE, filter);
 

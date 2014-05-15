@@ -90,6 +90,7 @@ public class UserProvider {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
                 User user = dao.getUser(email);
+                //user.setPassword(""); // We wipe the password in RAM, all classes using this in controllers shouldn't use cache!
                 if (user != null) { // cache and return
                     Cache.set(key, user);
                     return user;

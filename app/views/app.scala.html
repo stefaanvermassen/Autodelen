@@ -47,6 +47,12 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="stylesheet/less" type="text/css" href="@routes.Assets.at("stylesheets/less/colortheme.less")">
         <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/colortheme.css")"> -->
+
+            <!--[if lt IE 9]>
+            <script src="@routes.Assets.at("javascripts/compatibility/html5shiv.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/compatibility/css3-mediaqueries.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/compatibility/respond.min.js")" type="text/javascript"></script>
+        <![endif]-->
     </head>
     <body>
         <div id="wrapper">
@@ -227,6 +233,9 @@
                         <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
                             <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
                         </li>
+                        <li @if(title == "Schadedossiers (eigenaar)") {class="active"}>
+                            <a href="@routes.Damages.showDamagesOwner()"><i class="fa fa-tasks fa-fw"></i> Schadedossiers</a>
+                        </li>
                         }
 
                         <li class="submenu">ACCOUNT</li>
@@ -292,8 +301,11 @@
                             <li @if(title == "Autokosten (Admin)") {class="active"}>
                                 <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
                             </li>
+                            <li @if(title == "Tankbeurten (Admin)") {class="active"}>
+                                <a href="@routes.Refuels.showAllRefuels()"><i class="fa fa-file fa-beer"></i> Tankbeurten</a>
+                            </li>
                             <li @if(title == "Schadedossiers (Admin)") {class="active"}>
-                                <a href="@routes.Damages.showAllDamages()"><i class="fa fa-file fa-fw"></i> Schadedossiers</a>
+                                <a href="@routes.Damages.showAllDamages()"><i class="fa fa-file fa-task"></i> Schadedossiers</a>
                             </li>
                         }
 

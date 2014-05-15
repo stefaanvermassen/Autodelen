@@ -18,6 +18,9 @@ function loadModal(carId) {
 }
 
 $(document).ready(function() {
+    var now = new Date();
+    var later = new Date();
+    later.setHours(later.getHours() + 1);
     var format = "yyyy-mm-dd";
     var inputFrom = $('#input_from_date');
     var inputTo = $('#input_to_date');
@@ -53,6 +56,19 @@ $(document).ready(function() {
     });
     $('#input_from_time').timeinput();
     $('#input_to_time').timeinput();
+
+    inputFrom.val(now.getFullYear() + '-'
+        + (now.getMonth() < 10 ? '0' : '') + now.getMonth() + '-'
+        + (now.getDate() < 10 ? '0' : '') + now.getDate());
+    inputTo.val(later.getFullYear() + '-'
+        + (later.getMonth() < 10 ? '0' : '') + later.getMonth() + '-'
+        + (later.getDate() < 10 ? '0' : '') + later.getDate());
+    $('#input_from_time').val(
+            (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' +
+            (now.getMinutes() < 10 ? '0' : '') + now.getMinutes());
+    $('#input_to_time').val(
+            (later.getHours() < 10 ? '0' : '') + later.getHours() + ':' +
+            (later.getMinutes() < 10 ? '0' : '') + later.getMinutes());
 
     $('#extraButton').on('click', function() {
         if(!$('#extraFiltering').hasClass('in')) {

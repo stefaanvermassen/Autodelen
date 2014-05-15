@@ -59,10 +59,10 @@ public class RoleSecured {
 
                 // If user is null, redirect to login page
                 if(user == null) {
-                    return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
+                    return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
                 } else if(UserProvider.isBlocked(user)) {
                     ctx.flash().put("danger", "Dit account is not niet geactiveerd of geblokkeerd.");
-                    return F.Promise.pure(redirect(routes.Login.login(URLEncoder.encode(ctx.request().path(), "UTF-8"))));
+                    return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
                 }
 
                 Set<UserRole> roles = DataProvider.getUserRoleProvider().getRoles(user.getId(), true); // cached instance

@@ -76,6 +76,16 @@ public class Damages extends Controller {
     /**
      * Method: GET
      *
+     * @return index page containing all the damages from a specific owner
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result showDamagesOwner() {
+        return ok(damagesOwner.render());
+    }
+
+    /**
+     * Method: GET
+     *
      * @return index page containing all the damages from everyone
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
@@ -98,6 +108,20 @@ public class Damages extends Controller {
         return ok(damageList(page, carField, asc, filter));
     }
 
+    @RoleSecured.RoleAuthenticated()
+    public static Result showDamagesPageOwner(int page, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField carField = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        User user = DataProvider.getUserProvider().getUser();
+        filter.putValue(FilterField.DAMAGE_OWNER_ID, user.getId() + "");
+        filter.putValue(FilterField.DAMAGE_FINISHED, "-1");
+
+        return ok(damageList(page, carField, asc, filter));
+    }
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
     public static Result showDamagesPageAdmin(int page, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?

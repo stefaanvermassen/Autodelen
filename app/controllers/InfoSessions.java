@@ -377,7 +377,7 @@ public class InfoSessions extends Controller {
      * @param status    New status of the user.
      * @return Redirect to the session detail page if successful.
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
 
@@ -403,6 +403,53 @@ public class InfoSessions extends Controller {
             return redirect(routes.InfoSessions.detail(sessionId));
         } catch (DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    /**
+     * Method: POST
+     * Adds a user to the given infosession
+     * @param sessionId
+     * @return
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    public static Result addUserToSession(int sessionId){
+        int userId = 0;
+        try {
+            userId = Integer.parseInt(Form.form().bindFromRequest().get("userid"));
+        } catch(Exception ex){
+            flash("danger", "Gebruiker bestaat niet.");
+            return redirect(routes.InfoSessions.detail(sessionId));
+        }
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            UserDAO udao = context.getUserDAO();
+            InfoSessionDAO idao = context.getInfoSessionDAO();
+            InfoSession is = idao.getInfoSession(sessionId, true);
+            if(is == null){
+                flash("danger", "InfoSessie bestaat niet.");
+                return redirect(routes.InfoSessions.pendingApprovalList());
+            } else {
+                User user = udao.getUser(userId, false);
+                if (user == null) {
+                    flash("danger", "GebruikersID bestaat niet.");
+                    return redirect(routes.InfoSessions.detail(sessionId));
+                } else {
+                    // TODO: simplify the user equals only by id
+                    for(Enrollee others : is.getEnrolled()) {
+                        if(others.getUser().getId() == user.getId()){
+                            flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
+                            return redirect(routes.InfoSessions.detail(sessionId));
+                        }
+                    }
+
+                    // Now we enroll
+                    idao.registerUser(is, user);
+                    context.commit();
+
+                    flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
+                    return redirect(routes.InfoSessions.detail(sessionId));
+                }
+            }
         }
     }
 
@@ -590,24 +637,19 @@ public class InfoSessions extends Controller {
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
                         List<String> errors = checkApprovalConditions(user, context);
-                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
+                        return ok(approvalrequest.render(user, errors.isEmpty() ? null : errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
                     }
                 }
             }
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
-    public static Boolean approvalRequestSent() {
+    public static boolean approvalRequestSent() {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ApprovalDAO dao = context.getApprovalDAO();
             List<Approval> approvals = dao.getPendingApprovals(user);
-            if (!approvals.isEmpty()) {
-                return true;
-            } else {
-                return false;
-            }
+            return !approvals.isEmpty();
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -642,6 +684,8 @@ public class InfoSessions extends Controller {
                 } else {
                     ApprovalDAO dao = context.getApprovalDAO();
                     InfoSessionDAO idao = context.getInfoSessionDAO();
+                    UserDAO udao = context.getUserDAO();
+                    user = udao.getUser(user.getId(), true); //get full user
                     try {
                         Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                         if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
@@ -649,6 +693,8 @@ public class InfoSessions extends Controller {
                             return redirect(routes.InfoSessions.showUpcomingSessions());
                         } else {
                             Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
+                            user.setStatus(UserStatus.FULL_VALIDATING); //set to validation
+                            udao.updateUser(user, true); //full update
                             context.commit();
                             return redirect(routes.Dashboard.index());
                         }
@@ -783,16 +829,22 @@ public class InfoSessions extends Controller {
             } else {
                 UserDAO udao = context.getUserDAO();
                 User contractManager = udao.getUser(userId, false);
-                if(contractManager != null){
-                    app.setAdmin(contractManager);
-                    adao.setApprovalAdmin(app, contractManager);
-                    context.commit();
 
-                    Notifier.sendContractManagerAssignedMail(app.getUser(), app);
-                    flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
-                    return redirect(routes.InfoSessions.pendingApprovalList());
+                if(contractManager != null){
+                    if(!DataProvider.getUserRoleProvider().hasRole(contractManager, UserRole.INFOSESSION_ADMIN)){
+                        flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
+                        return redirect(routes.InfoSessions.approvalAdmin(id));
+                    } else {
+                        app.setAdmin(contractManager);
+                        adao.setApprovalAdmin(app, contractManager);
+                        context.commit();
+
+                        Notifier.sendContractManagerAssignedMail(app.getUser(), app);
+                        flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
+                        return redirect(routes.InfoSessions.pendingApprovalList());
+                    }
                 } else {
-                    flash("danger", "Gebruiker bestaat niet.");
+                    flash("danger", "Contractmanager ID bestaat niet.");
                     return redirect(routes.InfoSessions.approvalAdmin(id));
                 }
             }
@@ -834,6 +886,9 @@ public class InfoSessions extends Controller {
 
                         // Set contact admin
                         User user = udao.getUser(ap.getUser().getId(), true);
+                        user.setStatus(UserStatus.FULL);
+                        user.setAgreeTerms(true); //TODO: check if we can accept this earlier, as it is accepted once approval is submitted
+                        udao.updateUser(user, true); //full update
 
                         // Add the new user roles
                         UserRoleDAO roleDao = context.getUserRoleDAO();
@@ -877,7 +932,6 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated()
     public static boolean didUserGoToInfoSession(){
         final User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {

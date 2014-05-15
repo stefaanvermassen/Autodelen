@@ -41,18 +41,19 @@
                         </div>
                     }
 
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <textarea name="@form("message").name" rows="4" cols="50" placeholder="Opmerkingen">@form("message").value</textarea>
-                        </div>
-                    </div>
+
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-12 well" style="overflow: auto; max-height:400px;">
+                                     @Html(terms)
+                                    </div>
+                                    <input type="checkbox" id="@form("acceptsTerms").id" name="@form("acceptsTerms").name" value="true" @if("true".equals(form("acceptsTerms").value)) { checked="checked" }> Ik aanvaard de algemene voorwaarden
+                                </div>
+                            </div>
 
                     <div class="form-group">
                         <div class="col-md-12">
-                            <textarea style="display: block"cols="50" readonly>@terms</textarea>
-                           @* TODO: checkbox text append *@
-                            @helper.checkbox(field = form("acceptsTerms"), '_label-> "", 'text -> "Ik aanvaard de algemene voorwaarden")
-                            Ik aanvaard de algemene voorwaarden
+                            <textarea name="@form("message").name" rows="4" cols="50" placeholder="Opmerkingen">@form("message").value</textarea>
                         </div>
                     </div>
 
