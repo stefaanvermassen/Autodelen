@@ -35,18 +35,8 @@ $(document).ready(function() {
     $("#calendar").calendar({
         startDateId: inputFrom,
         endDateId: inputTo,
-        dateFormat: format,
-        events: [new CalendarEvent("Test", new Date(), tommorow),
-                new CalendarEvent("Auto2", yesterday, new Date()),
-                new CalendarEvent("Auto2", new Date(), new Date()),
-                new CalendarEvent("Auto2", new Date(), new Date()),
-                new CalendarEvent("Auto2", new Date(), new Date()),
-                new CalendarEvent("Auto2", new Date(), new Date()),
-                new CalendarEvent("Auto2", new Date, tommorowLater),
-            new CalendarEvent("Een andere auto", new Date(), new Date()),
-            new CalendarEvent("Een andere auto", new Date(), new Date()),
-            new CalendarEvent("Een andere auto", new Date(), new Date())]
-    }) ;
+        dateFormat: format
+    });
 
     inputFrom.datetimeinput({
         formatString: format

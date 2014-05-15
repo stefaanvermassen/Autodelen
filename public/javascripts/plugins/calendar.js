@@ -22,7 +22,7 @@
     var Calendar = function (element, options) {
         this.options = options || {};
         this.element = $(element);
-        this.language = this.language in dates ? this.language : 'nl';
+        this.language = this.language in locales ? this.language : 'nl';
         this.disablePast = options.disablePast || false;
         this.dateFormat = options.dateFormat || "yyyy-mm-dd";
         this.events = options.events || null;
@@ -35,6 +35,7 @@
         this.endDateId = options.endDateId || null;
         if(!(this.endDateId instanceof jQuery) && this.endDateId != null)
             this.endDateId = $('#' + this.endDateId);
+        this.selectable = this.startDateId != null || this.endDateId != null;
 
         var date = new Date();
         this.year = date.getFullYear();
@@ -51,6 +52,7 @@
         this.title = 'calendar_title';
         this.titleLeft = 'calendar_title_left';
         this.titleRight = 'calendar_title_right';
+        this.legend = 'calendar_legend'
         this.rowId = 'calendar_row_';
         this.cellId = 'calendar_cell_';
 
@@ -60,6 +62,7 @@
         this.mousemove = false;
 
         this.environments = [new EventEnvironment('fill1'), new EventEnvironment('fill2'), new EventEnvironment('fill3')];
+        this.colorAssociator = new ColorAssociator();
 
         this.initCalendar();
     };
@@ -97,10 +100,11 @@
                 ev = this._events[i][1];
                 el.on(ev);
             }
-            this._attachCalendarEvents();
         },
 
         _attachCalendarEvents: function() {
+            if(!this.selectable)
+                return;
             var body = $('#' + this.calendarBody);
             body.off(this._bodyEvents);
             this._bodyEvents = {
@@ -299,6 +303,8 @@
         renderCalender: function() {
             this._renderTitle();
             this._renderTable();
+            if(this.events != null && this.events.length > 0)
+                this._renderLegend();
         },
 
         _renderTitle: function() {
@@ -343,7 +349,7 @@
                                     .attr('class', 'btn btn-default')
                                     .attr('type', 'button')
                                     .append($('<b>')
-                                        .text(dates[this.language].today)
+                                        .text(locales[this.language].today)
                                     )
                                 )
                             )
@@ -356,7 +362,7 @@
 
         resetTitle: function() {
             $('#' + this.title).html('').append($('<h2>')
-                    .text(dates[this.language].months[this.monthDisplayed] + ' ' + this.yearDisplayed)
+                    .text(locales[this.language].months[this.monthDisplayed] + ' ' + this.yearDisplayed)
             );
             this._resetTitleLeft();
         },
@@ -386,7 +392,7 @@
 
         _appendCalendarHeaders: function() {
             var headerRow = this.element.find('thead').find('tr');
-            jQuery.each(dates[this.language].daysShort, function(_, val) {
+            jQuery.each(locales[this.language].daysShort, function(_, val) {
                 headerRow.append($('<th>').text(val));
             });
         },
@@ -396,6 +402,7 @@
                 var evts = this.events;
                 var func = this._getEventEnvironment;
                 var environments = this.environments;
+                var colorAssociator = this.colorAssociator;
                 $('td[id^=' + this.cellId + ']').each(function () {
                     var i = 0;
                     while(i < evts.length && evts[i].startDate <= this.value) {
@@ -408,6 +415,7 @@
                                 var emin = evts[i].endTime % 100;
                                 $(this).find('div.' + env.name)
                                     .append($('<div>')
+                                        .css('background-color', colorAssociator.getColor(evts[i].name))
                                         .attr('class', 'event' + (evts[i].startDate == this.value ? ' start' : '')
                                             + (evts[i].endDate == this.value ? ' end' : ''))
                                         .popover({title: '<b>' + evts[i].name + '</b>',
@@ -423,15 +431,44 @@
                         i++;
                     }
                     for(i = 0; i < environments.length; i++) {
-                        var amount = $($(this).find('div.' + environments[i].name)).children().size();
+                        var amount = $(this).find('div.' + environments[i].name).children().size();
                         if(amount != 0){
-                            if(100 % amount )
                             var width = Math.floor(100/amount);
-                            $(this).find('div.' + environments[i].name).find('div.event')
-                                .css('width', width + '%').css('float', 'left');
+                            var last = Math.floor(100/amount) + 100 % amount;
+                            $(this).find('div.' + environments[i].name).find('div.event').each(function(index) {
+                                $(this).css('width', (index == amount - 1 ? last : width) + '%').css('float', 'left');
+                            });
                         }
                     }
                 });
+            }
+        },
+
+        _renderLegend: function() {
+            this.element.addClass('col-md-8 col-sm-12').before($('<div>')
+                .attr('id', this.legend)
+                .attr('class', 'col-md-4 col-sm-12 legend')
+                .append($('<h5>')
+                    .append($('<b>')
+                        .text(locales[this.language].legend)
+                    )
+                )
+                .append($('<hr />'))
+            );
+            var index = 1;
+            var association = this.colorAssociator.colors[0];
+            while(index < this.colorAssociator.colors.length && association.eventName != null) {
+                $('#' + this.legend).append($('<div>')
+                    .attr('class', 'col-md-12 col-sm-6 col-xs-6')
+                    .append($('<div>')
+                    .attr('class', 'col-xs-1 item_color')
+                    .css('background-color', association.color)
+                    ).append($('<div>')
+                        .attr('class', 'col-xs-11 item_text')
+                        .text(association.eventName)
+                    )
+                );
+                association = this.colorAssociator.colors[index++];
             }
         },
 
@@ -444,7 +481,7 @@
                 }
             }
             if(env == null) {
-                for(var i = 0; i < environments.length; i++) {
+                for(i = 0; i < environments.length; i++) {
                     if (environments[i].event == null) {
                         env = environments[i];
                         break;
@@ -452,7 +489,7 @@
                 }
             }
             if(env == null) {
-                for(var i = 0; i < environments.length; i++) {
+                for(i = 0; i < environments.length; i++) {
                     if (!environments[i].claimed) {
                         env = environments[i];
                         break;
@@ -485,9 +522,10 @@
         _fillCalendarBody: function() {
             // Clear body
             var body = $('#' + this.calendarBody).html('');
-            body.attr('data-toggle', 'tooltip').attr('data-placement', 'right').attr('title', 'Klik en sleep met de cursor over ' +
-                'de datums\nOF\nSelecteer de begindatum door te klikken en selecteer daarna\n' +
-                'de einddatum door te klikken met shift ingedrukt.');
+            if(this.selectable)
+                body.attr('data-toggle', 'tooltip').attr('data-placement', 'right').attr('title', 'Klik en sleep met de cursor over ' +
+                    'de datums\nOF\nSelecteer de begindatum door te klikken en selecteer daarna\n' +
+                    'de einddatum door te klikken met shift ingedrukt.');
             // Variables
             var day = 1;
             var startDay = this.firstWeekdayOfMonth();
@@ -584,14 +622,47 @@
 
     $.fn.calendar.Constructor = Calendar;
 
-    var dates = $.fn.calendar.dates = {
+    var locales = $.fn.calendar.locales = {
         nl: {
             days:        ["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"],
             daysShort:   ["Zon", "Maa", "Din", "Woe", "Don", "Vrij", "Zat"],
             months:      ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September",
                 "October", "November", "December"],
             monthsShort: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-            today:       "Vandaag"
+            today:       "Vandaag",
+            legend:      "Legende"
+        }
+    };
+
+    var ColorAssociation = function(color) {
+        this.eventName = null;
+        this.color = color;
+    };
+
+    var ColorAssociator = function() {
+        this.colors = [new ColorAssociation('#226611'), new ColorAssociation('#3276b1'), new ColorAssociation('#cb7a06'),
+            new ColorAssociation('#448833'), new ColorAssociation('#5498d2'), new ColorAssociation('#ed9c28'),
+            new ColorAssociation('#66aa55'), new ColorAssociation('#76baf4'), new ColorAssociation('#ffbe4a')]
+    };
+
+    ColorAssociator.prototype = {
+        constructor: ColorAssociator,
+
+        getColor: function(eventName) {
+            var index = 1;
+            var ca = this.colors[0];
+            while(index < this.colors.length && ca.eventName != null) {
+                if(eventName == ca.eventName)
+                    break;
+                ca = this.colors[index++];
+            }
+            if(index == this.colors.length) {
+                this.colors.push(new ColorAssociation('rgb(' + (Math.floor(Math.random() * 256)) + ',' +
+                    (Math.floor(Math.random() * 256)) + ',' + (Math.floor(Math.random() * 256)) + ')'));
+                ca = this.colors[index];
+            }
+            ca.eventName = eventName;
+            return ca.color;
         }
     };
 
@@ -691,9 +762,9 @@ function CalendarEvent(name, start, end) {
 }
 
 function compareEvents(event1, event2) {
-    if (event1.startDate < event2.startDate || (event1.startDate == event2.startDate && event1.endDate < event2.endDate))
+    if (event1.startDate < event2.startDate || (event1.startDate == event2.startDate && event1.startTime < event2.startTime))
         return -1;
-    if (event1.startDate > event2.startDate)
+    if (event1.startDate > event2.startDate || (event1.startDate == event2.startDate && event1.startTime > event2.startTime))
         return 1;
     return 0;
 }
