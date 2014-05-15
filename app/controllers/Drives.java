@@ -32,8 +32,6 @@ import java.util.List;
  */
 public class Drives extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
     /**
      * Class implementing a model wrapped in a form.
      * This model is used during the form submission when an owner does not
@@ -534,7 +532,7 @@ public class Drives extends Controller {
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result showDrivesPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showDrivesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -552,10 +550,10 @@ public class Drives extends Controller {
             // We only want reservations from the current user (or his car(s))
             filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
 
-            List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, PAGE_SIZE, filter);
+            List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfReservations(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return ok(drivespage.render(user.getId(), Form.form(RemarksModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
         } catch (DataAccessException ex) {
@@ -571,7 +569,7 @@ public class Drives extends Controller {
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.RESERVATION_ADMIN})
-    public static Result showDrivesAdminPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showDrivesAdminPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -586,10 +584,10 @@ public class Drives extends Controller {
                 field = FilterField.FROM;
             }
 
-            List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, PAGE_SIZE, filter);
+            List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfReservations(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return ok(drivespage.render(user.getId(), Form.form(RemarksModel.class), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
         } catch (DataAccessException ex) {

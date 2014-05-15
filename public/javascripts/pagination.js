@@ -57,6 +57,9 @@ if(typeof autoLoad == 'undefined') {
 if(typeof beginPage == 'undefined') {
     var beginPage = 1;
 }
+if(typeof beginPageSize == 'undefined') {
+    var beginPageSize = 10;
+}
 if(typeof beginAsc == 'undefined') {
     var beginAsc = 1;
 }
@@ -70,7 +73,7 @@ var pageLoaded = false;
 
 
 // Initially, we load the first page in ascending order, ordered by the default column, without filtering
-$(document).ready(loadPage(beginPage, beginAsc, beginOrder, beginFilter));
+$(document).ready(loadPage(beginPage, beginPageSize, beginAsc, beginOrder, beginFilter));
 
 /*
  * Filtering
@@ -82,7 +85,7 @@ var searchButton = document.getElementById("searchButton");
 if(searchButton != null) {
     searchButton.onclick = function () {
         var searchString = importSearchTextFields()
-        loadPage(1, 1, "", searchString);
+        loadPage(1, beginPageSize, 1, "", searchString);
     }
 }
 
@@ -105,7 +108,7 @@ function importSearchTextFields() {
 }
 
 // The function to load a new page
-function loadPage(page, asc, orderBy, search) {
+function loadPage(page, pageSize, asc, orderBy, search) {
     pageLoaded = false;
     // Fill in loading image inside the table if the table is already rendered
     if(typeof $("#resultsTable").find('table').val() != 'undefined') {
@@ -134,7 +137,7 @@ function loadPage(page, asc, orderBy, search) {
         );
     }
 
-    route(page, asc, orderBy, search).ajax({
+    route(page, pageSize, asc, orderBy, search).ajax({
         success : function(html) {
             if(autoLoad != 1)
                 $("#resultsTable").html(html);
@@ -155,7 +158,7 @@ function loadPage(page, asc, orderBy, search) {
                  * These will come in the element with id="pagination"
                  */
                 // Button to go to first page and to previous page
-                var buttonString = "";
+                var buttonString = '';
                 if(amountOfPages > 1) {
                     if(page != 1) {
                         buttonString += "<button class='buttons btn' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
@@ -191,7 +194,16 @@ function loadPage(page, asc, orderBy, search) {
                             "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button><br>";
                     }
                 }
+                buttonString += '<span style="float: left;">';
                 buttonString += "<p>Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).</p>";
+                buttonString += "</span>";
+                // Adjusting pagesize
+                buttonString += '<form style="float: right;" class="form-inline">Resultaten per pagina: ' +
+                    '<select id="selectPageSize" class="form-control" >' +
+                    '<option value="10" >10</option>' +
+                    '<option value="25" >25</option>' +
+                    '<option value="50" >50</option>' +
+                    '</select></form>';
                 // Add the buttons to the html-file
                 $("#pagination").html(buttonString);
 
@@ -204,10 +216,16 @@ function loadPage(page, asc, orderBy, search) {
                     } else {
                         buttons[i].onclick = function() {
                             var p = parseInt(this.getAttribute("name"));
-                            loadPage(p, asc, orderBy, search);
+                            loadPage(p, pageSize, asc, orderBy, search);
                         }
                     }
                 }
+                $('#selectPageSize').val(pageSize);
+                $('#selectPageSize').change(function() {
+                    var newPageSize = $(this).val();
+                    var newPage = parseInt((((page-1) * pageSize) / newPageSize)+1);
+                    loadPage(newPage, newPageSize, asc, orderBy, search);
+                });
             }
 
             /*
@@ -228,7 +246,7 @@ function loadPage(page, asc, orderBy, search) {
                         asc = 1;
                     }
                     page = 1;
-                    loadPage(page, asc, orderByNew, search);
+                    loadPage(page, pageSize, asc, orderByNew, search);
                 };
 
                 // Set class of sorted column to asc or desc (so we can style with css)
@@ -243,7 +261,7 @@ function loadPage(page, asc, orderBy, search) {
                     if($(window).scrollTop() == $(document).height() - $(window).height()) {
                         if(page < amountOfPages) {
                             page++;
-                            loadPage(page, asc, orderBy, search);
+                            loadPage(page, pageSize, asc, orderBy, search);
                         }
                     }
                 });

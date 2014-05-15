@@ -851,7 +851,6 @@ public class JDBCCarDAO implements CarDAO{
         }
     }
 
-
     private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
