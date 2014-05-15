@@ -17,15 +17,15 @@
                 <td style="text-align: center; padding: 8px;" colspan="7">Geen ritten beschikbaar</td>
             </tr>
         } else {
-            @for((reservation, index) <- reservations.zipWithIndex) {
+            @for(reservation <- reservations) {
                 <tr>
                     <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
                     <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
                     <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
                     @if(reservation.getUser.getId == userId) {
-                        <td>Jij</td>
+                        <td><a href="@routes.Profile.index(reservation.getUser.getId)">Jij</a></td>
                     } else {
-                        <td>@reservation.getUser</td>
+                        <td><a href="@routes.Profile.index(reservation.getUser.getId)">@reservation.getUser</a></td>
                     }
                     <td>
                         @reservation.getStatus match {
@@ -53,16 +53,17 @@
                     </td>
                     <td>
                         <div class="btn-group btn-group-xs">
-                            <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">
-                                Details
                                 @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                    <i class="fa fa-bell"></i>
+                                    <a class="btn btn-danger btn-small" href="@routes.Drives.details(reservation.getId)"><i class="fa fa-beer"></i> Ritdetails toevoegen</a>
+                                } else {
+                                   @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
+                                            reservation.getUser.getId != userId) {
+                                       <a class="btn btn-warning btn-small" href="@routes.Drives.details(reservation.getId)"><i class="fa fa-exclamation"></i> Goed- of afkeuren</a>
+                                    } else {
+                                       <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">Details bekijken</a>
+                                   }
                                 }
-                                @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
-                                        reservation.getUser.getId != userId) {
-                                    <i class="fa fa-exclamation"></i>
-                                }
-                            </a>
+
                         </div>
                     </td>
                 </tr>

@@ -23,7 +23,7 @@
         } else {
             @for(car <- cars) {
                 <tr>
-                    <td>@car.getName</td>
+                    <td> <a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
                     <td>@car.getSeats</td>
                     <td>
                         @if(car.isGps) {
@@ -36,7 +36,6 @@
                     <td>@car.getLocation</td>
                     <td>
                         <div class="btn-group btn-group-xs">
-                            <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">details</a>
                             <button class="btn btn-success" onclick="loadModal(@car.getId)">reserveer</button>
                         </div>
                     </td>

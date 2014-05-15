@@ -1,9 +1,11 @@
 package controllers;
 
 import controllers.Security.RoleSecured;
+import controllers.util.Pagination;
 import database.*;
 import models.EmailTemplate;
 import models.UserRole;
+import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
@@ -31,17 +33,30 @@ public class EmailTemplates extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
-    public static Result showExistingTemplatesPage(int page, int ascInt, String orderBy, String searchString) {
-        // We don't use the page, ascInt, orderBy, searchString, because there aren't many templates
+    public static Result showExistingTemplatesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField carField = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+        return ok(templateList(page, pageSize, carField, asc, filter));
+    }
+
+    private static Html templateList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             TemplateDAO dao = context.getTemplateDAO();
-            List<EmailTemplate> templates = dao.getAllTemplates();
-            // Always 1 page
-            int pages = 1;
-            int results = templates.size();
-            return ok(emailtemplatespage.render(templates, results, pages));
-        } catch(Exception e) {
-            throw e;
+
+            if(orderBy == null) {
+                orderBy = FilterField.TEMPLATE_NAME;
+            }
+            List<EmailTemplate> listOfTemplates = dao.getTemplateList(orderBy, asc, page, pageSize, filter);
+
+            int amountOfResults = dao.getAmountOfTemplates(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
+
+            return emailtemplatespage.render(listOfTemplates, page, amountOfResults, amountOfPages);
+        } catch (DataAccessException ex) {
+            throw ex;
         }
     }
 

@@ -63,6 +63,10 @@ public class JDBCFileDAO implements FileDAO {
         return new File(rs.getInt("file_id"), rs.getString("file_path"), rs.getString("file_name"), rs.getString("file_content_type"));
     }
 
+    public static File populateFile(ResultSet rs, String tableName) throws SQLException {
+        return new File(rs.getInt(tableName + ".file_id"), rs.getString(tableName + ".file_path"), rs.getString(tableName + ".file_name"), rs.getString(tableName + ".file_content_type"));
+    }
+
     @Override
     public File getFile(int id) throws DataAccessException {
         try {

@@ -19,6 +19,7 @@ public enum FilterField {
     RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true), RESERVATION_STATUS(true),
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
     NOTIFICATION_READ(true),
+    TEMPLATE_NAME(false),
     FROM(true), UNTIL(true);
 
     boolean exactValue;
@@ -131,6 +132,9 @@ public enum FilterField {
                 break;
             case "refuel_car_id":
                 field = REFUEL_CAR_ID;
+                break;
+            case "template_name":
+                field = TEMPLATE_NAME;
                 break;
         }
         return field;

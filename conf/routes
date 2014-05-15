@@ -11,15 +11,15 @@ GET         /dashboard                              controllers.Dashboard.index(
 
 # UserRoles
 GET         /userroles                              controllers.UserRoles.index()
-GET         /userroles/page                         controllers.UserRoles.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /userroles/page                         controllers.UserRoles.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /userroles/edit                         controllers.UserRoles.edit(userId: Int)
 POST        /userroles/edit                         controllers.UserRoles.editPost(userId: Int)
 
 # Drives
 GET         /drives                                 controllers.Drives.index()
-GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drives/admin                           controllers.Drives.drivesAdmin()
-GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drive_details                          controllers.Drives.details(reservationId: Int)
 POST        /drive_details/status                   controllers.Drives.setReservationStatus(reservationId: Int)
 POST        /drive_details/adjusted                 controllers.Drives.adjustDetails(reservationId: Int)
@@ -30,7 +30,7 @@ GET         /drives-cancelled                       controllers.Drives.cancelRes
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
 GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
-GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
 POST        /reserve/reservation                    controllers.Reserve.confirmReservation(cardId: Int)
 
@@ -41,15 +41,15 @@ GET         /settings                               controllers.Settings.index()
 
 # Notifiers
 GET         /messages                               controllers.Messages.showMessages()
-GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /messages/sent/page                     controllers.Messages.showSentMessagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/sent/page                     controllers.Messages.showSentMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
 GET         /messages/new                           controllers.Messages.newMessage()
 GET         /messages/reply                         controllers.Messages.reply(userId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
 GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
-GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
 GET         /profile                                controllers.Profile.indexWithoutId()
@@ -70,7 +70,7 @@ POST        /profile/editstatus                     controllers.Profile.editUser
 
 # Users
 GET         /users                                  controllers.Users.showUsers()
-GET         /users/page                             controllers.Users.showUsersPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /users/page                             controllers.Users.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /users/impersonate                      controllers.Users.impersonate(userId: Int)
 
 # Login screen
@@ -93,9 +93,9 @@ GET         /calendar                               controllers.Calendar.index()
 GET         /infosession/new                        controllers.InfoSessions.newSession()
 POST        /infosession/new                        controllers.InfoSessions.createNewSession()
 GET         /infosession                            controllers.InfoSessions.showUpcomingSessions()
-GET         /infosession/page                       controllers.InfoSessions.showUpcomingSessionsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /infosession/page                       controllers.InfoSessions.showUpcomingSessionsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /infosession/admin                      controllers.InfoSessions.showSessions()
-GET         /infosession/admin/page                 controllers.InfoSessions.showSessionsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /infosession/admin/page                 controllers.InfoSessions.showSessionsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /infosession/enroll                     controllers.InfoSessions.enrollSession(id: Int)
 GET         /infosession/unenroll                   controllers.InfoSessions.unenrollSession()
 GET         /infosession/view                       controllers.InfoSessions.detail(id: Int)
@@ -128,14 +128,14 @@ POST        /changepass                             controllers.Settings.changeP
 
 # Emailtemplates
 GET         /emailtemplate                          controllers.EmailTemplates.showExistingTemplates()
-GET         /emailtemplate/page                     controllers.EmailTemplates.showExistingTemplatesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /emailtemplate/page                     controllers.EmailTemplates.showExistingTemplatesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /emailtemplate/edit                     controllers.EmailTemplates.showTemplate(id: Int)
 POST        /emailtemplate/edit                     controllers.EmailTemplates.editTemplate()
 
 # Cars
 GET         /cars/admin                             controllers.Cars.showCars()
 GET         /cars                                   controllers.Cars.showUserCars()
-GET         /cars/page                              controllers.Cars.showCarsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /cars/page                              controllers.Cars.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/new                               controllers.Cars.newCar()
 POST        /cars/new                               controllers.Cars.addNewCar()
 GET         /cars/view                              controllers.Cars.detail(id: Int)
@@ -145,7 +145,7 @@ GET         /cars/picture                           controllers.Cars.getPicture(
 GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
 POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()
-GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
@@ -154,11 +154,11 @@ GET         /cars/priviliges/edit                   controllers.Cars.updatePrivi
 
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()
-GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
-GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/admin                          controllers.Refuels.showAllRefuels()
-GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
 POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
@@ -167,11 +167,11 @@ GET         /refuels/owner/refused                  controllers.Refuels.refuseRe
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
-GET         /damages/page                           controllers.Damages.showDamagesPage(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/page                           controllers.Damages.showDamagesPage(page: Int, pageSize:Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/owner                          controllers.Damages.showDamagesOwner()
-GET         /damages/owner/page                     controllers.Damages.showDamagesPageOwner(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/owner/page                     controllers.Damages.showDamagesPageOwner(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/admin                          controllers.Damages.showAllDamages()
-GET         /damages/admin/page                     controllers.Damages.showDamagesPageAdmin(page: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/admin/page                     controllers.Damages.showDamagesPageAdmin(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /damages/details                        controllers.Damages.showDamageDetails(damageId: Int)
 GET         /damages/edit                           controllers.Damages.editDamage(damageId: Int)
 GET         /damages/status                         controllers.Damages.addStatus(damageId: Int)

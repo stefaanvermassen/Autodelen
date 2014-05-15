@@ -28,9 +28,6 @@ import java.util.List;
  */
 public class Reserve extends Controller {
 
-    // The number of cars displayed in the table of the index page
-    private static final int PAGE_SIZE = 10;
-
     // Formatter to translate a string to a datetime
     private static final DateTimeFormatter DATEFORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
@@ -207,7 +204,15 @@ public class Reserve extends Controller {
                 context.commit();
 
                 if (reservation != null) {
-                    if(car.getOwner().getId() == user.getId()) {
+                    // Check if user is owner or priviliged
+                    boolean autoAccept = car.getOwner().getId() == user.getId();
+                    int i = 0;
+                    while(!autoAccept && i < car.getPriviliged().size()) {
+                        if(car.getPriviliged().get(i).getId() == user.getId()) {
+                            autoAccept = true;
+                        }
+                    }
+                    if(autoAccept) {
                         reservation.setStatus(ReservationStatus.ACCEPTED);
                         rdao.updateReservation(reservation);
                         context.commit();
@@ -243,7 +248,7 @@ public class Reserve extends Controller {
      * @return the requested page of cars for reservation
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
-    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
@@ -263,10 +268,10 @@ public class Reserve extends Controller {
             }
             filter.putValue(FilterField.CAR_ACTIVE, "1");
 
-            List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
+            List<Car> listOfCars = dao.getCarList(field, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfCars(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return ok(reservationspage.render(listOfCars, page, amountOfResults, amountOfPages, true));
         } catch (DataAccessException ex) {

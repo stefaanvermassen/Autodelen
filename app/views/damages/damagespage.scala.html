@@ -4,8 +4,8 @@
     <thead>
         <tr role="row">
             <th>Auto</th>
-            <th>Autorit van</th>
-            <th>Autorit tot</th>
+            <th>Autorit</th>
+            <th>Bestuurder</th>
             <th>Afgelopen</th>
             <th>Acties</th>
         </tr>
@@ -20,9 +20,9 @@
         } else {
             @for(damage <- damageList) {
                 <tr>
-                    <td>@damage.getCarRide.getReservation.getCar.getName</td>
-                    <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getFrom)</td>
-                    <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getTo)</td>
+                    <td><a href="@routes.Cars.detail(damage.getCarRide.getReservation.getCar.getId)">@damage.getCarRide.getReservation.getCar.getName</a></td>
+                    <td><a href="@routes.Drives.details(damage.getCarRide.getReservation.getId)">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getFrom)</a></td>
+                    <td><a href="@routes.Profile.index(damage.getCarRide.getReservation.getUser.getId)">@damage.getCarRide.getReservation.getUser</a></td>
                     <td>@if(damage.getFinished){Ja}else{Nee}</td>
                     <td>
                         <div class="btn-group btn-group-xs">
