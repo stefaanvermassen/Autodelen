@@ -21,11 +21,28 @@ $(document).ready(function() {
     var format = "yyyy-mm-dd";
     var inputFrom = $('#input_from_date');
     var inputTo = $('#input_to_date');
+    var tommorow = new Date();
+    tommorow.setDate(tommorow.getDate() + 1);
+    var tommorowLater = new Date();
+    tommorowLater.setDate(tommorowLater.getDate() + 1);
+    tommorowLater.setHours(tommorowLater.getHours() + 1);
+    var yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 2);
 
     $("#calendar").calendar({
         startDateId: inputFrom,
         endDateId: inputTo,
-        dateFormat: format
+        dateFormat: format,
+        events: [new CalendarEvent("Test", new Date(), tommorow),
+                new CalendarEvent("Auto2", yesterday, new Date()),
+                new CalendarEvent("Auto2", new Date(), new Date()),
+                new CalendarEvent("Auto2", new Date(), new Date()),
+                new CalendarEvent("Auto2", new Date(), new Date()),
+                new CalendarEvent("Auto2", new Date(), new Date()),
+                new CalendarEvent("Auto2", new Date, tommorowLater),
+            new CalendarEvent("Een andere auto", new Date(), new Date()),
+            new CalendarEvent("Een andere auto", new Date(), new Date()),
+            new CalendarEvent("Een andere auto", new Date(), new Date())]
     }) ;
 
     inputFrom.datetimeinput({

@@ -12,6 +12,7 @@ table.custom_title td.title_right {
 
 table.custom_calendar {
     width: 100%;
+    min-width: 230px;
     background-color: #ffffff;
 }
 
@@ -30,13 +31,16 @@ table.custom_calendar td {
     background-clip: padding-box;
     text-align: right;
     color: #b3b3b3;
-    padding-top: 1px;
-    padding-right: 5px;
-    padding-bottom: 8%;
     user-select: none; /* CSS3 (little to no support) */
     -ms-user-select: none; /* IE 10+ */
     -moz-user-select: none; /* Gecko (Firefox) */
     -webkit-user-select: none; /* Webkit (Safari, Chrome) */
+}
+
+table.custom_calendar p.day {
+    padding-top: 1px;
+    padding-right: 5px;
+    margin-bottom: 0px;
 }
 
 table.custom_calendar td.current_month {
@@ -53,4 +57,33 @@ table.custom_calendar td.selected {
 
 table.custom_calendar td.selected.disabled {
     background-color: #ffd6d6;
+}
+
+table.custom_calendar div.fill {
+    width: 100%;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    height: 8px;
+}
+
+table.custom_calendar div.event {
+    height: 100%;
+    background-color: #226611;
+}
+
+table.custom_calendar div.event:hover {
+    cursor: pointer;
+    cursor: hand;
+}
+
+table.custom_calendar div.event.start {
+    border-bottom-left-radius: 5px;
+}
+
+table.custom_calendar div.event.end {
+    border-top-right-radius: 5px;
+}
+
+.popover {
+    width: 175px;
 }

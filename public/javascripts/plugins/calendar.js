@@ -1,6 +1,6 @@
 /*
  * =========================================
- * Calendar V1
+ * Calendar V2
  * =========================================
  *
  * Custom jquery plugin in order to display a calendar.
@@ -14,69 +14,7 @@
  * Created by Benjamin on 27/04/2014.
  *
  */
-
 !function ($) {
-    function isLeapYear(year) {
-        return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
-    }
-
-    function converToDateValue(day, month, year) {
-        return (year * 10000) + (month * 100) + day;
-    }
-
-    function formatDateValue(dateValue, format) {
-        if (dateValue == null)
-            return null;
-        var year = getYear(dateValue);
-        var month = getMonth(dateValue);
-        var day = getDay(dateValue);
-        var success = true;
-        var index = 0;
-        var y = 0, m = 0, d = 0;
-        var f = format.toLowerCase();
-        var formattedString = '';
-        while (index < f.length && success) {
-            switch (f.charAt(index)) {
-                case 'y':
-                    var ystring = '';
-                    while (index < f.length && f.charAt(index) === 'y') {
-                        var value = year % 10;
-                        year = Math.floor(year / 10);
-                        ystring = value + ystring;
-                        index++;
-                    }
-                    formattedString += ystring + f.charAt(index++);
-                    break;
-                case 'm':
-                    index += 2;
-                    formattedString += ((month < 10) ? '0' + month : month) + f.charAt(index++);
-                    break;
-                case 'd':
-                    index += 2;
-                    formattedString += ((day < 10) ? '0' + day : day) + f.charAt(index++);
-                    break;
-                default:
-                    success = false;
-
-            }
-        }
-        if(success)
-            return formattedString;
-        return year + '-' + ((month < 10) ? '0' + month : month) + '-' + ((day < 10) ? '0' + day : day);
-    }
-
-    function getYear(dateValue) {
-        return Math.floor(dateValue/10000);
-    }
-
-    function getMonth(dateValue) {
-        return Math.floor(dateValue/100) % 100 + 1;
-    }
-
-    function getDay(dateValue) {
-        return dateValue % 100;
-    }
-
     /**
      * Create the datetimeinput object.
      * @constructor
@@ -87,6 +25,8 @@
         this.language = this.language in dates ? this.language : 'nl';
         this.disablePast = options.disablePast || false;
         this.dateFormat = options.dateFormat || "yyyy-mm-dd";
+        this.events = options.events || null;
+        this._checkEvents();
         if(!this._checkDateFormat())
             this.dateFormat = "yyyy-mm-dd";
         this.startDateId = options.startDateId || null;
@@ -119,6 +59,8 @@
         this.mousedown = false;
         this.mousemove = false;
 
+        this.environments = [new EventEnvironment('fill1'), new EventEnvironment('fill2'), new EventEnvironment('fill3')];
+
         this.initCalendar();
     };
 
@@ -126,6 +68,7 @@
         constructor: Calendar,
         _events: [],
         _bodyEvents: [],
+        _windowEvents: [],
 
         initCalendar: function() {
             this.renderCalender();
@@ -182,6 +125,100 @@
             this._events = [];
         },
 
+        _clickPrev: function() {
+            if(this.monthDisplayed == this.month && this.yearDisplayed == this.year && this.disablePast)
+                return;
+            this.monthDisplayed = (this.monthDisplayed + 11) % 12;
+            if(this.monthDisplayed == 11)
+                this.yearDisplayed--;
+            this.resetCalendar();
+        },
+
+        _clickNext: function() {
+            this.monthDisplayed = (this.monthDisplayed + 1) % 12;
+            if(this.monthDisplayed == 0)
+                this.yearDisplayed++;
+            this.resetCalendar();
+        },
+
+        _clickToday: function() {
+            this.monthDisplayed = this.month;
+            this.yearDisplayed = this.year;
+            this.resetCalendar();
+        },
+
+        _clickCell: function(target, shiftpressed) {
+            if(typeof target == 'undefined')
+                return;
+            if(shiftpressed && this.firstSelectedValue != null) {
+                if (this.firstSelectedValue >= target.val()) {
+                    this.setValueSecondSelected((this.secondSelectedValue != null) ? this.secondSelectedValue : this.firstSelectedValue);
+                    this.setValueFirstSelected(target.val());
+                } else {
+                    this.setValueSecondSelected(target.val());
+                }
+            }
+            else {
+                this.setValueFirstSelected(target.val());
+                this.setValueSecondSelected(this.firstSelectedValue);
+            }
+            this._colorSelectedDates();
+        },
+
+        _selectCell: function(target) {
+            this._clickCell(target, true);
+        },
+
+        _click: function(evt) {
+            if(!this.mousemove) {
+                var target = this._findTableCell($(evt.target));
+                this._clickCell(target, evt.shiftKey);
+            }
+            this.mousemove = false;
+        },
+
+        _mousedown: function() {
+            this.mousedown = true;
+        },
+
+        _mouseup: function() {
+            if(this.disablePast) {
+                if(this.firstSelectedValue < this.dateValueToday && this.secondSelectedValue < this.dateValueToday) {
+                    this.setValueFirstSelected(null);
+                    this.setValueSecondSelected(null);
+                    this._colorSelectedDates();
+                } else if(this.firstSelectedValue < this.dateValueToday) {
+                    this.setValueFirstSelected(this.dateValueToday);
+                    this._colorSelectedDates();
+                }
+            }
+            this.mousedown = false;
+        },
+
+        _mousemove: function(evt) {
+            if(this.mousedown) {
+                this.mousemove = true;
+                var target = this._findTableCell($(evt.target));
+                this._selectCell(target);
+            }
+            this.element.css('cursor','default');
+        },
+
+        _touchmove: function(evt) {
+            evt.preventDefault();
+            var touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
+            this.mousemove = true;
+            var target = this._findTableCell($(document.elementFromPoint(touch.clientX, touch.clientY)));
+            this._selectCell(target);
+        },
+
+        _findTableCell: function(target) {
+            while(typeof target[0] != 'undefined' && !target.is("td"))
+                target = $(target[0].parentElement);
+            return target;
+        },
+
+        // Functions containing calendar logic
         _checkDateFormat: function() {
             var y;
             var m;
@@ -217,100 +254,26 @@
             return (4 == y || 2 == y) && 2 == m && 2 == d;
         },
 
-        _clickPrev: function() {
-            if(this.monthDisplayed == this.month && this.yearDisplayed == this.year && this.disablePast)
-                return;
-            this.monthDisplayed = (this.monthDisplayed + 11) % 12;
-            if(this.monthDisplayed == 11)
-                this.yearDisplayed--;
-            this.resetCalendar();
-        },
-
-        _clickNext: function() {
-            this.monthDisplayed = (this.monthDisplayed + 1) % 12;
-            if(this.monthDisplayed == 0)
-                this.yearDisplayed++;
-            this.resetCalendar();
-        },
-
-        _clickToday: function() {
-            this.monthDisplayed = this.month;
-            this.yearDisplayed = this.year;
-            this.resetCalendar();
-        },
-
-        _clickCell: function(target, shiftpressed) {
-            console.log(shiftpressed);
-            if(shiftpressed && this.firstSelectedValue != null) {
-                if (this.firstSelectedValue >= target.value) {
-                    this.setValueSecondSelected((this.secondSelectedValue != null) ? this.secondSelectedValue : this.firstSelectedValue);
-                    this.setValueFirstSelected(target.value);
-                } else {
-                    this.setValueSecondSelected(target.value);
-                }
+        _checkEvents: function() {
+            if(this.events == null)
+                return true;
+            for(var i = 0; i < this.events.length; i++) {
+                if(this.events[i] == null || this.events[i].constructor != CalendarEvent || !this.events[i].validEvent)
+                    this.events.splice(i, 1);
             }
-            else {
-                this.setValueFirstSelected(target.value);
-                this.setValueSecondSelected(this.firstSelectedValue);
-            }
-            this._colorSelectedDates();
+            this.events.sort(compareEvents);
         },
 
-        _selectCell: function(target) {
-            this._clickCell(target, true);
-        },
-
-        _click: function(evt) {
-            if(!this.mousemove) {
-                this._clickCell(evt.target, evt.shiftKey);
-            }
-            this.mousemove = false;
-        },
-
-        _mousedown: function(evt) {
-            this.mousedown = true;
-        },
-
-        _mouseup: function() {
-            if(this.disablePast) {
-                if(this.firstSelectedValue < this.dateValueToday && this.secondSelectedValue < this.dateValueToday) {
-                    this.setValueFirstSelected(null);
-                    this.setValueSecondSelected(null);
-                    this._colorSelectedDates();
-                } else if(this.firstSelectedValue < this.dateValueToday) {
-                    this.setValueFirstSelected(this.dateValueToday);
-                    this._colorSelectedDates();
-                }
-            }
-            this.mousedown = false;
-        },
-
-        _mousemove: function(evt) {
-            if(this.mousedown) {
-                this.mousemove = true;
-                this._selectCell(evt.target);
-            }
-            this.element.css('cursor','default');
-        },
-
-        _touchmove: function(evt) {
-            evt.preventDefault();
-            var touch = evt.originalEvent.touches[0] || evt.originalEvent.changedTouches[0];
-            this.mousemove = true;
-            this._selectCell(document.elementFromPoint(touch.clientX, touch.clientY));
-        },
-
-        // Functions containing calendar logic
         setValueFirstSelected: function(value) {
             this.firstSelectedValue = value;
             if(this.startDateId != null)
-                this.startDateId.val(formatDateValue(value, this.dateFormat));
+                this.startDateId.val(CalGlobal.formatDateValue(value, this.dateFormat));
         },
 
         setValueSecondSelected: function(value) {
             this.secondSelectedValue = value;
             if(this.endDateId != null)
-                this.endDateId.val(formatDateValue(value, this.dateFormat));
+                this.endDateId.val(CalGlobal.formatDateValue(value, this.dateFormat));
         },
 
         resetCalendar: function() {
@@ -324,12 +287,12 @@
             var centryNumber = [6, 4, 2, 0];
             var y = this.yearDisplayed % 100;
             var c = Math.floor(this.yearDisplayed/100);
-            var v = isLeapYear(this.yearDisplayed) ? monthLeapValues[this.monthDisplayed] : monthValues[this.monthDisplayed];
+            var v = CalGlobal.isLeapYear(this.yearDisplayed) ? monthLeapValues[this.monthDisplayed] : monthValues[this.monthDisplayed];
             return (1 + v + y + Math.floor(y/4) + centryNumber[c%4]) % 7;
         },
 
         numberOfDaysInMonth: function(month) {
-            return [31, isLeapYear(this.yearDisplayed) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+            return [31, CalGlobal.isLeapYear(this.yearDisplayed) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
         },
 
         // Rendering functions
@@ -428,15 +391,88 @@
             });
         },
 
+        _visibleEvents: function() {
+            if(this.events != null) {
+                var evts = this.events;
+                var func = this._getEventEnvironment;
+                var environments = this.environments;
+                $('td[id^=' + this.cellId + ']').each(function () {
+                    var i = 0;
+                    while(i < evts.length && evts[i].startDate <= this.value) {
+                        if(evts[i].startDate <= this.value && this.value <= evts[i].endDate) {
+                            var env = func(this.value, evts[i], environments);
+                            if(env != null) {
+                                var shour = Math.floor(evts[i].startTime / 100);
+                                var smin = evts[i].startTime % 100;
+                                var ehour = Math.floor(evts[i].endTime / 100);
+                                var emin = evts[i].endTime % 100;
+                                $(this).find('div.' + env.name)
+                                    .append($('<div>')
+                                        .attr('class', 'event' + (evts[i].startDate == this.value ? ' start' : '')
+                                            + (evts[i].endDate == this.value ? ' end' : ''))
+                                        .popover({title: '<b>' + evts[i].name + '</b>',
+                                            content: 'Van ' +
+                                                (shour < 10 ? '0' : '') + shour + ':' + (smin < 10 ? '0' : '') + smin +
+                                                ' tot ' +
+                                                (ehour < 10 ? '0' : '') + ehour + ':' + (emin < 10 ? '0' : '') + emin,
+                                            placement: 'top',
+                                            html: true})
+                                    );
+                            }
+                        }
+                        i++;
+                    }
+                    for(i = 0; i < environments.length; i++) {
+                        var amount = $($(this).find('div.' + environments[i].name)).children().size();
+                        if(amount != 0){
+                            if(100 % amount )
+                            var width = Math.floor(100/amount);
+                            $(this).find('div.' + environments[i].name).find('div.event')
+                                .css('width', width + '%').css('float', 'left');
+                        }
+                    }
+                });
+            }
+        },
+
+        _getEventEnvironment: function(cellValue, event, environments) {
+            var env = null;
+            for(var i = 0; i < environments.length; i++) {
+                if(environments[i].event != null && environments[i].event.name == event.name) {
+                    env = environments[i];
+                    break;
+                }
+            }
+            if(env == null) {
+                for(var i = 0; i < environments.length; i++) {
+                    if (environments[i].event == null) {
+                        env = environments[i];
+                        break;
+                    }
+                }
+            }
+            if(env == null) {
+                for(var i = 0; i < environments.length; i++) {
+                    if (!environments[i].claimed) {
+                        env = environments[i];
+                        break;
+                    }
+                }
+            }
+            if(env != null)
+                env.claimEnvironment(event, cellValue);
+            return env;
+        },
+
         _colorSelectedDates: function() {
             if(this.firstSelectedValue != null) {
                 var firstValue = this.firstSelectedValue;
                 var secondValue = this.secondSelectedValue != null ? this.secondSelectedValue : this.firstSelectedValue;
                 $('td[id^=' + this.cellId + ']').each(function () {
                     if (firstValue <= this.value && this.value <= secondValue)
-                        $('#' + this.id).addClass('selected');
+                        $(this).addClass('selected');
                     else
-                        $('#' + this.id).removeClass('selected');
+                        $(this).removeClass('selected');
                 });
             }
             else {
@@ -503,6 +539,7 @@
             }
             this._attachCalendarEvents();
             this._colorSelectedDates();
+            this._visibleEvents();
         },
 
         _appendCell: function(rowId, day, c, month, year) {
@@ -513,10 +550,16 @@
             $('#' + rowId).append($('<td>')
                     .attr('id', this.cellId + value)
                     .attr('class', c + ((value < this.dateValueToday && this.disablePast) ? ' disabled ' : ''))
-                    .text(day)
                     .val(value)
-
+                    .append($('<p>')
+                        .attr('class', 'day')
+                        .text(day)
+                    )
             );
+            for(var i = this.environments.length - 1; i >= 0; i--)
+                $('#' + this.cellId + value).append($('<div>')
+                    .attr('class', 'fill ' + this.environments[i].name)
+                )
         }
     };
 
@@ -551,4 +594,106 @@
             today:       "Vandaag"
         }
     };
+
+    var EventEnvironment = function(name) {
+        this.name = name;
+        this.event = null;
+        this.claimed = false;
+    };
+
+    EventEnvironment.prototype = {
+        constructor: EventEnvironment,
+
+        claimEnvironment: function(event, cellValue) {
+            this.claimed = event.endDate > cellValue;
+            if(this.claimed)
+                this.event = event;
+        }
+    };
+
+    /**
+     * Global functions of the calendar plugin
+     */
+    var CalGlobal = {
+        isLeapYear: function(year) {
+            return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        },
+
+        formatDateValue: function(dateValue, format) {
+            if (dateValue == null)
+                return null;
+            var year = CalGlobal.getYear(dateValue);
+            var month = CalGlobal.getMonth(dateValue);
+            var day = CalGlobal.getDay(dateValue);
+            var success = true;
+            var index = 0;
+            var y = 0, m = 0, d = 0;
+            var f = format.toLowerCase();
+            var formattedString = '';
+            while (index < f.length && success) {
+                switch (f.charAt(index)) {
+                    case 'y':
+                        var ystring = '';
+                        while (index < f.length && f.charAt(index) === 'y') {
+                            var value = year % 10;
+                            year = Math.floor(year / 10);
+                            ystring = value + ystring;
+                            index++;
+                        }
+                        formattedString += ystring + f.charAt(index++);
+                        break;
+                    case 'm':
+                        index += 2;
+                        formattedString += ((month < 10) ? '0' + month : month) + f.charAt(index++);
+                        break;
+                    case 'd':
+                        index += 2;
+                        formattedString += ((day < 10) ? '0' + day : day) + f.charAt(index++);
+                        break;
+                    default:
+                        success = false;
+
+                }
+            }
+            if(success)
+                return formattedString;
+            return year + '-' + ((month < 10) ? '0' + month : month) + '-' + ((day < 10) ? '0' + day : day);
+        },
+
+        getYear: function(dateValue) {
+            return Math.floor(dateValue/10000);
+        },
+
+        getMonth: function(dateValue) {
+            return Math.floor(dateValue/100) % 100 + 1;
+        },
+
+        getDay: function(dateValue) {
+            return dateValue % 100;
+        }
+    }
 }(window.jQuery);
+
+
+function converToDateValue(day, month, year) {
+    return (year * 10000) + (month * 100) + day;
+}
+
+function CalendarEvent(name, start, end) {
+    this.name = name;
+    this.validEvent = (start.constructor == Date && end.constructor == Date);
+    if(this.validEvent) {
+        this.startDate = converToDateValue(start.getDate(), start.getMonth(), start.getFullYear());
+        this.endDate = converToDateValue(end.getDate(), end.getMonth(), end.getFullYear());
+    }
+    this.startTime = start.getHours() * 100 + start.getMinutes();
+    this.endTime =  end.getHours() * 100 + end.getMinutes();
+}
+
+function compareEvents(event1, event2) {
+    if (event1.startDate < event2.startDate || (event1.startDate == event2.startDate && event1.endDate < event2.endDate))
+        return -1;
+    if (event1.startDate > event2.startDate)
+        return 1;
+    return 0;
+}
