@@ -17,7 +17,9 @@ libraryDependencies ++= Seq(
   "com.typesafe"            %% "play-plugins-mailer"         % "2.1-RC2",
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
   "mysql"                   % "mysql-connector-java"         % "5.1.29",
-  "com.typesafe.akka"       %% "akka-actor"                  % "2.2.0"
+  "com.typesafe.akka"       %% "akka-actor"                  % "2.2.0",
+  "org.apache.poi"          % "poi"                          % "3.8",
+  "org.apache.poi"          % "poi-ooxml"                    % "3.9"
 )
 
 play.Project.playJavaSettings
