@@ -189,6 +189,7 @@ GET         /maps/test                              controllers.Maps.showMap()
 
 # Reports
 GET         /reports                                controllers.Reports.index()
+GET         /reports/users                          controllers.Reports.getUsers()
 
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
