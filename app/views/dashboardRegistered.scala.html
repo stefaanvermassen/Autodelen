@@ -1,0 +1,36 @@
+@(user: User)
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-bar-chart-o"></i> Informatie
+    </div>
+    <div class="panel-body">
+        <div class="well">
+            Welkom op onze webapplicatie, @user.getFirstName! Om volwaardig lid te worden moeten als eerst nog
+            enkele stappen doorlopen worden:
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <div  class="panel panel-info ">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <span class="numberInCircle">1</span> Volg een infosessie
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                Inschrijven voor een infosessie kan <a href="@routes.InfoSessions.showUpcomingSessions">hier</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1">
+                <div class="arrow"></div>
+            </div>
+        </div>
+    </div>
+</div>
