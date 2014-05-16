@@ -19,8 +19,6 @@ import java.util.List;
  */
 public class Users extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
     /**
      * @return The users index-page with all users
      */
@@ -38,26 +36,26 @@ public class Users extends Controller {
      * @return A partial page with a table of users of the corresponding page
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
-    public static Result showUsersPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(userList(page, carField, asc, filter));
+        return ok(userList(page, pageSize, carField, asc, filter));
     }
 
-    private static Html userList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html userList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             UserDAO dao = context.getUserDAO();
 
             if(orderBy == null) {
                 orderBy = FilterField.USER_NAME;
             }
-            List<User> listOfUsers = dao.getUserList(orderBy, asc, page, PAGE_SIZE, filter);
+            List<User> listOfUsers = dao.getUserList(orderBy, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfUsers(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return userspage.render(listOfUsers, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {

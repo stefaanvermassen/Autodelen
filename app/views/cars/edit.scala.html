@@ -114,6 +114,13 @@
                                         <input id="type" name="type" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("type").value">
                                     </div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-12" for="carphoto">Foto</label>
+                                    <div class="col-md-12">
+                                        <input id="picture" name="picture" type="file" class="form-control input-md">
+                                    </div>
+                                </div>
                             </fieldset>
                         </div>
                     </div>
@@ -263,6 +270,13 @@
 
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
+                                            <div class="col-md-12">
+                                                Huidig: @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) {
+                                                    Onbekend
+                                                } else {
+                                                    <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)" target="_blank">Link</a>
+                                                }
+                                            </div>
                                             <div class="col-md-12">
                                                 <input id="file" name="file" type="file" class="form-control input-md">
                                             </div>

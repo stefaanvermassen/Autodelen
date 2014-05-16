@@ -44,9 +44,6 @@ import static controllers.util.Addresses.modifyAddress;
  */
 public class Cars extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-    private static final int PAGE_SIZE_CAR_COSTS = 10;
-
     private static List<String> fuelList;
 
     public static List<String> getFuelList() {
@@ -167,10 +164,14 @@ public class Cars extends Controller {
     }
 
     /**
-     * @return The cars index-page with user cars  (only available to car_owners)
+     * @return The cars index-page with user cars (only available to car_owners)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     public static Result showUserCars() {
+        return ok(userCarList());
+    }
+
+    private static Html userCarList() {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
@@ -194,31 +195,26 @@ public class Cars extends Controller {
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
-    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(carList(page, carField, asc, filter));
+        return ok(carList(page, pageSize, carField, asc, filter));
     }
 
-    private static Html carList() {
-        return carList(1, FilterField.CAR_NAME, true, null);
-    }
-
-    private static Html carList(int page, FilterField orderBy, boolean asc, Filter filter) {
-
+    private static Html carList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
             if(orderBy == null) {
                 orderBy = FilterField.CAR_NAME;
             }
-            List<Car> listOfCars = dao.getCarList(orderBy, asc, page, PAGE_SIZE, filter);
+            List<Car> listOfCars = dao.getCarList(orderBy, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfCars(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return carspage.render(listOfCars, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
@@ -235,8 +231,17 @@ public class Cars extends Controller {
     @RoleSecured.RoleAuthenticated()
     public static Result getPicture(int carId) {
         //TODO: checks on whether other person can see this
-        // TODO: actual car picture
-        return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO carDao = context.getCarDAO();
+            Car car = carDao.getCar(carId);
+            if (car != null && car.getPhoto() != null && car.getPhoto().getId() > 0) {
+                return FileHelper.getFileStreamResult(context.getFileDAO(), car.getPhoto().getId());
+            } else {
+                return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+            }
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     /**
@@ -274,7 +279,9 @@ public class Cars extends Controller {
                     TechnicalCarDetails technicalCarDetails = null;
                     Http.MultipartFormData body = request().body().asMultipartFormData();
                     Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
+                    Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
                     models.File file = null;
+                    models.File picture = null;
                     if (registrationFile != null) {
                         String contentType = registrationFile.getContentType();
                         if (!FileHelper.isDocumentContentType(contentType)) {
@@ -285,6 +292,21 @@ public class Cars extends Controller {
                                 Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                                 FileDAO fdao = context.getFileDAO();
                                 file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex); //no more checked catch -> error page!
+                            }
+                        }
+                    }
+                    if (photoFilePart != null) {
+                        String contentType = photoFilePart.getContentType();
+                        if (!FileHelper.isImageContentType(contentType)) {
+                            flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                            return badRequest(edit.render(carForm, null, getCountryList(),getFuelList()));
+                        } else {
+                            try {
+                                Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
+                                FileDAO fdao = context.getFileDAO();
+                                picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
                             } catch (IOException ex) {
                                 throw new RuntimeException(ex); //no more checked catch -> error page!
                             }
@@ -301,7 +323,7 @@ public class Cars extends Controller {
                     }
                     Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                             model.year, model.manual, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
-                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active);
+                            model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, picture);
 
                     context.commit();
 
@@ -337,12 +359,12 @@ public class Cars extends Controller {
 
             if (car == null) {
                 flash("danger", "Auto met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             } else {
                 User currentUser = DataProvider.getUserProvider().getUser();
                 if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                     flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-                    return badRequest(carList());
+                    return badRequest(userCarList());
                 }
 
                 CarModel model = new CarModel();
@@ -375,13 +397,13 @@ public class Cars extends Controller {
 
             if (car == null) {
                 flash("danger", "Car met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             }
 
             User currentUser = DataProvider.getUserProvider().getUser();
             if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
                 flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             }
 
             try {
@@ -419,7 +441,9 @@ public class Cars extends Controller {
                     car.setOwnerAnnualKm(null);
                 Http.MultipartFormData body = request().body().asMultipartFormData();
                 Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
+                Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
                 models.File file = null;
+                models.File picture = null;
                 if (registrationFile != null) {
                     String contentType = registrationFile.getContentType();
                     if (!FileHelper.isDocumentContentType(contentType)) {
@@ -436,6 +460,21 @@ public class Cars extends Controller {
                     }
                 }
 
+                if (photoFilePart != null) {
+                    String contentType = photoFilePart.getContentType();
+                    if (!FileHelper.isImageContentType(contentType)) {
+                        flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten als foto. (ontvangen MIME-type: " + contentType + ")");
+                        return redirect(routes.Cars.detail(car.getId()));
+                    } else {
+                        try {
+                            Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
+                            FileDAO fdao = context.getFileDAO();
+                            picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex); //no more checked catch -> error page!
+                        }
+                    }
+                }
                 if(car.getTechnicalCarDetails() == null) {
                     if((model.licensePlate != null && !model.licensePlate.equals(""))
                             || (model.chassisNumber != null && model.chassisNumber != 0) || file != null)
@@ -485,6 +524,9 @@ public class Cars extends Controller {
                 car.setComments(model.comments);
 
                 car.setActive(model.active);
+                if(picture != null){
+                    car.setPhoto(picture);
+                }
 
                 User user = DataProvider.getUserProvider().getUser();
                 if(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
@@ -519,13 +561,13 @@ public class Cars extends Controller {
 
             if (car == null) {
                 flash("danger", "Car met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             }
 
             User currentUser = DataProvider.getUserProvider().getUser();
             if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
                 flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             }
 
             try {
@@ -588,13 +630,13 @@ public class Cars extends Controller {
 
             if (car == null) {
                 flash("danger", "Car met ID=" + carId + " bestaat niet.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             }
 
             User currentUser = DataProvider.getUserProvider().getUser();
             if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
                 flash("danger", "Je heeft geen rechten tot het bewerken van deze wagen.");
-                return badRequest(carList());
+                return badRequest(userCarList());
             }
 
             try {
@@ -667,7 +709,7 @@ public class Cars extends Controller {
                 return F.Promise.promise(new F.Function0<Result>() {
                     @Override
                     public Result apply() throws Throwable {
-                        return badRequest(carList());
+                        return badRequest(userCarList());
                     }
                 });
             } else {
@@ -813,7 +855,7 @@ public class Cars extends Controller {
         return ok(carCostsAdmin.render());
     }
 
-    public static Result showCarCostsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showCarCostsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -854,11 +896,11 @@ public class Cars extends Controller {
             }
         }
 
-        return ok(carCostList(page, field, asc, filter));
+        return ok(carCostList(page, pageSize, field, asc, filter));
 
     }
 
-    private static Html carCostList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html carCostList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarCostDAO dao = context.getCarCostDAO();
 
@@ -866,10 +908,10 @@ public class Cars extends Controller {
                 orderBy = FilterField.CAR_COST_DATE;
             }
 
-            List<CarCost> listOfResults = dao.getCarCostList(orderBy, asc, page, PAGE_SIZE_CAR_COSTS, filter);
+            List<CarCost> listOfResults = dao.getCarCostList(orderBy, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfCarCosts(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE_CAR_COSTS);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return carCostspage.render(listOfResults, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {

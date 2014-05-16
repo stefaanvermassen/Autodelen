@@ -15,11 +15,22 @@
     <tbody>
         @defining(DataProvider.getUserRoleProvider.isFullUser) { fullUser =>
             @for(session <- sessions) {
-                <tr @if(enrolled != null && session.getId == enrolled.getId) {
-                    class="info"}>
-                <td>@session.getType.getDescription @if(session.getType.equals(InfoSessionType.OTHER)) {
+                <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" }>
+                <td>
+                    @session.getType match {
+                        case InfoSessionType.NORMAL => {
+                            <span class="fa fa-user"></span>
+                        } case InfoSessionType.OWNER => {
+                            <span class="fa fa-group"></span>
+                        } case InfoSessionType.OTHER => {
+                            <span class="fa fa-briefcase"></span>
+                        }
+                        case _ => {}
+                    }
+                    @session.getType.getDescription @if(session.getType.equals(InfoSessionType.OTHER)) {
                     : @session.getTypeAlternative
-                }</td> <!-- TODO: mooi weergeven met icoontje ofzo -->
+                    }
+                </td>
                 <td>@session.getTime.toString("dd-MM-yyyy HH:mm")</td>
                 @if(session.getMaxEnrollees != 0) {
                     @if(session.getEnrolleeCount == session.getMaxEnrollees) {
@@ -35,7 +46,7 @@
                     @if(fullUser) {
                         <a href="@routes.Profile.index(session.getHost.getId)">@session.getHost</a>
                     } else {
-                        @session.getHost.getFirstName @session.getHost.getLastName
+                        @session.getHost
                     }
                 </td>
                 <td>@session.getAddress</td>

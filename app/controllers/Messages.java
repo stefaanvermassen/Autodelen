@@ -22,8 +22,6 @@ import java.util.List;
 
 public class Messages extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
     /**
      * Class implementing a model wrapped in a form.
      * This model is used during the submission of a new message.
@@ -56,7 +54,7 @@ public class Messages extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result showReceivedMessagesPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showReceivedMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -64,11 +62,11 @@ public class Messages extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         filter.putValue(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
-        return ok(messageList(page, field, asc, filter));
+        return ok(messageList(page, pageSize, field, asc, filter));
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result showSentMessagesPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showSentMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -76,16 +74,16 @@ public class Messages extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         filter.putValue(FilterField.MESSAGE_SENDER_ID, user.getId() + "");
-        return ok(messageList(page, field, asc, filter));
+        return ok(messageList(page, pageSize, field, asc, filter));
     }
 
-    private static Html messageList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html messageList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             MessageDAO dao = context.getMessageDAO();
-            List<Message> messageList = dao.getMessageList(orderBy, asc, page, PAGE_SIZE, filter);
+            List<Message> messageList = dao.getMessageList(orderBy, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfMessages(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return messagespage.render(messageList, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {

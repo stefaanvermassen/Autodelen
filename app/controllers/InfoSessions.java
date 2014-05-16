@@ -1004,7 +1004,7 @@ public class InfoSessions extends Controller {
      * @return A partial view of the table containing the filtered upcomming sessions
      */
     @RoleSecured.RoleAuthenticated()
-    public static Result showUpcomingSessionsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showUpcomingSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField filterField = FilterField.stringToField(orderBy);
 
@@ -1013,7 +1013,7 @@ public class InfoSessions extends Controller {
         filter.putValue(FilterField.FROM, DateTime.now().toString());
         filter.putValue(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
 
-        return ok(sessionsList(page, filterField, asc, filter, false));
+        return ok(sessionsList(page, pageSize, filterField, asc, filter, false));
     }
 
     /**
@@ -1026,14 +1026,14 @@ public class InfoSessions extends Controller {
      * @return A partial view of the table containing the filtered sessions
      */
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
-    public static Result showSessionsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField filterField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        return ok(sessionsList(page, filterField, asc, filter, true));
+        return ok(sessionsList(page, pageSize, filterField, asc, filter, true));
     }
 
     /**
@@ -1045,7 +1045,7 @@ public class InfoSessions extends Controller {
      * @param filter  The filter to apply to
      * @return The html patial table of upcoming sessions for this filter
      */
-    private static Html sessionsList(int page, FilterField orderBy, boolean asc, Filter filter, boolean admin) {
+    private static Html sessionsList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter, boolean admin) {
         // TODO: not use boolean admin
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -1055,7 +1055,6 @@ public class InfoSessions extends Controller {
                 orderBy = FilterField.INFOSESSION_DATE;
             }
 
-            int pageSize = DataProvider.getSettingProvider().getIntOrDefault("infosessions_page_size", 10);
             List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, pageSize, filter);
             if (enrolled != null) {
                 //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)

@@ -41,7 +41,8 @@ function newRow() {
             '<input class="availability_id hidden" value="0">' +
         '</td>' +
         '<td>' +
-            '<select class="beginDayOfWeek">' +
+            '<form class="form-inline">' +
+            '<select class="beginDayOfWeek form-control">' +
                 '<option value="2" >Maandag</option>' +
                 '<option value="3" >Dinsdag</option>' +
                 '<option value="4" >Woensdag</option>' +
@@ -50,6 +51,7 @@ function newRow() {
                 '<option value="7" >Zaterdag</option>' +
                 '<option value="1" >Zondag</option>' +
             '</select>' +
+            '</form>' +
         '</td>' +
         '<td>' +
             '<div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">' +
@@ -58,6 +60,7 @@ function newRow() {
             '</div>' +
         '</td>' +
         '<td>' +
+            '<form class="form-inline">' +
             '<select class="endDayOfWeek">' +
                 '<option value="2" >Maandag</option>' +
                 '<option value="3" >Dinsdag</option>' +
@@ -67,6 +70,7 @@ function newRow() {
                 '<option value="7" >Zaterdag</option>' +
                 '<option value="1" >Zondag</option>' +
             '</select>' +
+            '</form>' +
         '</td>' +
         '<td>' +
             '<div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">' +

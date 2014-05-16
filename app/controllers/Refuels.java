@@ -33,8 +33,6 @@ import java.util.List;
  */
 public class Refuels extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
     public static class RefuelModel {
 
         public BigDecimal amount;
@@ -55,7 +53,7 @@ public class Refuels extends Controller {
         return ok(refuels.render());
     }
 
-    public static Result showUserRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showUserRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -67,7 +65,7 @@ public class Refuels extends Controller {
 
         // TODO: Check if admin or car owner/user
 
-        return ok(refuelList(page, field, asc, filter));
+        return ok(refuelList(page, pageSize, field, asc, filter));
 
     }
 
@@ -81,7 +79,7 @@ public class Refuels extends Controller {
         return ok(refuelsOwner.render());
     }
 
-    public static Result showOwnerRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -94,7 +92,7 @@ public class Refuels extends Controller {
 
         // TODO: Check if admin or car owner/user
 
-        return ok(refuelList(page, field, asc, filter));
+        return ok(refuelList(page, pageSize, field, asc, filter));
     }
 
     /**
@@ -108,29 +106,29 @@ public class Refuels extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
-    public static Result showAllRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showAllRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        return ok(refuelList(page, field, asc, filter));
+        return ok(refuelList(page, pageSize, field, asc, filter));
     }
 
 
 
-    private static Html refuelList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html refuelList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
 
             if(orderBy == null) {
                 orderBy = FilterField.REFUEL_NOT_STATUS; // not neccessary, but orderBy cannot be null
             }
-            List<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, PAGE_SIZE, filter);
+            List<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfRefuels(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return refuelspage.render(listOfResults, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
