@@ -46,11 +46,13 @@ GET         /messages                               controllers.Messages.showMes
 GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/sent/page                     controllers.Messages.showSentMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
+GET         /messages/markallasread                 controllers.Messages.markAllMessagesAsRead()
 GET         /messages/new                           controllers.Messages.newMessage()
 GET         /messages/reply                         controllers.Messages.reply(userId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
 GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
+GET         /notifications/markallasread            controllers.Notifications.markAllNotificationsAsRead()
 GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages

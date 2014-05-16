@@ -79,4 +79,23 @@ public class Notifications extends Controller {
         }
     }
 
+    /**
+     * Method: GET
+     *
+     * @return notification index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markAllNotificationsAsRead() {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            NotificationDAO dao = context.getNotificationDAO();
+            dao.markAllNotificationsAsRead(user.getId());
+            context.commit();
+            DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
+            return redirect(routes.Notifications.showNotifications());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
 }
