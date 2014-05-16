@@ -3,8 +3,8 @@
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
-	alert("hello");
-    var route = myJsRoutes.controllers.Receipts.receiptsList;
+    var route = myJsRoutes.controllers.Receipts.showReceiptsPage;
+	console.log(route);
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
@@ -12,7 +12,7 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
 }
 
-@app("Gebruikers", stylesheets, scripts) {
+@app("Afrekeningen", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>

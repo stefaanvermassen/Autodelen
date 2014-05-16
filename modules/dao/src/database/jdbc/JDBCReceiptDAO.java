@@ -63,12 +63,10 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int PAGE_SIZE, Filter filter, User user){
-	
         return new ArrayList();
     }
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
-        System.out.println("HERE");
         if(filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
@@ -76,5 +74,4 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
         ps.setString(start, filter.getValue(FilterField.RECEIPT_DATE));
     }
-
 }

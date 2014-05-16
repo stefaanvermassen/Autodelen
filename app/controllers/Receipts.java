@@ -62,7 +62,7 @@ System.out.println("HERE");
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 	    
             //if(){rendernew()}
-
+	System.out.println("HERE "+amountOfPages);
             return receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;

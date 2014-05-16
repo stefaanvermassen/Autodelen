@@ -35,8 +35,13 @@ GET         /reserve/reservation                    controllers.Reserve.reserve(
 POST        /reserve/reservation                    controllers.Reserve.confirmReservation(cardId: Int)
 
 
+# Receipts
+GET         /receipts                                  controllers.Receipts.index()
+GET         /receipts/page                             controllers.Receipts.receiptsList(page: Int, asc: Int ?= 1,orderBy: String ?= "", filter: String ?= "")
+GET /settings controllers.Settings.index()
+
+
 # User pages
-GET         /receipts                               controllers.Receipts.index()
 GET         /settings                               controllers.Settings.index()
 
 # Notifiers
