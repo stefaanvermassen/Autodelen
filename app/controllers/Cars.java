@@ -20,7 +20,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import views.html.cars.*;
 import views.html.cars.edit;
 import views.html.cars.addcarcostmodal;
 import views.html.cars.carCostsAdmin;
@@ -182,7 +181,9 @@ public class Cars extends Controller {
         } catch (DataAccessException ex) {
             throw ex;
         }
+
     }
+
     /**
      *
      * @param page The page in the carlists
@@ -883,7 +884,7 @@ public class Cars extends Controller {
                 }
                 if(!isCarOfUser) {
                     flash("danger", "Je bent niet de eigenaar van deze auto.");
-                    return badRequest(cars.render(listOfCars));
+                    return badRequest(userCarList());
                 }
 
             } catch (DataAccessException ex) {

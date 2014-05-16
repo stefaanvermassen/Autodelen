@@ -17,6 +17,7 @@ POST        /userroles/edit                         controllers.UserRoles.editPo
 
 # Drives
 GET         /drives                                 controllers.Drives.index()
+GET         /drives_tab                             controllers.Drives.indexWithStatus(status: String)
 GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drives/admin                           controllers.Drives.drivesAdmin()
 GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
@@ -29,6 +30,7 @@ GET         /drives-cancelled                       controllers.Drives.cancelRes
 
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
+POST        /reserve                                controllers.Reserve.indexWithDate()
 GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
 GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
