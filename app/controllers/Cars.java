@@ -179,7 +179,7 @@ public class Cars extends Controller {
             // Doesn't need to be paginated, because a single user will never have a lot of cars
             List<Car> listOfCars = dao.getCarsOfUser(user.getId());
             List<Reservation> listOfReservations = rdao.getReservationListForOwner(user.getId());
-            return ok(cars.render(listOfCars, listOfReservations));
+            return cars.render(listOfCars, listOfReservations);
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -888,7 +888,7 @@ public class Cars extends Controller {
                 }
                 if(!isCarOfUser) {
                     flash("danger", "Je bent niet de eigenaar van deze auto.");
-                    return badRequest(cars.render(listOfCars, listOfReservations));
+                    return badRequest(userCarList());
                 }
 
             } catch (DataAccessException ex) {
