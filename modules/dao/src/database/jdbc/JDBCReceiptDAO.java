@@ -17,15 +17,23 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     // TODO: more fields to filter on
-    public static final String FILTER_FRAGMENT = " WHERE Users.user_firstname LIKE ? AND Users.user_lastname LIKE ? " +
-            "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?)";
+    public static final String USER_FRAGMENT = 
+	"Receipts.receipt_userID LIKE ?)";
 
-    private static final String USER_FIELDS = "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email";
+    public static final String DATE_FRAGMENT1 =
+        "Receipts.receipt_date BETWEEN ? AND ? ";
 
-    private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM Users " +
-            "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
-            "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
-            "LEFT JOIN users as contractManagers on contractManagers.user_id = users.user_contract_manager_id";
+    public static final String DATE_FRAGMENT2 =
+        "Receipts.receipt_date <= ? ";
+
+    private static final String RECEIPT_FIELDS = "receipt_id, receipt_name, receipt_date, receipt_fileID, receipt_userID";
+
+    private static final String RECEIPT_QUERY = "SELECT " + RECEIPT_FIELDS + " FROM Receipts " +
+            "LEFT JOIN files as receipt_file on domicileAddresses.address_id = user_address_domicile_id " +
+            "LEFT JOIN users as receipt_user on residenceAddresses.address_id = user_address_residence_id ";
+
+    public static final String FILTER_FRAGMENT =
+        "WHERE "+ DATE_FRAGMENT2 +";";
 
     private PreparedStatement getGetAmountOfReceiptsStatement;
     private PreparedStatement getReceiptsListStatement;
@@ -33,7 +41,8 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private PreparedStatement getGetAmountOfReceiptsStatement() throws SQLException {
         if(getGetAmountOfReceiptsStatement == null) {
-            getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts" + FILTER_FRAGMENT);
+            getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts"
+		+ FILTER_FRAGMENT);
         }
         return getGetAmountOfReceiptsStatement;
     }
@@ -71,7 +80,11 @@ public class JDBCReceiptDAO implements ReceiptDAO {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-
-        ps.setString(start, filter.getValue(FilterField.RECEIPT_DATE));
+	String date=filter.getValue(FilterField.RECEIPT_DATE);
+	if(date.equals("")){
+	    date = "CURRENT_TIMESTAMP";
+	    //date=DateTime.now().toString();
+	}
+        ps.setString(start, date);
     }
 }

@@ -408,6 +408,19 @@ CREATE TABLE `settings` (
 )
   ENGINE=InnoDB;
 
+CREATE TABLE `Receipts` (
+  `receipt_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `receipt_name` CHAR(32) NOT NULL,
+  `receipt_date` DATETIME NULL DEFAULT NULL,
+  `receipt_fileID` INT NULL DEFAULT NULL,
+  `receipt_userID` INT(11) NOT NULL,
+  PRIMARY KEY (`receipt_id`),
+  FOREIGN KEY (`receipt_fileID`) REFERENCES Files(`file_id`),
+  FOREIGN KEY (`receipt_userID`) REFERENCES Users(`user_id`)
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB;
+
 DELIMITER $$
 
 CREATE TRIGGER files_ins BEFORE INSERT ON files FOR EACH ROW

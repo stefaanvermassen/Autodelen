@@ -38,13 +38,12 @@ public class Receipts extends Controller {
      * @return A partial page with a table of users of the corresponding page
      */
    // @RoleSecured.RoleAuthenticated()
-    public static Result showReceiptsPage(int page, int ascInt, String orderBy, String searchString) {
-System.out.println("HERE");
+    public static Result showReceiptsPage(int page, int ascInt, String orderBy, String date) {
         // TODO: orderBy not as String-argument?
         FilterField receiptsField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
+	Filter filter = Pagination.parseFilter(date);
         return ok(receiptsList(page, receiptsField, asc, filter));
     }
 
