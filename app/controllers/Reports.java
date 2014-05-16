@@ -3,6 +3,7 @@ package controllers;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
+import models.Car;
 import models.Reservation;
 import models.User;
 import models.UserRole;
@@ -142,6 +143,91 @@ public class Reports extends Controller {
            }
         } catch (DataAccessException | IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    public static Result getCars(){
+        File file = new File("cars.xlsx");
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarDAO carDAO = context.getCarDAO();
+            Filter filter = Pagination.parseFilter("");
+            List<Car> carList = carDAO.getCarList(FilterField.CAR_NAME, true, 1, carDAO.getAmountOfCars(filter), filter);
+            try(FileOutputStream out = new FileOutputStream(file)){
+                Workbook wb = new XSSFWorkbook();
+                Sheet s = wb.createSheet("Gebruikers");
+                int rNum = 0;
+                Row row = s.createRow(rNum);
+                String[] header = {"Id", "Naam", "Merk", "Type", "Straat (locatie)", "Huisnummer (locatie)",
+                        "Postcode (locatie)", "Stad (locatie)", "Plaatsen", "Deuren", "Bouwjaar", "Manueel", "Gps",
+                        "Trekhaak", "Brandstof", "Verbuik (l/100km)", "Geschatte marktprijs",
+                        "Jaarlijkse kilometers door eigenaar", "Nummerplaat",  "Chassisnr",
+                        "Verzekering", "Verzekeringspolis", "Verzekeringsafloop", "Bonus-malus", "Eigenaar (ID)",
+                        "Commentaar", "Actief"};
+                for(int i=0; i<header.length; i++){
+                    Cell cell = row.createCell(i);
+                    cell.setCellValue(header[i]);
+                }
+                rNum++;
+                Car car = null;
+                for(int i=0; i<carList.size(); i++) {
+                    car = carList.get(i);
+                    row = s.createRow(i + 1);
+                    int j = 0;
+                    row.createCell(j++).setCellValue(car.getId());
+                    row.createCell(j++).setCellValue(car.getName());
+                    row.createCell(j++).setCellValue(car.getBrand());
+                    row.createCell(j++).setCellValue(car.getType());
+                    if(car.getLocation() != null){
+                        row.createCell(j++).setCellValue(car.getLocation().getStreet());
+                        row.createCell(j++).setCellValue(car.getLocation().getNumber());
+                        row.createCell(j++).setCellValue(car.getLocation().getZip());
+                        row.createCell(j++).setCellValue(car.getLocation().getCity());
+                    }else{
+                        j+=4;
+                    }
+
+                    row.createCell(j++).setCellValue(car.getSeats());
+                    row.createCell(j++).setCellValue(car.getDoors());
+                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getYear()).toString());
+                    row.createCell(j++).setCellValue(car.isManual());
+                    row.createCell(j++).setCellValue(car.isGps());
+                    row.createCell(j++).setCellValue(car.isHook());
+                    row.createCell(j++).setCellValue(car.getFuel().getDescription());
+                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getFuelEconomy()).toString());
+                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getEstimatedValue()).toString());
+                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getOwnerAnnualKm()).toString());
+                    if(car.getTechnicalCarDetails() != null){
+                        row.createCell(j++).setCellValue(car.getTechnicalCarDetails().getLicensePlate());
+                        row.createCell(j++).setCellValue(checkNotNullOrZero(car.getTechnicalCarDetails().getChassisNumber()).toString());
+                    }else{
+                        j+=2;
+                    }
+                    if(car.getInsurance() != null){
+                        row.createCell(j++).setCellValue(car.getInsurance().getName());
+                        row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getPolisNr()).toString());
+                        row.createCell(j++).setCellValue(car.getInsurance().getExpiration());
+                        row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getBonusMalus()).toString());
+                    }else{
+                        j+=4;
+                    }
+                    row.createCell(j++).setCellValue(car.getOwner().getId());
+                    row.createCell(j++).setCellValue(car.getComments());
+                    row.createCell(j++).setCellValue(car.isActive());
+                }
+                wb.write(out);
+                return ok(file, file.getName());
+            }
+        } catch (DataAccessException | IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static Object checkNotNullOrZero(Object object){
+        if(object != null){
+            return object;
+        }else{
+            return "";
         }
     }
 }
