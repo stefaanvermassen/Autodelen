@@ -38,9 +38,7 @@
             @if(DataProvider.getUserRoleProvider.isFullUser(user)){
                 @views.html.dashboardFullUser(user, completeness, form)
             } else {
-                @if(!userWentToInfoSession) {
-                    @views.html.dashboardRegistered(user, completeness, userWentToInfoSession, approvalRequestSent)
-                }
+                @views.html.dashboardRegistered(user, completeness, userWentToInfoSession, approvalRequestSent)
             }
         </div>
         <!-- /col-lg-12 -->
