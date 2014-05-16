@@ -116,6 +116,7 @@ public class Reports extends Controller {
                     int j = 0;
                     row.createCell(j++).setCellValue(reservation.getId());
                     row.createCell(j++).setCellValue(reservation.getCar().getName());
+                    row.createCell(j++).setCellValue(reservation.getUser().getId());
                     row.createCell(j++).setCellValue(reservation.getUser().getFirstName());
                     row.createCell(j++).setCellValue(reservation.getUser().getLastName());
                     row.createCell(j++).setCellValue(reservation.getUser().getEmail());
