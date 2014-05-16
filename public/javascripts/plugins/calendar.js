@@ -35,7 +35,7 @@
         this.endDateId = options.endDateId || null;
         if(!(this.endDateId instanceof jQuery) && this.endDateId != null)
             this.endDateId = $('#' + this.endDateId);
-        this.selectable = this.startDateId != null || this.endDateId != null;
+        this.selectable = this.startDateId != null && this.endDateId != null;
 
         var date = new Date();
         this.year = date.getFullYear();
@@ -52,7 +52,7 @@
         this.title = 'calendar_title';
         this.titleLeft = 'calendar_title_left';
         this.titleRight = 'calendar_title_right';
-        this.legend = 'calendar_legend'
+        this.legend = 'calendar_legend';
         this.rowId = 'calendar_row_';
         this.cellId = 'calendar_cell_';
 
@@ -61,7 +61,8 @@
         this.mousedown = false;
         this.mousemove = false;
 
-        this.environments = [new EventEnvironment('fill1'), new EventEnvironment('fill2'), new EventEnvironment('fill3')];
+        this.environments = [new EventEnvironment('fill1'), new EventEnvironment('fill2'), new EventEnvironment('fill3'),
+            new EventEnvironment('fill4'), new EventEnvironment('fill5')];
         this.colorAssociator = new ColorAssociator();
 
         this.initCalendar();
@@ -270,14 +271,20 @@
 
         setValueFirstSelected: function(value) {
             this.firstSelectedValue = value;
-            if(this.startDateId != null)
-                this.startDateId.val(CalGlobal.formatDateValue(value, this.dateFormat));
+            if(this.startDateId != null) {
+                var formatDate =  CalGlobal.formatDateValue(value, this.dateFormat);
+                this.startDateId.text(formatDate);
+                this.startDateId.val(formatDate).trigger('change');
+            }
         },
 
         setValueSecondSelected: function(value) {
             this.secondSelectedValue = value;
-            if(this.endDateId != null)
-                this.endDateId.val(CalGlobal.formatDateValue(value, this.dateFormat));
+            if(this.endDateId != null) {
+                var formatDate =  CalGlobal.formatDateValue(value, this.dateFormat);
+                this.endDateId.text(formatDate);
+                this.endDateId.val(formatDate).trigger('change');
+            }
         },
 
         resetCalendar: function() {
@@ -303,8 +310,6 @@
         renderCalender: function() {
             this._renderTitle();
             this._renderTable();
-            if(this.events != null && this.events.length > 0)
-                this._renderLegend();
         },
 
         _renderTitle: function() {
@@ -403,6 +408,7 @@
                 var func = this._getEventEnvironment;
                 var environments = this.environments;
                 var colorAssociator = this.colorAssociator;
+                colorAssociator.reset();
                 $('td[id^=' + this.cellId + ']').each(function () {
                     var i = 0;
                     while(i < evts.length && evts[i].startDate <= this.value) {
@@ -422,7 +428,9 @@
                                             content: 'Van ' +
                                                 (shour < 10 ? '0' : '') + shour + ':' + (smin < 10 ? '0' : '') + smin +
                                                 ' tot ' +
-                                                (ehour < 10 ? '0' : '') + ehour + ':' + (emin < 10 ? '0' : '') + emin,
+                                                (ehour < 10 ? '0' : '') + ehour + ':' + (emin < 10 ? '0' : '') + emin +
+                                                (evts[i].link != null ? ' (<a href="' + evts[i].link + '">' +
+                                                    (evts[i].linktext != null ? evts[i].linktext : 'link') + '</a>)' : ''),
                                             placement: 'top',
                                             html: true})
                                     );
@@ -441,31 +449,45 @@
                         }
                     }
                 });
+                this._renderLegend();
             }
         },
 
         _renderLegend: function() {
-            this.element.addClass('col-md-8 col-sm-12').before($('<div>')
-                .attr('id', this.legend)
-                .attr('class', 'col-md-4 col-sm-12 legend')
-                .append($('<h5>')
-                    .append($('<b>')
-                        .text(locales[this.language].legend)
-                    )
+            var legend = $('div[id^=' + this.legend + ']');
+            if(this.colorAssociator.colors[0].eventName == null){
+                this.element.removeClass('col-lg-10 col-md-9 col-sm-12');
+                legend.remove();
+                return;
+            }
+            if(legend.length == 0) {
+                this.element.addClass('col-lg-10 col-md-9 col-sm-12').after($('<div>')
+                    .attr('id', this.legend + '_large')
+                    .attr('class', 'visible-lg visible-md col-lg-2 col-md-3 legend')
                 )
-                .append($('<hr />'))
-            );
+                .before($('<div>')
+                        .attr('id', this.legend + '_small')
+                        .attr('class', 'visible-sm visible-xs col-sm-12 legend')
+                );
+                legend = $('div[id^=' + this.legend + ']');
+            }
+            legend.html('').append($('<h5>')
+                .append($('<b>')
+                    .text(locales[this.language].legend)
+                )
+            )
+            .append($('<hr />'));
             var index = 1;
             var association = this.colorAssociator.colors[0];
-            while(index < this.colorAssociator.colors.length && association.eventName != null) {
-                $('#' + this.legend).append($('<div>')
-                    .attr('class', 'col-md-12 col-sm-6 col-xs-6')
-                    .append($('<div>')
-                    .attr('class', 'col-xs-1 item_color')
-                    .css('background-color', association.color)
+            while (index < this.colorAssociator.colors.length && association.eventName != null) {
+                legend.append($('<div>')
+                        .attr('class', 'col-md-12 col-sm-4 col-xs-6')
+                        .append($('<div>')
+                            .attr('class', 'col-xs-1 item_color')
+                            .css('background-color', association.color)
                     ).append($('<div>')
-                        .attr('class', 'col-xs-11 item_text')
-                        .text(association.eventName)
+                            .attr('class', 'col-xs-11 item_text')
+                            .text(association.eventName)
                     )
                 );
                 association = this.colorAssociator.colors[index++];
@@ -640,9 +662,7 @@
     };
 
     var ColorAssociator = function() {
-        this.colors = [new ColorAssociation('#226611'), new ColorAssociation('#3276b1'), new ColorAssociation('#cb7a06'),
-            new ColorAssociation('#448833'), new ColorAssociation('#5498d2'), new ColorAssociation('#ed9c28'),
-            new ColorAssociation('#66aa55'), new ColorAssociation('#76baf4'), new ColorAssociation('#ffbe4a')]
+        this.reset();
     };
 
     ColorAssociator.prototype = {
@@ -663,6 +683,12 @@
             }
             ca.eventName = eventName;
             return ca.color;
+        },
+
+        reset: function() {
+            this.colors = [new ColorAssociation('#226611'), new ColorAssociation('#3276b1'), new ColorAssociation('#cb7a06'),
+                new ColorAssociation('#448833'), new ColorAssociation('#5498d2'), new ColorAssociation('#ed9c28'),
+                new ColorAssociation('#66aa55'), new ColorAssociation('#76baf4'), new ColorAssociation('#ffbe4a')]
         }
     };
 
@@ -750,7 +776,7 @@ function converToDateValue(day, month, year) {
     return (year * 10000) + (month * 100) + day;
 }
 
-function CalendarEvent(name, start, end) {
+function CalendarEvent(name, start, end, link, linktext) {
     this.name = name;
     this.validEvent = (start.constructor == Date && end.constructor == Date);
     if(this.validEvent) {
@@ -759,6 +785,8 @@ function CalendarEvent(name, start, end) {
     }
     this.startTime = start.getHours() * 100 + start.getMinutes();
     this.endTime =  end.getHours() * 100 + end.getMinutes();
+    this.link = link || null;
+    this.linktext = linktext || null;
 }
 
 function compareEvents(event1, event2) {

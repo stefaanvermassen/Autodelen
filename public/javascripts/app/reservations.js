@@ -24,19 +24,9 @@ $(document).ready(function() {
     var format = "yyyy-mm-dd";
     var inputFrom = $('#input_from_date');
     var inputTo = $('#input_to_date');
-    var tommorow = new Date();
-    tommorow.setDate(tommorow.getDate() + 1);
-    var tommorowLater = new Date();
-    tommorowLater.setDate(tommorowLater.getDate() + 1);
-    tommorowLater.setHours(tommorowLater.getHours() + 1);
-    var yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 2);
-
-    $("#calendar").calendar({
-        startDateId: inputFrom,
-        endDateId: inputTo,
-        dateFormat: format
-    });
+    var fromTime = $('#input_from_time');
+    var toTime = $('#input_to_time');
+    var search = $('#searchButton');
 
     inputFrom.datetimeinput({
         formatString: format
@@ -44,21 +34,10 @@ $(document).ready(function() {
     inputTo.datetimeinput({
         formatString: format
     });
-    $('#input_from_time').timeinput();
-    $('#input_to_time').timeinput();
+    fromTime.timeinput();
+    toTime.timeinput();
 
-    inputFrom.val(now.getFullYear() + '-'
-        + (now.getMonth() < 10 ? '0' : '') + now.getMonth() + '-'
-        + (now.getDate() < 10 ? '0' : '') + now.getDate());
-    inputTo.val(later.getFullYear() + '-'
-        + (later.getMonth() < 10 ? '0' : '') + later.getMonth() + '-'
-        + (later.getDate() < 10 ? '0' : '') + later.getDate());
-    $('#input_from_time').val(
-            (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' +
-            (now.getMinutes() < 10 ? '0' : '') + now.getMinutes());
-    $('#input_to_time').val(
-            (later.getHours() < 10 ? '0' : '') + later.getHours() + ':' +
-            (later.getMinutes() < 10 ? '0' : '') + later.getMinutes());
+
 
     $('#extraButton').on('click', function() {
         if(!$('#extraFiltering').hasClass('in')) {
@@ -74,8 +53,6 @@ $(document).ready(function() {
         // $('html, body').animate({scrollTop: $(this).offset().top - 50}, 1000);
     });
 
-    var search = $('#searchButton');
-
     search.on('mousedown', function() {
         $('#input_from_value').val($('#input_from_date').val() + ' ' + $('#input_from_time').val());
         $('#input_to_value').val($('#input_to_date').val() + ' ' + $('#input_to_time').val());
@@ -85,6 +62,28 @@ $(document).ready(function() {
     search.on('mouseup', function() {
         // $('html, body').animate({scrollTop: $('#resultsTable').offset().top - 50}, 1000);
     });
+
+    if(from === '' || until === '') {
+        inputFrom.val(now.getFullYear() + '-'
+            + (now.getMonth() < 10 ? '0' : '') + now.getMonth() + '-'
+            + (now.getDate() < 10 ? '0' : '') + now.getDate());
+        inputTo.val(later.getFullYear() + '-'
+            + (later.getMonth() < 10 ? '0' : '') + later.getMonth() + '-'
+            + (later.getDate() < 10 ? '0' : '') + later.getDate());
+        fromTime.val(
+                (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' +
+                (now.getMinutes() < 10 ? '0' : '') + now.getMinutes());
+        toTime.val(
+                (later.getHours() < 10 ? '0' : '') + later.getHours() + ':' +
+                (later.getMinutes() < 10 ? '0' : '') + later.getMinutes());
+    } else {
+        inputFrom.val(from);
+        inputTo.val(until);
+        fromTime.val('00:00');
+        toTime.val('23:55');
+        search.trigger('mousedown');
+        search.click();
+    }
 
 });
 

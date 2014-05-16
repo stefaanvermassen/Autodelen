@@ -17,8 +17,8 @@ table.custom_title h2 {
 
 table.custom_calendar {
     width: 100%;
-    min-width: 230px;
     background-color: #ffffff;
+    margin-bottom: 20px;
 }
 
 table.custom_calendar th {
@@ -113,5 +113,5 @@ div.legend div.item_color {
 
 .popover {
     color: #000000;
-    width: 175px;
+    width: 250px;
 }

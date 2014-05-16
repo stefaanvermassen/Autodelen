@@ -37,7 +37,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getPreviousReservationStatement;
     private PreparedStatement deleteReservationStatement;
     private PreparedStatement getReservationListByCaridStatement;
-    private PreparedStatement getReservationListByOwneridStatement;
+    private PreparedStatement getReservationListByUseridStatement;
     private PreparedStatement updateTableStatement;
 
     public JDBCReservationDAO(Connection connection) {
@@ -109,14 +109,15 @@ public class JDBCReservationDAO implements ReservationDAO{
         return getReservationListByCaridStatement ;
     }
 
-    private PreparedStatement getGetReservationListByOwneridStatement() throws SQLException {
-        if (getReservationListByOwneridStatement == null) {
+    private PreparedStatement getGetReservationListByUseridStatement() throws SQLException {
+        if (getReservationListByUseridStatement == null) {
             // Only request the reservations for which the current user is the loaner or the owner
-            getReservationListByOwneridStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
-                    " WHERE car_owner_user_id = ? AND reservation_status != '" + ReservationStatus.REFUSED.toString() +
+            getReservationListByUseridStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+                    " WHERE (car_owner_user_id = ? OR reservation_user_id = ? ) " +
+                    " AND reservation_status != '" + ReservationStatus.REFUSED.toString() +
                     "' AND reservation_status != '" + ReservationStatus.CANCELLED.toString() + "'");
         }
-        return getReservationListByOwneridStatement ;
+        return getReservationListByUseridStatement;
     }
 
     private PreparedStatement getUpdateTableStatement() throws SQLException {
@@ -327,10 +328,11 @@ public class JDBCReservationDAO implements ReservationDAO{
     }
 
     @Override
-    public List<Reservation> getReservationListForOwner(int ownerID) throws DataAccessException {
+    public List<Reservation> getReservationListForUser(int userID) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetReservationListByOwneridStatement();
-            ps.setInt(1, ownerID);
+            PreparedStatement ps = getGetReservationListByUseridStatement();
+            ps.setInt(1, userID);
+            ps.setInt(2, userID);
             return getReservationList(ps);
         } catch (Exception e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);

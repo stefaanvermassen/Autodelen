@@ -207,7 +207,7 @@
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li @if(title == "Ritten") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i>
+                            <a href="@routes.Drives.index"><i class="fa fa-car fa-fw"></i>
                                 Ritten
                                 @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
                                         Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
@@ -232,7 +232,7 @@
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_OWNER)){
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
-                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-car fa-fw"></i> Auto's</a>
                         </li>
                         <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
                             <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
@@ -244,7 +244,7 @@
 
                         <li class="submenu">ACCOUNT</li>
                         <li @if(title == "Berichten") {class="active"}>
-                            <a href="@routes.Messages.showMessages()"><i class="fa fa-comments fa-fw"></i> Berichten
+                            <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten
                             @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
                                 @if(unread_number>0){
                                     <span class="sidenumber">@unread_number</span>
@@ -252,7 +252,7 @@
                             }</a>
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-comments fa-fw"></i> Notificaties
                             @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
                               @if(unread_number>0){
                                   <span class="sidenumber">@unread_number</span>

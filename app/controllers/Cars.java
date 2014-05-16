@@ -175,11 +175,9 @@ public class Cars extends Controller {
         User user = DataProvider.getUserProvider().getUser();
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
-            ReservationDAO rdao = context.getReservationDAO();
             // Doesn't need to be paginated, because a single user will never have a lot of cars
             List<Car> listOfCars = dao.getCarsOfUser(user.getId());
-            List<Reservation> listOfReservations = rdao.getReservationListForOwner(user.getId());
-            return cars.render(listOfCars, listOfReservations);
+            return cars.render(listOfCars);
         } catch (DataAccessException ex) {
             throw ex;
         }
@@ -875,9 +873,7 @@ public class Cars extends Controller {
             }
             try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
                 CarDAO carDAO = context.getCarDAO();
-                ReservationDAO rdao = context.getReservationDAO();
                 List<Car> listOfCars = carDAO.getCarsOfUser(user.getId());
-                List<Reservation> listOfReservations = rdao.getReservationListForOwner(user.getId());
                 // Check if carId in cars
                 boolean isCarOfUser = false;
                 for(Car c : listOfCars) {
