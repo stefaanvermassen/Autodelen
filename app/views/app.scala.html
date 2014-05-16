@@ -89,9 +89,9 @@
                                             <a href="@routes.Messages.showMessages()">
                                                 <div>
                                                     @if(!message.isRead){
-                                                        <strong>Dégage [ongelezen]</strong>
+                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName [ongelezen]</strong>
                                                     }else{
-                                                        <strong>Dégage</strong>
+                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName</strong>
                                                     }
                                                     <span class="pull-right text-muted">
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
