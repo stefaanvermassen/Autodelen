@@ -60,12 +60,16 @@ public class Reports extends Controller {
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getNumber());
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getZip());
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getCountry());
+                    }else{
+                        j+=4;
                     }
                     if(user.getAddressResidence() != null){
                         row.createCell(j++).setCellValue(user.getAddressResidence().getStreet());
                         row.createCell(j++).setCellValue(user.getAddressResidence().getNumber());
                         row.createCell(j++).setCellValue(user.getAddressResidence().getZip());
                         row.createCell(j++).setCellValue(user.getAddressResidence().getCountry());
+                    }else{
+                        j+=4;
                     }
                     row.createCell(j++).setCellValue(user.getGender().name());
                     row.createCell(j++).setCellValue((user.getDriverLicense()!= null)? user.getDriverLicense().getId(): "");
