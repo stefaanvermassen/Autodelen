@@ -1,16 +1,20 @@
 package controllers;
 
 import database.*;
+import models.*;
 import models.CarCost;
 import models.CarRide;
 import models.Refuel;
+import controllers.util.*;
+import controllers.Security.RoleSecured;
 import org.joda.time.DateTime;
 import play.mvc.*;
 import providers.DataProvider;
-import views.html.receipts;
+import views.html.receipts.*;
 
 import java.sql.Date;
 import java.util.List;
+import play.api.templates.Html;
 
 public class Receipts extends Controller {
 
@@ -68,7 +72,7 @@ System.out.println("HERE");
 
 
 
-    public void endPeriod() {
+/*    public void endPeriod() {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO crdao = context.getCarRideDAO();
             RefuelDAO rdao = context.getRefuelDAO();
@@ -180,5 +184,5 @@ System.out.println("HERE");
         }
 
         return deprecationAmount + refuelAmount + carCostAmount;
-    }
+    }*/
 }

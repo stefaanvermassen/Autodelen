@@ -16,7 +16,6 @@
                 </td>
             </tr>
         } else {
-            @defining(DatabaseHelper.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)) { isAdmin =>
                 @for(receipt <- receipts) {
                     <tr>
                         <td>@receipt.getName @receipt.getName</td>
@@ -27,7 +26,6 @@
                         </td>
                     </tr>
                 }
-            }
         }
     </tbody>
 </table>
