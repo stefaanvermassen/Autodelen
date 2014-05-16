@@ -37,8 +37,8 @@ public class Reports extends Controller {
                 int rNum = 0;
                 Row row = s.createRow(rNum);
                 String[] header = {"Id", "Voornaam", "Familienaam", "Email", "Telefoon", "Straat (domicilie)",
-                        "Huisnummer (domicilie)", "Postcode (domicilie)", "Stad (domicilie)", "Straat (verblijf)",
-                        "Huisnummer (Verblijf)", "Postcode (verblijf)", "Stad (verblijf)", "Geslacht", "Rijbewijs",
+                        "Huisnummer (domicilie)", "Postcode (domicilie)", "Stad (domicilie)", "Land (domicilie)", "Straat (verblijf)",
+                        "Huisnummer (Verblijf)", "Postcode (verblijf)", "Stad (verblijf)", "Land (verblijf)", "Geslacht", "Rijbewijs",
                         "Gebruikersstatus", "Identiteitskaart", "Schadeverleden"};
                 for(int i=0; i<header.length; i++){
                     Cell cell = row.createCell(i);
@@ -59,17 +59,19 @@ public class Reports extends Controller {
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getStreet());
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getNumber());
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getZip());
+                        row.createCell(j++).setCellValue(user.getAddressDomicile().getCity());
                         row.createCell(j++).setCellValue(user.getAddressDomicile().getCountry());
                     }else{
-                        j+=4;
+                        j+=5;
                     }
                     if(user.getAddressResidence() != null){
                         row.createCell(j++).setCellValue(user.getAddressResidence().getStreet());
                         row.createCell(j++).setCellValue(user.getAddressResidence().getNumber());
                         row.createCell(j++).setCellValue(user.getAddressResidence().getZip());
+                        row.createCell(j++).setCellValue(user.getAddressResidence().getCity());
                         row.createCell(j++).setCellValue(user.getAddressResidence().getCountry());
                     }else{
-                        j+=4;
+                        j+=5;
                     }
                     row.createCell(j++).setCellValue(user.getGender().name());
                     row.createCell(j++).setCellValue((user.getDriverLicense()!= null)? user.getDriverLicense().getId(): "");
