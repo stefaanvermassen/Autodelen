@@ -7,11 +7,17 @@
         <script>
         var events = [];
         @for(reservation <- reservations) {
+            var from = "@reservation.getFrom.toString("yyyy-MM-dd HH:mm")";
+            var parts1 = from.split(" ");
+            var d1 = parts1[0].split("-");
+            var t1 = parts1[1].split(":");
+            var until = "@reservation.getTo.toString("yyyy-MM-dd HH:mm")";
+            var parts2 = until.split(" ");
+            var d2 = parts2[0].split("-");
+            var t2 = parts2[1].split(":");
             events.push(new CalendarEvent("@reservation.getCar.getName",
-            new Date("@reservation.getFrom.toString("yyyy-MM-dd HH:mm")"
-            ),
-            new Date("@reservation.getTo.toString("yyyy-MM-dd HH:mm")"
-            ),
+            new Date(d1[0],(d1[1]-1),d1[2],t1[0],t1[1]),
+            new Date(d2[0],(d2[1]-1),d2[2],t2[0],t2[1]),
             "@routes.Drives.details(reservation.getId).toString()"
             , "details"
             ));
