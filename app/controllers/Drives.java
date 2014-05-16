@@ -91,7 +91,8 @@ public class Drives extends Controller {
     /**
      * Method: GET
      *
-     * @return the drives index page containing all (pending) reservations of the user or for his car.
+     * @return the drives index page containing all (pending) reservations of the user or for his car
+     * starting with active tab containing the approved reservations.
      */
     @RoleSecured.RoleAuthenticated()
     public static Result index() {
@@ -99,10 +100,31 @@ public class Drives extends Controller {
     }
 
     /**
-     * @return the html page of the index page
+     * Method: GET
+     *
+     * @return the drives index page containing all (pending) reservations of the user or for his car
+     * starting with the tab containing the reservations with the specified status active.
+     * @param status The status identifying the tab
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result indexWithStatus(String status) {
+        return ok(showIndex(ReservationStatus.valueOf(status)));
+    }
+
+    /**
+     * @return the html page of the index page starting with the tab containing
+     * the approved reservations active.
      */
     public static Html showIndex() {
-        return drives.render();
+        return drives.render(ReservationStatus.ACCEPTED);
+    }
+
+    /**
+     * @return the html page of the index page starting with the tab containing
+     * the reservations with the specified status active.
+     */
+    public static Html showIndex(ReservationStatus status) {
+        return drives.render(status);
     }
 
     /**
