@@ -3,10 +3,7 @@ package controllers;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import database.*;
-import models.Car;
-import models.Reservation;
-import models.User;
-import models.UserRole;
+import models.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import play.mvc.Controller;
@@ -90,11 +87,75 @@ public class Reports extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result getReservationsForOwner(){
+        User user = DataProvider.getUserProvider().getUser();
+        Filter filter = Pagination.parseFilter("");
+        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
+        File file = new File("reservations.xlsx");
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ReservationDAO reservationDAO = context.getReservationDAO();
+            CarRideDAO carRideDAO = context.getCarRideDAO();
+            List<Reservation> reservationList = reservationDAO.getReservationListPage(FilterField.FROM, true, 1, reservationDAO.getAmountOfReservations(filter), filter);
+            try(FileOutputStream out = new FileOutputStream(file)){
+                Workbook wb = new XSSFWorkbook();
+                CreationHelper createHelper = wb.getCreationHelper();
+                Sheet s = wb.createSheet("Reservaties");
+                int rNum = 0;
+                Row row = s.createRow(rNum);
+                String[] header = {"Id", "Autonaam", "Lener(ID)", "Lener voornaam","Lener familienaam", "Lener email", "Lener telefoon", "Lener gsm", "Van", "Tot", "Status", "Bericht", "Startkilometers", "Eindkilometers", "Schade", "Details goedgekeurd"};
+                for(int i=0; i<header.length; i++){
+                    Cell cell = row.createCell(i);
+                    cell.setCellValue(header[i]);
+                }
+                Reservation reservation = null;
+                CarRide carRide = null;
+                for(int i=0; i<reservationList.size(); i++) {
+                    reservation = reservationList.get(i);
+                    row = s.createRow(i + 1);
+                    int j = 0;
+                    row.createCell(j++).setCellValue(reservation.getId());
+                    row.createCell(j++).setCellValue(reservation.getCar().getName());
+                    row.createCell(j++).setCellValue(reservation.getUser().getFirstName());
+                    row.createCell(j++).setCellValue(reservation.getUser().getLastName());
+                    row.createCell(j++).setCellValue(reservation.getUser().getEmail());
+                    row.createCell(j++).setCellValue(reservation.getUser().getPhone());
+                    row.createCell(j++).setCellValue(reservation.getUser().getCellphone());
+                    Cell cell;
+                    CellStyle cellStyle = wb.createCellStyle();
+                    cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));
+                    cell = row.createCell(j++);
+                    cell.setCellValue(reservation.getFrom().toDate());
+                    cell.setCellStyle(cellStyle);
+                    cell = row.createCell(j++);
+                    cell.setCellValue(reservation.getTo().toDate());
+                    cell.setCellStyle(cellStyle);
+                    row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
+                    row.createCell(j++).setCellValue(reservation.getMessage());
+                    if(reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED){
+                        carRide = carRideDAO.getCarRide(reservation.getId());
+                        row.createCell(j++).setCellValue(carRide.getStartMileage());
+                        row.createCell(j++).setCellValue(carRide.getEndMileage());
+                        row.createCell(j++).setCellValue(carRide.isDamaged());
+                        row.createCell(j++).setCellValue(carRide.isStatus());
+                    }
+                }
+                wb.write(out);
+                return ok(file, file.getName());
+            }
+        }catch (DataAccessException | IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER, UserRole.RESERVATION_ADMIN})
     public static Result getReservations(){
         File file = new File("reservations.xlsx");
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
            ReservationDAO reservationDAO = context.getReservationDAO();
+            CarRideDAO carRideDAO = context.getCarRideDAO();
             Filter filter = Pagination.parseFilter("");
             filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "");
             filter.putValue(FilterField.RESERVATION_CAR_ID, "");
@@ -105,13 +166,14 @@ public class Reports extends Controller {
                Sheet s = wb.createSheet("Reservaties");
                int rNum = 0;
                Row row = s.createRow(rNum);
-               String[] header = {"Id", "Auto(ID)", "Autonaam", "Lener(ID)", "Lener voornaam","Lener familienaam", "Lener email", "Lener telefoon", "Lener gsm", "Van", "Tot", "Status", "Bericht"};
+               String[] header = {"Id", "Auto(ID)", "Autonaam", "Lener(ID)", "Lener voornaam","Lener familienaam", "Lener email", "Lener telefoon", "Lener gsm", "Van", "Tot", "Status", "Bericht", "Startkilometers", "Eindkilometers", "Schade", "Details goedgekeurd"};
                for(int i=0; i<header.length; i++){
                    Cell cell = row.createCell(i);
                    cell.setCellValue(header[i]);
                }
                rNum++;
                Reservation reservation = null;
+               CarRide carRide = null;
                for(int i=0; i<reservationList.size(); i++){
                    reservation = reservationList.get(i);
                    row = s.createRow(i+1);
@@ -127,8 +189,7 @@ public class Reports extends Controller {
                    row.createCell(j++).setCellValue(reservation.getUser().getCellphone());
                    Cell cell;
                    CellStyle cellStyle = wb.createCellStyle();
-                   cellStyle.setDataFormat(
-                           createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));
+                   cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));
                    cell = row.createCell(j++);
                    cell.setCellValue(reservation.getFrom().toDate());
                    cell.setCellStyle(cellStyle);
@@ -137,6 +198,13 @@ public class Reports extends Controller {
                    cell.setCellStyle(cellStyle);
                    row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
                    row.createCell(j++).setCellValue(reservation.getMessage());
+                   if(reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED){
+                       carRide = carRideDAO.getCarRide(reservation.getId());
+                       row.createCell(j++).setCellValue(carRide.getStartMileage());
+                       row.createCell(j++).setCellValue(carRide.getEndMileage());
+                       row.createCell(j++).setCellValue(carRide.isDamaged());
+                       row.createCell(j++).setCellValue(carRide.isStatus());
+                   }
                }
                wb.write(out);
                return ok(file, file.getName());
@@ -146,7 +214,7 @@ public class Reports extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER, UserRole.CAR_ADMIN})
     public static Result getCars(){
         File file = new File("cars.xlsx");
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
@@ -155,6 +223,7 @@ public class Reports extends Controller {
             List<Car> carList = carDAO.getCarList(FilterField.CAR_NAME, true, 1, carDAO.getAmountOfCars(filter), filter);
             try(FileOutputStream out = new FileOutputStream(file)){
                 Workbook wb = new XSSFWorkbook();
+                CreationHelper createHelper = wb.getCreationHelper();
                 Sheet s = wb.createSheet("Gebruikers");
                 int rNum = 0;
                 Row row = s.createRow(rNum);
@@ -206,7 +275,12 @@ public class Reports extends Controller {
                     if(car.getInsurance() != null){
                         row.createCell(j++).setCellValue(car.getInsurance().getName());
                         row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getPolisNr()).toString());
-                        row.createCell(j++).setCellValue(car.getInsurance().getExpiration());
+                        Cell cell;
+                        CellStyle cellStyle = wb.createCellStyle();
+                        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
+                        cell = row.createCell(j++);
+                        cell.setCellValue(car.getInsurance().getExpiration());
+                        cell.setCellStyle(cellStyle);
                         row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getBonusMalus()).toString());
                     }else{
                         j+=4;

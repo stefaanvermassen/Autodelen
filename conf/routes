@@ -191,6 +191,7 @@ GET         /maps/test                              controllers.Maps.showMap()
 GET         /reports                                controllers.Reports.index()
 GET         /reports/users                          controllers.Reports.getUsers()
 GET         /reports/reservations                   controllers.Reports.getReservations()
+GET         /reports/reservations/owner             controllers.Reports.getReservationsForOwner()
 GET         /reports/cars                           controllers.Reports.getCars()
 
 # User Picker
