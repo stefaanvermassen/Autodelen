@@ -1,9 +1,10 @@
+@(status: ReservationStatus)
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
     <script>
         var route = myJsRoutes.controllers.Drives.showDrivesPage;
-        var beginFilter = "status=" + @ReservationStatus.ACCEPTED.toString();
+        var beginFilter = "status=" + "@status.toString";
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
@@ -26,11 +27,11 @@
                 <h1 class="page-header">Ritten</h1>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs">
-                  <li id="tab_planned" class="active"><a href="#resultpanel" data-toggle="tab">
+                  <li id="tab_planned" @if(status == ReservationStatus.ACCEPTED) { class="active" } ><a href="#resultpanel" data-toggle="tab">
                       Gepland</a>
                       <input name="status" value="@ReservationStatus.ACCEPTED.toString" class="searchTextField hidden">
                   </li>
-                  <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
+                  <li id="tab_passed" @if(status != ReservationStatus.ACCEPTED && status != ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Voorbij
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
                               Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { amount =>
@@ -40,7 +41,7 @@
                       }
                       </a>
                   </li>
-                  <li id="tab_request"><a href="#resultpanel" data-toggle="tab">
+                  <li id="tab_request" @if(status == ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Aanvragen
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { amount =>
                           @if(amount > 0) {

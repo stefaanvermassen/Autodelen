@@ -515,7 +515,7 @@
          */
         appendValue: function(value) {
             this.value  = this.value * 10 + value;
-        },
+        }
     };
 
 

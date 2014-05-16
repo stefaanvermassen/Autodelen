@@ -305,3 +305,8 @@ table.dataTable thead .sorting:after {
 .show-grid {
     margin: 15px 0;
 }
+
+.datetimepicker .active {
+    background-color: #5cb85c ! important;
+    background-image: none ! important;
+}
