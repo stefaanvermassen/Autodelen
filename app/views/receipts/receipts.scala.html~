@@ -1,9 +1,9 @@
-@import database.DataProvider;
+@import providers.DataProvider;
 
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
-    var route = myJsRoutes.controllers.Receipts.showReceiptsPage;
+    var route = myJsRoutes.controllers.Receipts.receiptsList;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }

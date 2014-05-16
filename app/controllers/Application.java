@@ -46,6 +46,7 @@ public class Application extends Controller {
                         routes.javascript.Messages.showReceivedMessagesPage(),
                         routes.javascript.Messages.showSentMessagesPage(),
                         routes.javascript.InfoSessions.enrollSession(),
+                        routes.javascript.Receipts.showReceiptsPage(),
                         routes.javascript.Drives.showDrivesPage(),
                         routes.javascript.Drives.showDrivesAdminPage(),
                         routes.javascript.Maps.getMap(),
