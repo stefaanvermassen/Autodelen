@@ -24,7 +24,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         "Receipts.receipt_date BETWEEN ? AND ? ";
 
     public static final String DATE_FRAGMENT2 =
-        "Receipts.receipt_date <= ? ";
+        "Receipts.receipt_date=? ";
 
     private static final String RECEIPT_FIELDS = "receipt_id, receipt_name, receipt_date, receipt_fileID, receipt_userID";
 
@@ -41,8 +41,8 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private PreparedStatement getGetAmountOfReceiptsStatement() throws SQLException {
         if(getGetAmountOfReceiptsStatement == null) {
-            getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts"
-		+ FILTER_FRAGMENT);
+            //getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts" + FILTER_FRAGMENT);
+	getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts WHERE Receipts.receipt_date=?;");
         }
         return getGetAmountOfReceiptsStatement;
     }
@@ -80,11 +80,13 @@ public class JDBCReceiptDAO implements ReceiptDAO {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-	String date=filter.getValue(FilterField.RECEIPT_DATE);
-	if(date.equals("")){
-	    date = "CURRENT_TIMESTAMP";
+	String string_date=filter.getValue(FilterField.RECEIPT_DATE);
+	string_date="2036-10-29 11:42:32";
+	Timestamp date= Timestamp.valueOf(string_date);
+	//if(date.equals("")){
+	//    date = new java.sql.Timestamp(now.getTime());
 	    //date=DateTime.now().toString();
-	}
-        ps.setString(start, date);
+	//}
+        ps.setTimestamp(start, date);
     }
 }
