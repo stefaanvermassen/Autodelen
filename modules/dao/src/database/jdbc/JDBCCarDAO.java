@@ -599,7 +599,11 @@ public class JDBCCarDAO implements CarDAO{
 
             ps.setBoolean(19, car.isActive());
 
-            ps.setInt(20, car.getPhoto().getId());
+            if(car.getPhoto() != null && car.getPhoto().getId() != 0){
+                ps.setInt(20, car.getPhoto().getId());
+            }else{
+                ps.setNull(20, Types.INTEGER);
+            }
 
             ps.setInt(21, car.getId());
 
