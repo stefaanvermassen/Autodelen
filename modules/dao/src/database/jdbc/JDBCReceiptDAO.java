@@ -24,7 +24,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         " Receipts.receipt_date BETWEEN ? AND ? ";
 
     public static final String DATE_FRAGMENT2 =
-        " Receipts.receipt_date=? ";
+        " Receipts.receipt_date <= ? ";
 
     private static final String RECEIPT_FIELDS = " receipt_id, receipt_name, receipt_date, receipt_fileID, receipt_userID ";
 
@@ -33,7 +33,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
             " LEFT JOIN users as receipt_user on users.user_id = receipt_user ";
 
     public static final String FILTER_FRAGMENT =
-        " WHERE "+ USER_FRAGMENT + DATE_FRAGMENT2 +";";
+        " WHERE "+ USER_FRAGMENT + " AND "+ DATE_FRAGMENT2;
 
     private PreparedStatement getGetAmountOfReceiptsStatement;
     private PreparedStatement getReceiptsListStatement;
@@ -41,7 +41,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private PreparedStatement getGetAmountOfReceiptsStatement() throws SQLException {
         if(getGetAmountOfReceiptsStatement == null) {
-            getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts " + FILTER_FRAGMENT);
+            getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts " + FILTER_FRAGMENT+ ";");
 	    //getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts WHERE Receipts.receipt_date<=?;");
         }
         return getGetAmountOfReceiptsStatement;
@@ -49,7 +49,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     
     private PreparedStatement getReceiptsListStatement() throws SQLException {
         if(getReceiptsListStatement == null) {
-            getReceiptsListStatement = connection.prepareStatement(RECEIPT_QUERY + FILTER_FRAGMENT + "ORDER BY Receipts.receipt_date asc LIMIT ?, ?");
+            getReceiptsListStatement = connection.prepareStatement(RECEIPT_QUERY + FILTER_FRAGMENT + " ORDER BY Receipts.receipt_date asc LIMIT ?, ? ;");
         }
         return getReceiptsListStatement;
     }
@@ -79,7 +79,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, User user){
-	    System.out.println("LISTING");
+	    System.out.println("LISTING2");
         try {
             PreparedStatement ps = getReceiptsListStatement();
             fillFragment(ps, filter, 2, user);
@@ -136,7 +136,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
 	receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
-	    receipt.setFiles(JDBCFileDAO.populateFiles(rs));
+	    receipt.setFiles(JDBCFileDAO.populateFile(rs));
 	}
         if(withDate) {
 	    Object date = rs.getObject(tableName + ".receipt_date");

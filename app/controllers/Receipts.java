@@ -55,14 +55,15 @@ public class Receipts extends Controller {
             if(orderBy == null) {
                 orderBy = FilterField.RECEIPT_DATE;
             }
+System.out.println("LISTING1");
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
+System.out.println("LISTING3");
 
-            //int amountOfResults = dao.getAmountOfReceipts(filter);
-	    int amountOfResults = listOfReceipts.size();
+            int amountOfResults = dao.getAmountOfReceipts(filter);
+	    //int amountOfResults = listOfReceipts.size();
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
             //if(){rendernew()}
-	System.out.println("HERE "+amountOfPages);
             return receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
             throw ex;
