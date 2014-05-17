@@ -1,9 +1,11 @@
-@(error: String, carName: String, carId: Int)
+@(error: String, carName: String, carId: Int, from: String, until: String)
 @scripts = {
     <script>
         var yesImage = "@routes.Assets.at("images/tristate-checkbox/yes.png")";
         var noImage = "@routes.Assets.at("images/tristate-checkbox/no.png")";
         var noneImage = "@routes.Assets.at("images/tristate-checkbox/none.png")";
+        var from = '@from'
+        var until = '@until'
     </script>
     <script src="@routes.Assets.at("javascripts/plugins/tristate-checkbox/main.js")"></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -11,17 +13,14 @@
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/timeinput.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
-    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery-ui.js"))'></script>
-    <script src="@routes.Assets.at("javascripts/plugins/calendar.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/calendar.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/timeinput.css")">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 @app("Reserveren", stylesheets, scripts) {
 
@@ -48,29 +47,23 @@
                     <div class="panel-body">
                         <div class="well">
                             <div class="row">
-                                <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
-                                    <div class="col-lg-12">
-                                        <div id="calendar">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="basicEnv" class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                                <div id="basicEnv" class="col-xs-12">
                                     <h4>@if(carId != -1) { @carName reserveren: } else { Auto's zoeken }</h4><hr />
                                     <input id="input_from_value" class="hidden searchTextField" name="from" value="" />
-                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                    <div class="col-sm-6 col-xs-12">
                                         <label>Reservatie van: </label><br />
                                         <input id="input_from_date" class="form-control" name="test" type="text">
                                     </div>
-                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                    <div class="col-sm-6 col-xs-12">
                                         <label>Tijdstip van: </label><br />
                                         <input id="input_from_time" class="form-control" name="test" type="text"><br />
                                     </div>
                                     <input id="input_to_value" class="hidden searchTextField" name="until" value="" />
-                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                    <div class="col-sm-6 col-xs-12">
                                         <label>Reservatie tot: </label><br />
                                         <input id="input_to_date" class="form-control" name="test" type="text">
                                     </div>
-                                    <div class="col-lg-12 col-md-6 col-sm-6 col-xs-6">
+                                    <div class="col-sm-6 col-xs-12">
                                         <label>Tijdstip tot: </label><br />
                                         <input id="input_to_time" class="form-control" name="test" type="text">
                                     </div>
@@ -92,6 +85,7 @@
                                 </div>
                             </div>
                             <div id="extraFiltering" class="panel-collapse collapse">
+                                <br />
                                 <div class="row">
                                     <div id="extraEnv" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                         <h4>Extra filteropties</h4><hr />
@@ -100,6 +94,7 @@
                                             <div class="userpicker" data-url="@routes.CarPicker.getList()">
                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto" value="@carName"/>
                                                 <input type="hidden" class="searchTextField" name="car_id" value="@if(carId != -1){@carId}" />
+                                                <div class="viewId"></div>
                                                 <ul class="dropdown-menu" role="menu"></ul>
                                             </div>
                                         </div>

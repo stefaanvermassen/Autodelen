@@ -70,6 +70,8 @@ if(typeof beginFilter == 'undefined') {
 }
 var pageLoaded = false;
 
+var intervalLoading;
+var goingLeft = true;
 
 // Initially, we load the first page in ascending order, ordered by the default column, without filtering
 $(document).ready(loadPage(beginPage, beginPageSize, beginAsc, beginOrder, beginFilter));
@@ -116,25 +118,33 @@ function loadPage(page, pageSize, asc, orderBy, search) {
         $("#resultsTable").find('table').find('tbody').html($('<tr>')
                 .append($('<td class="loading">')
                     .attr('colspan', cols)
-                    .attr('style', 'text-align: center; background-color: #FFFFFF; padding: 8px;')
+                    .attr('style', 'background-color: #FFFFFF; position: relative;')
                     .append($('<img>')
+                        .attr('id', 'loadingImage')
                         .attr('alt', 'Laden...')
                         .attr('src', loadingImage)
-                )
+                    .append($('<p>')
+                        .attr('id', 'loadingText')
+                        .text('De inhoud is onderweg...'))
+                ).attr('style', 'overflow:hidden;')
             )
         );
     // Fill in loading image if the table is not yet rendered
     } else {
         $("#resultsTable").append($('<div class="loading">')
-            .attr('style', 'text-align: center;')
+            .attr('style', 'position: relative;')
             .append($('<img>')
+                .attr('id', 'loadingImage')
                 .attr('alt', 'Laden...')
                 .attr('src', loadingImage)
                 )
             .append($('<p>')
-                .text('De tabel is onderweg...'))
-        );
+                .attr('id', 'loadingText')
+                .text('De inhoud is onderweg...'))
+        ).attr('style', 'overflow:hidden;');
     }
+
+    intervalLoading = setInterval(moveLoadingIcon, 50);
 
     route(page, pageSize, asc, orderBy, search).ajax({
         success : function(html) {
@@ -206,7 +216,7 @@ function loadPage(page, pageSize, asc, orderBy, search) {
                 // Add the buttons to the html-file
                 $("#pagination").html(buttonString);
 
-                // Now let's add the appropriote onclick-functions to the buttons and disable them if needed
+                // Now let's add the appropriate onclick-functions to the buttons and disable them if needed
                 var buttons = document.getElementsByClassName('buttons');
                 for(var i = 0; i < buttons.length; i++) {
                     var p = parseInt(buttons[i].getAttribute("name"));
@@ -287,4 +297,36 @@ function createSearchString(fields, values) {
         }
     }
     return searchString;
+}
+
+function moveLoadingIcon() {
+
+    if(pageLoaded) {
+        clearInterval(intervalLoading);
+    }
+
+    if($(".loading").position().left <= $("#resultsTable").position().left) {
+        goingLeft = false;
+        $('#loadingImage').attr('style', '');
+    }
+    if($(".loading").position().left >= ($("#resultsTable").innerWidth() - $('#loadingImage').outerWidth())) {
+        goingLeft = true;
+        $('#loadingImage').attr('style', '' +
+            '-moz-transform: scaleX(-1);' +
+            '-o-transform: scaleX(-1);' +
+            '-webkit-transform: scaleX(-1);' +
+            'transform: scaleX(-1);' +
+            'filter: FlipH;' +
+            '-ms-filter: "FlipH";'
+        );
+    }
+    var move;
+    if(goingLeft) {
+        move = '-=5';
+    } else {
+        move = '+=5';
+    }
+    $(".loading").animate({
+        left: move
+    }, 25);
 }

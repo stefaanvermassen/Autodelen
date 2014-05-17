@@ -225,6 +225,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', #approved by car_admin
 	`car_cost_time` DATETIME,
 	`car_cost_mileage` DECIMAL(10,1),
+	`car_cost_billed` DATE DEFAULT NULL,
 	`car_cost_created_at` DATETIME,
 	`car_cost_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
@@ -241,6 +242,8 @@ CREATE TABLE `carrides` (
   `car_ride_end_mileage` DECIMAL(10,1),
   `car_ride_damage` BIT(1) NOT NULL DEFAULT 0,
   `car_ride_refueling` INT NOT NULL,
+  `car_ride_cost` DECIMAL(19,4) DEFAULT NULL,
+  `car_ride_billed` DATE DEFAULT NULL,
   `car_ride_created_at` DATETIME,
   `car_ride_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`car_ride_car_reservation_id`),
@@ -255,6 +258,7 @@ CREATE TABLE `refuels` (
 	`refuel_file_id` INT,
 	`refuel_amount` DECIMAL(19,4),
 	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', #approved by owner
+	`refuel_billed` DATE DEFAULT NULL,
    	`refuel_created_at` DATETIME,
    	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),

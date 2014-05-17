@@ -1,6 +1,7 @@
 package models;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 
 /**
  * Created by Stefaan Vermassen on 26/04/14.
@@ -11,6 +12,7 @@ public class Refuel {
     private File proof;
     private BigDecimal amount;
     private RefuelStatus status;
+    private Date billed;
 
     public Refuel(int id, CarRide carRide, File proof, BigDecimal amount, RefuelStatus status) {
         this.id = id;
@@ -65,4 +67,8 @@ public class Refuel {
     public void setStatus(RefuelStatus status) {
         this.status = status;
     }
+
+    public Date getBilled() { return billed; }
+
+    public void setBilled(Date billed) { this.billed = billed; }
 }

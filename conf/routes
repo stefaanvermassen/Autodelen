@@ -17,6 +17,7 @@ POST        /userroles/edit                         controllers.UserRoles.editPo
 
 # Drives
 GET         /drives                                 controllers.Drives.index()
+GET         /drives_tab                             controllers.Drives.indexWithStatus(status: String)
 GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drives/admin                           controllers.Drives.drivesAdmin()
 GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
@@ -29,6 +30,7 @@ GET         /drives-cancelled                       controllers.Drives.cancelRes
 
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
+POST        /reserve                                controllers.Reserve.indexWithDate()
 GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
 GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
@@ -38,7 +40,6 @@ POST        /reserve/reservation                    controllers.Reserve.confirmR
 # Receipts
 GET         /receipts                                  controllers.Receipts.index()
 GET         /receipts/page                             controllers.Receipts.showReceiptsPage(page: Int, asc: Int ?= 1,orderBy: String ?= "", filter: String ?= "")
-GET /settings controllers.Settings.index()
 
 
 # User pages
@@ -49,11 +50,13 @@ GET         /messages                               controllers.Messages.showMes
 GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/sent/page                     controllers.Messages.showSentMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
+GET         /messages/markallasread                 controllers.Messages.markAllMessagesAsRead()
 GET         /messages/new                           controllers.Messages.newMessage()
 GET         /messages/reply                         controllers.Messages.reply(userId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
 GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
+GET         /notifications/markallasread            controllers.Notifications.markAllNotificationsAsRead()
 GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Profile pages
@@ -191,6 +194,13 @@ GET         /damages/finished                       controllers.Damages.setDamag
 # Maps
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                              controllers.Maps.showMap()
+
+# Reports
+GET         /reports                                controllers.Reports.index()
+GET         /reports/users                          controllers.Reports.getUsers()
+GET         /reports/reservations                   controllers.Reports.getReservations()
+GET         /reports/reservations/owner             controllers.Reports.getReservationsForOwner()
+GET         /reports/cars                           controllers.Reports.getCars()
 
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
