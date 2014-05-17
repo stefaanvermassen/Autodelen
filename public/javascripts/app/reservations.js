@@ -37,8 +37,6 @@ $(document).ready(function() {
     fromTime.timeinput();
     toTime.timeinput();
 
-
-
     $('#extraButton').on('click', function() {
         if(!$('#extraFiltering').hasClass('in')) {
             $('#extraEnv').append($('#filterbuttons'));
