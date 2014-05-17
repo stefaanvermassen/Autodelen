@@ -58,7 +58,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private PreparedStatement getCreateReceiptStatement() throws SQLException {
         if (createReceiptStatement == null) {
-            createReceiptStatement = connection.prepareStatement("INSERT INTO Reciepts (receipt_name, receipt_date ,receipt_fileID,receipt_userID,receipt_price) VALUES (?,?,?,?,?);",
+            createReceiptStatement = connection.prepareStatement("INSERT INTO Receipts (receipt_name, receipt_date ,receipt_fileID,receipt_userID,receipt_price) VALUES (?,?,?,?,?);",
                     new String[]{"receipt_id"});
         }
         return createReceiptStatement;
