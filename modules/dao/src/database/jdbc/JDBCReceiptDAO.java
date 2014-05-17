@@ -3,6 +3,7 @@ package database.jdbc;
 import database.*;
 import models.Receipt;
 import models.User;
+import models.File;
 import org.joda.time.DateTime;
 
 import java.sql.*;
@@ -37,6 +38,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private PreparedStatement getGetAmountOfReceiptsStatement;
     private PreparedStatement getReceiptsListStatement;
+    private PreparedStatement createReceiptStatement;
 
 
     private PreparedStatement getGetAmountOfReceiptsStatement() throws SQLException {
@@ -53,6 +55,15 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         }
         return getReceiptsListStatement;
     }
+
+    private PreparedStatement getCreateReceiptStatement() throws SQLException {
+        if (createReceiptStatement == null) {
+            createReceiptStatement = connection.prepareStatement("INSERT INTO Reciepts (receipt_name, receipt_date ,receipt_fileID,receipt_userID) VALUES (?,?,?,?);",
+                    new String[]{"receipt_id"});
+        }
+        return createReceiptStatement;
+    }
+
 
     /**
      * @param filter The filter to apply to
@@ -145,4 +156,38 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         }
         return receipt;
     }
+
+    @Override
+    public Receipt createReceipt(String name, DateTime date, File file, User user) throws DataAccessException {
+	//(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments)
+	if(name==null){
+	    throw new DataAccessException("Tried to create receipt without a name");
+	}
+        if (user.getId() == 0){
+            throw new DataAccessException("Tried to create receipt without receipt user");
+	}
+        if (file.getId() == 0){
+            throw new DataAccessException("Tried to create receipt without receipt file");
+	}
+        try {
+            PreparedStatement ps = getCreateReceiptStatement();
+            ps.setString(1, name);
+            ps.setTimestamp(2, new Timestamp(date.getMillis())); //TODO: timezones?? convert to datetime see below
+	    ps.setInt(3, file.getId());
+            ps.setInt(4, user.getId());
+
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating infosession.");
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+                return new Receipt(keys.getInt(1), name, file, date, user);
+            } catch (SQLException ex) {
+                throw new DataAccessException("Failed to get primary key for new receipt.", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not create receipt.", ex);
+        }
+    }
+
 }

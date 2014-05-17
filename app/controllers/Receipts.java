@@ -71,8 +71,22 @@ public class Receipts extends Controller {
         }
     }
 
-    public static void generatePDF() {
-        try {/*
+    public static void newReceipt(String filename) {
+        try {
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream(filename));
+            document.open();
+	    generatePDF(document);
+	    addtoDataBase(filename);
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	
+    }
+
+    public static void generatePDF(Document document) {
+        try {
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
             document.open();

@@ -59,7 +59,6 @@ public class Receipts extends Controller {
                 orderBy = FilterField.RECEIPT_DATE;
             }
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
-            System.out.println("curUser: "+ currentUser);
 
             int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
 	    //int amountOfResults = listOfReceipts.size();
@@ -72,8 +71,21 @@ public class Receipts extends Controller {
         }
     }
 
-    public static void generatePDF() {
-        try {/*
+    public static void newReceipt(String filename) {
+        try {
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream(filename));
+            document.open();
+	    generatePDF(document);
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	
+    }
+
+    public static void generatePDF(Document document) {
+        try {
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
             document.open();
