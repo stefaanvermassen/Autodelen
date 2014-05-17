@@ -48,6 +48,7 @@
 
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 
 @app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
@@ -92,6 +93,7 @@
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
                                                                 <input type="hidden" name="userId" value="@user.getId" />
+                                                                <div class="viewId"></div>
                                                                 <ul class="dropdown-menu" role="menu"></ul>
                                                             </div>
                                                         }
@@ -100,6 +102,7 @@
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
                                                                 <input type="hidden" name="userId" value="@user.getId"/>
+                                                                <div class="viewId"></div>
                                                                 <ul class="dropdown-menu" role="menu"></ul>
                                                             </div>
                                                         }

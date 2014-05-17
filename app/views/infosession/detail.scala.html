@@ -20,6 +20,7 @@
 
 @stylesheets = {
     <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 
 @app("Details Infosessie", stylesheets, scripts) {
@@ -60,6 +61,7 @@
                                 <label for="userPickerBox">Gebruikersnaam:</label>
                                 <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off" />
                                 <input type="hidden" name="userid" value=""/>
+                                <div class="viewId"></div>
                                 <ul class="dropdown-menu" role="menu"></ul>
                             </div>
                             </div>

@@ -20,6 +20,7 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/timeinput.css")">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 @app("Reserveren", stylesheets, scripts) {
 
@@ -93,6 +94,7 @@
                                             <div class="userpicker" data-url="@routes.CarPicker.getList()">
                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto" value="@carName"/>
                                                 <input type="hidden" class="searchTextField" name="car_id" value="@if(carId != -1){@carId}" />
+                                                <div class="viewId"></div>
                                                 <ul class="dropdown-menu" role="menu"></ul>
                                             </div>
                                         </div>
