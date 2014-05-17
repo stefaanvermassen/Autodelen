@@ -79,6 +79,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, User user){
+	    System.out.println("LISTING");
         try {
             PreparedStatement ps = getReceiptsListStatement();
             fillFragment(ps, filter, 2, user);
@@ -91,13 +92,13 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         }
     }
 
-    private List<User> getReceipts(PreparedStatement ps) {
-        List<Receipts> receipts = new ArrayList<>();
+    private List<Receipt> getReceipts(PreparedStatement ps) {
+        List<Receipt> receipts = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 receipts.add(populateReceipt(rs, false, true));
             }
-            return users;
+            return receipts;
         } catch (SQLException ex) {
             throw new DataAccessException("Error reading receipts resultset", ex);
         }
@@ -125,7 +126,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     public static Receipt populateReceipt(ResultSet rs, boolean withDate, boolean withFiles) throws SQLException {
-        return populateReceipt(rs, withPassword, withRest, "Receipts");
+        return populateReceipt(rs, withDate, withFiles, "Receipts");
     }
 
     public static Receipt populateReceipt(ResultSet rs, boolean withDate, boolean withFiles, String tableName) throws SQLException {
@@ -133,14 +134,16 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 		rs.getInt(tableName + ".receipt_id"), 
 		rs.getString(tableName + ".receipt_name"));
 
-	receipt.setUser(JDBCUserDAO.populateUser(rs, "receipt_user"))
+	receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
-	    receipt.setFiles(JDBCFilesDAO.populateFiles(rs, "receipt_file"));
+	    receipt.setFiles(JDBCFileDAO.populateFiles(rs));
 	}
         if(withDate) {
-	    rs.getObject("setting_after") == null ? null : receipt.setDate(new DateTime(rs.getDate("setting_after")))
+	    Object date = rs.getObject(tableName + ".receipt_date");
+            if(date!=null){
+                receipt.setDate(new DateTime(date));
+            }
         }
-
-        return user;
+        return receipt;
     }
 }

@@ -55,6 +55,7 @@ public class Receipts extends Controller {
             if(orderBy == null) {
                 orderBy = FilterField.RECEIPT_DATE;
             }
+	    System.out.println("LISTING");
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
 
             //int amountOfResults = dao.getAmountOfReceipts(filter);

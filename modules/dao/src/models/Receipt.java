@@ -13,11 +13,11 @@ public class Receipt {
 
     private int id;
     private String name;
-    private Files files;
+    private File files;
     private DateTime date;
     private User user;
 
-    public Receipt(int id, String name, Files files, DateTime date, User user) {
+    public Receipt(int id, String name, File files, DateTime date, User user) {
         this.id = id;
         this.name = name;
         this.files = files;
@@ -46,11 +46,11 @@ public class Receipt {
         this.name = name;
     }
 
-    public Files getFiles() {
+    public File getFiles() {
         return files;
     }
 
-    public void setFiles(Files files) {
+    public void setFiles(File files) {
         this.files = files;
     }
 
@@ -70,7 +70,7 @@ public class Receipt {
         this.user = user;
     }
 
-    public static Receipt generate(int id, String name, FileGroup files, DateTime date, User user){
+    public static Receipt generate(int id, String name, File files, DateTime date, User user){
         HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("rapport");
         //HSSFSheet sheet = workbook.createSheet("Rapport voor "+user.getId()+" "+date.toYearMonthDay().toString());
@@ -133,3 +133,4 @@ data.put("4", new Object[] {3d, "Dean", 700000d});
 	return new Receipt(id, name, files, date, user);
     }
 }
+
