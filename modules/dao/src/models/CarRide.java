@@ -1,5 +1,7 @@
 package models;
 
+import java.sql.Date;
+
 /**
  * Created by HannesM on 10/03/14.
  */
@@ -9,6 +11,8 @@ public class CarRide {
     private int startMileage;
     private int endMileage;
     private boolean damaged;
+    private double cost;
+    private Date billed;
 
     private int refueling;
 
@@ -63,4 +67,12 @@ public class CarRide {
     public void setDamaged(boolean damaged) {
         this.damaged = damaged;
     }
+
+    public double getCost() { return cost; }
+
+    public void setCost(double cost) { this.cost = cost; }
+
+    public Date getBilled() { return billed; }
+
+    public void setBilled(Date billed) { this.billed = billed; }
 }

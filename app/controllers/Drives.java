@@ -11,6 +11,7 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import providers.DataProvider;
+import providers.SettingProvider;
 import views.html.drives.driveDetails;
 import views.html.drives.drivesAdmin;
 import views.html.drives.drives;
@@ -438,6 +439,10 @@ public class Drives extends Controller {
                 // Owner is allowed to adjust the information
                 ride.setStartMileage(detailsForm.get().startMileage);
                 ride.setEndMileage(detailsForm.get().endMileage);
+            }
+
+            if(isOwner) {
+                calculateDriveCost(ride, reservation.getFrom());
                 dao.updateCarRide(ride);
             }
             // Unable to create or retrieve the drive
@@ -487,6 +492,7 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             ride.setStatus(true);
+            calculateDriveCost(ride, reservation.getFrom());
             dao.updateCarRide(ride);
             reservation.setStatus(ReservationStatus.FINISHED);
             rdao.updateReservation(reservation);
@@ -495,6 +501,28 @@ public class Drives extends Controller {
         } catch(DataAccessException ex) {
             throw ex;
         }
+    }
+
+    private static void calculateDriveCost(CarRide ride, DateTime date) {
+        SettingProvider provider = DataProvider.getSettingProvider();
+
+        double cost = 0;
+        int distance = ride.getEndMileage() - ride.getStartMileage();
+        int levels = provider.getInt("cost_levels", date);
+
+        for (int level = 0; level < levels; level++) {
+            int limit;
+
+            if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date))) {
+                cost += distance * provider.getDouble("cost_" + level, date);
+                break;
+            } else {
+                cost += limit * provider.getDouble("cost_" + level, date);
+                distance -= limit;
+            }
+        }
+
+        ride.setCost(cost);
     }
 
     /**
