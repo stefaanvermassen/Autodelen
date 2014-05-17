@@ -151,9 +151,38 @@ private static void createTable(Document document)
     int aantalRitten=10;
 
     int amountOfComulns=5+aantalCategorien;
-    PdfPTable table = new PdfPTable(amountOfComulns); //columns.
-    String[] row=new String[amountOfComulns];
+    PdfPTable table = new PdfPTable(amountOfComulns);
 
+    /*Hoofdding*/
+    add(table,"Auto");
+    add(table,"Datum");
+    add(table,"Aantal kms");
+    
+	for(int j=0;j<aantalCategorien;j++){
+	    String cell="0-";
+	    if(j>0){
+		cell=categorienBovengrens[j-1]+"-";
+	    }
+	    
+	    add(table,cell+categorienBovengrens[j]+" km");
+	}
+    add(table,"Kostprijs");
+    add(table,"Tank-");
+
+    add(table,"");
+    add(table,"");
+    add(table,"");
+    
+	for(int j=0;j<aantalCategorien;j++){
+	    add(table,"kms aan "+categoriePrijs[j]);
+	}
+    add(table,"kilometers");
+    add(table,"beurten");
+    
+
+
+
+    /*Middenstuk*/
     for(int i=0;i<aantalRitten;i++){
 	//**variabelen
 	String naamAuto="Klorofil";
@@ -162,26 +191,29 @@ private static void createTable(Document document)
 	int kostprijskm=10;
 	int tankbeurten=44;
 	
-	row[0] = naamAuto;
-	row[1] = date;
-	row[2] = ""+aantalkm;
+	add(table,naamAuto);
+	add(table,date);
+	add(table,""+aantalkm);
 
 	for(int j=0;j<aantalCategorien;j++){
 	    //**variabelen
             int kmInCategorie=5;
 	    
-	    row[3+j]=""+kmInCategorie;
+	    add(table,""+kmInCategorie);
 	}
-	row[amountOfComulns-2] = ""+kostprijskm;
-	row[amountOfComulns-2] = ""+tankbeurten;
+	add(table,""+kostprijskm);
+	add(table,""+tankbeurten);
 
-	for(String cell:row){
-	    table.addCell(new PdfPCell(new Paragraph(cell)));
-	}
     }
+
+    /*Slot*/
+
     document.add(table);
 }
 
+    public static void add(PdfPTable table, String cell) {
+        table.addCell(new PdfPCell(new Paragraph(cell)));
+    }
 
 /*    public void endPeriod() {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
