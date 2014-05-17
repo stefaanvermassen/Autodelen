@@ -58,7 +58,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private PreparedStatement getCreateReceiptStatement() throws SQLException {
         if (createReceiptStatement == null) {
-            createReceiptStatement = connection.prepareStatement("INSERT INTO Reciepts (receipt_name, receipt_date ,receipt_fileID,receipt_userID) VALUES (?,?,?,?);",
+            createReceiptStatement = connection.prepareStatement("INSERT INTO Reciepts (receipt_name, receipt_date ,receipt_fileID,receipt_userID,receipt_price) VALUES (?,?,?,?,?);",
                     new String[]{"receipt_id"});
         }
         return createReceiptStatement;
@@ -142,7 +142,8 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     public static Receipt populateReceipt(ResultSet rs, boolean withDate, boolean withFiles, String tableName) throws SQLException {
         Receipt receipt = new Receipt(
 		rs.getInt(tableName + ".receipt_id"), 
-		rs.getString(tableName + ".receipt_name"));
+		rs.getString(tableName + ".receipt_name"),
+		rs.getInt(tableName + ".receipt_price"));
 
 	//receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
@@ -158,7 +159,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     @Override
-    public Receipt createReceipt(String name, DateTime date, File file, User user) throws DataAccessException {
+    public Receipt createReceipt(String name, DateTime date, File file, User user, int price) throws DataAccessException {
 	//(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments)
 	if(name==null){
 	    throw new DataAccessException("Tried to create receipt without a name");
@@ -175,13 +176,14 @@ public class JDBCReceiptDAO implements ReceiptDAO {
             ps.setTimestamp(2, new Timestamp(date.getMillis())); //TODO: timezones?? convert to datetime see below
 	    ps.setInt(3, file.getId());
             ps.setInt(4, user.getId());
+            ps.setInt(5, price);
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating infosession.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Receipt(keys.getInt(1), name, file, date, user);
+                return new Receipt(keys.getInt(1), name, file, date, user, price);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new receipt.", ex);
             }
@@ -189,5 +191,4 @@ public class JDBCReceiptDAO implements ReceiptDAO {
             throw new DataAccessException("Could not create receipt.", ex);
         }
     }
-
 }

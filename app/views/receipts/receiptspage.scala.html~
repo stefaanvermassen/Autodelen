@@ -4,7 +4,9 @@
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
     <thead>
         <tr role="row">
-            <th name="user_name" class="sortable" tabindex="0" >Naam</th>
+            <th name="reciept_name" class="sortable" tabindex="0" >Naam</th>
+            <th name="reciept_price" class="sortable" tabindex="0" >Bedrag</th>
+            <th name="reciept_date" class="sortable" tabindex="0" >Datum</th>
             <th>Acties</th>
         </tr>
     </thead>
@@ -18,7 +20,9 @@
         } else {
                 @for(receipt <- receipts) {
                     <tr>
-                        <td>@receipt.getName @receipt.getName</td>
+                        <td>@receipt.getName</td>
+                        <td>@receipt.getPrice()</td>
+                        <td>@receipt.getDate</td>
                         <td>
                             <div class="btn-group btn-group-xs">
 				@if(receipt.getFiles()!=null) {

@@ -17,6 +17,7 @@ import java.util.List;
 import play.api.templates.Html;
 import com.itextpdf.text.*;
 import java.io.FileOutputStream;
+import com.itextpdf.text.pdf.PdfWriter;
 
 public class Receipts extends Controller {
 
@@ -27,8 +28,7 @@ public class Receipts extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     public static Result index() {
-	//Receipt.generate(111, "name", null, DateTime.now(), DatabaseHelper.getUserProvider().getUser());
-	generatePDF();
+	//generatePDF();
         return ok(receipts.render());
     }
 
@@ -87,25 +87,19 @@ public class Receipts extends Controller {
 
     public static void addtoDataBase(String filename) {
 	try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            ReceiptsDAO dao = context.getReceiptsDAO();
+            ReceiptDAO dao = context.getReceiptDAO();
             try {
 		//**datum**
 		DateTime date=DateTime.now(); 
 		//**gebruiker**
 		User user=null;
+		//**price**
+		int price=0;
 
                 FileDAO fdao = context.getFileDAO();
 		File file=fdao.createFile(filename, filename, "pdf", -1);
 
-
-                InfoSessionType type = InfoSessionType.getTypeFromString(createForm.get().type);
-                String typeAlternative = null;
-                if (type.equals(InfoSessionType.OTHER)) {
-                    typeAlternative = createForm.get().type_alternative;
-                }
-
-                Reciept reciept = dao.createReceipt(filename, date, File file, User user)
-		//createReciept(type, typeAlternative, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments);
+                Receipt reciept = dao.createReceipt(filename, date, file, user, price);
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;
@@ -116,7 +110,7 @@ public class Receipts extends Controller {
     }
 
     public static void generatePDF(Document document) {
-        try {
+        try {/*
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
             document.open();
