@@ -85,6 +85,9 @@ public class Receipts extends Controller {
 	
     }
 
+    public static void addtoDataBase(String filename) {
+    }
+
     public static void generatePDF(Document document) {
         try {
             Document document = new Document();
