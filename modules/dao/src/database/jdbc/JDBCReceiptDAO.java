@@ -136,7 +136,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
 	//receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
-	    receipt.setFiles(JDBCFileDAO.populateFile(rs));
+	    receipt.setFiles(JDBCFileDAO.populateFile(rs, "files"));
 	}
         if(withDate) {
 	    Object date = rs.getObject(tableName + ".receipt_date");

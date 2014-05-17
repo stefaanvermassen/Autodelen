@@ -21,7 +21,9 @@
                         <td>@receipt.getName @receipt.getName</td>
                         <td>
                             <div class="btn-group btn-group-xs">
-                                <a class="btn btn-primary" href="receipt.getFile.getPath()">Bekijk</a>
+				@if(receipt.getFiles()!=null) {
+                                    <a class="btn btn-primary" href="receipt.getFiles.getPath()">Bekijk</a>
+				}
                             </div>
                         </td>
                     </tr>
