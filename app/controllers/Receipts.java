@@ -15,6 +15,8 @@ import views.html.receipts.*;
 import java.sql.Date;
 import java.util.List;
 import play.api.templates.Html;
+import com.itextpdf.text.*;
+import java.io.FileOutputStream;
 
 public class Receipts extends Controller {
 
@@ -26,6 +28,7 @@ public class Receipts extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     public static Result index() {
 	//Receipt.generate(111, "name", null, DateTime.now(), DatabaseHelper.getUserProvider().getUser());
+	generatePDF();
         return ok(receipts.render());
     }
 
@@ -55,9 +58,7 @@ public class Receipts extends Controller {
             if(orderBy == null) {
                 orderBy = FilterField.RECEIPT_DATE;
             }
-System.out.println("LISTING1");
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
-System.out.println("LISTING3"+listOfReceipts.size());
 
             int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
 	    //int amountOfResults = listOfReceipts.size();
@@ -70,6 +71,57 @@ System.out.println("LISTING3"+listOfReceipts.size());
         }
     }
 
+    public void generatePDF() {
+        try {
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
+            document.open();
+	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
+            Image image2 = Image.getInstance(new URL(imageUrl));
+            document.add(image2);
+
+            //addMetaData(document);
+            //addTitlePage(document);
+	    //Anchor anchor = new Anchor("First Chapter", catFont);
+	    //createTable(Section subCatPart);
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+private static void createTable(Section subCatPart)
+      throws BadElementException {
+    PdfPTable table = new PdfPTable(3);
+
+    // t.setBorderColor(BaseColor.GRAY);
+    // t.setPadding(4);
+    // t.setSpacing(4);
+     t.setBorderWidth(0);
+
+    PdfPCell c1 = new PdfPCell(new Phrase("Afrekening"));
+    c1.setHorizontalAlignment(Element.ALIGN_CENTER);
+    table.addCell(c1);
+
+    c1 = new PdfPCell(new Phrase("nummer"));
+    c1.setHorizontalAlignment(Element.ALIGN_CENTER);
+    table.addCell(c1);
+
+    c1 = new PdfPCell(new Phrase("Table Header 3"));
+    c1.setHorizontalAlignment(Element.ALIGN_CENTER);
+    table.addCell(c1);
+    table.setHeaderRows(1);
+
+    table.addCell("1.0");
+    table.addCell("1.1");
+    table.addCell("1.2");
+    table.addCell("2.1");
+    table.addCell("2.2");
+    table.addCell("2.3");
+
+    subCatPart.add(table);
+
+  }
 
 
 

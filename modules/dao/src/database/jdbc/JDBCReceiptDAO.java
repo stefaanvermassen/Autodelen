@@ -28,7 +28,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
     private static final String RECEIPT_FIELDS = " receipt_id, receipt_name, receipt_date, receipt_fileID, receipt_userID ";
 
-    private static final String RECEIPT_QUERY = "SELECT " + RECEIPT_FIELDS + " FROM Receipts " +
+    private static final String RECEIPT_QUERY = "SELECT * FROM Receipts " +
             " LEFT JOIN files ON files.file_id = Receipts.receipt_fileID " +
             " LEFT JOIN Users ON users.user_id = Receipts.receipt_userID ";
 
@@ -79,7 +79,6 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, User user){
-	    System.out.println("LISTING2");
         try {
             PreparedStatement ps = getReceiptsListStatement();
             fillFragment(ps, filter, 1, user);
