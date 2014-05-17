@@ -17,7 +17,7 @@ import java.util.List;
 import play.api.templates.Html;
 import com.itextpdf.text.*;
 import java.io.FileOutputStream;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import java.net.URL;
 
 public class Receipts extends Controller {
@@ -118,15 +118,16 @@ public class Receipts extends Controller {
 	    String eindPeriode= "15 maart 2014";
 	    User gebruiker= DataProvider.getUserProvider().getUser();
 
+	    /*Hoofdding*/
 	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
             Image image2 = Image.getInstance(new URL(imageUrl));
             document.add(image2);
 
-            //addMetaData(document);
-            //addTitlePage(document);
-	    //Anchor anchor = new Anchor("First Chapter", catFont);
+	    /*Tabel*/
 	    createTable(document);
-	    //Beter meer in variabelen
+
+	    /*Voetnoot*/
+	    /*In templates steken?*/
 	    document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB"));
 	    document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent"));
 	    document.add(new Paragraph("Gelieve de afrekening te betalen voor " + vervaldatum));
@@ -136,38 +137,50 @@ public class Receipts extends Controller {
     }
 
 private static void createTable(Document document)
-      throws BadElementException {/*
-    PdfPTable table = new PdfPTable(3);
+      throws BadElementException, DocumentException {
+    //**variabelen
+    int aantalCategorien= 3;
+    int[] categorienBovengrens=new int[aantalCategorien];
+    double[] categoriePrijs=new double[aantalCategorien];
+    for(int i=1;i<=aantalCategorien;i++){
+        //Bovengrens
+        categorienBovengrens[i-1]=i*100;
+        //Prijs
+        categoriePrijs[i-1]=i*0.21;
+    }
+    int aantalRitten=10;
 
-    // t.setBorderColor(BaseColor.GRAY);
-    // t.setPadding(4);
-    // t.setSpacing(4);
-     t.setBorderWidth(0);
+    int amountOfComulns=5+aantalCategorien;
+    PdfPTable table = new PdfPTable(amountOfComulns); //columns.
+    String[] row=new String[amountOfComulns];
 
-    PdfPCell c1 = new PdfPCell(new Phrase("Afrekening"));
-    c1.setHorizontalAlignment(Element.ALIGN_CENTER);
-    table.addCell(c1);
+    for(int i=0;i<aantalRitten;i++){
+	//**variabelen
+	String naamAuto="Klorofil";
+	String date="1986";
+	int aantalkm = 999;
+	int kostprijskm=10;
+	int tankbeurten=44;
+	
+	row[0] = naamAuto;
+	row[1] = date;
+	row[2] = ""+aantalkm;
 
-    c1 = new PdfPCell(new Phrase("nummer"));
-    c1.setHorizontalAlignment(Element.ALIGN_CENTER);
-    table.addCell(c1);
+	for(int j=0;j<aantalCategorien;j++){
+	    //**variabelen
+            int kmInCategorie=5;
+	    
+	    row[3+j]=""+kmInCategorie;
+	}
+	row[amountOfComulns-2] = ""+kostprijskm;
+	row[amountOfComulns-2] = ""+tankbeurten;
 
-    c1 = new PdfPCell(new Phrase("Table Header 3"));
-    c1.setHorizontalAlignment(Element.ALIGN_CENTER);
-    table.addCell(c1);
-    table.setHeaderRows(1);
-
-    table.addCell("1.0");
-    table.addCell("1.1");
-    table.addCell("1.2");
-    table.addCell("2.1");
-    table.addCell("2.2");
-    table.addCell("2.3");
-
-    subCatPart.add(table);
-*/
-  }
-
+	for(String cell:row){
+	    table.addCell(new PdfPCell(new Paragraph(cell)));
+	}
+    }
+    document.add(table);
+}
 
 
 /*    public void endPeriod() {
