@@ -13,16 +13,21 @@ public class Receipt {
 
     private int id;
     private String name;
-    private FileGroup files;
+    private Files files;
     private DateTime date;
     private User user;
 
-    public Receipt(int id, String name, FileGroup files, DateTime date, User user) {
+    public Receipt(int id, String name, Files files, DateTime date, User user) {
         this.id = id;
         this.name = name;
         this.files = files;
         this.date = date;
         this.user=user;
+    }
+
+    public Receipt(int id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public int getId() {
@@ -41,12 +46,12 @@ public class Receipt {
         this.name = name;
     }
 
-    public FileGroup getFileGroup() {
+    public Files getFiles() {
         return files;
     }
 
-    public void setFileGroup(FileGroup fileGroup) {
-        this.files = fileGroup;
+    public void setFiles(Files files) {
+        this.files = files;
     }
 
     public DateTime getDate() {

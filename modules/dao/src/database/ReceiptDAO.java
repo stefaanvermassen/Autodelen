@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface ReceiptDAO {
      public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int PAGE_SIZE, Filter filter, User user) throws DataAccessException;
-     public int getAmountOfReceipts(Filter filter); 
+     public int getAmountOfReceipts(Filter filter, User user); 
 }
