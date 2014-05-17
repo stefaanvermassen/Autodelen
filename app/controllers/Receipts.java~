@@ -59,6 +59,7 @@ public class Receipts extends Controller {
                 orderBy = FilterField.RECEIPT_DATE;
             }
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
+            System.out.println("curUser: "+ currentUser);
 
             int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
 	    //int amountOfResults = listOfReceipts.size();
@@ -71,22 +72,27 @@ public class Receipts extends Controller {
         }
     }
 
-    public void generatePDF() {
-        try {
+    public static void generatePDF() {
+        try {/*
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
             document.open();
+	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
+            Image image2 = Image.getInstance(new URL(imageUrl));
+            document.add(image2);
+
             //addMetaData(document);
             //addTitlePage(document);
-            addContent(document);
-            document.close();
+	    //Anchor anchor = new Anchor("First Chapter", catFont);
+	    //createTable(Section subCatPart);
+            document.close();*/
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 private static void createTable(Section subCatPart)
-      throws BadElementException {
+      throws BadElementException {/*
     PdfPTable table = new PdfPTable(3);
 
     // t.setBorderColor(BaseColor.GRAY);
@@ -115,7 +121,7 @@ private static void createTable(Section subCatPart)
     table.addCell("2.3");
 
     subCatPart.add(table);
-
+*/
   }
 
 

@@ -71,8 +71,8 @@ public class Receipts extends Controller {
         }
     }
 
-    public void generatePDF() {
-        try {
+    public static void generatePDF() {
+        try {/*
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
             document.open();
@@ -84,14 +84,14 @@ public class Receipts extends Controller {
             //addTitlePage(document);
 	    //Anchor anchor = new Anchor("First Chapter", catFont);
 	    //createTable(Section subCatPart);
-            document.close();
+            document.close();*/
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 private static void createTable(Section subCatPart)
-      throws BadElementException {
+      throws BadElementException {/*
     PdfPTable table = new PdfPTable(3);
 
     // t.setBorderColor(BaseColor.GRAY);
@@ -120,7 +120,7 @@ private static void createTable(Section subCatPart)
     table.addCell("2.3");
 
     subCatPart.add(table);
-
+*/
   }
 
 
