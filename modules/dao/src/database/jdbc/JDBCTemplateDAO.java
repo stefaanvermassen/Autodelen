@@ -1,6 +1,8 @@
 package database.jdbc;
 
 import database.DataAccessException;
+import database.Filter;
+import database.FilterField;
 import database.TemplateDAO;
 import models.EmailTemplate;
 import models.MailType;
@@ -17,11 +19,26 @@ import java.util.List;
  */
 public class JDBCTemplateDAO implements TemplateDAO {
 
+    private String TEMPLATE_QUERY = "SELECT template_id, template_title, template_body, template_subject, template_send_mail, template_send_mail_changeable " +
+            "FROM templates ";
+
+    private String FILTER_FRAGMENT = " WHERE template_title LIKE ? ";
+
+    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
+        if(filter == null) {
+            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
+            filter = new JDBCFilter();
+        }
+        ps.setString(start, filter.getValue(FilterField.TEMPLATE_NAME));
+    }
+
     private Connection connection;
     private PreparedStatement getTemplateByIdStatement;
     private PreparedStatement getTagsByTemplateIdStatement;
-    private PreparedStatement getAllTemplatesStatement;
     private PreparedStatement updateTemplateStatement;
+    private PreparedStatement getGetTemplateListPageByTitleAscStatement;
+    private PreparedStatement getGetTemplateListPageByTitleDescStatement;
+    private PreparedStatement getGetAmountOfTemplatesStatement;
 
     public JDBCTemplateDAO(Connection connection) {
         this.connection = connection;
@@ -35,12 +52,25 @@ public class JDBCTemplateDAO implements TemplateDAO {
         return getTemplateByIdStatement;
     }
 
-    private PreparedStatement getAllTemplatesStatement() throws SQLException {
-        if (getAllTemplatesStatement == null) {
-            getAllTemplatesStatement = connection.prepareStatement("SELECT template_id, template_title, template_body, template_subject, template_send_mail, template_send_mail_changeable " +
-                    "FROM templates;");
+    private PreparedStatement getGetAmountOfTemplatesStatement() throws SQLException {
+        if(getGetAmountOfTemplatesStatement == null) {
+            getGetAmountOfTemplatesStatement = connection.prepareStatement("SELECT count(template_id) as amount_of_templates " +
+                    "FROM templates " + FILTER_FRAGMENT);
         }
-        return getAllTemplatesStatement;
+        return getGetAmountOfTemplatesStatement;
+    }
+
+    private PreparedStatement getGetTemplateListPageByTitleAscStatement() throws SQLException {
+        if(getGetTemplateListPageByTitleAscStatement == null) {
+            getGetTemplateListPageByTitleAscStatement = connection.prepareStatement(TEMPLATE_QUERY + FILTER_FRAGMENT + " ORDER BY template_title asc LIMIT ?, ?");
+        }
+        return getGetTemplateListPageByTitleAscStatement;
+    }
+    private PreparedStatement getGetTemplateListPageByTitleDescStatement() throws SQLException {
+        if(getGetTemplateListPageByTitleDescStatement == null) {
+            getGetTemplateListPageByTitleDescStatement = connection.prepareStatement(TEMPLATE_QUERY + FILTER_FRAGMENT + " ORDER BY template_title desc LIMIT ?, ?");
+        }
+        return getGetTemplateListPageByTitleDescStatement;
     }
 
     private PreparedStatement getUpdateTemplateStatement() throws SQLException {
@@ -112,21 +142,44 @@ public class JDBCTemplateDAO implements TemplateDAO {
     }
 
     @Override
-    public List<EmailTemplate> getAllTemplates() throws DataAccessException {
-        List<EmailTemplate> templates = new ArrayList<>();
-        try{
-            PreparedStatement ps = getAllTemplatesStatement();
+    public int getAmountOfTemplates(Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfTemplatesStatement();
+            fillFragment(ps, filter, 1);
+
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    templates.add(populateEmailTemplate(rs));
-                }
-                return templates;
+                if(rs.next())
+                    return rs.getInt("amount_of_templates");
+                else return 0;
+
             } catch (SQLException ex) {
-                throw new DataAccessException("Error reading template resultset", ex);
+                throw new DataAccessException("Error reading count of templates", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of templates", ex);
+        }
+    }
+
+    @Override
+    public List<EmailTemplate> getTemplateList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = null;
+            switch(orderBy) {
+                default: // TEMPLATE_NAME
+                    ps = asc ? getGetTemplateListPageByTitleAscStatement() : getGetTemplateListPageByTitleDescStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create getTemplateList statement");
             }
 
-        }catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch templates.", ex);
+            fillFragment(ps, filter, 1);
+            int first = (page-1)*pageSize;
+            ps.setInt(2, first);
+            ps.setInt(3, pageSize);
+            return getTemplates(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of templates", ex);
         }
     }
 
@@ -144,5 +197,17 @@ public class JDBCTemplateDAO implements TemplateDAO {
             e.printStackTrace();
         }
 
+    }
+
+    private List<EmailTemplate> getTemplates(PreparedStatement ps) {
+        List<EmailTemplate> templates = new ArrayList<>();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                templates.add(populateEmailTemplate(rs));
+            }
+            return templates;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error reading templates resultset", ex);
+        }
     }
 }

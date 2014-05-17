@@ -4,8 +4,8 @@ package models;
  * Created by HannesM on 14/03/14.
  */
 public enum InfoSessionType {
-    NORMAL("Normaal"),
-    OWNER("Eigenaar"),
+    NORMAL("Autolener"),
+    OWNER("Autoeigenaar"),
     OTHER("Ander");
 
     // Enum implementation

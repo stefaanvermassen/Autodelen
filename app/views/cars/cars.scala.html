@@ -1,10 +1,7 @@
 @(cars: List[Car])
-
     @scripts = {
-
     }
     @stylesheets = {
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     }
 @import providers.DataProvider;
 @app("Auto's", stylesheets, scripts) {
@@ -24,12 +21,8 @@
                         DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_OWNER)) { isAdmin =>
                     @if(isAdmin) {
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
-                            </div>
-                                <!-- /.panel-heading -->
                             <div class="panel-body">
-                                <a class="btn btn-primary btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
+                                <a class="btn btn-default btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
                             </div>
                                 <!-- /.panel-body -->
                         </div>
@@ -48,21 +41,20 @@
                                         <th>Naam</th>
                                         <th>Merk</th>
                                         <th>Actief</th>
-                                        <th>Eigenaar</th>
                                         <th>Acties</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 @if(cars.isEmpty) {
                                     <tr>
-                                        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="6">
+                                        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8px ;" colspan="6">
                                             Je hebt momenteel geen auto in het systeem.
                                         </td>
                                     </tr>
                                 } else {
                                     @for(car <- cars) {
                                         <tr>
-                                            <td>@car.getName</td>
+                                            <td><a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
                                             <td>@car.getBrand</td>
                                             <td>
                                                 @if(car.isActive) {
@@ -71,11 +63,10 @@
                                                     <span class="label label-danger">Non-actief</span>
                                                 }
                                             </td>
-                                            <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.getFirstName @car.getOwner.getLastName</a></td>
                                             <td>
                                                 <div class="btn-group btn-group-xs">
-                                                    <a class="btn btn-primary" href="@routes.Cars.detail(car.getId)">beheer</a>
-                                                    <a class="btn btn-success" href="@routes.Reserve.indexWithCar(car.getName, car.getId)">reserveer</a>
+                                                    <a class="btn btn-primary" href="@routes.Cars.editCar(car.getId)">Wijzig</a>
+                                                    <a class="btn btn-success" href="@routes.Reserve.indexWithCar(car.getName, car.getId)">Reserveer</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -83,6 +74,12 @@
                                 }
                                 </tbody>
                             </table>
+                        </div><br />
+                        <div class="row">
+                            <div class="well col-xs-10 col-xs-offset-1">
+                                <div id="calendar">
+                                </div>
+                            </div>
                         </div>
                     </div>
                         <!-- /.panel-body -->

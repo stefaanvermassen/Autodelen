@@ -18,15 +18,15 @@ function loadModal(carId) {
 }
 
 $(document).ready(function() {
+    var now = new Date();
+    var later = new Date();
+    later.setHours(later.getHours() + 1);
     var format = "yyyy-mm-dd";
     var inputFrom = $('#input_from_date');
     var inputTo = $('#input_to_date');
-
-    $("#calendar").calendar({
-        startDateId: inputFrom,
-        endDateId: inputTo,
-        dateFormat: format
-    }) ;
+    var fromTime = $('#input_from_time');
+    var toTime = $('#input_to_time');
+    var search = $('#searchButton');
 
     inputFrom.datetimeinput({
         formatString: format
@@ -34,24 +34,24 @@ $(document).ready(function() {
     inputTo.datetimeinput({
         formatString: format
     });
-    $('#input_from_time').timeinput();
-    $('#input_to_time').timeinput();
+    fromTime.timeinput();
+    toTime.timeinput();
+
+
 
     $('#extraButton').on('click', function() {
         if(!$('#extraFiltering').hasClass('in')) {
             $('#extraEnv').append($('#filterbuttons'));
-            $('#extraButton').html('Minder filteropties');
+            $('#extraButton').html('minder filteropties');
         } else {
             $('#basicEnv').append($('#filterbuttons'));
-            $('#extraButton').html('Meer filteropties');
+            $('#extraButton').html('meer filteropties');
         }
     });
 
     $('#extraFiltering').on('shown.bs.collapse', function (e) {
-        $('html, body').animate({scrollTop: $(this).offset().top - 50}, 1000);
+        // $('html, body').animate({scrollTop: $(this).offset().top - 50}, 1000);
     });
-
-    var search = $('#searchButton');
 
     search.on('mousedown', function() {
         $('#input_from_value').val($('#input_from_date').val() + ' ' + $('#input_from_time').val());
@@ -60,8 +60,30 @@ $(document).ready(function() {
     });
 
     search.on('mouseup', function() {
-        $('html, body').animate({scrollTop: $('#resultsTable').offset().top - 50}, 1000);
+        // $('html, body').animate({scrollTop: $('#resultsTable').offset().top - 50}, 1000);
     });
+
+    if(from === '' || until === '') {
+        inputFrom.val(now.getFullYear() + '-'
+            + (now.getMonth() < 10 ? '0' : '') + now.getMonth() + '-'
+            + (now.getDate() < 10 ? '0' : '') + now.getDate());
+        inputTo.val(later.getFullYear() + '-'
+            + (later.getMonth() < 10 ? '0' : '') + later.getMonth() + '-'
+            + (later.getDate() < 10 ? '0' : '') + later.getDate());
+        fromTime.val(
+                (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' +
+                (now.getMinutes() < 10 ? '0' : '') + now.getMinutes());
+        toTime.val(
+                (later.getHours() < 10 ? '0' : '') + later.getHours() + ':' +
+                (later.getMinutes() < 10 ? '0' : '') + later.getMinutes());
+    } else {
+        inputFrom.val(from);
+        inputTo.val(until);
+        fromTime.val('00:00');
+        toTime.val('23:55');
+        search.trigger('mousedown');
+        search.click();
+    }
 
 });
 

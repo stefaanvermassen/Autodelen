@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by stefaan on 22/03/14.
+ * Created by Stefaan Vermassen on 22/03/14.
  */
 public class JDBCMessageDAO implements MessageDAO {
 
@@ -45,6 +45,7 @@ public class JDBCMessageDAO implements MessageDAO {
     private PreparedStatement createMessageStatement;
     private PreparedStatement getNumberOfUnreadMessagesStatement;
     private PreparedStatement setReadStatement;
+    private PreparedStatement setAllReadStatement;
     private PreparedStatement getMessageListPageByTimestampStatement;
     private PreparedStatement getAmountOfMessagesStatement;
 
@@ -72,6 +73,13 @@ public class JDBCMessageDAO implements MessageDAO {
             setReadStatement = connection.prepareStatement("UPDATE messages SET message_read = ? WHERE message_id = ?;");
         }
         return setReadStatement;
+    }
+
+    private PreparedStatement getSetAllReadStatement() throws SQLException {
+        if (setAllReadStatement == null) {
+            setAllReadStatement = connection.prepareStatement("UPDATE messages SET message_read = ? WHERE message_to_user_id = ?;");
+        }
+        return setAllReadStatement;
     }
 
     private PreparedStatement getNumberOfUnreadMessagesStatement() throws SQLException {
@@ -188,9 +196,21 @@ public class JDBCMessageDAO implements MessageDAO {
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating message.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Unable to mark message as read", e);
         }
+    }
 
+    @Override
+    public void markAllMessagesAsRead(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSetAllReadStatement();
+            ps.setBoolean(1, true);
+            ps.setInt(2,userId);
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating message.");
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to mark message as read", e);
+        }
     }
 
     private List<Message> getMessageList(PreparedStatement ps) throws DataAccessException {

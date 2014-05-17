@@ -21,6 +21,7 @@ import views.html.refuels.editmodal;
 import views.html.refuels.refuels;
 import views.html.refuels.refuelspage;
 import views.html.refuels.refuelsOwner;
+import views.html.refuels.refuelsAdmin;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,8 +32,6 @@ import java.util.List;
  * Created by Stefaan Vermassen on 26/04/14.
  */
 public class Refuels extends Controller {
-
-    private static final int PAGE_SIZE = 10;
 
     public static class RefuelModel {
 
@@ -54,7 +53,7 @@ public class Refuels extends Controller {
         return ok(refuels.render());
     }
 
-    public static Result showUserRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showUserRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -66,11 +65,21 @@ public class Refuels extends Controller {
 
         // TODO: Check if admin or car owner/user
 
-        return ok(refuelList(page, field, asc, filter));
+        return ok(refuelList(page, pageSize, field, asc, filter));
 
     }
 
-    public static Result showOwnerRefuelsPage(int page, int ascInt, String orderBy, String searchString) {
+    /**
+     * Method: GET
+     *
+     * @return index page containing all the refuel requests to a specific owner
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result showOwnerRefuels() {
+        return ok(refuelsOwner.render());
+    }
+
+    public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -83,37 +92,48 @@ public class Refuels extends Controller {
 
         // TODO: Check if admin or car owner/user
 
-        return ok(refuelList(page, field, asc, filter));
-
+        return ok(refuelList(page, pageSize, field, asc, filter));
     }
-
-    private static Html refuelList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            RefuelDAO dao = context.getRefuelDAO();
-
-            if(orderBy == null) {
-                orderBy = FilterField.REFUEL_NOT_STATUS; // not neccessary, but orderBy cannot be null
-            }
-            List<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, PAGE_SIZE, filter);
-
-            int amountOfResults = dao.getAmountOfRefuels(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
-
-            return refuelspage.render(listOfResults, page, amountOfResults, amountOfPages);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
-    }
-
 
     /**
      * Method: GET
      *
      * @return index page containing all the refuel requests to a specific owner
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
-    public static Result showOwnerRefuels() {
-        return ok(refuelsOwner.render());
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showAllRefuels() {
+        return ok(refuelsAdmin.render());
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    public static Result showAllRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+        // TODO: orderBy not as String-argument?
+        FilterField field = FilterField.stringToField(orderBy);
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+        Filter filter = Pagination.parseFilter(searchString);
+
+        return ok(refuelList(page, pageSize, field, asc, filter));
+    }
+
+
+
+    private static Html refuelList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            RefuelDAO dao = context.getRefuelDAO();
+
+            if(orderBy == null) {
+                orderBy = FilterField.REFUEL_NOT_STATUS; // not neccessary, but orderBy cannot be null
+            }
+            List<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, pageSize, filter);
+
+            int amountOfResults = dao.getAmountOfRefuels(filter);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
+
+            return refuelspage.render(listOfResults, page, amountOfResults, amountOfPages);
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
     }
 
     /**

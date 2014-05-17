@@ -1,21 +1,16 @@
-package database.jdbc;
+package tests;
 
 import database.*;
+import database.jdbc.JDBCDataAccessProvider;
 import models.*;
-
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import providers.DataProvider;
 
-/**
- * Created by HannesM on 26/02/14.
- */
 public class JDBCDAOTest {
 
     private DataAccessContext context;
@@ -26,6 +21,7 @@ public class JDBCDAOTest {
     private ReservationDAO reservationDAO;
     private CarRideDAO carRideDAO;
     private InfoSessionDAO infoSessionDAO;
+
 
     private List<Address> addresses = new ArrayList<>();
     private List<User> users = new ArrayList<>();
@@ -40,8 +36,8 @@ public class JDBCDAOTest {
      */
     @Before
     public void setUp() throws Exception {
-        DataProvider.setDataAccessProvider(new JDBCDataAccessProvider(DatabaseConfiguration.getConfiguration("conf/database.properties")));
-        context = DataProvider.getDataAccessProvider().getDataAccessContext();
+        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("/tests/testdb.properties"));
+        context = provider.getDataAccessContext();
 
         addressDAO = context.getAddressDAO();
         userDAO = context.getUserDAO();
@@ -213,7 +209,7 @@ public class JDBCDAOTest {
      * Creates 100 random addresses in the database and in private List address
      */
     private void createAddresses() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_addresses.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_addresses.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         while(sc.hasNext()) {
@@ -283,7 +279,7 @@ public class JDBCDAOTest {
      * Creates 100 random users in the database and in private List users
      */
     private void createUsers() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_users.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_users.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         while(sc.hasNext()) {
@@ -327,7 +323,7 @@ public class JDBCDAOTest {
      * First createUsers() and createAddresses() has to be called
      */
     private void updateUserTest() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_users.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_users.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         for(User user : users) {
@@ -380,7 +376,7 @@ public class JDBCDAOTest {
      * Creates 100 random cars, without addresses, in the database and in private List cars
      */
     private void createCarsWithoutAddresses() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
         int i = 1;
@@ -407,7 +403,7 @@ public class JDBCDAOTest {
             Address address = null;
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook, null);
             cars.add(car);
         }
         sc.close();
@@ -418,7 +414,7 @@ public class JDBCDAOTest {
      * This should fail
      */
     private void createCarWithoutUser() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
         String name = "name"; // TODO: also read from Scanner
@@ -442,7 +438,7 @@ public class JDBCDAOTest {
         Address address = null;
         String comments = sc.next();
 
-        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
+        Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook, null);
         cars.add(car);
         sc.close();
     }
@@ -452,7 +448,7 @@ public class JDBCDAOTest {
      * First createUsers() and createAddresses() has to be called
      */
     private void createCars() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_cars.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_cars.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); // skip header first time
         int i = 1;
@@ -478,7 +474,7 @@ public class JDBCDAOTest {
             Address address = addresses.get(owner_id);
             String comments = sc.next();
 
-            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook);
+            Car car = carDAO.createCar(name, brand, type, address, seats, doors, year, gps, gps, hook, carFuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, user, comments, hook, null);
             cars.add(car);
         }
         sc.close();
@@ -512,7 +508,7 @@ public class JDBCDAOTest {
      * First createCars() has to be called
      */
     private void createReservations() throws Exception {
-    	Scanner sc = new Scanner(new File("test/database/random_reservations.txt"));
+    	Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_reservations.txt"));
         sc.useDelimiter("\\t|\\r\\n");
     	sc.nextLine();
 
@@ -618,7 +614,7 @@ public class JDBCDAOTest {
      * First createCarRides() has to be called
      */
     private void updateCarRideTest() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_carrides.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_carrides.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine();
 
@@ -643,7 +639,7 @@ public class JDBCDAOTest {
      * First createUsers() and createAddresses() has to be called
      */
     private void createInfoSessions() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_infosessions.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine();
 
@@ -691,7 +687,7 @@ public class JDBCDAOTest {
      * This should fail
      */
     private void createInfoSessionWithSameEnrollees() throws Exception {
-        Scanner sc = new Scanner(new File("test/database/random_infosessions.txt"));
+        Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/tests/random/random_infosessions.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine();
 

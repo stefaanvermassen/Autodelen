@@ -1,70 +1,70 @@
 @(car: Car, mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider;
 @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
-    <div class="row">
-        <div class="col-lg-3">
-            <div class="panel panel-default">
-                <div class="panel-header">
+    @defining(DataProvider.getUserProvider().getUser()) { user =>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="panel panel-default">
+                    <div class="panel-header">
 
-                </div>
-                    <!-- /.panel-heading -->
-                <div class="panel-body">
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
 
-                    @if(car == null) {
-                        <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
-                    } else {
-                        <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
-                    }
-                    <!-- TODO: profile picture-->
+                        @if(car == null) {
+                            <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                        } else {
+                            <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                        }
+                        <!-- TODO: profile picture-->
 
-                @if(car.isActive) {
-                    <span class="label label-success">Actief</span>
-                } else {
-                    <span class="label label-danger">Non-actief</span>
-                }
 
-                <h2>@car.getName</h2>
-                <h3>@car.getBrand @car.getType</h3>
-                <p> <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a></p>
+                    <h2>@car.getName</h2>
+                    <p>
+                        <strong>Auto:</strong> @car.getBrand @car.getType <br>
+                        <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a>
+                    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        @if(car.isActive) {
+                            <span class="label label-success">Actief</span>
+                        } else {
+                            <span class="label label-danger">Non-actief</span>
+                        }
+                    </p>
 
-                    <!-- /.panel-body -->
+                        <!-- /.panel-body -->
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-9">
-                <!-- /.panel -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Details
+            <div class="col-md-9">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Adres</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>Adres:</strong> @car.getLocation.toString
+                        <div class="well map">
+                            @map(mapDetails)
+                        </div>
+                    </div>
                 </div>
-                    <!-- /.panel-heading -->
-                <div class="panel-body">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Adres</h3>
-                        </div>
-                        <div class="panel-body">
-                            <strong>Adres:</strong> @car.getLocation.toString
-                            <div class="well map">
-                                @map(mapDetails)
-                            </div>
-                        </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Details</h3>
                     </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Details</h3>
-                        </div>
-                        <div class="panel-body">
-                            <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
-                            <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
-                            <strong>Manueel: </strong> @if(car.isManual) { ja } else { nee } <br>
-                            <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
-                            <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
-                            <strong>Brandstof: </strong>  @{car.getFuel.getDescription } <br>
-                            <strong>Commentaar: </strong> <br> @car.getComments
-                        </div>
+                    <div class="panel-body">
+                        <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
+                        <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
+                        <strong>Manueel: </strong> @if(car.isManual) { ja } else { nee } <br>
+                        <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                        <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                        <strong>Brandstof: </strong>  @{car.getFuel.getDescription } <br>
+                        <strong>Commentaar: </strong> <br> @car.getComments
                     </div>
+                </div>
 
+                @if(isAdmin || car.getOwner.getId == user.getId) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">Geheime details (enkel zichtbaar voor admin en eigenaar)</h3>
@@ -86,11 +86,9 @@
 
                         </div>
                     </div>
-                </div>
-                    <!-- /.panel-body -->
+                }
             </div>
-                <!-- /.panel-default -->
-        </div>
             <!-- /col-md-9 -->
-    </div>
+        </div>
+    }
 }

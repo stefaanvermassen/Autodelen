@@ -9,7 +9,34 @@
     <head>
         <script src="@routes.Assets.at("javascripts/jquery-1.11.0.min.js")" type="text/javascript"></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
-
+        <script type="text/javascript">
+            // There is a lot of field experience data, so this will always make the table responsive.
+            function forceResponsiveTables() {
+              var windowSize = $(window).width();
+              if ($('.table-responsive > .table').length > 0) {
+                $.each($('.table-responsive > .table'), function (index, value) {
+                  var thisTable = $(value);
+                  var tableSize = thisTable.width();
+                  var parent = thisTable.parent('.table-responsive');
+                  // 768px is the default for bootstrap 3's responsive-table, modify if needed
+                  if (windowSize <= 768) {
+                    parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                  } else {
+                    if (tableSize >= windowSize) {
+                      // Change the border color based on the bootstrap theme colors
+                      parent.css('width', '100%').css('overflow-x', 'scroll').css('overflow-y', 'hidden').css('margin-bottom', '15px').css('border', '1px solid #DDDDDD');
+                    } else {
+                      parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                    }
+                  }
+                });
+              }
+            }
+        </script>
+        <script>
+            // Loadingimage to use in pagination.js
+            var loadingImage = '@routes.Assets.at("images/car-loader.gif")'
+        </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -24,6 +51,12 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="stylesheet/less" type="text/css" href="@routes.Assets.at("stylesheets/less/colortheme.less")">
         <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/colortheme.css")"> -->
+
+            <!--[if lt IE 9]>
+            <script src="@routes.Assets.at("javascripts/compatibility/html5shiv.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/compatibility/css3-mediaqueries.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/compatibility/respond.min.js")" type="text/javascript"></script>
+        <![endif]-->
     </head>
     <body>
         <div id="wrapper">
@@ -56,9 +89,9 @@
                                             <a href="@routes.Messages.showMessages()">
                                                 <div>
                                                     @if(!message.isRead){
-                                                        <strong>Dégage [ongelezen]</strong>
+                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName [ongelezen]</strong>
                                                     }else{
-                                                        <strong>Dégage</strong>
+                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName</strong>
                                                     }
                                                     <span class="pull-right text-muted">
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
@@ -131,10 +164,10 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle avatar" data-toggle="dropdown" href="#">
                             <span>@user.toString</span>
-                            @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) {
-                               <img class="avatar" src="@routes.Assets.at("images/avatar.jpg")" alt="small profile picture">
+                            <!-- @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) { -->
+                               <img class="avatar" src="" alt="small profile picture">
                                 <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
-                            }
+                            <!-- } -->
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -164,15 +197,17 @@
                         <li @if(title == "Dashboard") {class="active"}>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
+                        @if(!DataProvider.getUserRoleProvider.isFullUser(user)){
                         <li @if(title == "Infosessies") {class="active"}>
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
+                        }
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_USER)){
                         <li @if(title == "Reserveren") {class="active"}>
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
                         <li @if(title == "Ritten") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-truck fa-fw"></i>
+                            <a href="@routes.Drives.index"><i class="fa fa-car fa-fw"></i>
                                 Ritten
                                 @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
                                         Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
@@ -197,16 +232,19 @@
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_OWNER)){
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
-                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-truck fa-fw"></i> Auto's</a>
+                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-car fa-fw"></i> Auto's</a>
                         </li>
                         <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
                             <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
+                        </li>
+                        <li @if(title == "Schadedossiers (eigenaar)") {class="active"}>
+                            <a href="@routes.Damages.showDamagesOwner()"><i class="fa fa-tasks fa-fw"></i> Schadedossiers</a>
                         </li>
                         }
 
                         <li class="submenu">ACCOUNT</li>
                         <li @if(title == "Berichten") {class="active"}>
-                            <a href="@routes.Messages.showMessages()"><i class="fa fa-comments fa-fw"></i> Berichten
+                            <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten
                             @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
                                 @if(unread_number>0){
                                     <span class="sidenumber">@unread_number</span>
@@ -214,7 +252,7 @@
                             }</a>
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-envelope fa-fw"></i> Notificaties
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-comments fa-fw"></i> Notificaties
                             @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
                               @if(unread_number>0){
                                   <span class="sidenumber">@unread_number</span>
@@ -233,8 +271,8 @@
 
 
                         @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.MAIL_ADMIN)){
-                        <li @if(title == "Emailtemplates") {class="active"}>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Emailtemplates</a>
+                        <li @if(title == "Templates") {class="active"}>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Templates</a>
                         </li>
                         }
 
@@ -267,8 +305,11 @@
                             <li @if(title == "Autokosten (Admin)") {class="active"}>
                                 <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
                             </li>
+                            <li @if(title == "Tankbeurten (Admin)") {class="active"}>
+                                <a href="@routes.Refuels.showAllRefuels()"><i class="fa fa-file fa-beer"></i> Tankbeurten</a>
+                            </li>
                             <li @if(title == "Schadedossiers (Admin)") {class="active"}>
-                                <a href="@routes.Damages.showAllDamages()"><i class="fa fa-file fa-fw"></i> Schadedossiers</a>
+                                <a href="@routes.Damages.showAllDamages()"><i class="fa fa-file fa-task"></i> Schadedossiers</a>
                             </li>
                         }
 
@@ -278,15 +319,16 @@
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
                         </li>
 
-                        <li>
+                        <li @if(title == "Systeemvariabelen") {class="active"}>
                             <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
                         </li>
 
                         <li @if(title == "Rapportering") {class="active"}>
-                            <a href=""><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
+                            <a href="@routes.Reports.index"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
                         </li>
                         }
-                                }
+                        }
+                        <li id="logoutbutton"><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                     </ul>
                     <!-- /#side-menu -->
                 </div>
@@ -303,7 +345,7 @@
         <script src="@routes.Assets.at("javascripts/less-1.7.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
-
+        
         <!-- Page-Level Plugin Scripts - Main -->
 
         <!-- Page-Level Demo Scripts - Main - Use for reference -->

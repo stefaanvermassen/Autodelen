@@ -22,7 +22,9 @@
     }
 </p>
 <p>
-    <strong>Status: </strong> <span class="label label-default">@user.getStatus</span>
+    @if(DataProvider.getUserRoleProvider.isAdmin) {
+        <strong>Status: </strong> <span class="label label-default">@user.getStatus</span>
+    }
     @if(DataProvider.getUserRoleProvider.isAdmin(user)){
         <span class="label label-default"><i class="fa fa-star" style="color: yellow;"></i> Admin</span>
     }

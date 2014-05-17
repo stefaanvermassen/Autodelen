@@ -6,8 +6,8 @@
         <li>
             <div class="chat-body clearfix">
                 <div class="header">
-                    <img src="@routes.Assets.at("images/avatar.jpg")" alt="User Avatar" class="img-circle msg-avatar">
-                    <strong class="primary-font">@message.getSender</strong>
+                    <!-- <img src="@routes.Assets.at("images/avatar.jpg")" alt="User Avatar" class="img-circle msg-avatar"> -->
+                    <strong class="primary-font"><a href="@routes.Profile.index(message.getSender.getId)">@message.getSender</a></strong>
                     <small class="text-muted">
                         - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(message.getTimestamp)
                     </small>

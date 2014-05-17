@@ -12,7 +12,8 @@ public interface TemplateDAO {
 
     public EmailTemplate getTemplate(int templateID) throws DataAccessException;
     public EmailTemplate getTemplate(MailType type) throws DataAccessException;
-    public List<EmailTemplate> getAllTemplates() throws DataAccessException;
+    public int getAmountOfTemplates(Filter filter) throws DataAccessException;
+    public List<EmailTemplate> getTemplateList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public void updateTemplate(int templateID, String templateBody, String templateSubject, boolean templateSendMail ) throws DataAccessException;
 
 }

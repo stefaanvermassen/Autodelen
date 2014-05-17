@@ -4,20 +4,7 @@
     var route = myJsRoutes.controllers.Refuels.showOwnerRefuelsPage;
     </script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
-    <script>
-    function loadModal ( refuelId ) {
-    myJsRoutes.controllers.Refuels.provideRefuelInfo ( refuelId ).ajax ( {
-    success : function ( html ) {
-    $ ( "#resultModal" ).html ( html ) ;
-    $ ( '#detailsModal' ).modal ( 'show' ) ;
-    },
-    error : function ( ) {
-    // TODO: make clearer
-    $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
-    }
-    } ) ;
-    }
-    </script>
+    <script src="@routes.Assets.at("javascripts/app/refuelInfo.js")"></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
@@ -36,10 +23,6 @@
                 <h1 class="page-header">Tankbeurten (eigenaar)</h1>
                 @flashes()
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Tankbeurten (eigenaar)
-                    </div>
-                        <!-- /.panel-heading -->
                     <div class="panel-body">
                         <p>
                             Hier kan je als eigenaar tankbeurten van leners goedkeuren.
@@ -58,4 +41,5 @@
             <!-- /row -->
     </div>
     <!-- /page-wrapper -->
+    <div id="resultModal"></div>
 }

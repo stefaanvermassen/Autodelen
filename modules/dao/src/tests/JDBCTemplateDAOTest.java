@@ -1,26 +1,24 @@
-package database.jdbc;
+package tests;
 
-import static org.junit.Assert.*;
+import database.*;
+import database.jdbc.JDBCDataAccessProvider;
+import database.jdbc.JDBCFilter;
+import models.EmailTemplate;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
-import models.EmailTemplate;
-import models.User;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import database.DataAccessContext;
-import providers.DataProvider;
-import database.TemplateDAO;
+import static org.junit.Assert.*;
 
 public class JDBCTemplateDAOTest {
 
     private DataAccessContext context;
-	private TemplateDAO templateDAO;
+
+    private TemplateDAO templateDAO;
 	private List<EmailTemplate> templates;
 
     /**
@@ -29,9 +27,11 @@ public class JDBCTemplateDAOTest {
      */
 	@Before
     public void setUp() throws Exception {
-        context = DataProvider.getDataAccessProvider().getDataAccessContext();
+        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("/tests/testdb.properties"));
+        context = provider.getDataAccessContext();
+
         templateDAO = context.getTemplateDAO();
-        templates = templateDAO.getAllTemplates();
+        templates = templateDAO.getTemplateList(FilterField.TEMPLATE_NAME, true, 1, 100, new JDBCFilter());
     }
 
     /**
@@ -50,7 +50,7 @@ public class JDBCTemplateDAOTest {
 	
 	private void updateTemplateTest() throws Exception{
 		Iterator<EmailTemplate> it = templates.iterator();
-		Scanner sc = new Scanner(new File("test/database/random_text.txt"));
+		Scanner sc = new Scanner(JDBCTemplateDAOTest.class.getResourceAsStream("/tests/random/random_text.txt"));
         sc.useDelimiter("\\t|\\r\\n");
         sc.nextLine(); //skip header first time
         while(sc.hasNext() && it.hasNext()) {
@@ -63,7 +63,7 @@ public class JDBCTemplateDAOTest {
             EmailTemplate template2 = templateDAO.getTemplate(template.getId());
             
             assertEquals(template2.getBody(), body);
-            assertNotEquals(template.getBody(), template2.getBody());
+            assertFalse(template.getBody().equals(template2.getBody()));
         }
         sc.close();
 	}

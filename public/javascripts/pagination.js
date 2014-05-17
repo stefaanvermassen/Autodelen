@@ -45,7 +45,6 @@ var previousBtnTxt = "<";
 var nextBtnTxt = ">";
 var firstBtnTxt = "<<";
 var lastBtnTxt = ">>";
-var loadingImage = '/assets/images/ajax-loader.gif';
 var errorMessageFilter = "Zoekvelden mogen geen komma's (,) of gelijk-aan-tekens (=) bevatten!";
 
 // For example: 2 means if we are at page 5, we will see: 3 4 5 6 7. If we are at page 1 we will see: 1 2 3 4 5
@@ -56,6 +55,9 @@ if(typeof autoLoad == 'undefined') {
 }
 if(typeof beginPage == 'undefined') {
     var beginPage = 1;
+}
+if(typeof beginPageSize == 'undefined') {
+    var beginPageSize = 10;
 }
 if(typeof beginAsc == 'undefined') {
     var beginAsc = 1;
@@ -68,9 +70,11 @@ if(typeof beginFilter == 'undefined') {
 }
 var pageLoaded = false;
 
+var intervalLoading;
+var goingLeft = true;
 
 // Initially, we load the first page in ascending order, ordered by the default column, without filtering
-$(document).ready(loadPage(beginPage, beginAsc, beginOrder, beginFilter));
+$(document).ready(loadPage(beginPage, beginPageSize, beginAsc, beginOrder, beginFilter));
 
 /*
  * Filtering
@@ -82,7 +86,7 @@ var searchButton = document.getElementById("searchButton");
 if(searchButton != null) {
     searchButton.onclick = function () {
         var searchString = importSearchTextFields()
-        loadPage(1, 1, "", searchString);
+        loadPage(1, beginPageSize, 1, "", searchString);
     }
 }
 
@@ -105,7 +109,7 @@ function importSearchTextFields() {
 }
 
 // The function to load a new page
-function loadPage(page, asc, orderBy, search) {
+function loadPage(page, pageSize, asc, orderBy, search) {
     pageLoaded = false;
     // Fill in loading image inside the table if the table is already rendered
     if(typeof $("#resultsTable").find('table').val() != 'undefined') {
@@ -114,27 +118,35 @@ function loadPage(page, asc, orderBy, search) {
         $("#resultsTable").find('table').find('tbody').html($('<tr>')
                 .append($('<td class="loading">')
                     .attr('colspan', cols)
-                    .attr('style', 'text-align: center; background-color: #FFFFFF; padding: 8px;')
+                    .attr('style', 'background-color: #FFFFFF; position: relative;')
                     .append($('<img>')
-                        .attr('alt', 'Loading...')
+                        .attr('id', 'loadingImage')
+                        .attr('alt', 'Laden...')
                         .attr('src', loadingImage)
-                )
+                    .append($('<p>')
+                        .attr('id', 'loadingText')
+                        .text('De inhoud is onderweg...'))
+                ).attr('style', 'overflow:hidden;')
             )
         );
     // Fill in loading image if the table is not yet rendered
     } else {
         $("#resultsTable").append($('<div class="loading">')
-            .attr('style', 'text-align: center;')
+            .attr('style', 'position: relative;')
             .append($('<img>')
-                .attr('alt', 'Loading...')
+                .attr('id', 'loadingImage')
+                .attr('alt', 'Laden...')
                 .attr('src', loadingImage)
                 )
             .append($('<p>')
-                .text('Loading table'))
-        );
+                .attr('id', 'loadingText')
+                .text('De inhoud is onderweg...'))
+        ).attr('style', 'overflow:hidden;');
     }
 
-    route(page, asc, orderBy, search).ajax({
+    intervalLoading = setInterval(moveLoadingIcon, 50);
+
+    route(page, pageSize, asc, orderBy, search).ajax({
         success : function(html) {
             if(autoLoad != 1)
                 $("#resultsTable").html(html);
@@ -155,7 +167,7 @@ function loadPage(page, asc, orderBy, search) {
                  * These will come in the element with id="pagination"
                  */
                 // Button to go to first page and to previous page
-                var buttonString = "";
+                var buttonString = '';
                 if(amountOfPages > 1) {
                     if(page != 1) {
                         buttonString += "<button class='buttons btn' id='firstPage' name='1' type='button'>" + firstBtnTxt + "</button> " +
@@ -191,11 +203,20 @@ function loadPage(page, asc, orderBy, search) {
                             "<button class='buttons btn' id='lastPage' name='" + amountOfPages + "' type='button'>" + lastBtnTxt + "</button><br>";
                     }
                 }
+                buttonString += '<span style="float: left;">';
                 buttonString += "<p>Aantal resultaten: " + amountOfResults + " (" + amountOfPages + " pagina's).</p>";
+                buttonString += "</span>";
+                // Adjusting pagesize
+                buttonString += '<form style="float: right;" class="form-inline">Resultaten per pagina: ' +
+                    '<select id="selectPageSize" class="form-control" >' +
+                    '<option value="10" >10</option>' +
+                    '<option value="25" >25</option>' +
+                    '<option value="50" >50</option>' +
+                    '</select></form>';
                 // Add the buttons to the html-file
                 $("#pagination").html(buttonString);
 
-                // Now let's add the appropriote onclick-functions to the buttons and disable them if needed
+                // Now let's add the appropriate onclick-functions to the buttons and disable them if needed
                 var buttons = document.getElementsByClassName('buttons');
                 for(var i = 0; i < buttons.length; i++) {
                     var p = parseInt(buttons[i].getAttribute("name"));
@@ -204,10 +225,16 @@ function loadPage(page, asc, orderBy, search) {
                     } else {
                         buttons[i].onclick = function() {
                             var p = parseInt(this.getAttribute("name"));
-                            loadPage(p, asc, orderBy, search);
+                            loadPage(p, pageSize, asc, orderBy, search);
                         }
                     }
                 }
+                $('#selectPageSize').val(pageSize);
+                $('#selectPageSize').change(function() {
+                    var newPageSize = $(this).val();
+                    var newPage = parseInt((((page-1) * pageSize) / newPageSize)+1);
+                    loadPage(newPage, newPageSize, asc, orderBy, search);
+                });
             }
 
             /*
@@ -228,7 +255,7 @@ function loadPage(page, asc, orderBy, search) {
                         asc = 1;
                     }
                     page = 1;
-                    loadPage(page, asc, orderByNew, search);
+                    loadPage(page, pageSize, asc, orderByNew, search);
                 };
 
                 // Set class of sorted column to asc or desc (so we can style with css)
@@ -243,7 +270,7 @@ function loadPage(page, asc, orderBy, search) {
                     if($(window).scrollTop() == $(document).height() - $(window).height()) {
                         if(page < amountOfPages) {
                             page++;
-                            loadPage(page, asc, orderBy, search);
+                            loadPage(page, pageSize, asc, orderBy, search);
                         }
                     }
                 });
@@ -270,4 +297,36 @@ function createSearchString(fields, values) {
         }
     }
     return searchString;
+}
+
+function moveLoadingIcon() {
+
+    if(pageLoaded) {
+        clearInterval(intervalLoading);
+    }
+
+    if($(".loading").position().left <= $("#resultsTable").position().left) {
+        goingLeft = false;
+        $('#loadingImage').attr('style', '');
+    }
+    if($(".loading").position().left >= ($("#resultsTable").innerWidth() - $('#loadingImage').outerWidth())) {
+        goingLeft = true;
+        $('#loadingImage').attr('style', '' +
+            '-moz-transform: scaleX(-1);' +
+            '-o-transform: scaleX(-1);' +
+            '-webkit-transform: scaleX(-1);' +
+            'transform: scaleX(-1);' +
+            'filter: FlipH;' +
+            '-ms-filter: "FlipH";'
+        );
+    }
+    var move;
+    if(goingLeft) {
+        move = '-=5';
+    } else {
+        move = '+=5';
+    }
+    $(".loading").animate({
+        left: move
+    }, 25);
 }

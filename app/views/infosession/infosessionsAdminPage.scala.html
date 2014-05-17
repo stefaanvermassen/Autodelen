@@ -13,7 +13,21 @@
     <tbody>
     @for(session <- sessions) {
     <tr>
-        <td>@session.getType.getDescription</td> <!-- TODO: mooi weergeven met icoontje ofzo -->
+        <td>
+            @session.getType match {
+                case InfoSessionType.NORMAL => {
+                    <span class="fa fa-taxi"></span>
+                } case InfoSessionType.OWNER => {
+                    <span class="fa fa-car"></span>
+                } case InfoSessionType.OTHER => {
+
+                }
+                case _ => {}
+            }
+            @session.getType.getDescription @if(session.getType.equals(InfoSessionType.OTHER)) {
+            : @session.getTypeAlternative
+            }
+        </td>
         <td>@session.getTime.toString("dd-MM-YYYY HH:mm")</td>
         @if(session.getMaxEnrollees != 0) {
         @if(session.getEnrolleeCount == session.getMaxEnrollees) {

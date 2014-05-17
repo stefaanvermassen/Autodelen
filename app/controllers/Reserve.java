@@ -6,6 +6,7 @@ import database.*;
 import database.FilterField;
 import models.*;
 import notifiers.Notifier;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -14,12 +15,13 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import providers.DataProvider;
-import views.html.reserve.*;
 import views.html.reserve.reservationDetailsPartial;
 import views.html.reserve.reservations;
 import views.html.reserve.reservationspage;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,12 +30,19 @@ import java.util.List;
  */
 public class Reserve extends Controller {
 
-    // The number of cars displayed in the table of the index page
-    private static final int PAGE_SIZE = 10;
+    // Formatter to translate a string to a date
+    private static final SimpleDateFormat DATEFORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
     // Formatter to translate a string to a datetime
-    private static final DateTimeFormatter DATEFORMATTER =
+    private static final DateTimeFormatter DATETIMEFORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+
+    public static class IndexModel {
+        // Date from
+        public String from;
+        // Date until
+        public String until;
+    }
 
     /**
      * Class implementing a model wrapped in a form.
@@ -55,14 +64,14 @@ public class Reserve extends Controller {
          * @return the start datetime of the reservation
          */
         public DateTime getTimeFrom() {
-            return DATEFORMATTER.parseDateTime(from).withSecondOfMinute(0);
+            return DATETIMEFORMATTER.parseDateTime(from).withSecondOfMinute(0);
         }
 
         /**
          * @return the end datetime of the reservation
          */
         public DateTime getTimeUntil() {
-            return DATEFORMATTER.parseDateTime(until).withSecondOfMinute(0);
+            return DATETIMEFORMATTER.parseDateTime(until).withSecondOfMinute(0);
         }
 
         /**
@@ -110,21 +119,35 @@ public class Reserve extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
     public static Result indexWithCar(String carName, int id) {
-        return ok(showIndex(carName, id));
+        return ok(showIndex(carName, "", "", id));
     }
 
     /**
-     * @return The html context of the reservations index page for one specific car
+     * Method: GET
+     *
+     * @return the reservation index page containing one specific car
      */
-    public static Html showIndex(String carName, int id) {
-        return reservations.render("", carName, id);
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    public static Result indexWithDate() {
+        Form<IndexModel> form =  Form.form(IndexModel.class).bindFromRequest();
+        if(form.hasErrors()) {
+            return ok(showIndex());
+        }
+        return ok(showIndex("", form.get().from, form.get().until, -1));
+    }
+
+    /**
+     * @return The html context of the reservations index page with date from and until and car added
+     */
+    public static Html showIndex(String carName, String from, String until, int id) {
+        return reservations.render("", carName, id, from, until);
     }
 
     /**
      * @return The html context of the reservations index page
      */
     public static Html showIndex() {
-        return reservations.render("", "", -1);
+        return reservations.render("", "", -1, "", "");
     }
 
     /**
@@ -180,7 +203,7 @@ public class Reserve extends Controller {
             // Request the form
             Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
             if(reservationForm.hasErrors()) {
-                return badRequest(reservations.render(reservationForm.globalError().message(), "", -1));
+                return badRequest(reservations.render(reservationForm.globalError().message(), "", -1, "", ""));
             }
             try {
                 // Test whether the reservation is valid
@@ -189,7 +212,7 @@ public class Reserve extends Controller {
                 for(Reservation reservation : res) {
                     if((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                             (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
-                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1));
+                        return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1, "", ""));
                     }
                 }
 
@@ -207,7 +230,15 @@ public class Reserve extends Controller {
                 context.commit();
 
                 if (reservation != null) {
-                    if(car.getOwner().getId() == user.getId()) {
+                    // Check if user is owner or priviliged
+                    boolean autoAccept = car.getOwner().getId() == user.getId();
+                    int i = 0;
+                    while(!autoAccept && i < car.getPriviliged().size()) {
+                        if(car.getPriviliged().get(i).getId() == user.getId()) {
+                            autoAccept = true;
+                        }
+                    }
+                    if(autoAccept) {
                         reservation.setStatus(ReservationStatus.ACCEPTED);
                         rdao.updateReservation(reservation);
                         context.commit();
@@ -216,7 +247,7 @@ public class Reserve extends Controller {
                     }
                     return redirect(routes.Drives.index());
                 } else
-                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator", "", -1));
+                    return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator", "", -1, "", ""));
             } catch(DataAccessException ex) {
                 throw ex;
             }
@@ -243,7 +274,7 @@ public class Reserve extends Controller {
      * @return the requested page of cars for reservation
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
-    public static Result showCarsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarDAO dao = context.getCarDAO();
 
@@ -256,17 +287,17 @@ public class Reserve extends Controller {
                 field = FilterField.CAR_NAME;
             }
             try {
-                DATEFORMATTER.parseDateTime(filter.getValue(FilterField.FROM));
-                DATEFORMATTER.parseDateTime(filter.getValue(FilterField.UNTIL));
+                DATETIMEFORMATTER.parseDateTime(filter.getValue(FilterField.FROM));
+                DATETIMEFORMATTER.parseDateTime(filter.getValue(FilterField.UNTIL));
             } catch(IllegalArgumentException ex) {
                 return ok(reservationspage.render(new ArrayList<Car>(), page, 0, 0, false));
             }
             filter.putValue(FilterField.CAR_ACTIVE, "1");
 
-            List<Car> listOfCars = dao.getCarList(field, asc, page, PAGE_SIZE, filter);
+            List<Car> listOfCars = dao.getCarList(field, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfCars(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return ok(reservationspage.render(listOfCars, page, amountOfResults, amountOfPages, true));
         } catch (DataAccessException ex) {

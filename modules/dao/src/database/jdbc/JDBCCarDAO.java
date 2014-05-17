@@ -28,6 +28,7 @@ public class JDBCCarDAO implements CarDAO{
             "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
             "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_technical_details " +
             "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
+            "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
             "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance " +
             "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id";
 
@@ -174,18 +175,20 @@ public class JDBCCarDAO implements CarDAO{
                 car.setOwnerAnnualKm(ownerAnnualKm);
             car.setComments(rs.getString("car_comments"));
             car.setActive(rs.getBoolean("car_active"));
+            File photo = null;
             Address location = null;
             User user = null;
             TechnicalCarDetails technicalCarDetails = null;
             CarInsurance insurance = null;
             if(withRest) {
+                photo = JDBCFileDAO.populateFile(rs, "pictures");
                 location = JDBCAddressDAO.populateAddress(rs);
                 user = JDBCUserDAO.populateUser(rs, false, false);
                 rs.getInt("car_technical_details");
                 if(!rs.wasNull()) {
                     File registration = null;
                     rs.getInt("details_car_registration");
-                    if(!rs.wasNull()) registration = JDBCFileDAO.populateFile(rs);
+                    if(!rs.wasNull()) registration = JDBCFileDAO.populateFile(rs, "files");
 
                     Integer chassisNr = rs.getInt("details_car_chassis_number");
                     if(rs.wasNull()) chassisNr = null;
@@ -204,6 +207,7 @@ public class JDBCCarDAO implements CarDAO{
                     insurance = new CarInsurance(rs.getInt("insurance_id"), name, expiration, bonusMalus, contractId);
                 }
             }
+            car.setPhoto(photo);
             car.setLocation(location);
             car.setOwner(user);
             car.setTechnicalCarDetails(technicalCarDetails);
@@ -222,7 +226,7 @@ public class JDBCCarDAO implements CarDAO{
             createCarStatement = connection.prepareStatement("INSERT INTO cars(car_name, car_type, car_brand, car_location, " +
                     "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_technical_details, car_insurance, car_owner_user_id, car_comments, car_active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
+                    "car_technical_details, car_insurance, car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
         }
         return createCarStatement;
     }
@@ -232,7 +236,7 @@ public class JDBCCarDAO implements CarDAO{
             updateCarStatement = connection.prepareStatement("UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=?, car_active=? WHERE car_id = ?");
+                    "car_technical_details=?, car_insurance=?, car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
         }
         return updateCarStatement;
     }
@@ -382,7 +386,7 @@ public class JDBCCarDAO implements CarDAO{
     @Override
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active) throws DataAccessException {
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active, File photo) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement();
             ps.setString(1, name);
@@ -451,7 +455,7 @@ public class JDBCCarDAO implements CarDAO{
             }
             ps.setString(18, comments);
             ps.setBoolean(19, active);
-
+            ps.setInt(20, photo.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -459,6 +463,7 @@ public class JDBCCarDAO implements CarDAO{
                 int id = keys.getInt(1);
                 Car car = new Car(id, name, brand, type, location, seats, doors, year, manual, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
                 car.setActive(active);
+                car.setPhoto(photo);
                 return car;
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new car.", ex);
@@ -633,7 +638,13 @@ public class JDBCCarDAO implements CarDAO{
 
             ps.setBoolean(19, car.isActive());
 
-            ps.setInt(20, car.getId());
+            if(car.getPhoto() != null && car.getPhoto().getId() != 0){
+                ps.setInt(20, car.getPhoto().getId());
+            }else{
+                ps.setNull(20, Types.INTEGER);
+            }
+
+            ps.setInt(21, car.getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");
@@ -889,7 +900,6 @@ public class JDBCCarDAO implements CarDAO{
             throw new DataAccessException("Could not retrieve a list of cars for user with id " + user_id, ex);
         }
     }
-
 
     private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();

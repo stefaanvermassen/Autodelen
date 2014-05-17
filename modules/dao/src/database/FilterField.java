@@ -11,14 +11,15 @@ public enum FilterField {
 
     CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_MANUAL(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true), CAR_ACTIVE(true),
     CAR_COST_STATUS(false), CAR_COST_DATE(true),
-    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_NOT_STATUS(true),
+    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true), REFUEL_NOT_STATUS(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
     INFOSESSION_DATE(true), INFOSESSION_TYPE(false),
-    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_STATUS(true),
+    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true), RESERVATION_STATUS(true),
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
     NOTIFICATION_READ(true),
+    TEMPLATE_NAME(false),
     FROM(true), UNTIL(true);
 
     boolean exactValue;
@@ -96,6 +97,12 @@ public enum FilterField {
             case "notification_read":
                 field = NOTIFICATION_READ;
                 break;
+            case "reservation_user_or_owner_id":
+                field = RESERVATION_USER_OR_OWNER_ID;
+                break;
+            case "reservation_car_id":
+                field = RESERVATION_CAR_ID;
+                break;
             case "status":
                 field = RESERVATION_STATUS;
                 break;
@@ -116,6 +123,18 @@ public enum FilterField {
                 break;
             case "damage_car_id":
                 field = DAMAGE_CAR_ID;
+                break;
+            case "refuel_user_id":
+                field = REFUEL_USER_ID;
+                break;
+            case "refuel_owner_id":
+                field = REFUEL_OWNER_ID;
+                break;
+            case "refuel_car_id":
+                field = REFUEL_CAR_ID;
+                break;
+            case "template_name":
+                field = TEMPLATE_NAME;
                 break;
         }
         return field;

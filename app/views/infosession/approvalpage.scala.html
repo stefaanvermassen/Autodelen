@@ -19,7 +19,7 @@
     } else {
             @for(approval <- approvals) {
                 <tr>
-                    <td>@approval.getUser.getFirstName @approval.getUser.getLastName</td>
+                    <td> <a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser</a></td>
                     <td>
                         @approval.getStatus match {
                             case Approval.ApprovalStatus.PENDING => { <span class="label label-default">In afwachting</span> }
@@ -28,7 +28,7 @@
                         }
                     </td>
                     <td>@if(approval.getAdmin != null) {
-                        <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin.getFirstName @approval.getAdmin.getLastName</a>
+                        <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin</a>
                     } else { / }</td>
                     <td>@approval.getSubmitted.toString("dd-MM-YYYY")</td>
                     <td>
@@ -38,7 +38,7 @@
                                 <button class="btn btn-primary" disabled>Afronden</button>
                             } else {
                                 <a class="btn btn-primary" href="@routes.InfoSessions.approvalDetails(approval.getId)">
-                                    Afronden</a>
+                                   Afronden</a>
                             }
                         </div>
                     </td>

@@ -20,8 +20,6 @@ import java.util.List;
  */
 public class Notifications extends Controller {
 
-    private static final int PAGE_SIZE = 10;
-
     /**
      * Method: GET
      *
@@ -33,7 +31,7 @@ public class Notifications extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
-    public static Result showNotificationsPage(int page, int ascInt, String orderBy, String searchString) {
+    public static Result showNotificationsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
@@ -41,19 +39,19 @@ public class Notifications extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         filter.putValue(FilterField.USER_ID, user.getId() + "");
-        return ok(notificationList(page, field, asc, filter));
+        return ok(notificationList(page, pageSize, field, asc, filter));
 
 
     }
 
-    private static Html notificationList(int page, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html notificationList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             NotificationDAO dao = context.getNotificationDAO();
 
-            List<Notification> list = dao.getNotificationList(orderBy, asc, page, PAGE_SIZE, filter);
+            List<Notification> list = dao.getNotificationList(orderBy, asc, page, pageSize, filter);
 
             int amountOfResults = dao.getAmountOfNotifications(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
+            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
 
             return notificationspage.render(list, page, amountOfResults, amountOfPages);
         } catch (DataAccessException ex) {
@@ -73,6 +71,25 @@ public class Notifications extends Controller {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             NotificationDAO dao = context.getNotificationDAO();
             dao.markNotificationAsRead(notificationId);
+            context.commit();
+            DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
+            return redirect(routes.Notifications.showNotifications());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * @return notification index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markAllNotificationsAsRead() {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            NotificationDAO dao = context.getNotificationDAO();
+            dao.markAllNotificationsAsRead(user.getId());
             context.commit();
             DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
             return redirect(routes.Notifications.showNotifications());

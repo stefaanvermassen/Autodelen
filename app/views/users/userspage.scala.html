@@ -20,12 +20,11 @@
                     @defining(!(session.get("impersonated") == null || session.get("impersonated").isEmpty)) { impersonating =>
                         @for(user <- users) {
                             <tr>
-                                <td>@user.getFirstName @user.getLastName</td>
+                                <td><a href="@routes.Profile.index(user.getId)">@user</a></td>
                                 <td>
                                     <div class="btn-group btn-group-xs">
-                                        <a class="btn btn-primary" href="@routes.Profile.index(user.getId)">Detail</a>
                                         @if(isAdmin) {
-                                            <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Bewerk</a>
+                                            <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Wijzig</a>
                                         }
                                         @if(!impersonating && DataProvider.getUserRoleProvider.hasRole(UserRole.SUPER_USER) && !UserProvider.isBlocked(user)) {
                                             <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">

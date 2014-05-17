@@ -693,13 +693,49 @@ public class Profile extends Controller {
         if (user.getIdentityCard() != null) {
             total++;
         }
-        if (user.getProfilePictureId() != -1) {
-            total++;
-        }
-
-        return (int) (((float) total / 9) * 100); //9 records
+        return (int) (((float) total / 8) * 100); //9 records
     }
 
+    @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
+    public static Result editUserStatus(int userId){
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if(user == null){
+                flash("danger", "GebruikersID bestaat niet.");
+                return redirect(routes.Users.showUsers());
+            } else {
+                return ok(editstatus.render(user));
+            }
+        }
+    }
+
+    @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
+    public static Result editUserStatusPost(int userId){
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
+            UserDAO udao = context.getUserDAO();
+            User user = udao.getUser(userId, true);
+            if(user == null){
+                flash("danger", "GebruikersID bestaat niet.");
+                return redirect(routes.Users.showUsers());
+            } else {
+                String strStatus = Form.form().bindFromRequest().get("status");
+                UserStatus status = Enum.valueOf(UserStatus.class, strStatus);
+                if(user.getStatus() != status) {
+                    user.setStatus(status);
+                    udao.updateUser(user, true);
+                    context.commit();
+
+                    DataProvider.getUserProvider().invalidateUser(user); //wipe the status from ram
+
+                    flash("success", "De gebruikersstatus werd succesvol aangepast.");
+                } else {
+                    flash("warning", "De gebruiker had reeds de opgegeven status.");
+                }
+                return ok(editstatus.render(user));
+            }
+        }
+    }
 
 
     /**
