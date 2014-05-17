@@ -29,7 +29,8 @@ public class JDBCCarDAO implements CarDAO{
             "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_technical_details " +
             "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
             "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
-            "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance ";
+            "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance " +
+            "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id";
 
     public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
             "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
@@ -37,7 +38,25 @@ public class JDBCCarDAO implements CarDAO{
             "AND cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM cars INNER JOIN carreservations " +
             "ON carreservations.reservation_car_id = cars.car_id " +
             "WHERE ? < carreservations.reservation_to AND ? > carreservations.reservation_from) " +
-            "AND ( cars.car_active = ? OR cars.car_active LIKE ? )";
+            "AND ( cars.car_active = ? OR cars.car_active LIKE ? )" +
+            // FILTER ON CAR AVAILABILITY
+            // We want all cars or car doesn't have any availabilities specified
+            "AND (? OR caravailabilities.car_availability_id IS NULL " +
+            // Car is always available (e.g. Mondag 0:00 -> Monday 0:00 or Monday 1:00 -> Monday 0:55)
+            "OR (caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week " +
+            "AND caravailabilities.car_availability_begin_time >= caravailabilities.car_availability_end_time " +
+            "AND TIMEDIFF(caravailabilities.car_availability_begin_time, caravailabilities.car_availability_end_time) <= TIME('0:05')) " +
+            // Car is always available (e.g. Monday 0:00 -> Sunday 23:55)
+            "OR (caravailabilities.car_availability_begin_day_of_week - 1 = caravailabilities.car_availability_end_day_of_week % 7 " +
+            "AND caravailabilities.car_availability_begin_time = TIME('0:00') AND caravailabilities.car_availability_end_time >= TIME('23:55')) " +
+            // Car is only available in certain intervals
+            "OR (TIMEDIFF(?, ?) < TIME('7 0:0') " +
+            "AND (NOT(DAYOFWEEK(?) = caravailabilities.car_availability_begin_day_of_week AND TIME(?) < caravailabilities.car_availability_begin_time) " +
+            "OR (caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week AND caravailabilities.car_availability_begin_time > caravailabilities.car_availability_end_time AND TIME(?) BETWEEN TIME(?) AND caravailabilities.car_availability_end_time)) " +
+            "AND (NOT(DAYOFWEEK(?) = caravailabilities.car_availability_end_day_of_week AND TIME(?) > caravailabilities.car_availability_end_time) " +
+            "OR (caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week AND caravailabilities.car_availability_begin_time > caravailabilities.car_availability_end_time AND TIME(?) BETWEEN caravailabilities.car_availability_begin_time AND TIME(?))) " +
+            "AND DATEDIFF(DATE_ADD(?, INTERVAL (caravailabilities.car_availability_end_day_of_week - DAYOFWEEK(?) + 7) % 7 DAY), DATE_SUB(?, INTERVAL (DAYOFWEEK(?) - caravailabilities.car_availability_begin_day_of_week + 7) % 7 DAY)) " +
+            "< IF(caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week AND caravailabilities.car_availability_end_time < caravailabilities.car_availability_begin_time, 8, 7))) ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -78,6 +97,25 @@ public class JDBCCarDAO implements CarDAO{
             s2 = "%%"; // This will match everything
         }
         ps.setString(start+13, s2);
+        if (filter.getValue(FilterField.FROM).equals("")) { // Do we want a list of all cars or only available ones?
+            ps.setBoolean(start + 14, true);
+        } else {
+            ps.setBoolean(start + 14, false);
+        }
+        ps.setString(start+15, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+16, filter.getValue(FilterField.FROM));
+        ps.setString(start+17, filter.getValue(FilterField.FROM));
+        ps.setString(start+18, filter.getValue(FilterField.FROM));
+        ps.setString(start+19, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+20, filter.getValue(FilterField.FROM));
+        ps.setString(start+21, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+22, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+23, filter.getValue(FilterField.FROM));
+        ps.setString(start+24, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+25, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+26, filter.getValue(FilterField.UNTIL));
+        ps.setString(start+27, filter.getValue(FilterField.FROM));
+        ps.setString(start+28, filter.getValue(FilterField.FROM));
     }
 
     private Connection connection;
@@ -251,7 +289,8 @@ public class JDBCCarDAO implements CarDAO{
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
                     "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
                     "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_technical_details " +
-                    "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance" + FILTER_FRAGMENT);
+                    "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_insurance " +
+                    "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT);
         }
         return getGetAmountOfCarsStatement;
     }
@@ -837,8 +876,8 @@ public class JDBCCarDAO implements CarDAO{
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(15, first);
-            ps.setInt(16, pageSize);
+            ps.setInt(30, first);
+            ps.setInt(31, pageSize);
             return getCars(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
