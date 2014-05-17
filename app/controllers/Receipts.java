@@ -18,6 +18,7 @@ import play.api.templates.Html;
 import com.itextpdf.text.*;
 import java.io.FileOutputStream;
 import com.itextpdf.text.pdf.PdfWriter;
+import java.net.URL;
 
 public class Receipts extends Controller {
     private boolean loanerState = false;
@@ -36,7 +37,7 @@ public class Receipts extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     public static Result index() {
-	//generatePDF();
+	newReceipt("/home/maryna/r/r1.pdf");
         return ok(receipts.render());
     }
 
@@ -97,12 +98,12 @@ public class Receipts extends Controller {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReceiptDAO dao = context.getReceiptDAO();
             try {
-                //**datum**
-                DateTime date=DateTime.now();
-                //**gebruiker**
-                User user=null;
-                //**price**
-                int price=0;
+		//**datum**
+		DateTime date=DateTime.now(); 
+		//**gebruiker**
+		User user=DataProvider.getUserProvider().getUser();;
+		//**price**
+		int price=15;
 
                 FileDAO fdao = context.getFileDAO();
                 File file=fdao.createFile(filename, filename, "pdf", -1);
@@ -118,10 +119,7 @@ public class Receipts extends Controller {
     }
 
     public static void generatePDF(Document document) {
-        try {/*
-            Document document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream("/Example.pdf"));
-            document.open();
+        try {
 	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
             Image image2 = Image.getInstance(new URL(imageUrl));
             document.add(image2);
@@ -130,7 +128,9 @@ public class Receipts extends Controller {
             //addTitlePage(document);
 	    //Anchor anchor = new Anchor("First Chapter", catFont);
 	    //createTable(Section subCatPart);
-            document.close();*/
+	    //Beter meer in variabelen
+	    document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB"));
+	    document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent"));
         } catch (Exception e) {
             e.printStackTrace();
         }
