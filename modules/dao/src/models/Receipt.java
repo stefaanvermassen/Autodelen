@@ -29,6 +29,8 @@ public class Receipt {
 
     public Receipt(int id, String name, int price) {
         this.id = id;
+	System.out.println("NAAM "+name);
+        this.name = name;
         this.price = price;
     }
 

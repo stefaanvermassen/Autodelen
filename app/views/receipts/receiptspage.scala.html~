@@ -21,7 +21,7 @@
                 @for(receipt <- receipts) {
                     <tr>
                         <td>@receipt.getName</td>
-                        <td>@receipt.getPrice()</td>
+                        <td>@receipt.getPrice</td>
                         <td>@receipt.getDate</td>
                         <td>
                             <div class="btn-group btn-group-xs">

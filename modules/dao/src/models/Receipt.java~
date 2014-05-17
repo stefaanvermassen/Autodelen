@@ -24,11 +24,14 @@ public class Receipt {
         this.files = files;
         this.date = date;
         this.user=user;
+        this.price=price;
     }
 
-    public Receipt(int id, String name) {
+    public Receipt(int id, String name, int price) {
         this.id = id;
+	System.out.println(name);
         this.name = name;
+        this.price = price;
     }
 
     public int getId() {

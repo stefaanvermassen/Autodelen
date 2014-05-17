@@ -106,7 +106,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         List<Receipt> receipts = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                receipts.add(populateReceipt(rs, false, true));
+                receipts.add(populateReceipt(rs, true, true));
             }
             return receipts;
         } catch (SQLException ex) {

@@ -183,7 +183,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Receipt(keys.getInt(1), name, file, date, user);
+                return new Receipt(keys.getInt(1), name, file, date, user, price);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new receipt.", ex);
             }
