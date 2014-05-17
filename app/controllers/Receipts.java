@@ -57,9 +57,9 @@ public class Receipts extends Controller {
             }
 System.out.println("LISTING1");
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
-System.out.println("LISTING3");
+System.out.println("LISTING3"+listOfReceipts.size());
 
-            int amountOfResults = dao.getAmountOfReceipts(filter);
+            int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
 	    //int amountOfResults = listOfReceipts.size();
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 

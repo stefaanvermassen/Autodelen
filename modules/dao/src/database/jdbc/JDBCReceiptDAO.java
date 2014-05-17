@@ -29,8 +29,8 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     private static final String RECEIPT_FIELDS = " receipt_id, receipt_name, receipt_date, receipt_fileID, receipt_userID ";
 
     private static final String RECEIPT_QUERY = "SELECT " + RECEIPT_FIELDS + " FROM Receipts " +
-            " LEFT JOIN files as receipt_file on files.file_id = receipt_file " +
-            " LEFT JOIN users as receipt_user on users.user_id = receipt_user ";
+            " LEFT JOIN files ON files.file_id = Receipts.receipt_fileID " +
+            " LEFT JOIN Users ON users.user_id = Receipts.receipt_userID ";
 
     public static final String FILTER_FRAGMENT =
         " WHERE "+ USER_FRAGMENT + " AND "+ DATE_FRAGMENT2;
@@ -82,10 +82,10 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 	    System.out.println("LISTING2");
         try {
             PreparedStatement ps = getReceiptsListStatement();
-            fillFragment(ps, filter, 2, user);
+            fillFragment(ps, filter, 1, user);
             int first = (page-1)*pageSize;
-            ps.setInt(5, first);
-            ps.setInt(6, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
             return getReceipts(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of reciepts", ex);
@@ -134,7 +134,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
 		rs.getInt(tableName + ".receipt_id"), 
 		rs.getString(tableName + ".receipt_name"));
 
-	receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
+	//receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
 	    receipt.setFiles(JDBCFileDAO.populateFile(rs));
 	}

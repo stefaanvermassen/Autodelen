@@ -16,18 +16,16 @@
                 </td>
             </tr>
         } else {
-            @defining(DatabaseHelper.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)) { isAdmin =>
                 @for(receipt <- receipts) {
                     <tr>
                         <td>@receipt.getName @receipt.getName</td>
                         <td>
                             <div class="btn-group btn-group-xs">
-                                <a class="btn btn-primary" href="@routes.Profile.index(receipt.getUser.getId)">Detail</a>
+                                <a class="btn btn-primary" href="receipt.getFile.getPath()">Bekijk</a>
                             </div>
                         </td>
                     </tr>
                 }
-            }
         }
     </tbody>
 </table>
