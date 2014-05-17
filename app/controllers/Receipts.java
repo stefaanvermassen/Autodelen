@@ -93,7 +93,7 @@ public class Receipts extends Controller {
 		//**datum**
 		DateTime date=DateTime.now(); 
 		//**gebruiker**
-		User user=DataProvider.getUserProvider().getUser();;
+		User user=DataProvider.getUserProvider().getUser();
 		//**price**
 		int price=15;
 
@@ -112,6 +112,20 @@ public class Receipts extends Controller {
 
     public static void generatePDF(Document document) {
         try {
+	    //**variabelen
+	    String vervaldatum= "15 maart 2014";
+	    String startPeriode= "15 maart 2014";
+	    String eindPeriode= "15 maart 2014";
+	    User gebruiker= DataProvider.getUserProvider().getUser();
+	    int aantalCategorien= 3;
+	    int[][] categorien=new int[aantalCategorien][2];
+	    for(int i=1;i<=aantalCategorien;i++){
+		//Bovengrens
+		categorien[i][1]=i*100;
+		//Prijs
+		categorien[i][1]=i*0,21;
+            }
+
 	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
             Image image2 = Image.getInstance(new URL(imageUrl));
             document.add(image2);
@@ -119,16 +133,17 @@ public class Receipts extends Controller {
             //addMetaData(document);
             //addTitlePage(document);
 	    //Anchor anchor = new Anchor("First Chapter", catFont);
-	    //createTable(Section subCatPart);
+	    createTable(document);
 	    //Beter meer in variabelen
 	    document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB"));
 	    document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent"));
+	    document.add(new Paragraph("Gelieve de afrekening te betalen voor " + vervaldatum));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-private static void createTable(Section subCatPart)
+private static void createTable(Document document)
       throws BadElementException {/*
     PdfPTable table = new PdfPTable(3);
 
