@@ -31,9 +31,8 @@ public class CarPicker extends Controller {
                     for (String part : search.split(" ")) {
                         value = value.replaceAll("(?i)\\b(" + part + ")", "<#>$1</#>");
                     }
-                    value += " (" + car.getId() + ")";
 
-                    cars += "<li data-uid=\"" + car.getId() + "\"><a href=\"javascript:void(0)\">" + value.replace("#", "strong") + "</a></li>";
+                    cars += "<li data-uid=\"" + car.getId() + "\"><a href=\"javascript:void(0)\"><span>" + value.replace("#", "strong") + "</span> (" + car.getId() + ")</a></li>";
                 }
                 return ok(cars);
             } catch (DataAccessException ex) {

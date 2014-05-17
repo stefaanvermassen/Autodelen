@@ -220,22 +220,27 @@
                                     <div id="showEnv" @if(infoForm.hasGlobalErrors) { class="hidden" }>
                                         <div class="well">
                                             <div class="row">
-                                                <div class="col-sm-4">
+                                                <div class="col-sm-3">
                                                     <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartMileage
                                                 </div>
-                                                <div class="col-sm-4">
+                                                <div class="col-sm-3">
                                                     <strong>Kilometerstand na rit:</strong> @driveInfo.getEndMileage
                                                 </div>
-                                                <div class="col-sm-4">
+                                                @if(driveInfo.getCost != 0) {
+                                                <div class="col-sm-3">
+                                                    <strong>Prijs van de rit:</strong> @driveInfo.getCost
+                                                </div>
+                                                }
+                                                <div class="col-sm-3">
                                                     <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && owner.getId == userId) {
-                                                    <div class="col-sm-4 btn-group btn-group-xs">
-                                                        <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
-                                                        <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
-                                                    </div>
+                                                <div class="col-sm-4 btn-group btn-group-xs">
+                                                    <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
+                                                    <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
+                                                </div>
                                                 }
                                             </div>
                                             <br />

@@ -37,6 +37,7 @@ public class JDBCReservationDAO implements ReservationDAO{
     private PreparedStatement getPreviousReservationStatement;
     private PreparedStatement deleteReservationStatement;
     private PreparedStatement getReservationListByCaridStatement;
+    private PreparedStatement getReservationListByUseridStatement;
     private PreparedStatement updateTableStatement;
 
     public JDBCReservationDAO(Connection connection) {
@@ -106,6 +107,17 @@ public class JDBCReservationDAO implements ReservationDAO{
                     "WHERE car_id=?");
         }
         return getReservationListByCaridStatement ;
+    }
+
+    private PreparedStatement getGetReservationListByUseridStatement() throws SQLException {
+        if (getReservationListByUseridStatement == null) {
+            // Only request the reservations for which the current user is the loaner or the owner
+            getReservationListByUseridStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+                    " WHERE (car_owner_user_id = ? OR reservation_user_id = ? ) " +
+                    " AND reservation_status != '" + ReservationStatus.REFUSED.toString() +
+                    "' AND reservation_status != '" + ReservationStatus.CANCELLED.toString() + "'");
+        }
+        return getReservationListByUseridStatement;
     }
 
     private PreparedStatement getUpdateTableStatement() throws SQLException {
@@ -315,6 +327,17 @@ public class JDBCReservationDAO implements ReservationDAO{
         }
     }
 
+    @Override
+    public List<Reservation> getReservationListForUser(int userID) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetReservationListByUseridStatement();
+            ps.setInt(1, userID);
+            ps.setInt(2, userID);
+            return getReservationList(ps);
+        } catch (Exception e){
+            throw new DataAccessException("Unable to retrieve the list of reservations", e);
+        }
+    }
 
     @Override
     public List<Reservation> getReservationListForCar(int carId) throws DataAccessException {

@@ -20,6 +20,14 @@ import java.io.FileOutputStream;
 import com.itextpdf.text.pdf.PdfWriter;
 
 public class Receipts extends Controller {
+    private boolean loanerState = false;
+    private boolean carState = false;
+
+    private Date date;
+
+    private List<CarRide> rides;
+    private List<Refuel> refuels;
+    private List<CarCost> carcosts;
 
     private static final int PAGE_SIZE = 10;
 
@@ -40,13 +48,13 @@ public class Receipts extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of users of the corresponding page
      */
-   // @RoleSecured.RoleAuthenticated()
+    // @RoleSecured.RoleAuthenticated()
     public static Result showReceiptsPage(int page, int ascInt, String orderBy, String date) {
         // TODO: orderBy not as String-argument?
         FilterField receiptsField = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
-	Filter filter = Pagination.parseFilter(date);
+        Filter filter = Pagination.parseFilter(date);
         return ok(receiptsList(page, receiptsField, asc, filter));
     }
 
@@ -61,7 +69,7 @@ public class Receipts extends Controller {
             List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
 
             int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
-	    //int amountOfResults = listOfReceipts.size();
+            //int amountOfResults = listOfReceipts.size();
             int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
 
             //if(){rendernew()}
@@ -76,28 +84,28 @@ public class Receipts extends Controller {
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.open();
-	    generatePDF(document);
-	    addtoDataBase(filename);
+            generatePDF(document);
+            addtoDataBase(filename);
             document.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-	
+
     }
 
     public static void addtoDataBase(String filename) {
-	try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             ReceiptDAO dao = context.getReceiptDAO();
             try {
-		//**datum**
-		DateTime date=DateTime.now(); 
-		//**gebruiker**
-		User user=null;
-		//**price**
-		int price=0;
+                //**datum**
+                DateTime date=DateTime.now();
+                //**gebruiker**
+                User user=null;
+                //**price**
+                int price=0;
 
                 FileDAO fdao = context.getFileDAO();
-		File file=fdao.createFile(filename, filename, "pdf", -1);
+                File file=fdao.createFile(filename, filename, "pdf", -1);
 
                 Receipt receipt = dao.createReceipt(filename, date, file, user, price);
             } catch (DataAccessException ex) {
@@ -128,8 +136,8 @@ public class Receipts extends Controller {
         }
     }
 
-private static void createTable(Section subCatPart)
-      throws BadElementException {/*
+    private static void createTable(Section subCatPart)
+            throws BadElementException {/*
     PdfPTable table = new PdfPTable(3);
 
     // t.setBorderColor(BaseColor.GRAY);
@@ -159,11 +167,9 @@ private static void createTable(Section subCatPart)
 
     subCatPart.add(table);
 */
-  }
+    }
 
-
-
-/*    public void endPeriod() {
+    public void endPeriod() {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO crdao = context.getCarRideDAO();
             RefuelDAO rdao = context.getRefuelDAO();
@@ -171,47 +177,49 @@ private static void createTable(Section subCatPart)
             crdao.endPeriod();
             rdao.endPeriod();
             ccdao.endPeriod();
-	    File f = generateExcel();
-	    addFile(f);
         } catch(DataAccessException ex) {
             throw ex;
         }
     }
 
-
-    public void generateExcel() {
-        //...
-	double amount = 0;
-
+    public void getLoanerBillData(Date date, int user) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO cdao = context.getCarRideDAO();
             RefuelDAO rdao = context.getRefuelDAO();
-            List<CarRide> rides = cdao.getBillRidesForLoaner(date, user);
-            List<Refuel> refuels = rdao.getBillRefuelsForLoaner(date, user);
+            rides = cdao.getBillRidesForLoaner(date, user);
+            refuels = rdao.getBillRefuelsForLoaner(date, user);
 
-            for (CarRide ride : rides) {
-                amount += ride.getCost();
-            }
+            this.date = date;
 
-            for (Refuel refuel: refuels) {
-                amount -= refuel.getAmount().doubleValue();
-            }
+            loanerState = true;
+            carState = false;
         } catch(DataAccessException ex) {
             throw ex;
         }
     }
 
+    public void getCarBillData(Date date, int car) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            CarRideDAO crdao = context.getCarRideDAO();
+            RefuelDAO rdao = context.getRefuelDAO();
+            CarCostDAO ccdao = context.getCarCostDAO();
+            rides = crdao.getBillRidesForCar(date, car);
+            refuels = rdao.getBillRefuelsForCar(date, car);
+            carcosts = ccdao.getBillCarCosts(date, car);
 
+            this.date = date;
 
-    public double getLoanerBillAmount(Date date, int user) {
+            carState = true;
+            loanerState = false;
+        } catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    public double getLoanerBillAmount() {
         double amount = 0;
 
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            CarRideDAO cdao = context.getCarRideDAO();
-            RefuelDAO rdao = context.getRefuelDAO();
-            List<CarRide> rides = cdao.getBillRidesForLoaner(date, user);
-            List<Refuel> refuels = rdao.getBillRefuelsForLoaner(date, user);
-
+        if (loanerState) {
             for (CarRide ride : rides) {
                 amount += ride.getCost();
             }
@@ -219,26 +227,17 @@ private static void createTable(Section subCatPart)
             for (Refuel refuel: refuels) {
                 amount -= refuel.getAmount().doubleValue();
             }
-        } catch(DataAccessException ex) {
-            throw ex;
         }
 
         return amount;
     }
 
-    public double getCarBillAmount(Date date, int car) {
+    public double getCarBillAmount() {
         double deprecationAmount = 0;
         double refuelAmount = 0;
         double carCostAmount = 0;
 
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            CarRideDAO crdao = context.getCarRideDAO();
-            RefuelDAO rdao = context.getRefuelDAO();
-            CarCostDAO ccdao = context.getCarCostDAO();
-            List<CarRide> rides = crdao.getBillRidesForCar(date, car);
-            List<Refuel> refuels = rdao.getBillRefuelsForCar(date, car);
-            List<CarCost> carcosts = ccdao.getBillCarCosts(date, car);
-
+        if (carState) {
             int distanceOwner = 0;
             int distanceOthers = 0;
 
@@ -270,10 +269,8 @@ private static void createTable(Section subCatPart)
             }
 
             carCostAmount *= distanceOthers / (distanceOwner + distanceOthers);
-        } catch(DataAccessException ex) {
-            throw ex;
         }
 
         return deprecationAmount + refuelAmount + carCostAmount;
-    }*/
+    }
 }

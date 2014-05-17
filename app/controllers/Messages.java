@@ -190,4 +190,23 @@ public class Messages extends Controller {
             throw ex;
         }
     }
+
+    /**
+     * Method: GET
+     *
+     * @return message index page
+     */
+    @RoleSecured.RoleAuthenticated()
+    public static Result markAllMessagesAsRead() {
+        User user = DataProvider.getUserProvider().getUser();
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            MessageDAO dao = context.getMessageDAO();
+            dao.markAllMessagesAsRead(user.getId());
+            context.commit();
+            DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
+            return redirect(routes.Messages.showMessages());
+        } catch (DataAccessException ex) {
+            throw ex;
+        }
+    }
 }

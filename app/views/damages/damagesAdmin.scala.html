@@ -15,6 +15,7 @@
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/tristate-checkbox/main.css")">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 @app("Schadedossiers (Admin)", stylesheets, scripts) {
 
@@ -48,6 +49,7 @@
                                 <div class="userpicker" data-url="@routes.CarPicker.getList()">
                                     <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
                                     <input type="hidden" class="searchTextField" name="damage_car_id" value="" />
+                                    <div class="viewId"></div>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>
@@ -55,6 +57,7 @@
                                 <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                     <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Eigenaar"/>
                                     <input type="hidden" class="searchTextField" name="damage_owner_id" value="" />
+                                    <div class="viewId"></div>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>
@@ -62,6 +65,7 @@
                                 <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                     <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Bestuurder"/>
                                     <input type="hidden" class="searchTextField" name="damage_user_id" value="" />
+                                    <div class="viewId"></div>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>
@@ -101,6 +105,7 @@
                                 <div class="userpicker" data-url="@routes.CarPicker.getList()">
                                     <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
                                     <input type="hidden" class="searchTextField" name="damage_car_id" value="" />
+                                    <div class="viewId"></div>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>
@@ -108,6 +113,7 @@
                                 <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                     <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Eigenaar"/>
                                     <input type="hidden" class="searchTextField" name="damage_owner_id" value="" />
+                                    <div class="viewId"></div>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>
@@ -115,6 +121,7 @@
                                 <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                     <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Bestuurder"/>
                                     <input type="hidden" class="searchTextField" name="damage_user_id" value="" />
+                                    <div class="viewId"></div>
                                     <ul class="dropdown-menu" role="menu"></ul>
                                 </div>
                             </div>

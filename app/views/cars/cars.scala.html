@@ -1,10 +1,7 @@
 @(cars: List[Car])
-
     @scripts = {
-
     }
     @stylesheets = {
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
     }
 @import providers.DataProvider;
 @app("Auto's", stylesheets, scripts) {
@@ -50,7 +47,7 @@
                                 <tbody>
                                 @if(cars.isEmpty) {
                                     <tr>
-                                        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="6">
+                                        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8px ;" colspan="6">
                                             Je hebt momenteel geen auto in het systeem.
                                         </td>
                                     </tr>
@@ -77,6 +74,12 @@
                                 }
                                 </tbody>
                             </table>
+                        </div><br />
+                        <div class="row">
+                            <div class="well col-xs-10 col-xs-offset-1">
+                                <div id="calendar">
+                                </div>
+                            </div>
                         </div>
                     </div>
                         <!-- /.panel-body -->

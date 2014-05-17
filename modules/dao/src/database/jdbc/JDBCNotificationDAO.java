@@ -24,6 +24,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
     private PreparedStatement getNotificationListPageByUseridDescStatement;
     private PreparedStatement getGetAmountOfNotificationsStatement;
     private PreparedStatement setReadStatement;
+    private PreparedStatement setAllReadStatement;
 
     public static final String NOTIFICATION_QUERY = "SELECT * FROM notifications JOIN users ON " +
             "notification_user_id= user_id";
@@ -95,6 +96,13 @@ public class JDBCNotificationDAO implements NotificationDAO{
             setReadStatement = connection.prepareStatement("UPDATE notifications SET notification_read = ? WHERE notification_id = ?;");
         }
         return setReadStatement;
+    }
+
+    private PreparedStatement getSetAllReadStatement() throws SQLException {
+        if (setAllReadStatement == null) {
+            setAllReadStatement = connection.prepareStatement("UPDATE notifications SET notification_read = ? WHERE notification_user_id = ?;");
+        }
+        return setAllReadStatement;
     }
 
 
@@ -196,7 +204,20 @@ public class JDBCNotificationDAO implements NotificationDAO{
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating notification.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Unable to mark notification as read", e);
+        }
+    }
+
+    @Override
+    public void markAllNotificationsAsRead(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getSetAllReadStatement();
+            ps.setBoolean(1, true);
+            ps.setInt(2,userId);
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when updating notification.");
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to mark notification as read", e);
         }
     }
 

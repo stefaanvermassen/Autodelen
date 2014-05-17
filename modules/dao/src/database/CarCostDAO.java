@@ -4,6 +4,7 @@ import models.*;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 
 /**
@@ -15,5 +16,7 @@ public interface CarCostDAO {
     public int getAmountOfCarCosts(Filter filter) throws DataAccessException;
     public List<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public void updateCarCost(CarCost carCost) throws DataAccessException;
-    public CarCost getCarCost(int id) throws DataAccessException;
+    public CarCost getCarCost(int id) throws DataAccessException;public void endPeriod() throws DataAccessException;
+    public List<CarCost> getBillCarCosts(Date date, int car) throws DataAccessException;
+
 }

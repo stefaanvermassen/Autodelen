@@ -43,10 +43,20 @@ public class JDBCCarCostDAO implements CarCostDAO {
     private PreparedStatement getCarCostStatement;
     private PreparedStatement getCarCostListPageByDateDescStatement;
     private PreparedStatement getGetAmountOfCarCostsStatement;
+    private PreparedStatement endPeriodStatement;
+    private PreparedStatement getBillCarCostsStatement;
 
     public JDBCCarCostDAO(Connection connection) {
         this.connection = connection;
     }
+
+    private PreparedStatement getEndPeriodStatement() throws SQLException {
+        if (endPeriodStatement == null) {
+            endPeriodStatement = connection.prepareStatement("UPDATE carcosts SET car_cost_billed = CURDATE() " +
+                    "WHERE car_cost_billed = NULL AND car_cost_status = 'ACCEPTED'");
+            }
+            return endPeriodStatement;
+        }
 
     private PreparedStatement getGetCarCostStatement() throws SQLException {
         if (getCarCostStatement == null) {
@@ -57,6 +67,15 @@ public class JDBCCarCostDAO implements CarCostDAO {
                     "WHERE car_cost_id=?");
         }
         return getCarCostStatement;
+    }
+
+    private PreparedStatement getGetBillCarCostsStatement() throws SQLException {
+        if (getBillCarCostsStatement == null) {
+            getBillCarCostsStatement = connection.prepareStatement("SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
+                    "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
+                    "LEFT JOIN technicalcardetails ON car_technical_details = details_id WHERE car_cost_billed = ? AND car_id = ?");
+        }
+        return getBillCarCostsStatement;
     }
 
     private PreparedStatement getCreateCarCostStatement() throws SQLException {
@@ -94,6 +113,7 @@ public class JDBCCarCostDAO implements CarCostDAO {
     public static CarCost populateCarCost(ResultSet rs, Car car) throws SQLException {
         CarCost carCost = new CarCost(rs.getInt("car_cost_id"), car, rs.getBigDecimal("car_cost_amount"), rs.getBigDecimal("car_cost_mileage"), rs.getString("car_cost_description"), new DateTime(rs.getTimestamp("car_cost_time")), rs.getInt("car_cost_proof"));
         carCost.setStatus(CarCostStatus.valueOf(rs.getString("car_cost_status")));
+        carCost.setBilled(rs.getDate("car_cost_billed"));
         return carCost;
     }
 
@@ -208,6 +228,35 @@ public class JDBCCarCostDAO implements CarCostDAO {
         }catch (SQLException e){
             throw new DataAccessException("Error while reading carcost resultset", e);
 
+        }
+    }
+
+    @Override
+    public void endPeriod() throws DataAccessException {
+        try {
+            PreparedStatement ps = getEndPeriodStatement();
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Car Cost update affected 0 rows.");
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update car cost", e);
+        }
+    }
+
+    @Override
+    public List<CarCost> getBillCarCosts(Date date, int car) throws DataAccessException {
+        List<CarCost> list = new ArrayList<>();
+        try {
+            PreparedStatement ps = getGetBillCarCostsStatement();
+            ps.setDate(1, date);
+            ps.setInt(2, car);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(populateCarCost(rs, JDBCCarDAO.populateCar(rs, true)));
+            }
+            return list;
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of car costs", e);
         }
     }
 }
