@@ -85,6 +85,36 @@ public class Receipts extends Controller {
 	
     }
 
+    public static void addtoDataBase(String filename) {
+	try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            ReceiptsDAO dao = context.getReceiptsDAO();
+            try {
+		//**datum**
+		DateTime date=DateTime.now(); 
+		//**gebruiker**
+		User user=null;
+
+                FileDAO fdao = context.getFileDAO();
+		File file=fdao.createFile(filename, filename, "pdf", -1);
+
+
+                InfoSessionType type = InfoSessionType.getTypeFromString(createForm.get().type);
+                String typeAlternative = null;
+                if (type.equals(InfoSessionType.OTHER)) {
+                    typeAlternative = createForm.get().type_alternative;
+                }
+
+                Reciept reciept = dao.createReceipt(filename, date, File file, User user)
+		//createReciept(type, typeAlternative, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments);
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
+            }
+        } catch (DataAccessException ex) {
+            throw ex; //TODO: show gracefully
+        }
+    }
+
     public static void generatePDF(Document document) {
         try {
             Document document = new Document();
