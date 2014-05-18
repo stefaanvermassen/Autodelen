@@ -1,3 +1,73 @@
+/* --- Colortheme --- */
+
+/*set colors*/
+@textColor: white;  
+@topnumberBGColor: red;
+@navtogColor: #ddd;
+@bg: #7dba4d;
+
+/*computed*/
+@bgdarker: @bg - #111;
+@bglighter: @bg + #111;
+
+.navbar-top-links li .dropdown-toggle {
+	color: @textColor;
+	background: @bgdarker;
+}
+
+.navbar-top-links:hover li:hover .dropdown-toggle:hover {
+	background: @bglighter;
+}
+
+.navbar-top-links .open>a:focus {
+	background: @bglighter;
+}
+
+.navbar-top-links:hover li:hover .avatar:hover {
+	background: transparent;
+}
+.nav .open>.avatar:focus {
+	background: transparent;
+}
+
+.navbar-static-top {
+	background-color: @bg;
+}
+
+.navbar-top-links > li > .avatar {
+	background-color: transparent;
+}
+
+.navbar-default .navbar-brand {
+	color: @textColor;
+}
+
+.navbar-default:hover .navbar-brand:hover{
+	color: @textColor;
+}
+
+.topnumber {
+	color: @textColor;
+	background-color: @topnumberBGColor;
+}
+
+.navbar-default .navbar-toggle {
+	border-color: @navtogColor;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: @navtogColor;
+}
+
+.navbar-default .navbar-toggle:hover {
+	background-color: @bglighter;
+}
+
+.navbar-default .navbar-toggle:focus {
+	background-color: @bg;
+}
+
+
 /* --- Dashboard --- */
 
 .numbercircle {
