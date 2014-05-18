@@ -262,6 +262,13 @@
                                                         <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
                                                         <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
                                                     </div>
+                                                } else {
+                                                    <!-- The admin can still change it -->
+                                                    @if(reservation.getStatus == ReservationStatus.FINISHED && isAdmin) {
+                                                        <div class="col-sm-4 btn-group btn-group-xs">
+                                                            <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
+                                                        </div>
+                                                    }
                                                 }
                                             </div>
                                             <br />
