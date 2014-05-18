@@ -8,6 +8,9 @@ function initUserPicker() {
             userpicker.find(".dropdown-menu").html(data);
             userpicker.find("input[type=text]").dropdown("toggle");
         });
+
+        userpicker.find("input[type=hidden]").val("");
+        userpicker.find("div").html("");
     });
 
     $(".userpicker > input[type=text]").on("focus", function() {
@@ -40,9 +43,10 @@ function initUserPicker() {
 
     $(".userpicker > .dropdown-menu").on("click", "li", function() {
         var userpicker = $(this).parent().parent();
-        userpicker.find("input[type=text]").val($(this).text());
+        userpicker.find("input[type=text]").val($(this).find("span").text());
         userpicker.find("input[type=hidden]").val($(this).data("uid"));
-        userpicker.find(".dropdown-menu").html("<li data-uid=\"" + $(this).data("uid") + "\"><a href=\"javascript:void(0)\"><strong>" + $(this).text() + "</strong></a></li>");
+        userpicker.find("div").html($(this).data("uid"));
+        userpicker.find(".dropdown-menu").html("<li data-uid=\"" + $(this).data("uid") + "\"><a href=\"javascript:void(0)\"><span><strong>" + $(this).find("span").text() + "</strong></span> (" + $(this).data("uid") + ")</a></li>");
         $(":input:tabbable").eq($(":input:tabbable").index(userpicker.find("input[type=text]")) + 1).focus();
     });
 
