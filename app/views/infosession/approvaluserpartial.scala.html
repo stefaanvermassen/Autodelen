@@ -26,7 +26,7 @@
 
         <br>
         <strong>Opmerkingen:</strong><br>
-        <textarea readonly rows="4" cols="50">@approval.getUserMessage</textarea>
+        <p>@if(approval.getUserMessage == "") { Geen opmerkingen opgegeven. } else {approval.getUserMessage}</p>
         <br>
 
         <a class="btn btn-default" href="@routes.Profile.index(approval.getUser.getId)">Profiel bekijken</a>
