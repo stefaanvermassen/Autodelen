@@ -115,8 +115,6 @@ public class Refuels extends Controller {
         return ok(refuelList(page, pageSize, field, asc, filter));
     }
 
-
-
     private static Html refuelList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             RefuelDAO dao = context.getRefuelDAO();
