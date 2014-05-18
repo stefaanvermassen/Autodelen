@@ -19,6 +19,8 @@ import com.itextpdf.text.*;
 import java.io.FileOutputStream;
 import com.itextpdf.text.pdf.*;
 import java.net.URL;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Font.FontFamily;
 
 public class Receipts extends Controller {
     private boolean loanerState = false;
@@ -136,9 +138,12 @@ public class Receipts extends Controller {
 
 	    /*Voetnoot*/
 	    /*In templates steken?*/
-	    document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB"));
-	    document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent"));
-	    document.add(new Paragraph("Gelieve de afrekening te betalen voor " + vervaldatum));
+	    Font f=new Font(FontFamily.COURIER, 8);
+	    Font f2=new Font(FontFamily.COURIER, 6);
+	    document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB",f));
+	    document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent",f));
+	    document.add(new Paragraph("Gelieve de afrekening te betalen voor " + vervaldatum,f));
+	    document.add(new Paragraph("Bij betaling, gelieve het nummer van de afrekening te vermelden",f2));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -162,9 +167,9 @@ private static void createTable(Document document)
     PdfPTable table = new PdfPTable(amountOfComulns);
 
     /*Hoofdding*/
-    add(table,"Auto");
-    add(table,"Datum");
-    add(table,"Aantal kms");
+    add(table,"Auto", true);
+    add(table,"Datum", true);
+    add(table,"Aantal kms", true);
     
 	for(int j=0;j<aantalCategorien;j++){
 	    String cell="0-";
@@ -172,20 +177,20 @@ private static void createTable(Document document)
 		cell=categorienBovengrens[j-1]+"-";
 	    }
 	    
-	    add(table,cell+categorienBovengrens[j]+" km");
+	    add(table,cell+categorienBovengrens[j]+" km", true);
 	}
-    add(table,"Kostprijs");
-    add(table,"Tank-");
+    add(table,"Kostprijs",  true);
+    add(table,"Tank-",  true);
 
-    add(table,"");
-    add(table,"");
-    add(table,"");
+    add(table,"",  true);
+    add(table,"",  true);
+    add(table,"",  true);
     
 	for(int j=0;j<aantalCategorien;j++){
 	    add(table,"kms aan "+categoriePrijs[j]);
 	}
-    add(table,"kilometers");
-    add(table,"beurten");
+    add(table,"kilometers", true);
+    add(table,"beurten", true);
     
 
 
@@ -209,7 +214,7 @@ private static void createTable(Document document)
 	    
 	    add(table,""+kmInCategorie);
 	}
-	add(table,""+kostprijskm);
+	add(table,""+kostprijskm, true);
 	add(table,""+tankbeurten);
 
     }
@@ -219,8 +224,27 @@ private static void createTable(Document document)
     document.add(table);
 }
 
-    public static void add(PdfPTable table, String cell) {
-        table.addCell(new PdfPCell(new Paragraph(cell)));
+
+    public static void add(PdfPTable table, String contents, boolean fat) {
+	Font f=new Font(FontFamily.COURIER, 8);
+	if(fat){ 
+	    f=new Font(FontFamily.COURIER, 8, Font.BOLD);
+        }
+	PdfPCell cell=new PdfPCell(new Paragraph(contents,f));
+	//cell.setBorderLeft(Rectangle.NO_BORDER);
+	//cell.setBorderRight(Rectangle.NO_BORDER);
+	//cell.setBorderColorLeft(BaseColor.WHITE);
+        //cell.setBorderColorRight(BaseColor.WHITE);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setBorderColor(BaseColor.WHITE);
+        cell.setBorderColorTop(BaseColor.BLACK);
+        cell.setBorderColorBottom(BaseColor.BLACK);
+        cell.setBorderWidthBottom(0);
+        table.addCell(cell);
+    }
+
+    public static void add(PdfPTable table, String contents) {
+	add( table,  contents, false);
     }
 
     public void endPeriod() {
