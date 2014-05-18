@@ -1,5 +1,8 @@
 package models;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+
 /**
  * Created by HannesM on 10/03/14.
  */
@@ -9,6 +12,8 @@ public class CarRide {
     private int startMileage;
     private int endMileage;
     private boolean damaged;
+    private BigDecimal cost;
+    private Date billed;
 
     private int refueling;
 
@@ -63,4 +68,12 @@ public class CarRide {
     public void setDamaged(boolean damaged) {
         this.damaged = damaged;
     }
+
+    public BigDecimal getCost() { return cost; }
+
+    public void setCost(BigDecimal cost) { this.cost = cost; }
+
+    public Date getBilled() { return billed; }
+
+    public void setBilled(Date billed) { this.billed = billed; }
 }

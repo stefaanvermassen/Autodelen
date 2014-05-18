@@ -11,11 +11,13 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import providers.DataProvider;
+import providers.SettingProvider;
 import views.html.drives.driveDetails;
 import views.html.drives.drivesAdmin;
 import views.html.drives.drives;
 import views.html.drives.drivespage;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -439,6 +441,10 @@ public class Drives extends Controller {
                 // Owner is allowed to adjust the information
                 ride.setStartMileage(detailsForm.get().startMileage);
                 ride.setEndMileage(detailsForm.get().endMileage);
+            }
+
+            if(isOwner) {
+                calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
                 dao.updateCarRide(ride);
             } else {
                 detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
@@ -491,6 +497,7 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             ride.setStatus(true);
+            calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
             dao.updateCarRide(ride);
             reservation.setStatus(ReservationStatus.FINISHED);
             rdao.updateReservation(reservation);
@@ -498,6 +505,34 @@ public class Drives extends Controller {
             return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         } catch(DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    private static void calculateDriveCost(CarRide ride, DateTime date, boolean privileged) {
+        if (privileged) {
+            ride.setCost(BigDecimal.ZERO);
+        } else {
+            SettingProvider provider = DataProvider.getSettingProvider();
+
+            double cost = 0;
+            int distance = ride.getEndMileage() - ride.getStartMileage();
+            int levels = provider.getInt("cost_levels", date);
+            int lower = 0;
+
+            for (int level = 0; level < levels; level++) {
+                int limit;
+
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date))) {
+                    cost += distance * provider.getDouble("cost_" + level, date);
+                    break;
+                } else {
+                    cost += (limit - lower) * provider.getDouble("cost_" + level, date);
+                    distance -= (limit - lower);
+                    lower = limit;
+                }
+            }
+
+            ride.setCost(new BigDecimal(cost));
         }
     }
 
@@ -536,6 +571,19 @@ public class Drives extends Controller {
             index++;
         }
         return isOwner;
+    }
+
+    private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, User user, Reservation reservation) {
+        CarDAO cdao = context.getCarDAO();
+        List<User> users = cdao.getPriviliged(reservation.getCar());
+        boolean isPrivileged= false;
+        int index = 0;
+        while(!isPrivileged && index < users.size()){
+            if(users.get(index).getId() == user.getId())
+                isPrivileged = true;
+            index++;
+        }
+        return isPrivileged;
     }
 
     /**

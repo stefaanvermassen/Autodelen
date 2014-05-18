@@ -62,6 +62,9 @@ public class JDBCRefuelDAO implements RefuelDAO {
     private PreparedStatement getRefuelsStatement;
     private PreparedStatement getGetAmountOfRefuelsStatement;
     private PreparedStatement getGetAmountOfRefuelsWithStatusStatement;
+    private PreparedStatement endPeriodStatement;
+    private PreparedStatement getBillRefuelsForLoanerStatement;
+    private PreparedStatement getBillRefuelsForCarStatement;
 
     public JDBCRefuelDAO(Connection connection) {
         this.connection = connection;
@@ -152,6 +155,29 @@ public class JDBCRefuelDAO implements RefuelDAO {
         return getRefuelsForOwnerStatement;
     }
 
+    private PreparedStatement getEndPeriodStatement() throws SQLException {
+        if (endPeriodStatement == null) {
+            endPeriodStatement = connection.prepareStatement("UPDATE refuels SET refuel_billed = CURDATE() " +
+                    "FROM refuels INNER JOIN carrides ON refuels.refuel_car_ride_id = carrides.car_ride_car_reservation_id INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
+                    "WHERE refuels.refuel_billed = NULL AND refuels.refuel_status = 'ACCEPTED' AND carreservation.reservation_to < CURDATE()");
+        }
+        return endPeriodStatement;
+    }
+
+    private PreparedStatement getGetBillRefuelsForLoanerStatement() throws SQLException {
+        if (getBillRefuelsForLoanerStatement == null) {
+            getBillRefuelsForLoanerStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_user_id = ?");
+        }
+        return getBillRefuelsForLoanerStatement;
+    }
+
+    private PreparedStatement getGetBillRefuelsForCarStatement() throws SQLException {
+        if (getBillRefuelsForCarStatement == null) {
+            getBillRefuelsForCarStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_car_id = ?");
+        }
+        return getBillRefuelsForCarStatement;
+    }
+
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
         Refuel refuel;
         if(rs.getString("refuel_status").equals("CREATED")){
@@ -159,6 +185,8 @@ public class JDBCRefuelDAO implements RefuelDAO {
         }else{
             refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), JDBCFileDAO.populateFile(rs), rs.getBigDecimal("refuel_amount"), RefuelStatus.valueOf(rs.getString("refuel_status")));
         }
+
+        refuel.setBilled(rs.getDate("refuel_billed"));
 
         refuel.getCarRide().getReservation().getCar().setOwner(JDBCUserDAO.populateUser(rs, false, false, "owners"));
 
@@ -352,6 +380,42 @@ public class JDBCRefuelDAO implements RefuelDAO {
             return list;
         }catch (SQLException e){
             throw new DataAccessException("Error while reading refuel resultset", e);
+        }
+    }
+
+    @Override
+    public void endPeriod() throws DataAccessException {
+        try {
+            PreparedStatement ps = getEndPeriodStatement();
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Refuel update affected 0 rows.");
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update car refuel", e);
+        }
+    }
+
+    @Override
+    public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetBillRefuelsForLoanerStatement();
+            ps.setDate(1, date);
+            ps.setInt(2, user);
+            return getRefuelList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
+        }
+    }
+
+    @Override
+    public List<Refuel> getBillRefuelsForCar(Date date, int car) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetBillRefuelsForCarStatement();
+            ps.setDate(1, date);
+            ps.setInt(2, car);
+            return getRefuelList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of refuels for car.", e);
         }
     }
 }

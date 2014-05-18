@@ -3,6 +3,7 @@ package models;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 
 /**
  * Created by Stefaan Vermassen on 15/04/14.
@@ -17,6 +18,7 @@ public class CarCost {
     private String description;
     private CarCostStatus status;
     private int proofId;
+    private Date billed;
 
     public int getId() {
         return id;
@@ -81,6 +83,10 @@ public class CarCost {
     public void setProofId(int proofId) {
         this.proofId = proofId;
     }
+
+    public Date getBilled() { return billed; }
+
+    public void setBilled(Date billed) { this.billed = billed; }
 
     public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time, int proofId){
         this.id = id;
