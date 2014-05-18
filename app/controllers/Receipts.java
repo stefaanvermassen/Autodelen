@@ -1,6 +1,5 @@
 package controllers;
 
-import com.itextpdf.text.pdf.draw.LineSeparator;
 import database.*;
 import models.*;
 import models.CarCost;
@@ -28,9 +27,6 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.Font.FontFamily;
 
 public class Receipts extends Controller {
-    private boolean loanerState = false;
-    private boolean carState = false;
-
     private static Date date = new Date(1401580800000L);
 
     private static List<CarRide> rides;
@@ -162,8 +158,14 @@ public class Receipts extends Controller {
 
             document.add(table);
 
-	    /*Tabel*/
-	    createTable(document);
+            getLoanerBillData(date, gebruiker.getId());
+            double saldo = createLoanerTable(document);
+
+            DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
+            for (Car car : context.getCarDAO().getCarsOfUser(gebruiker.getId())) {
+                getCarBillData(date, car.getId());
+                saldo += createCarTable(document, car.getName());
+            }
 
 	    /*Voetnoot*/
 	    /*In templates steken?*/
@@ -178,7 +180,107 @@ public class Receipts extends Controller {
         }
     }
 
-private static void createTable(Document document)
+    private static double createCarTable(Document document, String carName)
+            throws BadElementException, DocumentException {
+        document.newPage();
+        document.add(new Paragraph("WAGEN: " + carName));
+        PdfPTable carTable = new PdfPTable(2);
+        carTable.setSpacingBefore(5);
+        carTable.setSpacingAfter(10);
+
+        int loanerDist = 0;
+        int othersDist = 0;
+
+        for (CarRide ride : rides) {
+            if (ride.getReservation().getUser() == ride.getReservation().getCar().getOwner()) {
+                loanerDist += ride.getEndMileage() - ride.getStartMileage();
+            } else {
+                othersDist += ride.getEndMileage() - ride.getStartMileage();
+            }
+        }
+
+        add(carTable, "Totaal aantal kilometers:", true);
+        add(carTable, (loanerDist + othersDist) + " km", true);
+
+        double deprecation = DataProvider.getSettingProvider().getDouble("deprecation_cost", new DateTime(date));
+
+        if (loanerDist + othersDist > 0) {
+            add(carTable, "Door eigenaar gereden:");
+            add(carTable, loanerDist + " km");
+            add(carTable, "Percentage eigenaar:");
+            add(carTable, Math.round(100 * loanerDist / (loanerDist + othersDist)) + "%");
+            add(carTable, "Percentage gedeeld:");
+            add(carTable, Math.round(100 * othersDist / (loanerDist + othersDist)) + "%");
+            add(carTable, "Afschrijving per kilometer:");
+            add(carTable, "€ " + deprecation);
+            add(carTable, "Afschrijving voor deze periode:", true);
+            add(carTable, "€ " + (othersDist * deprecation), true);
+        }
+
+        add(carTable, "");
+        add(carTable, "");
+
+        double carCostAmount = 0;
+        for (CarCost carcost : carcosts) {
+            carCostAmount += carcost.getAmount().doubleValue();
+        }
+
+        add(carTable, "Vaste kosten af te schrijven:");
+        add(carTable, "€ " + carCostAmount);
+
+        double recupCosts = 0;
+
+        if (loanerDist + othersDist > 0) {
+            recupCosts = (carCostAmount * othersDist / (loanerDist + othersDist));
+            add(carTable, "Recuperatie vaste kosten:", true);
+            add(carTable, "€ " + recupCosts, true);
+            add(carTable, "Ter info: Vaste kost per kilometer:");
+            add(carTable, "€ " + (carCostAmount / (loanerDist + othersDist)));
+        }
+
+        add(carTable, "");
+        add(carTable, "");
+
+        double refuelOthers = 0;
+        double refuelOwner = 0;
+
+        for (Refuel refuel: refuels) {
+            if (refuel.getCarRide().getCost() == 0) {
+                refuelOwner += refuel.getAmount().doubleValue();
+            } else {
+                refuelOthers += refuel.getAmount().doubleValue();
+            }
+        }
+
+        add(carTable, "Totaal brandstof:");
+        add(carTable, "€ " + (refuelOthers + refuelOwner));
+
+        double refuelTot = 0;
+
+        if (loanerDist + othersDist > 0) {
+            add(carTable, "Brandstof per kilometer:");
+            add(carTable, "€ " + ((refuelOthers + refuelOwner) / (loanerDist + othersDist)));
+            add(carTable, "Te betalen brandstof:");
+            add(carTable, "€ " + (loanerDist * (refuelOthers + refuelOwner) / (loanerDist + othersDist)));
+            add(carTable, "Brandstof reeds betaald:");
+            add(carTable, "€ " + refuelOwner);
+            refuelTot = (refuelOwner - (loanerDist * (refuelOthers + refuelOwner) / (loanerDist + othersDist)));
+            add(carTable, "Saldo brandstof:", true);
+            add(carTable, "€ " + refuelTot, true);
+        }
+
+        add(carTable, "");
+        add(carTable, "");
+
+        add(carTable, "SALDO WAGEN '" + carName + "'", true);
+        add(carTable, "€ " + (othersDist * deprecation + recupCosts + refuelTot), true);
+
+        document.add(carTable);
+
+        return 0;
+    }
+
+private static double createLoanerTable(Document document)
       throws BadElementException, DocumentException {
     document.add(new Paragraph("Ritten"));
     //**variabelen
@@ -222,14 +324,6 @@ private static void createTable(Document document)
 
     add(drivesTable,"",  true);
 
-    try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-        CarRideDAO dao = context.getCarRideDAO();
-        rides = new ArrayList<>();
-        rides.add(dao.getCarRide(101));
-        refuels = new ArrayList<>();
-        refuels.add(new Refuel(1, rides.get(0), null, new BigDecimal(5), RefuelStatus.ACCEPTED));
-    } catch (Exception e) {}
-
     int totalDistance = 0;
     double totalCost = 0;
     int[] totals = new int[levels];
@@ -244,11 +338,6 @@ private static void createTable(Document document)
 	add(drivesTable, new SimpleDateFormat("dd-MM-yyyy").format(ride.getReservation().getFrom().toDate()));
 	add(drivesTable, distance + " km");
 
-        double rideCost = 0;
-        if (ride.getCost() == 0) {
-            for (int level = 0; level < levels; level++)
-                add(drivesTable, "--");
-        } else {
             int level;
             lower = 0;
             for (level = 0; level < levels; level++) {
@@ -262,7 +351,6 @@ private static void createTable(Document document)
 
                 totals[level] += d;
                 distance -= d;
-                rideCost += d * provider.getDouble("cost_" + level, new DateTime(date));
                 add(drivesTable, d + " km");
 
                 if (distance == 0) {
@@ -276,11 +364,13 @@ private static void createTable(Document document)
             for (int i = level; i < levels; i++) {
                 add(drivesTable, "");
             }
-        }
 
-        totalCost += rideCost;
+        totalCost += ride.getCost();
 
-	add(drivesTable, "€ " + rideCost, true);
+        if (ride.getCost() != 0)
+            add(drivesTable, "€ " + ride.getCost(), true);
+        else
+            add(drivesTable, "--", true);
 
     }
 
@@ -316,8 +406,11 @@ private static void createTable(Document document)
     for (Refuel refuel : refuels) {
         add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
         add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
-        add(refuelsTable, "€ " + refuel.getAmount(), true);
-        refuelTotal += refuel.getAmount().doubleValue();
+        if (refuel.getCarRide().getCost() != 0) {
+            add(refuelsTable, "€ " + refuel.getAmount(), true);
+            refuelTotal += refuel.getAmount().doubleValue();
+        } else
+            add(refuelsTable, "-- € " + refuel.getAmount(), true);
     }
 
     add(refuelsTable, "TOTAAL", true);
@@ -325,6 +418,22 @@ private static void createTable(Document document)
     add(refuelsTable, "€ " + refuelTotal, true);
 
     document.add(refuelsTable);
+
+    PdfPTable totalTable = new PdfPTable(3);
+    totalTable.setSpacingBefore(5);
+    totalTable.setSpacingAfter(10);
+
+    add(totalTable, "Totaal ritten", true);
+    add(totalTable, "Totaal tankbeurten", true);
+    add(totalTable, "SALDO", true);
+
+    add(totalTable, "+ € " + totalCost);
+    add(totalTable, "- € " + refuelTotal);
+    add(totalTable, "€ " + (totalCost - refuelTotal), true);
+
+    document.add(totalTable);
+
+    return totalCost - refuelTotal;
 }
 
 
@@ -366,95 +475,31 @@ private static void createTable(Document document)
         }
     }
 
-    public void getLoanerBillData(Date date, int user) {
+    public static void getLoanerBillData(Date d, int user) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO cdao = context.getCarRideDAO();
             RefuelDAO rdao = context.getRefuelDAO();
-            rides = cdao.getBillRidesForLoaner(date, user);
-            refuels = rdao.getBillRefuelsForLoaner(date, user);
+            rides = cdao.getBillRidesForLoaner(d, user);
+            refuels = rdao.getBillRefuelsForLoaner(d, user);
 
-            this.date = date;
-
-            loanerState = true;
-            carState = false;
+            date = d;
         } catch(DataAccessException ex) {
             throw ex;
         }
     }
 
-    public void getCarBillData(Date date, int car) {
+    public static void getCarBillData(Date d, int car) {
         try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
             CarRideDAO crdao = context.getCarRideDAO();
             RefuelDAO rdao = context.getRefuelDAO();
             CarCostDAO ccdao = context.getCarCostDAO();
-            rides = crdao.getBillRidesForCar(date, car);
-            refuels = rdao.getBillRefuelsForCar(date, car);
-            carcosts = ccdao.getBillCarCosts(date, car);
+            rides = crdao.getBillRidesForCar(d, car);
+            refuels = rdao.getBillRefuelsForCar(d, car);
+            carcosts = ccdao.getBillCarCosts(d, car);
 
-            this.date = date;
-
-            carState = true;
-            loanerState = false;
+            date = d;
         } catch(DataAccessException ex) {
             throw ex;
         }
-    }
-
-    public double getLoanerBillAmount() {
-        double amount = 0;
-
-        if (loanerState) {
-            for (CarRide ride : rides) {
-                amount += ride.getCost();
-            }
-
-            for (Refuel refuel: refuels) {
-                amount -= refuel.getAmount().doubleValue();
-            }
-        }
-
-        return amount;
-    }
-
-    public double getCarBillAmount() {
-        double deprecationAmount = 0;
-        double refuelAmount = 0;
-        double carCostAmount = 0;
-
-        if (carState) {
-            int distanceOwner = 0;
-            int distanceOthers = 0;
-
-            for (CarRide ride : rides) {
-                if (ride.getReservation().getUser() == ride.getReservation().getCar().getOwner()) {
-                    distanceOwner += ride.getEndMileage() - ride.getStartMileage();
-                } else {
-                    distanceOthers += ride.getEndMileage() - ride.getStartMileage();
-                }
-            }
-
-            deprecationAmount = distanceOthers * DataProvider.getSettingProvider().getDouble("deprecation_cost", new DateTime(date.getTime()));
-
-            double refuelOthers = 0;
-            double refuelOwner = 0;
-
-            for (Refuel refuel: refuels) {
-                if (refuel.getCarRide().getReservation().getUser() == refuel.getCarRide().getReservation().getCar().getOwner()) {
-                    refuelOwner += refuel.getAmount().doubleValue();
-                } else {
-                    refuelOthers += refuel.getAmount().doubleValue();
-                }
-            }
-
-            refuelAmount = refuelOwner - (refuelOwner + refuelOthers) * distanceOwner / (distanceOwner + distanceOthers);
-
-            for (CarCost carcost : carcosts) {
-                carCostAmount += carcost.getAmount().doubleValue();
-            }
-
-            carCostAmount *= distanceOthers / (distanceOwner + distanceOthers);
-        }
-
-        return deprecationAmount + refuelAmount + carCostAmount;
     }
 }

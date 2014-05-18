@@ -442,7 +442,7 @@ public class Drives extends Controller {
             }
 
             if(isOwner) {
-                calculateDriveCost(ride, reservation.getFrom());
+                calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
                 dao.updateCarRide(ride);
             }
             // Unable to create or retrieve the drive
@@ -492,7 +492,7 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             ride.setStatus(true);
-            calculateDriveCost(ride, reservation.getFrom());
+            calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
             dao.updateCarRide(ride);
             reservation.setStatus(ReservationStatus.FINISHED);
             rdao.updateReservation(reservation);
@@ -503,13 +503,8 @@ public class Drives extends Controller {
         }
     }
 
-    private static void calculateDriveCost(CarRide ride, DateTime date) {
-        boolean priviliged = false;
-        for (User user : ride.getReservation().getCar().getPriviliged()) {
-            if (user.getId() == ride.getReservation().getUser().getId())
-                priviliged = true;
-        }
-        if (ride.getReservation().getUser().getId() == ride.getReservation().getCar().getOwner().getId() || priviliged) {
+    private static void calculateDriveCost(CarRide ride, DateTime date, boolean privileged) {
+        if (privileged) {
             ride.setCost(0);
         } else {
             SettingProvider provider = DataProvider.getSettingProvider();
@@ -517,6 +512,7 @@ public class Drives extends Controller {
             double cost = 0;
             int distance = ride.getEndMileage() - ride.getStartMileage();
             int levels = provider.getInt("cost_levels", date);
+            int lower = 0;
 
             for (int level = 0; level < levels; level++) {
                 int limit;
@@ -525,8 +521,9 @@ public class Drives extends Controller {
                     cost += distance * provider.getDouble("cost_" + level, date);
                     break;
                 } else {
-                    cost += limit * provider.getDouble("cost_" + level, date);
-                    distance -= limit;
+                    cost += (limit - lower) * provider.getDouble("cost_" + level, date);
+                    distance -= (limit - lower);
+                    lower = limit;
                 }
             }
 
@@ -569,6 +566,19 @@ public class Drives extends Controller {
             index++;
         }
         return isOwner;
+    }
+
+    private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, User user, Reservation reservation) {
+        CarDAO cdao = context.getCarDAO();
+        List<User> users = cdao.getPriviliged(reservation.getCar());
+        boolean isPrivileged= false;
+        int index = 0;
+        while(!isPrivileged && index < users.size()){
+            if(users.get(index).getId() == user.getId())
+                isPrivileged = true;
+            index++;
+        }
+        return isPrivileged;
     }
 
     /**
