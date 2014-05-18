@@ -3,6 +3,7 @@ package database;
 import models.*;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 
 /**
@@ -22,4 +23,7 @@ public interface RefuelDAO {
     public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException;
     public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException;
     public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException;
+    public void endPeriod() throws DataAccessException;
+    public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException;
+    public List<Refuel> getBillRefuelsForCar(Date date, int car) throws DataAccessException;
 }

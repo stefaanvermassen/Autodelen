@@ -11,11 +11,13 @@ import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.*;
 import providers.DataProvider;
+import providers.SettingProvider;
 import views.html.drives.driveDetails;
 import views.html.drives.drivesAdmin;
 import views.html.drives.drives;
 import views.html.drives.drivespage;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -199,7 +201,8 @@ public class Drives extends Controller {
                 flash("Error", "De reservatie bevat ongeldige gegevens");
                 return null;
             }
-            if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)) {
+            if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)
+                    && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 flash("Errror", "Je bent niet gemachtigd om deze informatie op te vragen");
                 return null;
             }
@@ -250,7 +253,7 @@ public class Drives extends Controller {
                 adjustForm.reject("Er is een fout gebeurt bij het opvragen van de rit.");
                 return badRequest(showIndex());
             }
-            if(!isLoaner(reservation, user)) {
+            if(!isLoaner(reservation, user) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 adjustForm.reject("Je bent niet gemachtigd deze actie uit te voeren.");
                 return badRequest(showIndex());
             }
@@ -359,7 +362,7 @@ public class Drives extends Controller {
                 switch (status) {
                     // Only the loaner is allowed to cancel a reservation at any time
                     case CANCELLED:
-                        if (!isLoaner(reservation, user)) {
+                        if (!isLoaner(reservation, user) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                             flash("Error", "Alleen de ontlener mag een reservatie annuleren!");
                             return null;
                         } else if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
@@ -411,7 +414,7 @@ public class Drives extends Controller {
             }
             // Test if user is authorized
             boolean isOwner = isOwnerOfReservedCar(context, user, reservation);
-            if(!isLoaner(reservation, user) && !isOwner) {
+            if(!isLoaner(reservation, user) && !isOwner && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
@@ -434,11 +437,18 @@ public class Drives extends Controller {
                     Damage damage = damageDAO.createDamage(ride);
                     context.commit();
                 }
-            } else if(isOwner) {
+            } else if(isOwner || DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 // Owner is allowed to adjust the information
                 ride.setStartMileage(detailsForm.get().startMileage);
                 ride.setEndMileage(detailsForm.get().endMileage);
+            }
+
+            if(isOwner) {
+                calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
                 dao.updateCarRide(ride);
+            } else {
+                detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
+                return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             // Unable to create or retrieve the drive
             if(ride == null) {
@@ -477,7 +487,7 @@ public class Drives extends Controller {
                 detailsForm.reject("De reservatie kan niet opgevraagd worden. Gelieve de database administrator te contacteren.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
-            if(!isOwnerOfReservedCar(context, user, reservation)) {
+            if(!isOwnerOfReservedCar(context, user, reservation) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
@@ -487,6 +497,7 @@ public class Drives extends Controller {
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             ride.setStatus(true);
+            calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
             dao.updateCarRide(ride);
             reservation.setStatus(ReservationStatus.FINISHED);
             rdao.updateReservation(reservation);
@@ -494,6 +505,34 @@ public class Drives extends Controller {
             return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         } catch(DataAccessException ex) {
             throw ex;
+        }
+    }
+
+    private static void calculateDriveCost(CarRide ride, DateTime date, boolean privileged) {
+        if (privileged) {
+            ride.setCost(BigDecimal.ZERO);
+        } else {
+            SettingProvider provider = DataProvider.getSettingProvider();
+
+            double cost = 0;
+            int distance = ride.getEndMileage() - ride.getStartMileage();
+            int levels = provider.getInt("cost_levels", date);
+            int lower = 0;
+
+            for (int level = 0; level < levels; level++) {
+                int limit;
+
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date))) {
+                    cost += distance * provider.getDouble("cost_" + level, date);
+                    break;
+                } else {
+                    cost += (limit - lower) * provider.getDouble("cost_" + level, date);
+                    distance -= (limit - lower);
+                    lower = limit;
+                }
+            }
+
+            ride.setCost(new BigDecimal(cost));
         }
     }
 
@@ -532,6 +571,19 @@ public class Drives extends Controller {
             index++;
         }
         return isOwner;
+    }
+
+    private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, User user, Reservation reservation) {
+        CarDAO cdao = context.getCarDAO();
+        List<User> users = cdao.getPriviliged(reservation.getCar());
+        boolean isPrivileged= false;
+        int index = 0;
+        while(!isPrivileged && index < users.size()){
+            if(users.get(index).getId() == user.getId())
+                isPrivileged = true;
+            index++;
+        }
+        return isPrivileged;
     }
 
     /**
