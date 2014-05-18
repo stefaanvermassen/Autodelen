@@ -72,8 +72,8 @@
                                         @if(isAdmin) {
                                             <label class="col-md-12" for="userId">Eigenaar</label>
                                             <div class="col-md-12">
-                                            @if(form("userId").value){
-                                                @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
+                                            @if(car != null){
+                                                @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value().toInt, false)) { user =>
                                                     <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                                         <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
                                                         <input type="hidden" name="userId" value="@user.getId" />
@@ -275,7 +275,7 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
                                             <div class="col-md-12">
-                                                Huidig: @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) {
+                                                Huidig: @if(car == null || car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) {
                                                     Onbekend
                                                 } else {
                                                     <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)" target="_blank">Link</a>

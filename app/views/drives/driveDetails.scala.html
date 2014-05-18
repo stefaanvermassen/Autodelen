@@ -29,6 +29,7 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 @app("Rit details", stylesheets, scripts) {
+@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
     @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
         <div id="page-header-wrapper">
             <ol class="breadcrumb">
@@ -87,10 +88,21 @@
                                 </div><br />
                                         <!-- /row -->
                                     <!-- loaner specific content -->
-                                    @if(loaner.getId == userId) {
+                                    @if(loaner.getId == userId || isAdmin) {
+                                        @if(loaner.getId != userId) {
+                                            <div class="alert alert-warning alert-dismissable">
+                                                Pas op! Je bent niet de bestuurder, maar ziet deze details toch omdat je admin bent!
+                                            </div>
+                                        }
                                         @views.html.drives.driveDetailsLoaner(adjustForm, reservation)
                                     <!-- owner specific content -->
-                                    } else {
+                                    }
+                                    @if(owner.getId == userId || isAdmin) {
+                                        @if(owner.getId != userId) {
+                                            <div class="alert alert-warning alert-dismissable">
+                                                Pas op! Je bent niet de eigenaar, maar ziet onderstaande details toch omdat je admin bent!
+                                            </div>
+                                        }
                                         @views.html.drives.driveDetailsOwner(refuseForm, reservation)
                                     }
                             <!-- /well -->
@@ -257,4 +269,5 @@
         <!-- /page wrapper -->
         </div>
     }
+}
 }

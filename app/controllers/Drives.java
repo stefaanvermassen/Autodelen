@@ -199,7 +199,8 @@ public class Drives extends Controller {
                 flash("Error", "De reservatie bevat ongeldige gegevens");
                 return null;
             }
-            if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)) {
+            if(!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)
+                    && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 flash("Errror", "Je bent niet gemachtigd om deze informatie op te vragen");
                 return null;
             }
@@ -250,7 +251,7 @@ public class Drives extends Controller {
                 adjustForm.reject("Er is een fout gebeurt bij het opvragen van de rit.");
                 return badRequest(showIndex());
             }
-            if(!isLoaner(reservation, user)) {
+            if(!isLoaner(reservation, user) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 adjustForm.reject("Je bent niet gemachtigd deze actie uit te voeren.");
                 return badRequest(showIndex());
             }
@@ -359,7 +360,7 @@ public class Drives extends Controller {
                 switch (status) {
                     // Only the loaner is allowed to cancel a reservation at any time
                     case CANCELLED:
-                        if (!isLoaner(reservation, user)) {
+                        if (!isLoaner(reservation, user) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                             flash("Error", "Alleen de ontlener mag een reservatie annuleren!");
                             return null;
                         } else if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
@@ -411,7 +412,7 @@ public class Drives extends Controller {
             }
             // Test if user is authorized
             boolean isOwner = isOwnerOfReservedCar(context, user, reservation);
-            if(!isLoaner(reservation, user) && !isOwner) {
+            if(!isLoaner(reservation, user) && !isOwner && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
