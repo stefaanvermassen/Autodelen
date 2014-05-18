@@ -77,18 +77,15 @@
                 @defining(DataProvider.getUserProvider().getUser()) { user =>
                     @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
                         @flashes()
+
+                        @if(car.getOwner.getId == user.getId()) {
+                            <div class="alert alert-info alert-dismissable">
+                                U bent eigenaar.
+                            </div>
+                        }
                         @if(isAdmin || car.getOwner.getId == user.getId()) {
                             <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <i class="fa fa-bar-chart-o fa-fw"></i> Admin Toolbox
-                                </div>
-                                    <!-- /.panel-heading -->
                                 <div class="panel-body">
-                                    @if(car.getOwner.getId == user.getId()) {
-                                        <div class="alert alert-info alert-dismissable">
-                                            U bent eigenaar.
-                                        </div>
-                                    }
                                     <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
                                     <a class="btn btn-default btn-sm" href="@routes.Reports.getReservationsForOwner">Exporteer ritten</a>
                                 </div>
@@ -103,7 +100,7 @@
                     <!-- Beschikbaarheid -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Beschikbaarheid
+                            Beschikbaarheid
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -182,20 +179,20 @@
                                     <tr>
                                         <td colspan="5">
                                             <div class="btn-group btn-group-xs">
-                                                <button type="button" class="btn btn-success" onclick="newAvailability(this)">Nieuw</button>
+                                                <button type="button" class="btn btn-default" onclick="newAvailability(this)">Nieuw</button>
                                             </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <button class="btn btn-primary" onclick="updateCarAvailabilities(@car.getId)">Wijzigingen opslaan</button>
+                            <button class="btn btn-success" onclick="updateCarAvailabilities(@car.getId)">Wijzigingen opslaan</button>
                         </div>
                     </div>
 
                     <!-- Gepriviligeerden -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Gepriviligieerden
+                            Gepriviligieerden
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -234,25 +231,25 @@
                                     <tr>
                                         <td colspan="5">
                                             <div class="btn-group btn-group-xs">
-                                                <button type="button" class="btn btn-success" onclick="newPrivilege(this)">Nieuw</button>
+                                                <button type="button" class="btn btn-default" onclick="newPrivilege(this)">Nieuw</button>
                                             </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <button class="btn btn-primary" onclick="updatePrivileged(@car.getId)">Wijzigingen opslaan</button>
+                            <button class="btn btn-success" onclick="updatePrivileged(@car.getId)">Wijzigingen opslaan</button>
                         </div>
                     </div>
 
                     <!-- Autogebonden kosten -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Autogebonden kosten
+                            Autogebonden kosten
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
                             <p>Vul hier als eigenaar jouw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.</p>
-                            <button class="btn btn-primary" onclick="loadModal(@car.getId)">Nieuwe kost</button>
+                            <button class="btn btn-default" onclick="loadModal(@car.getId)">Nieuwe kost</button>
                             <p></p>
 
                             <input name="car_id" value="@car.getId" class="searchTextField hidden">

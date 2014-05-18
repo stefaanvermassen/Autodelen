@@ -61,18 +61,14 @@
                 <h1 class="page-header">Schadedossier details</h1>
                 @flashes()
                 <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Schade toolbox
-                    </div>
-                        <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <button class="btn btn-primary" onclick="loadDescriptionModal(@damage.getId)">Tijd/beschrijving aanpassen</button>
-                        <button class="btn btn-primary" onclick="loadStatusModal(@damage.getId)">Nieuwe status</button>
-                        <button class="btn btn-primary" onclick="loadProofModal(@damage.getId)">Nieuw bewijsstuk</button>
+                        <button class="btn btn-default" onclick="loadDescriptionModal(@damage.getId)">Tijd/beschrijving aanpassen</button>
+                        <button class="btn btn-default" onclick="loadStatusModal(@damage.getId)">Nieuwe status</button>
+                        <button class="btn btn-default" onclick="loadProofModal(@damage.getId)">Nieuw bewijsstuk</button>
                         @if(!damage.getFinished){
-                            <a class="btn btn-primary" href="@routes.Damages.setDamageFinished(damage.getId, 1)">Schadedossier sluiten</a>
+                            <a class="btn btn-default" href="@routes.Damages.setDamageFinished(damage.getId, 1)">Schadedossier sluiten</a>
                         }else{
-                            <a class="btn btn-primary" href="@routes.Damages.setDamageFinished(damage.getId, 0)">Schadedossier heropenen</a>
+                            <a class="btn btn-default" href="@routes.Damages.setDamageFinished(damage.getId, 0)">Schadedossier heropenen</a>
                         }
 
                     </div>

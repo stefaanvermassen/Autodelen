@@ -18,7 +18,7 @@ $(document).ready(function() {
         .append($('<button>')
             .attr('type', 'submit')
             .attr('class', 'btn btn-block btn-sm btn-default')
-            .css('border-radius', '0px 0px 10px 10px')
+            // .css('border-radius', '0px 0px 10px 10px')
             .css('background-color', '#d4d4d4')
             .append($('<b>')
                 .text('Zoek naar auto\'s')

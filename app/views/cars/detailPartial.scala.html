@@ -49,9 +49,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Details</h3>
+                        Details
                     </div>
                     <div class="panel-body">
                         <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
@@ -67,7 +71,7 @@
                 @if(isAdmin || car.getOwner.getId == user.getId) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Geheime details (enkel zichtbaar voor admin en eigenaar)</h3>
+                            Geheime details (enkel zichtbaar voor admin en eigenaar)
                         </div>
 
                         <div class="panel-body">
