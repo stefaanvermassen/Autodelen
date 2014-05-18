@@ -635,12 +635,12 @@
          * Append the cell to the calendars body.
          * @param rowId the id of the row where the cell ougth to be added
          * @param day the day represented by the cell
-         * @param month the month represented by the cell
-         * @param year the year represented by the cell
          * @param c extra classes to be added to the cell
+         * @param [optional] month the month represented by the cell
+         * @param [optional] year the year represented by the cell
          * @private
          */
-        _appendCell: function(rowId, day, month, year, c) {
+        _appendCell: function(rowId, day, c, month, year) {
             var y = year || this.yearDisplayed;
             var m = month || this.monthDisplayed;
             m = month == 0 ? 0 : m;
@@ -662,6 +662,10 @@
 
         // RENDERING FUNCTIONS: SELECTION RENDER
 
+        /**
+         * Function responsible for the visualisation of selected dates.
+         * @private
+         */
         _colorSelectedDates: function() {
             if(this.firstSelectedValue != null) {
                 var firstValue = this.firstSelectedValue;
@@ -680,13 +684,25 @@
             }
         },
 
+        // RENDERING FUNCTIONS: EVENT RENDER
+
+        /**
+         * Function responsible for the visualisation of the events
+         * @private
+         */
         _visibleEvents: function() {
             if(this.events != null) {
                 var evts = this.events;
                 var func = this._getEventEnvironment;
+                // The environments in a single cell (div's)
                 var environments = this.environments;
+                // Associates colors with events
                 var colorAssociator = this.colorAssociator;
                 colorAssociator.reset();
+                // Check for each cell if an event takes place at that day.
+                // If so, show that event in the right environment and with
+                // the correct color (in order to group an event that takes
+                // place over multiple days)
                 $('td[id^=' + this.cellId + ']').each(function () {
                     var i = 0;
                     while(i < evts.length && evts[i].startDate <= this.value) {
@@ -716,6 +732,7 @@
                         }
                         i++;
                     }
+                    // Correct the width of multiple events in a single environment
                     for(i = 0; i < environments.length; i++) {
                         var amount = $(this).find('div.' + environments[i].name).children().size();
                         if(amount != 0){
@@ -731,6 +748,11 @@
             }
         },
 
+        /**
+         * Render the legend corresponding to the events being shown in the calendar.
+         * If no events are visible, the legend is removed.
+         * @private
+         */
         _renderLegend: function() {
             var legend = $('div[id^=' + this.legend + ']');
             if(this.colorAssociator.colors[0].eventName == null){
@@ -772,6 +794,15 @@
             }
         },
 
+        /**
+         * Function fetching an environment of a cell corresponding to
+         * the event which ought to be contained in this environment.
+         * @param cellValue the value of the cell
+         * @param event the event
+         * @param environments the environments array
+         * @returns an environment
+         * @private
+         */
         _getEventEnvironment: function(cellValue, event, environments) {
             var env = null;
             for(var i = 0; i < environments.length; i++) {
@@ -823,6 +854,9 @@
 
     $.fn.calendar.Constructor = Calendar;
 
+    /**
+     * Localisation properties
+     */
     var locales = $.fn.calendar.locales = {
         nl: {
             days:        ["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"],
@@ -835,11 +869,21 @@
         }
     };
 
+    /**
+     * Javascript object which associates an event name with a color.
+     * @param color the color contained in this association
+     * @constructor
+     */
     var ColorAssociation = function(color) {
         this.eventName = null;
         this.color = color;
     };
 
+    /**
+     * Javascript object containing multiple ColorAssociations in order
+     * to associate multiple events with multiple different colors.
+     * @constructor
+     */
     var ColorAssociator = function() {
         this.reset();
     };
@@ -847,11 +891,18 @@
     ColorAssociator.prototype = {
         constructor: ColorAssociator,
 
+        /**
+         * Get the color associated with the given string. If the string is
+         * not yet associated with a color, a new color is returned and the
+         * association is stored.
+         * @param eventName name of an event
+         * @returns the ColorAssociation associated with this name
+         */
         getColor: function(eventName) {
             var index = 1;
             var ca = this.colors[0];
             while(index < this.colors.length && ca.eventName != null) {
-                if(eventName == ca.eventName)
+                if(eventName === ca.eventName)
                     break;
                 ca = this.colors[index++];
             }
@@ -864,6 +915,9 @@
             return ca.color;
         },
 
+        /**
+         * Remove all associations contained in this associator.
+         */
         reset: function() {
             this.colors = [new ColorAssociation('#226611'), new ColorAssociation('#3276b1'), new ColorAssociation('#cb7a06'),
                 new ColorAssociation('#448833'), new ColorAssociation('#5498d2'), new ColorAssociation('#ed9c28'),
@@ -871,6 +925,11 @@
         }
     };
 
+    /**
+     * An event environment used to visualise events in the calendar.
+     * @param name the name of this environment
+     * @constructor
+     */
     var EventEnvironment = function(name) {
         this.name = name;
         this.event = null;
@@ -880,6 +939,12 @@
     EventEnvironment.prototype = {
         constructor: EventEnvironment,
 
+        /**
+         * An event can claim an environment if this environment is not
+         * yet claimed by an other event.
+         * @param event
+         * @param cellValue
+         */
         claimEnvironment: function(event, cellValue) {
             this.claimed = event.endDate > cellValue;
             if(this.claimed)
@@ -891,10 +956,21 @@
      * Global functions of the calendar plugin
      */
     var CalGlobal = {
+        /**
+         * Return whether the given year is a leapyear.
+         * @param year the year provided to the function
+         * @returns {boolean} true if the year is a leapyear, false otherwise
+         */
         isLeapYear: function(year) {
             return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
         },
 
+        /**
+         * Format a datevalue to a string corresponding to the given format.
+         * @param dateValue the datevalue (year * 10000 + month * 100 + day)
+         * @param format the format provided to this function
+         * @returns the formatted string of the datevalue
+         */
         formatDateValue: function(dateValue, format) {
             if (dateValue == null)
                 return null;
@@ -936,25 +1012,56 @@
             return year + '-' + ((month < 10) ? '0' + month : month) + '-' + ((day < 10) ? '0' + day : day);
         },
 
+        /**
+         * Returns the year contained in a given datevalue
+         * @param dateValue the datevalue
+         * @returns {number} the year
+         */
         getYear: function(dateValue) {
             return Math.floor(dateValue/10000);
         },
 
+        /**
+         * Returns the month contained in a given datevalue
+         * @param dateValue the datevalue
+         * @returns {number} the month
+         */
         getMonth: function(dateValue) {
             return Math.floor(dateValue/100) % 100 + 1;
         },
 
+        /**
+         * Returns the day contained in a given datevalue
+         * @param dateValue the datevalue
+         * @returns {number} the day
+         */
         getDay: function(dateValue) {
             return dateValue % 100;
         }
     }
 }(window.jQuery);
 
-
+/**
+ * Convert a day, month and year to a datevalue.
+ * @param day the day
+ * @param month the month
+ * @param year the year
+ * @returns {*} the datevalue corresponding to the given values
+ */
 function converToDateValue(day, month, year) {
     return (year * 10000) + (month * 100) + day;
 }
 
+/**
+ * In order to visualise the events in the calendar, these events have to
+ * be a CalendarEvent javascript object.
+ * @param name the name of the event
+ * @param start the start date of the event
+ * @param end the end date of the event
+ * @param link [optional] the link to the page of the event
+ * @param linktext [optional] the text used in the link
+ * @constructor
+ */
 function CalendarEvent(name, start, end, link, linktext) {
     this.name = name;
     this.validEvent = (start.constructor == Date && end.constructor == Date);
@@ -968,6 +1075,13 @@ function CalendarEvent(name, start, end, link, linktext) {
     this.linktext = linktext || null;
 }
 
+/**
+ * Function to compare two events in order to be able to order the events.
+ * @param event1 the first event
+ * @param event2 the second event
+ * @returns {number} -1 if the first event is before the second, 1 if the second event
+ * is before the first and 0 otherwise.
+ */
 function compareEvents(event1, event2) {
     if (event1.startDate < event2.startDate || (event1.startDate == event2.startDate && event1.startTime < event2.startTime))
         return -1;
