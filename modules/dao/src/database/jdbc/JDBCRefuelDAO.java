@@ -4,10 +4,7 @@ import database.*;
 import models.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +61,7 @@ public class JDBCRefuelDAO implements RefuelDAO {
     private PreparedStatement updateRefuelStatement;
     private PreparedStatement getRefuelsStatement;
     private PreparedStatement getGetAmountOfRefuelsStatement;
+    private PreparedStatement getGetAmountOfRefuelsWithStatusStatement;
 
     public JDBCRefuelDAO(Connection connection) {
         this.connection = connection;
@@ -116,6 +114,15 @@ public class JDBCRefuelDAO implements RefuelDAO {
                     "LEFT JOIN FILES ON refuel_file_id = file_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfRefuelsStatement;
+    }
+
+    private PreparedStatement getGetAmountOfRefuelsWithStatusStatement() throws SQLException {
+        if(getGetAmountOfRefuelsWithStatusStatement == null) {
+            getGetAmountOfRefuelsWithStatusStatement = connection.prepareStatement("SELECT COUNT(*) AS amount_of_refuels " +
+                    "FROM refuels JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                    "WHERE refuel_status = ? AND reservation_user_id = ?");
+        }
+        return getGetAmountOfRefuelsWithStatusStatement;
     }
 
     private PreparedStatement getGetRefuelsStatement() throws SQLException {
@@ -313,6 +320,26 @@ public class JDBCRefuelDAO implements RefuelDAO {
             return getRefuelList(ps);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
+        }
+    }
+
+    @Override
+    public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfRefuelsWithStatusStatement();
+            ps.setString(1, status.name());
+            ps.setInt(2, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_refuels");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of refuels with status", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of refuels with status", ex);
         }
     }
 

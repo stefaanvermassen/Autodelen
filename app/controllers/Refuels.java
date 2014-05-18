@@ -5,12 +5,9 @@ import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import database.*;
+import models.*;
 import providers.DataProvider;
 import providers.UserRoleProvider;
-import models.Refuel;
-import models.RefuelStatus;
-import models.User;
-import models.UserRole;
 import notifiers.Notifier;
 import play.api.templates.Html;
 import play.data.Form;
@@ -38,6 +35,8 @@ public class Refuels extends Controller {
         public BigDecimal amount;
 
         public String validate() {
+            if(amount.compareTo(new BigDecimal(200)) == 1)
+                return "Bedrag te hoog";
             return null;
         }
     }
@@ -264,6 +263,21 @@ public class Refuels extends Controller {
             flash("success", "Tankbeurt succesvol geaccepteerd");
             return redirect(routes.Refuels.showOwnerRefuels());
         }catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Get the number of refuels having the provided status
+     * @param status The status
+     * @return The number of refuels
+     */
+    public static int refuelsWithStatus(RefuelStatus status) {
+        User user = DataProvider.getUserProvider().getUser();
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            RefuelDAO dao = context.getRefuelDAO();
+            return dao.getAmountOfRefuelsWithStatus(status, user.getId());
+        } catch(DataAccessException ex) {
             throw ex;
         }
     }

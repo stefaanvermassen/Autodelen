@@ -447,4 +447,18 @@ public class Damages extends Controller {
             throw new RuntimeException(ex);
         }
     }
+
+    /**
+     * Get the number of open damages
+     * @return The number of damages
+     */
+    public static int openDamages() {
+        User user = DataProvider.getUserProvider().getUser();
+        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            DamageDAO dao = context.getDamageDAO();
+            return dao.getAmountOfOpenDamages(user.getId());
+        } catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
 }
