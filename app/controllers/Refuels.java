@@ -112,6 +112,8 @@ public class Refuels extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
+        filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
+
         return ok(refuelList(page, pageSize, field, asc, filter));
     }
 
@@ -261,6 +263,30 @@ public class Refuels extends Controller {
             context.commit();
             Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, true);
             flash("success", "Tankbeurt succesvol geaccepteerd");
+            return redirect(routes.Refuels.showOwnerRefuels());
+        }catch(DataAccessException ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * Method: GET
+     *
+     * Called when a refuel of a car is put back to the request status by the car owner.
+     *
+     * @param refuelId  The refuel being put back to the request status
+     * @return the refuel admin page
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    public static Result makeRefuelStatusRequest(int refuelId) {
+        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+            RefuelDAO dao = context.getRefuelDAO();
+            Refuel refuel = dao.getRefuel(refuelId);
+            refuel.setStatus(RefuelStatus.REQUEST);
+            dao.updateRefuel(refuel);
+            context.commit();
+            // TODO: also send notification?
+            flash("success", "Tankbeurt succesvol op status REQUEST gezet.");
             return redirect(routes.Refuels.showOwnerRefuels());
         }catch(DataAccessException ex) {
             throw ex;

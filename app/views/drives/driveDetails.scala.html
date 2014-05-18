@@ -29,6 +29,7 @@
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
 }
 @app("Rit details", stylesheets, scripts) {
+@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
     @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
         <div id="page-header-wrapper">
             <ol class="breadcrumb">
@@ -85,12 +86,31 @@
                                         <strong>Type:</strong> @car.getType
                                     </div>
                                 </div><br />
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Status:</strong> @reservation.getStatus.getDescription
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
+                                    </div>
+                                </div> <br />
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <strong>Commentaar:</strong> @reservation.getMessage
+                                    </div>
+                                </div><br />
                                         <!-- /row -->
                                     <!-- loaner specific content -->
-                                    @if(loaner.getId == userId) {
+                                    @if(loaner.getId == userId || isAdmin) {
                                         @views.html.drives.driveDetailsLoaner(adjustForm, reservation)
                                     <!-- owner specific content -->
-                                    } else {
+                                    }
+                                    @if(owner.getId == userId || isAdmin) {
+                                        <!-- Reservation.getCar.getOwner is still null, lets adjust it manually -->
+                                        @(reservation.getCar.setOwner(owner))
                                         @views.html.drives.driveDetailsOwner(refuseForm, reservation)
                                     }
                             <!-- /well -->
@@ -211,6 +231,7 @@
                                         <!-- /col-lg-6 -->
                                 </div>
                             </div>
+                            <!-- Both loaner and owner can edit this -->
                             @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
                                 @views.html.drives.driveInfo(infoForm, reservation, driveInfo, false)
                             }
@@ -231,11 +252,23 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && owner.getId == userId) {
+                                                @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && (owner.getId == userId || isAdmin)) {
+                                                    @if(owner.getId != userId) {
+                                                        <div class="alert alert-warning alert-dismissable">
+                                                            Pas op! Je bent niet de eigenaar, maar ziet onderstaand formulier toch omdat je admin bent!
+                                                        </div>
+                                                    }
                                                     <div class="col-sm-4 btn-group btn-group-xs">
                                                         <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
                                                         <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
                                                     </div>
+                                                } else {
+                                                    <!-- The admin can still change it -->
+                                                    @if(reservation.getStatus == ReservationStatus.FINISHED && isAdmin) {
+                                                        <div class="col-sm-4 btn-group btn-group-xs">
+                                                            <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
+                                                        </div>
+                                                    }
                                                 }
                                             </div>
                                             <br />
@@ -257,4 +290,5 @@
         <!-- /page wrapper -->
         </div>
     }
+}
 }

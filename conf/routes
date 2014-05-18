@@ -165,6 +165,8 @@ POST        /refuels/edit                           controllers.Refuels.provideR
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
 GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
 GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
+GET         /refuels/owner/request                  controllers.Refuels.makeRefuelStatusRequest(refuelId: Int)
+
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
