@@ -219,7 +219,14 @@
                             </a>
                         </li>
                         <li @if(title == "Tankbeurten") {class="active"}>
-                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
+                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i>
+                                Tankbeurten
+                                @defining(0) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>
                             <a href="@routes.Receipts.index"><i class="fa fa-money fa-fw"></i> Afrekeningen</a>
@@ -252,7 +259,7 @@
                             }</a>
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-comments fa-fw"></i> Notificaties
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-bell fa-fw"></i> Notificaties
                             @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
                               @if(unread_number>0){
                                   <span class="sidenumber">@unread_number</span>

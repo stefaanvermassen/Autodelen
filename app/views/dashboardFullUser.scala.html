@@ -2,14 +2,8 @@
 @import providers.DataProvider
 
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <i class="fa fa-bar-chart-o"></i> Informatie
-    </div>
-    <div class="panel-body">
-        <div class="well">
-            Welkom op onze webapplicatie, @user.getFirstName!
-        </div>
+<div class="">
+    <div class="">
         @defining(DataProvider.getUserRoleProvider.hasRole(user.getId, UserRole.CAR_OWNER)) { owner =>
             <div class="row">
                 @if(owner) {
@@ -32,7 +26,7 @@
                                     </div>
                                 </div>
                                 <a href="@routes.Drives.indexWithStatus(ReservationStatus.REQUEST.toString)">
-                                    <div class="panel-footer announcement-bottom">
+                                    <div class="panel-body">
                                         <div class="row">
                                             <div class="col-xs-6">
                                                 Ga naar reservaties
@@ -64,7 +58,7 @@
                             <a href="@if(requests > 0) {
                                 @routes.Drives.indexWithStatus(ReservationStatus.REQUEST_DETAILS.toString)
                                 } else { @routes.Drives.index() }">
-                                <div class="panel-footer announcement-bottom">
+                                <div class="panel-body">
                                     <div class="row">
                                         <div class="col-xs-6">
                                             Ga naar ritten
@@ -93,7 +87,7 @@
                                 </div>
                             </div>
                             <a href="@routes.Messages.showMessages">
-                                <div class="panel-footer announcement-bottom">
+                                <div class="panel-body">
                                     <div class="row">
                                         <div class="col-xs-6">
                                             Ga naar berichten
@@ -127,7 +121,7 @@
                             </div>
                         </div>
                         <a href="@routes.Profile.indexWithoutId">
-                            <div class="panel-footer announcement-bottom">
+                            <div class="panel-body">
                                 <div class="row">
                                     <div class="col-xs-6">
                                         @if(completeness != 100) {
@@ -150,7 +144,7 @@
 </div>
 <div class="row">
     <div class="col-lg-12">
-        <div class="panel panel-info">
+        <div class="panel panel-default">
             @helper.form(routes.Reserve.indexWithDate(), 'class -> "form-horizontal") {
                 <input name="from" id="input_from" class="hidden" type="text">
                 <input name="until" id="input_until" class="hidden" type="text">
