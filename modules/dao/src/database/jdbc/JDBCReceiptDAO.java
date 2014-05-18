@@ -6,6 +6,7 @@ import models.User;
 import models.File;
 import org.joda.time.DateTime;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -143,7 +144,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
         Receipt receipt = new Receipt(
 		rs.getInt(tableName + ".receipt_id"), 
 		rs.getString(tableName + ".receipt_name"),
-		rs.getInt(tableName + ".receipt_price"));
+		rs.getBigDecimal(tableName + ".receipt_price"));
 
 	//receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
@@ -159,7 +160,7 @@ public class JDBCReceiptDAO implements ReceiptDAO {
     }
 
     @Override
-    public Receipt createReceipt(String name, DateTime date, File file, User user, int price) throws DataAccessException {
+    public Receipt createReceipt(String name, DateTime date, File file, User user, BigDecimal price) throws DataAccessException {
 	//(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments)
 	if(name==null){
 	    throw new DataAccessException("Tried to create receipt without a name");
@@ -174,9 +175,9 @@ public class JDBCReceiptDAO implements ReceiptDAO {
             PreparedStatement ps = getCreateReceiptStatement();
             ps.setString(1, name);
             ps.setTimestamp(2, new Timestamp(date.getMillis())); //TODO: timezones?? convert to datetime see below
-	    ps.setInt(3, file.getId());
+	        ps.setInt(3, file.getId());
             ps.setInt(4, user.getId());
-            ps.setInt(5, price);
+            ps.setBigDecimal(5, price);
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating infosession.");

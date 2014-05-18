@@ -1,9 +1,8 @@
-    package models;
-    import org.joda.time.DateTime;
+package models;
+import org.joda.time.DateTime;
 
-    import java.sql.Date;
-    import java.text.DateFormat;
-    import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 
 public class Receipt {
 
@@ -12,9 +11,9 @@ public class Receipt {
     private File files;
     private DateTime date;
     private User user;
-    private int price;
+    private BigDecimal price;
 
-    public Receipt(int id, String name, File files, DateTime date, User user, int price) {
+    public Receipt(int id, String name, File files, DateTime date, User user, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.files = files;
@@ -23,7 +22,7 @@ public class Receipt {
         this.price=price;
     }
 
-    public Receipt(int id, String name, int price) {
+    public Receipt(int id, String name, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -73,11 +72,11 @@ public class Receipt {
         this.user = user;
     }
 
-    public int getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 }

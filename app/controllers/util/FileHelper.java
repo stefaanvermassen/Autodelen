@@ -41,13 +41,19 @@ public class FileHelper {
     public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList(new String[]{"text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream"});
 
     private static String uploadFolder;
+    private static String generatedFolder;
 
-    // Initialize path to save uploads to
+    // Initialize path to save uploads / generated files to
     static {
         String property = ConfigurationHelper.getConfigurationString("uploads.path");
         if (property.startsWith("./")) {
             uploadFolder = Paths.get(Play.current().path().getAbsolutePath(), property.substring(2)).toString(); // Get relative path to Play
         } else uploadFolder = property;
+
+        property = ConfigurationHelper.getConfigurationString("generated.path");
+        if (property.startsWith("./")) {
+            generatedFolder = Paths.get(Play.current().path().getAbsolutePath(), property.substring(2)).toString(); // Get relative path to Play
+        } else generatedFolder = property;
     }
 
     private static Path createPath(String fileName, String subfolder){
@@ -58,6 +64,15 @@ public class FileHelper {
         String newFileName = uuid + "-" + fileName;
 
         return Paths.get(subfolder, newFileName);
+    }
+
+    public static String getGeneratedFilesPath(String filename, String subfolder) throws IOException {
+        Path path = createPath(filename, subfolder);
+        Path absolutePath = Paths.get(generatedFolder).resolve(path.toString());
+
+        Files.createDirectories(absolutePath.getParent());
+
+        return absolutePath.toString();
     }
 
     public static Path saveFile(Http.MultipartFormData.FilePart filePart, String subfolder) throws IOException {

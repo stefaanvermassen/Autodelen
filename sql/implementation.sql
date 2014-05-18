@@ -418,7 +418,7 @@ CREATE TABLE `Receipts` (
   `receipt_date` DATETIME NULL DEFAULT NULL,
   `receipt_fileID` INT NULL DEFAULT NULL,
   `receipt_userID` INT(11) NOT NULL,
-  `receipt_price` INT(11),
+  `receipt_price` DECIMAL(19,4),
   PRIMARY KEY (`receipt_id`),
   FOREIGN KEY (`receipt_fileID`) REFERENCES Files(`file_id`),
   FOREIGN KEY (`receipt_userID`) REFERENCES Users(`user_id`)
