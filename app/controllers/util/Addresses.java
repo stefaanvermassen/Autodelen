@@ -89,7 +89,7 @@ public class Addresses extends Controller {
             // User changed existing address
 
             // Only call the database when there's actually some change
-            if ((model.country != null && model.country.equals(address.getCountry())) ||
+            if ((model.country != null && !model.country.equals(address.getCountry())) ||
                     (model.zipCode != null && !model.zipCode.equals(address.getZip())) ||
                     (model.city != null && !model.city.equals(address.getCity())) ||
                     (model.street != null && !model.street.equals(address.getStreet())) ||
