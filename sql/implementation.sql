@@ -1,6 +1,3 @@
-DROP DATABASE IF EXISTS autodelen;
-CREATE DATABASE autodelen;
-USE autodelen;
 SET NAMES utf8;
 
 CREATE TABLE `filegroups` (
