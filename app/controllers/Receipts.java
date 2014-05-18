@@ -127,12 +127,34 @@ public class Receipts extends Controller {
 	    String startPeriode= "15 maart 2014";
 	    String eindPeriode= "15 maart 2014";
 	    User gebruiker= DataProvider.getUserProvider().getUser();
+	    int afrekeningnr=103;
 
 	    /*Hoofdding*/
-	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
-            Image image2 = Image.getInstance(new URL(imageUrl));
-            document.add(image2);
 
+
+	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
+            Image image = Image.getInstance(new URL(imageUrl));
+            image.setAlignment(Image.RIGHT | Image.TEXTWRAP);
+            image.scaleAbsolute(45f, 45f);
+            document.add(image);
+
+
+	    PdfPTable table = new PdfPTable(3);
+	    add(table,"Afrekening n°:");
+	    add(table,""+afrekeningnr, true);
+	    add(table,"");
+	    add(table,"Naam:");
+	    add(table,""+gebruiker, true);
+	    add(table,"");
+	    add(table,"Adres:");
+	    add(table,""+gebruiker.getAddressDomicile(), true);
+	    add(table,"");
+	    add(table,"Periode:");
+	    add(table,"Start:"+startPeriode);
+	    add(table,"Einde:"+eindPeriode);
+
+            document.add(table);
+	    
 	    /*Tabel*/
 	    createTable(document);
 
@@ -220,6 +242,30 @@ private static void createTable(Document document)
     }
 
     /*Slot*/
+
+    //**variabelen: totalen
+    
+
+    add(table,"", true);
+    add(table,"Totalen", true);
+    add(table,"443423", true);
+    
+	for(int j=0;j<aantalCategorien;j++){
+	    add(table,cell+categorienBovengrens[j]+"", true);
+	}
+    add(table,"Vervaldatum:",  true);
+    add(table,"15/131/13",  false);
+
+    add(table,"", true);
+    add(table,"", true);
+    add(table,"", true);
+    
+	for(int j=0;j<aantalCategorien;j++){
+	    add(table,"", true);
+	}
+    add(table,"TOTAAL TE BETALEN:",  true);
+    add(table,"88909"+ "€",  true);
+
 
     document.add(table);
 }
