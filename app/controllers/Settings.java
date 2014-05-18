@@ -44,42 +44,6 @@ public class Settings extends Controller {
         return ok(overview.render());
     }
 
-
-    /**
-     * Method: GET
-     * Temporary method to create a superuser
-     *
-     * @return Redirect to the userrole page
-     */
-    @Deprecated
-    @RoleSecured.RoleAuthenticated()
-    public static Result instantAdmin() {
-        User user = DataProvider.getUserProvider().getUser();
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            UserRoleDAO dao = context.getUserRoleDAO();
-            Set<UserRole> roles = dao.getUserRoles(user.getId());
-            if (roles.contains(UserRole.SUPER_USER)) {
-                flash("warning", "Je hebt reeds superuser rechten.");
-                return badRequest(Dashboard.dashboard());
-            } else {
-                try {
-                    dao.addUserRole(user.getId(), UserRole.SUPER_USER);
-                    context.commit();
-                    DataProvider.getUserRoleProvider().invalidateRoles(user);
-                    roles.add(UserRole.SUPER_USER);
-
-                    flash("success", "Je hebt nu superuserrechten. Gelieve je extra rechten aan te duiden.");
-                    return ok(views.html.userroles.editroles.render(UserRoles.getUserRolesStatus(roles), user));
-                } catch (DataAccessException ex) {
-                    context.rollback();
-                    throw ex;
-                }
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
-    }
-
     public static class ChangePasswordModel {
         public String oldpw;
         public String newpw;
