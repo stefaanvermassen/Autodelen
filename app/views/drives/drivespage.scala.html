@@ -54,13 +54,13 @@
                     <td>
                         <div class="btn-group btn-group-xs">
                                 @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                    <a class="btn btn-danger btn-small" href="@routes.Drives.details(reservation.getId)"><i class="fa fa-beer"></i> Ritdetails toevoegen</a>
+                                    <a class="btn btn-danger btn-small" href="@routes.Drives.details(reservation.getId)">ritdetails toevoegen</a>
                                 } else {
                                    @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
                                             reservation.getUser.getId != userId) {
-                                       <a class="btn btn-warning btn-small" href="@routes.Drives.details(reservation.getId)"><i class="fa fa-exclamation"></i> Goed- of afkeuren</a>
+                                       <a class="btn btn-warning btn-small" href="@routes.Drives.details(reservation.getId)">goed- of afkeuren</a>
                                     } else {
-                                       <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">Details bekijken</a>
+                                       <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">details</a>
                                    }
                                 }
 
