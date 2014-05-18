@@ -22,6 +22,7 @@ public interface RefuelDAO {
     public int getAmountOfRefuels(Filter filter) throws DataAccessException;
     public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException;
     public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException;
+    public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
     public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException;
     public List<Refuel> getBillRefuelsForCar(Date date, int car) throws DataAccessException;

@@ -15,7 +15,7 @@ public interface DamageDAO {
     public Damage getDamage(int damageId) throws DataAccessException;
     public void updateDamage(Damage damage) throws DataAccessException;
     public void deleteDamage(int damageId);
-
+    public int getAmountOfOpenDamages(int userId) throws DataAccessException;
     public int getAmountOfDamages(Filter filter) throws DataAccessException;
     public List<Damage> getDamages(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 }

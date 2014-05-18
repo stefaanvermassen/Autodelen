@@ -17,7 +17,6 @@
                     @Html(message.getBody)
                     </p>
                 </div>
-                @* TODO: antwoordlogica *@
                 @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
                     @if(message.getReceiver.getId == userId) {
                         @if(!message.isRead) {

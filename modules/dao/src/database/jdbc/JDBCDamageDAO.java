@@ -25,6 +25,7 @@ public class JDBCDamageDAO implements DamageDAO {
     private PreparedStatement getDamageStatement;
     private PreparedStatement updateDamageStatement;
     private PreparedStatement getGetAmountOfDamagesStatement;
+    private PreparedStatement getGetAmountOfOpenDamagesStatement;
     private PreparedStatement getGetDamageListPageStatement;
 
     private static final String DAMAGE_QUERY = "SELECT * FROM damages " +
@@ -109,6 +110,14 @@ public class JDBCDamageDAO implements DamageDAO {
                     "JOIN Users ON reservation_user_id = user_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfDamagesStatement;
+    }
+
+    private PreparedStatement getGetAmountOfOpenDamagesStatement() throws SQLException {
+        if(getGetAmountOfOpenDamagesStatement == null) {
+            getGetAmountOfOpenDamagesStatement = connection.prepareStatement("SELECT COUNT(*) AS amount_of_damages FROM damages " +
+                    "JOIN carreservations ON damage_car_ride_id = reservation_id WHERE damage_finished = 0 AND reservation_user_id = ?");
+        }
+        return getGetAmountOfOpenDamagesStatement;
     }
 
     private PreparedStatement getGetDamageListPageDescStatement() throws SQLException {
@@ -242,6 +251,25 @@ public class JDBCDamageDAO implements DamageDAO {
                 throw new DataAccessException("No rows were affected when deleting damage.");
         } catch (SQLException e){
             throw new DataAccessException("Could not delete damage.", e);
+        }
+    }
+
+    @Override
+    public int getAmountOfOpenDamages(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getGetAmountOfOpenDamagesStatement();
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_damages");
+                else return 0;
+
+            } catch (SQLException ex) {
+                throw new DataAccessException("Error reading count of open damages", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of open damages", ex);
         }
     }
 

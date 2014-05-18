@@ -22,8 +22,15 @@
                         </div>
 
                         <div class="panel-body">
-                            @helper.inputText(form("cardNumber"), '_label -> "Kaartnummer", 'placeholder -> "Kaartnummer")
-                            <input class="btn btn-sm btn-default" type="submit" value="Opslaan">
+                            <div class="form-group">
+                                <label class="col-md-12">Kaartnummer</label>
+                                <div class="col-md-12">
+                                    <input name="cardNumber" type="text" class="form-control input-md" value="@form("cardNumber").value">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <input class="btn btn-sm btn-default" type="submit" value="Opslaan">
+                            </div>
                         </div>
                     </div>
 

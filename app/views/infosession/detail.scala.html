@@ -45,27 +45,23 @@
                     <div class="panel-body">
                         <a class="btn btn-default btn-sm" href="@routes.InfoSessions.editSession(infoSession.getId)">Infosessie wijzigen</a>
                         <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Infosessie verwijderen</button>
-
-
                     </div>
                 </div>
-<div class="row">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Gebruiker toevoegen:</h3>
+                        <i class="fa fa-plus-square-o fa-fw"></i> Gebruiker toevoegen
                     </div>
                     <div class="panel-body">
                         @helper.form(routes.InfoSessions.addUserToSession(infoSession.getId), 'class -> "form-horizontal") {
                             <div class="form-group">
-                            <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
-                                <label for="userPickerBox">Gebruikersnaam:</label>
-                                <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off" />
-                                <input type="hidden" name="userid" value=""/>
-                                <div class="viewId"></div>
-                                <ul class="dropdown-menu" role="menu"></ul>
+                                <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
+                                    <label for="userPickerBox">Gebruikersnaam:</label>
+                                    <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off" />
+                                    <input type="hidden" name="userid" value=""/>
+                                    <div class="viewId"></div>
+                                    <ul class="dropdown-menu" role="menu"></ul>
+                                </div>
                             </div>
-                            </div>
-
                             <div class="form-group">
                                 <div class="col-md-4">
                                     <button type="submit" id="create" name="create" class="btn btn-block btn-success">Toevoegen</button>
@@ -74,12 +70,11 @@
                         }
                     </div>
                 </div>
-</div>
             }
 
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Gekozen infosessie
+                    <i class="fa fa-lightbulb-o fa-fw"></i> Gekozen infosessie
                 </div>
                 <!-- /.panel-heading -->
                 <div class="panel-body">
@@ -101,7 +96,7 @@
             @if(infoSession.hasEnrolled) {
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Aanwezigen (@infoSession.getEnrolled.size)</h3>
+                        <i class="fa fa-users fa-fw"></i> Aanwezigen (@infoSession.getEnrolled.size)
                     </div>
                     <div class="panel-body">
 
