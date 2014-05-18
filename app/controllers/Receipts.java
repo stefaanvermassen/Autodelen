@@ -14,6 +14,7 @@ import providers.DataProvider;
 import providers.SettingProvider;
 import views.html.receipts.*;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -135,11 +136,11 @@ public class Receipts extends Controller {
 	    /*Hoofdding*/
 
 
-	    /**String imageUrl = "http://zelensis.ugent.be/prod/assets/images/logosmall.png";
+	    String imageUrl = "https://fbcdn-sphotos-e-a.akamaihd.net/hphotos-ak-frc3/t1.0-9/969296_656566794396242_1002112915_n.jpg";
             Image image = Image.getInstance(new URL(imageUrl));
-            image.setAlignment(Image.RIGHT | Image.TEXTWRAP);
-            image.scaleAbsolute(45f, 45f);
-            document.add(image);**/
+            image.setAlignment(Image.LEFT | Image.TEXTWRAP);
+            image.scaleAbsolute(60f, 60f);
+            document.add(image);
 
         DateTime report = new DateTime(date);
 
@@ -204,9 +205,9 @@ private static void createTable(Document document)
 
         if (j < levels - 1) {
             upper = provider.getInt("cost_limit_" + j, new DateTime(date));
-            add(drivesTable,lower + "-" + upper + "km", true, false);
+            add(drivesTable,lower + "-" + upper + " km", true, false);
         } else {
-            add(drivesTable, ">" + upper + "km", true, false);
+            add(drivesTable, "> " + upper + " km", true, false);
         }
 	}
     add(drivesTable,"Ritprijs",  true, false);
@@ -225,11 +226,13 @@ private static void createTable(Document document)
         CarRideDAO dao = context.getCarRideDAO();
         rides = new ArrayList<>();
         rides.add(dao.getCarRide(101));
-    }catch (Exception e) {}
+        refuels = new ArrayList<>();
+        refuels.add(new Refuel(1, rides.get(0), null, new BigDecimal(5), RefuelStatus.ACCEPTED));
+    } catch (Exception e) {}
 
     int totalDistance = 0;
     double totalCost = 0;
-    double[] totals = new double[levels];
+    int[] totals = new int[levels];
 
     /*Middenstuk*/
     for (CarRide ride : rides) {
@@ -239,10 +242,10 @@ private static void createTable(Document document)
 	
 	add(drivesTable, ride.getReservation().getCar().getName());
 	add(drivesTable, new SimpleDateFormat("dd-MM-yyyy").format(ride.getReservation().getFrom().toDate()));
-	add(drivesTable, "" + distance);
+	add(drivesTable, distance + " km");
 
         double rideCost = 0;
-        if (true) {
+        if (ride.getCost() == 0) {
             for (int level = 0; level < levels; level++)
                 add(drivesTable, "--");
         } else {
@@ -250,22 +253,19 @@ private static void createTable(Document document)
             lower = 0;
             for (level = 0; level < levels; level++) {
                 int limit = 0;
-                double cost;
-                boolean stop = false;
+                int d;
 
-                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, new DateTime(date)))) {
-                    cost = distance * provider.getDouble("cost_" + level, new DateTime(date));
-                    stop = true;
-                } else {
-                    cost = (limit - lower) * provider.getDouble("cost_" + level, new DateTime(date));
-                    distance -= (limit - lower);
-                }
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, new DateTime(date))))
+                    d = distance;
+                else
+                    d = limit - lower;
 
-                totals[level] += cost;
-                rideCost += cost;
-                add(drivesTable, "€ " + cost);
+                totals[level] += d;
+                distance -= d;
+                rideCost += d * provider.getDouble("cost_" + level, new DateTime(date));
+                add(drivesTable, d + " km");
 
-                if (stop) {
+                if (distance == 0) {
                     level++;
                     break;
                 }
@@ -274,7 +274,7 @@ private static void createTable(Document document)
             }
 
             for (int i = level; i < levels; i++) {
-                add(drivesTable,"");
+                add(drivesTable, "");
             }
         }
 
@@ -294,7 +294,7 @@ private static void createTable(Document document)
     add(drivesTable, totalDistance + " km", true);
 
 	for(int j = 0; j < levels; j++){
-	    add(drivesTable, "€ " + totals[j], true);
+	    add(drivesTable, totals[j] + " km", true);
 	}
 
     add(drivesTable, "€ " + totalCost, true);
@@ -303,13 +303,27 @@ private static void createTable(Document document)
 
     document.add(new Paragraph("Tankbeurten"));
     PdfPTable refuelsTable = new PdfPTable(3);
+    refuelsTable.setWidthPercentage(100);
+    refuelsTable.setSpacingBefore(5);
+    refuelsTable.setSpacingAfter(10);
 
     add(refuelsTable, "Auto", true);
     add(refuelsTable, "Datum", true);
     add(refuelsTable, "Prijs", true);
-    refuelsTable.setWidthPercentage(100);
-    refuelsTable.setSpacingBefore(5);
-    refuelsTable.setSpacingAfter(10);
+
+    double refuelTotal = 0;
+
+    for (Refuel refuel : refuels) {
+        add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
+        add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
+        add(refuelsTable, "€ " + refuel.getAmount(), true);
+        refuelTotal += refuel.getAmount().doubleValue();
+    }
+
+    add(refuelsTable, "TOTAAL", true);
+    add(refuelsTable, "");
+    add(refuelsTable, "€ " + refuelTotal, true);
+
     document.add(refuelsTable);
 }
 
