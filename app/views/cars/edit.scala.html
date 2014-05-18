@@ -131,17 +131,10 @@
                 </div>
             </div>
             <div class="col-md-9">
-                    <!-- /.panel -->
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Details
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
                         <div class="form-group">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h3 class="panel-title">Adres</h3>
+                                    Adres
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
@@ -189,7 +182,7 @@
                         <div class="form-group">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h3 class="panel-title">Details</h3>
+                                    Details
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
@@ -260,7 +253,7 @@
                         <div class="form-group">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h3 class="panel-title">Technische details</h3>
+                                    Technische details
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
@@ -297,7 +290,7 @@
                         <div class="form-group">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h3 class="panel-title">Verzekering</h3>
+                                    Verzekering
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
@@ -337,17 +330,22 @@
                             </div>
                                 <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
                         </div>
+
                         <div class="form-group">
-                            @if(car == null) {
-                                <button name="saveChanges" class="btn btn-block btn-success">Auto aanmaken</button>
-                            } else {
-                                <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
-                            }
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    @if(car == null) {
+                                        <button name="saveChanges" class="btn btn-block btn-success">Auto aanmaken</button>
+                                    } else {
+                                        <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                                    }
+                                </div>
+                            </div>
+                            <!-- /.panel-body -->
                         </div>
+                        <!-- /.panel-default -->
                     </div>
-                    <!-- /.panel-body -->
                 </div>
-                <!-- /.panel-default -->
             </div>
             <!-- /col-md-9 -->
         }
