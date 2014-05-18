@@ -1,23 +1,15 @@
 @(refuseFrom: play.data.Form[Drives.RemarksModel], reservation: Reservation)
-<div class="row">
-    <div class="col-sm-4">
-        <strong>Status:</strong> @reservation.getStatus.getDescription
-    </div>
-    <div class="col-sm-4">
-        <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
-    </div>
-    <div class="col-sm-4">
-        <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
-    </div>
-</div> <br />
-<!-- row -->
-<div class="row">
-    <div class="col-sm-12">
-        <strong>Commentaar:</strong> @reservation.getMessage
-    </div>
-</div><br />
+@import providers.DataProvider;
+
 <!-- /row -->
 @if(reservation.getStatus == ReservationStatus.REQUEST) {
+    @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
+        @if(reservation.getCar.getOwner.getId != userId) {
+            <div class="alert alert-warning alert-dismissable">
+                Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
+            </div>
+        }
+    }
     <div class="row">
         <div class="col-xs-12">
                 @helper.form(routes.Drives.setReservationStatus(reservation.getId), 'class -> "form-horizontal") {

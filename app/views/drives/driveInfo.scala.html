@@ -1,4 +1,4 @@
-@(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide, cancelButton: Boolean)
+@(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide, adjust: Boolean)
 @helper.form(routes.Drives.provideDriveInfo(reservation.getId), 'class -> "form-horizontal") {
     <div class="well">
         <div class="form-group">
@@ -17,33 +17,39 @@
                 <input name="endMileage" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@infoForm("endMileage").value">
             }
         </div>
-        <div class="form-group">
-            <label>Schade opvolging:</label>
-            <div class="radio">
-                <label>
-                    <input type="radio" name="damaged" id="damaged" value="false" checked>
-                    De auto liep geen schade op
-                </label>
+        <div @if(adjust) { class="hidden" }>
+            <div class="form-group">
+                <label>Schade opvolging:</label>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="damaged" id="damaged" value="false" checked >
+                        De auto liep geen schade op
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="damaged" id="damaged" value="true">
+                        De auto liep schade op (<i>een schadedossier zal aangemaakt worden waarbij je om bijkomende
+                        informatie gevraagd wordt</i>)
+                    </label>
+                </div>
             </div>
-            <div class="radio">
-                <label>
-                    <input type="radio" name="damaged" id="damaged" value="true">
-                    De auto liep schade op (<i>een schadedossier zal aangemaakt worden waarbij je om bijkomende
-                    informatie gevraagd wordt</i>)
-                </label>
+            <div class="form-group">
+                <label>Aantal tankbeuren:</label>
+                @if(!infoForm.hasGlobalErrors && driveInfo != null) {
+                    <input name="refueling" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@driveInfo.getRefueling">
+                } else {
+                    <input name="refueling" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@infoForm("refueling").value">
+                }
             </div>
         </div>
-        <div class="form-group">
-            <label>Aantal tankbeuren:</label>
-                <input name="refueling" class="form-control" type="number" placeholder="Tankbeurten" value="0" min="0">
-        </div>
-
 
         <div id="infoButtons" class="form-group btn-group btn-group-xs">
             <button type="submit" class="btn btn-success">Verstuur details</button>
-            @if(cancelButton) {
+            @if(adjust) {
                 <button id="annulateAdjustInfo" type="button" class="btn btn-warning">Annuleren</button>
             }
         </div>
+
     </div>
 }

@@ -435,11 +435,14 @@ public class Drives extends Controller {
                     Damage damage = damageDAO.createDamage(ride);
                     context.commit();
                 }
-            } else if(isOwner) {
+            } else if(isOwner || DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 // Owner is allowed to adjust the information
                 ride.setStartMileage(detailsForm.get().startMileage);
                 ride.setEndMileage(detailsForm.get().endMileage);
                 dao.updateCarRide(ride);
+            } else {
+                detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
+                return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
             // Unable to create or retrieve the drive
             if(ride == null) {
@@ -478,7 +481,7 @@ public class Drives extends Controller {
                 detailsForm.reject("De reservatie kan niet opgevraagd worden. Gelieve de database administrator te contacteren.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }
-            if(!isOwnerOfReservedCar(context, user, reservation)) {
+            if(!isOwnerOfReservedCar(context, user, reservation) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
                 detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
                 return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
             }

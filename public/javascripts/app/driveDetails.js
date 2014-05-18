@@ -30,6 +30,14 @@ $(document).ready(function() {
         }
     });
 
+    $('#adjustInfo').on('click', function() {
+       $('#adjustEnv').removeClass('hidden');
+    })
+
+    $('#annulateAdjustInfo').on('click', function() {
+        $('#adjustEnv').addClass('hidden');
+    })
+
     if($('#datetimepickerfrom') === undefined)
         return;
 
