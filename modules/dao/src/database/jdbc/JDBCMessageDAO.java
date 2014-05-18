@@ -206,8 +206,8 @@ public class JDBCMessageDAO implements MessageDAO {
             PreparedStatement ps = getSetAllReadStatement();
             ps.setBoolean(1, true);
             ps.setInt(2,userId);
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when updating message.");
+            // It is possible that no rows are affected but that is not a problem
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to mark message as read", e);
         }

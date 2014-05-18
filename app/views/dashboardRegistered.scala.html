@@ -1,21 +1,20 @@
 @(user: User, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <i class="fa fa-bar-chart-o"></i> Informatie
-    </div>
     <div class="panel-body">
-        <div class="well">
             Welkom op onze webapplicatie, @user.getFirstName! Om volwaardig lid te worden moeten als eerst nog
-            enkele stappen doorlopen worden:
-        </div>
+            enkele stappen doorlopen worden.
+    </div>
+</div>
+<div>
+    <div>
         <div class="row">
             <div class="col-lg-3">
                 <div  class="panel @if(userWentToInfoSession) { panel-success } else { panel-info } ">
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <span class="numberInCircle">1</span> Volg een infosessie
+                                ① Volg een infosessie
                             </div>
                         </div>
                     </div>
@@ -45,7 +44,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <span class="numberInCircle">2</span> Vul je profiel verder aan
+                                ② Vul je profiel verder aan
                             </div>
                         </div>
                     </div>
@@ -81,7 +80,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <span class="numberInCircle">3</span> Wordt volwaardig lid
+                                ③ Wordt volwaardig lid
                             </div>
                         </div>
                     </div>
