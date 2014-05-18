@@ -61,8 +61,8 @@ public class Receipt {
         return date;
     }
 
-    public String getDateString() {
-        return "" + date.dayOfWeek() ;
+    public SimpleDateFormat getDateString() {
+        return new SimpleDateFormat("dd-MM-yyyy").format(date);
     }
 
     public void setDate(DateTime date) {

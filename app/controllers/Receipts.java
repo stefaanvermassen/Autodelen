@@ -88,6 +88,8 @@ public class Receipts extends Controller {
             PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.open();
             generatePDF(document);
+            //**if has car
+	    //**for each car
             addtoDataBase(filename);
             document.close();
         } catch (Exception e) {
@@ -251,7 +253,7 @@ private static void createTable(Document document)
     add(table,"443423", true);
     
 	for(int j=0;j<aantalCategorien;j++){
-	    add(table,cell+categorienBovengrens[j]+"", true);
+	    add(table,categorienBovengrens[j]+"", true);
 	}
     add(table,"Vervaldatum:",  true);
     add(table,"15/131/13",  false);

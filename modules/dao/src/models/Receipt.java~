@@ -29,7 +29,6 @@ public class Receipt {
 
     public Receipt(int id, String name, int price) {
         this.id = id;
-	System.out.println(name);
         this.name = name;
         this.price = price;
     }
@@ -60,6 +59,10 @@ public class Receipt {
 
     public DateTime getDate() {
         return date;
+    }
+
+    public SimpleDateFormat getDateString() {
+        return new SimpleDateFormat("dd-MM-yyyy").format(date)
     }
 
     public void setDate(DateTime date) {
