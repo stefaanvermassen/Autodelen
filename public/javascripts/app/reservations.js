@@ -21,23 +21,68 @@ $(document).ready(function() {
     var now = new Date();
     var later = new Date();
     later.setHours(later.getHours() + 1);
-    var format = "yyyy-mm-dd";
+    var dateFormat = "yyyy-mm-dd";
+    var timeFormat = "hh:ii";
     var inputFrom = $('#input_from_date');
     var inputTo = $('#input_to_date');
     var fromTime = $('#input_from_time');
     var toTime = $('#input_to_time');
     var search = $('#searchButton');
 
+    $('.datepicker.from').datetimepicker({
+        language: 'nl',
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        minView: 2,
+        forceParse: 0,
+        showMeridian: 1,
+        format: dateFormat,
+        initialDate: from,
+        pickerPosition: 'bottom-left'
+    });
+
+    $('.datepicker.until').datetimepicker({
+        language: 'nl',
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        minView: 2,
+        forceParse: 0,
+        showMeridian: 1,
+        format: dateFormat,
+        initialDate: until,
+        pickerPosition: 'bottom-left'
+    });
+
+    $('.timepicker').datetimepicker({
+        language: 'nl',
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 1,
+        forceParse: 0,
+        showMeridian: 1,
+        format: timeFormat,
+        pickerPosition: 'bottom-left'
+    });
+
+    $('.datetimepicker-hours .table-condensed thead').html('').append($('<tr>').append(
+        $('<th>').css('width', '180px').text('Selecteer het uur')));
+    $('.datetimepicker-minutes .table-condensed thead').html('').append($('<tr>').append(
+        $('<th>').css('width', '180px').text('Selecteer de minuten')));
+
     inputFrom.datetimeinput({
-        formatString: format
+        formatString: dateFormat
     });
     inputTo.datetimeinput({
-        formatString: format
+        formatString: dateFormat
     });
-    fromTime.timeinput();
-    toTime.timeinput();
-
-
+    fromTime.datetimeinput({
+        formatString: timeFormat
+    });
+    toTime.datetimeinput({
+        formatString: timeFormat
+    });
 
     $('#extraButton').on('click', function() {
         if(!$('#extraFiltering').hasClass('in')) {
@@ -49,26 +94,18 @@ $(document).ready(function() {
         }
     });
 
-    $('#extraFiltering').on('shown.bs.collapse', function (e) {
-        // $('html, body').animate({scrollTop: $(this).offset().top - 50}, 1000);
-    });
-
     search.on('mousedown', function() {
         $('#input_from_value').val($('#input_from_date').val() + ' ' + $('#input_from_time').val());
         $('#input_to_value').val($('#input_to_date').val() + ' ' + $('#input_to_time').val());
         $('#input_fuel').val($('#selectFuel').find('option:selected').val());
     });
 
-    search.on('mouseup', function() {
-        // $('html, body').animate({scrollTop: $('#resultsTable').offset().top - 50}, 1000);
-    });
-
     if(from === '' || until === '') {
         inputFrom.val(now.getFullYear() + '-'
-            + (now.getMonth() < 10 ? '0' : '') + now.getMonth() + '-'
+            + (now.getMonth() < 10 ? '0' : '') + (now.getMonth() + 1) + '-'
             + (now.getDate() < 10 ? '0' : '') + now.getDate());
         inputTo.val(later.getFullYear() + '-'
-            + (later.getMonth() < 10 ? '0' : '') + later.getMonth() + '-'
+            + (later.getMonth() < 10 ? '0' : '') + (later.getMonth() + 1) + '-'
             + (later.getDate() < 10 ? '0' : '') + later.getDate());
         fromTime.val(
                 (now.getHours() < 10 ? '0' : '') + now.getHours() + ':' +
