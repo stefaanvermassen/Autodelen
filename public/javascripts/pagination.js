@@ -299,34 +299,38 @@ function createSearchString(fields, values) {
     return searchString;
 }
 
+
+/*
+ * Useless function that makes the car-loading-icon go left and right while loading
+ */
 function moveLoadingIcon() {
 
     if(pageLoaded) {
         clearInterval(intervalLoading);
-    }
-
-    if($(".loading").position().left <= $("#resultsTable").position().left) {
-        goingLeft = false;
-        $('#loadingImage').attr('style', '');
-    }
-    if($(".loading").position().left >= ($("#resultsTable").innerWidth() - $('#loadingImage').outerWidth())) {
-        goingLeft = true;
-        $('#loadingImage').attr('style', '' +
-            '-moz-transform: scaleX(-1);' +
-            '-o-transform: scaleX(-1);' +
-            '-webkit-transform: scaleX(-1);' +
-            'transform: scaleX(-1);' +
-            'filter: FlipH;' +
-            '-ms-filter: "FlipH";'
-        );
-    }
-    var move;
-    if(goingLeft) {
-        move = '-=5';
     } else {
-        move = '+=5';
+        if($(".loading").position().left <= $("#resultsTable").position().left) {
+            goingLeft = false;
+            $('#loadingImage').attr('style', '');
+        }
+        if($(".loading").position().left >= ($("#resultsTable").innerWidth() - $('#loadingImage').outerWidth())) {
+            goingLeft = true;
+            $('#loadingImage').attr('style', '' +
+                '-moz-transform: scaleX(-1);' +
+                '-o-transform: scaleX(-1);' +
+                '-webkit-transform: scaleX(-1);' +
+                'transform: scaleX(-1);' +
+                'filter: FlipH;' +
+                '-ms-filter: "FlipH";'
+            );
+        }
+        var move;
+        if(goingLeft) {
+            move = '-=5';
+        } else {
+            move = '+=5';
+        }
+        $(".loading").animate({
+            left: move
+        }, 25);
     }
-    $(".loading").animate({
-        left: move
-    }, 25);
 }
