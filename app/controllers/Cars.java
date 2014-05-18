@@ -360,7 +360,7 @@ public class Cars extends Controller {
                 return badRequest(userCarList());
             } else {
                 User currentUser = DataProvider.getUserProvider().getUser();
-                if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))){
+                if(!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))){
                     flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                     return badRequest(userCarList());
                 }

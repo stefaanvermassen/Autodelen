@@ -64,9 +64,11 @@
                                 @refuel.getStatus match {
                                     case RefuelStatus.ACCEPTED => {
                                         <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
+                                        <a type="button" class="btn btn-xs btn-info" href="@routes.Refuels.makeRefuelStatusRequest(refuel.getId)">Onbeslist zetten</a>
                                     }
                                     case RefuelStatus.REFUSED => {
                                         <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
+                                        <a type="button" class="btn btn-xs btn-info" href="@routes.Refuels.makeRefuelStatusRequest(refuel.getId)">Onbeslist zetten</a>
                                     }
                                     case RefuelStatus.REQUEST => {
                                         <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
