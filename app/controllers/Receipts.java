@@ -1,5 +1,6 @@
 package controllers;
 
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import database.*;
 import models.*;
 import models.CarCost;
@@ -10,9 +11,12 @@ import controllers.Security.RoleSecured;
 import org.joda.time.DateTime;
 import play.mvc.*;
 import providers.DataProvider;
+import providers.SettingProvider;
 import views.html.receipts.*;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import play.api.templates.Html;
 import com.itextpdf.text.*;
@@ -26,11 +30,11 @@ public class Receipts extends Controller {
     private boolean loanerState = false;
     private boolean carState = false;
 
-    private Date date;
+    private static Date date = new Date(1401580800000L);
 
-    private List<CarRide> rides;
-    private List<Refuel> refuels;
-    private List<CarCost> carcosts;
+    private static List<CarRide> rides;
+    private static List<Refuel> refuels;
+    private static List<CarCost> carcosts;
 
     private static final int PAGE_SIZE = 10;
 
@@ -39,7 +43,7 @@ public class Receipts extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     public static Result index() {
-	newReceipt("/home/maryna/r/r1.pdf");
+	newReceipt("/Users/karsgoos/Documents/r1.pdf");
         return ok(receipts.render());
     }
 
@@ -125,23 +129,21 @@ public class Receipts extends Controller {
     public static void generatePDF(Document document) {
         try {
 	    //**variabelen
-	    String vervaldatum= "15 maart 2014";
-	    String startPeriode= "15 maart 2014";
-	    String eindPeriode= "15 maart 2014";
-	    User gebruiker= DataProvider.getUserProvider().getUser();
-	    int afrekeningnr=103;
+	    User gebruiker = DataProvider.getUserProvider().getUser();
+	    int afrekeningnr = 103;
 
 	    /*Hoofdding*/
 
 
-	    String imageUrl = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-frc3/t1.0-1/c3.0.50.50/p50x50/969296_656566794396242_1002112915_s.jpg";
+	    /**String imageUrl = "http://zelensis.ugent.be/prod/assets/images/logosmall.png";
             Image image = Image.getInstance(new URL(imageUrl));
             image.setAlignment(Image.RIGHT | Image.TEXTWRAP);
             image.scaleAbsolute(45f, 45f);
-            document.add(image);
+            document.add(image);**/
 
+        DateTime report = new DateTime(date);
 
-	    PdfPTable table = new PdfPTable(3);
+        PdfPTable table = new PdfPTable(3);
 	    add(table,"Afrekening n°:");
 	    add(table,""+afrekeningnr, true);
 	    add(table,"");
@@ -151,12 +153,14 @@ public class Receipts extends Controller {
 	    add(table,"Adres:");
 	    add(table,""+gebruiker.getAddressDomicile(), true);
 	    add(table,"");
-	    add(table,"Periode:");
-	    add(table,"Start:"+startPeriode);
-	    add(table,"Einde:"+eindPeriode);
+	    add(table,"Periode:", false, false);
+	    add(table,"vanaf " + new SimpleDateFormat("dd-MM-yyyy").format(report.minusMonths(3).toDate()), false, false);
+	    add(table, "t.e.m. " + new SimpleDateFormat("dd-MM-yyyy").format(report.minusDays(1).toDate()), false, false);
+
+            table.setSpacingAfter(20);
 
             document.add(table);
-	    
+
 	    /*Tabel*/
 	    createTable(document);
 
@@ -166,7 +170,7 @@ public class Receipts extends Controller {
 	    Font f2=new Font(FontFamily.COURIER, 6);
 	    document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB",f));
 	    document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent",f));
-	    document.add(new Paragraph("Gelieve de afrekening te betalen voor " + vervaldatum,f));
+	    document.add(new Paragraph("Gelieve de afrekening te betalen voor " + new SimpleDateFormat("dd-MM-yyyy").format(report.plusMonths(3).toDate()),f));
 	    document.add(new Paragraph("Bij betaling, gelieve het nummer van de afrekening te vermelden",f2));
         } catch (Exception e) {
             e.printStackTrace();
@@ -175,124 +179,164 @@ public class Receipts extends Controller {
 
 private static void createTable(Document document)
       throws BadElementException, DocumentException {
+    document.add(new Paragraph("Ritten"));
     //**variabelen
-    int aantalCategorien= 3;
-    int[] categorienBovengrens=new int[aantalCategorien];
-    double[] categoriePrijs=new double[aantalCategorien];
-    for(int i=1;i<=aantalCategorien;i++){
-        //Bovengrens
-        categorienBovengrens[i-1]=i*100;
-        //Prijs
-        categoriePrijs[i-1]=i*0.21;
-    }
-    int aantalRitten=10;
+    SettingProvider provider = DataProvider.getSettingProvider();
+    int levels = provider.getInt("cost_levels", new DateTime(date));
 
-    int amountOfComulns=5+aantalCategorien;
-    PdfPTable table = new PdfPTable(amountOfComulns);
+    int amountOfComulns = 4 + levels;
+    PdfPTable drivesTable = new PdfPTable(amountOfComulns);
+    drivesTable.setWidthPercentage(100);
+    drivesTable.setSpacingBefore(5);
+    drivesTable.setSpacingAfter(10);
 
     /*Hoofdding*/
-    add(table,"Auto", true);
-    add(table,"Datum", true);
-    add(table,"Aantal kms", true);
-    
-	for(int j=0;j<aantalCategorien;j++){
-	    String cell="0-";
-	    if(j>0){
-		cell=categorienBovengrens[j-1]+"-";
-	    }
-	    
-	    add(table,cell+categorienBovengrens[j]+" km", true);
+    add(drivesTable,"Auto", true, false);
+    add(drivesTable,"Datum", true, false);
+    add(drivesTable,"Afstand", true, false);
+
+    int lower = 0;
+    int upper = 0;
+
+    for(int j=0; j < levels; j++){
+        if (j > 0)
+            lower = upper;
+
+        if (j < levels - 1) {
+            upper = provider.getInt("cost_limit_" + j, new DateTime(date));
+            add(drivesTable,lower + "-" + upper + "km", true, false);
+        } else {
+            add(drivesTable, ">" + upper + "km", true, false);
+        }
 	}
-    add(table,"Kostprijs",  true);
-    add(table,"Tank-",  true);
+    add(drivesTable,"Ritprijs",  true, false);
 
-    add(table,"",  true);
-    add(table,"",  true);
-    add(table,"",  true);
+    add(drivesTable,"",  true);
+    add(drivesTable,"",  true);
+    add(drivesTable,"",  true);
     
-	for(int j=0;j<aantalCategorien;j++){
-	    add(table,"kms aan "+categoriePrijs[j]);
+	for(int j=0; j < levels; j++){
+	    add(drivesTable,"€" + provider.getDouble("cost_" + j, new DateTime(date)) + "/km");
 	}
-    add(table,"kilometers", true);
-    add(table,"beurten", true);
-    
 
+    add(drivesTable,"",  true);
 
+    try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+        CarRideDAO dao = context.getCarRideDAO();
+        rides = new ArrayList<>();
+        rides.add(dao.getCarRide(101));
+    }catch (Exception e) {}
+
+    int totalDistance = 0;
+    double totalCost = 0;
+    double[] totals = new double[levels];
 
     /*Middenstuk*/
-    for(int i=0;i<aantalRitten;i++){
+    for (CarRide ride : rides) {
 	//**variabelen
-	String naamAuto="Klorofil";
-	String date="1986";
-	int aantalkm = 999;
-	int kostprijskm=10;
-	int tankbeurten=44;
+    int distance = ride.getEndMileage() - ride.getStartMileage();
+    totalDistance += distance;
 	
-	add(table,naamAuto);
-	add(table,date);
-	add(table,""+aantalkm);
+	add(drivesTable, ride.getReservation().getCar().getName());
+	add(drivesTable, new SimpleDateFormat("dd-MM-yyyy").format(ride.getReservation().getFrom().toDate()));
+	add(drivesTable, "" + distance);
 
-	for(int j=0;j<aantalCategorien;j++){
-	    //**variabelen
-            int kmInCategorie=5;
-	    
-	    add(table,""+kmInCategorie);
-	}
-	add(table,""+kostprijskm, true);
-	add(table,""+tankbeurten);
+        double rideCost = 0;
+        if (true) {
+            for (int level = 0; level < levels; level++)
+                add(drivesTable, "--");
+        } else {
+            int level;
+            lower = 0;
+            for (level = 0; level < levels; level++) {
+                int limit = 0;
+                double cost;
+                boolean stop = false;
+
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, new DateTime(date)))) {
+                    cost = distance * provider.getDouble("cost_" + level, new DateTime(date));
+                    stop = true;
+                } else {
+                    cost = (limit - lower) * provider.getDouble("cost_" + level, new DateTime(date));
+                    distance -= (limit - lower);
+                }
+
+                totals[level] += cost;
+                rideCost += cost;
+                add(drivesTable, "€ " + cost);
+
+                if (stop) {
+                    level++;
+                    break;
+                }
+
+                lower = limit;
+            }
+
+            for (int i = level; i < levels; i++) {
+                add(drivesTable,"");
+            }
+        }
+
+        totalCost += rideCost;
+
+	add(drivesTable, "€ " + rideCost, true);
 
     }
 
     /*Slot*/
 
     //**variabelen: totalen
-    
 
-    add(table,"", true);
-    add(table,"Totalen", true);
-    add(table,"443423", true);
-    
-	for(int j=0;j<aantalCategorien;j++){
-	    add(table,categorienBovengrens[j]+"", true);
+
+    add(drivesTable, "TOTALEN", true);
+    add(drivesTable, "");
+    add(drivesTable, totalDistance + " km", true);
+
+	for(int j = 0; j < levels; j++){
+	    add(drivesTable, "€ " + totals[j], true);
 	}
-    add(table,"Vervaldatum:",  true);
-    add(table,"15/131/13",  false);
 
-    add(table,"", true);
-    add(table,"", true);
-    add(table,"", true);
-    
-	for(int j=0;j<aantalCategorien;j++){
-	    add(table,"", true);
-	}
-    add(table,"TOTAAL TE BETALEN:",  true);
-    add(table,"88909"+ "€",  true);
+    add(drivesTable, "€ " + totalCost, true);
 
+    document.add(drivesTable);
 
-    document.add(table);
+    document.add(new Paragraph("Tankbeurten"));
+    PdfPTable refuelsTable = new PdfPTable(3);
+
+    add(refuelsTable, "Auto", true);
+    add(refuelsTable, "Datum", true);
+    add(refuelsTable, "Prijs", true);
+    refuelsTable.setWidthPercentage(100);
+    refuelsTable.setSpacingBefore(5);
+    refuelsTable.setSpacingAfter(10);
+    document.add(refuelsTable);
 }
 
 
     public static void add(PdfPTable table, String contents, boolean fat) {
-	Font f=new Font(FontFamily.COURIER, 8);
-	if(fat){ 
-	    f=new Font(FontFamily.COURIER, 8, Font.BOLD);
+        add(table, contents, fat, true);
+    }
+
+    public static void add(PdfPTable table, String contents, boolean fat, boolean border) {
+        Font f=new Font(FontFamily.COURIER, 8);
+        if(fat){
+            f=new Font(FontFamily.COURIER, 8, Font.BOLD);
         }
-	PdfPCell cell=new PdfPCell(new Paragraph(contents,f));
-	//cell.setBorderLeft(Rectangle.NO_BORDER);
-	//cell.setBorderRight(Rectangle.NO_BORDER);
-	//cell.setBorderColorLeft(BaseColor.WHITE);
-        //cell.setBorderColorRight(BaseColor.WHITE);
+        PdfPCell cell=new PdfPCell(new Paragraph(contents,f));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setBorderColor(BaseColor.WHITE);
-        cell.setBorderColorTop(BaseColor.BLACK);
-        cell.setBorderColorBottom(BaseColor.BLACK);
-        cell.setBorderWidthBottom(0);
+        if (border) {
+            cell.setPaddingBottom(5);
+            cell.setBorder(Rectangle.BOTTOM);
+            cell.setBorderColor(BaseColor.BLACK);
+        } else {
+            cell.setBorder(Rectangle.NO_BORDER);
+        }
         table.addCell(cell);
     }
 
     public static void add(PdfPTable table, String contents) {
-	add( table,  contents, false);
+        add(table, contents, false);
     }
 
     public void endPeriod() {

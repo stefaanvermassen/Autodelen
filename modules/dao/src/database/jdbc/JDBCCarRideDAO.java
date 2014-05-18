@@ -60,7 +60,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
     private PreparedStatement getGetCarRideStatement() throws SQLException {
         if (getCarRideStatement == null) {
             getCarRideStatement = connection.prepareStatement("SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
-                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id" +
+                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     " WHERE car_ride_car_reservation_id = ?");
         }
         return getCarRideStatement;

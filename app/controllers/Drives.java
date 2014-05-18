@@ -504,25 +504,34 @@ public class Drives extends Controller {
     }
 
     private static void calculateDriveCost(CarRide ride, DateTime date) {
-        SettingProvider provider = DataProvider.getSettingProvider();
-
-        double cost = 0;
-        int distance = ride.getEndMileage() - ride.getStartMileage();
-        int levels = provider.getInt("cost_levels", date);
-
-        for (int level = 0; level < levels; level++) {
-            int limit;
-
-            if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date))) {
-                cost += distance * provider.getDouble("cost_" + level, date);
-                break;
-            } else {
-                cost += limit * provider.getDouble("cost_" + level, date);
-                distance -= limit;
-            }
+        boolean priviliged = false;
+        for (User user : ride.getReservation().getCar().getPriviliged()) {
+            if (user.getId() == ride.getReservation().getUser().getId())
+                priviliged = true;
         }
+        if (ride.getReservation().getUser().getId() == ride.getReservation().getCar().getOwner().getId() || priviliged) {
+            ride.setCost(0);
+        } else {
+            SettingProvider provider = DataProvider.getSettingProvider();
 
-        ride.setCost(cost);
+            double cost = 0;
+            int distance = ride.getEndMileage() - ride.getStartMileage();
+            int levels = provider.getInt("cost_levels", date);
+
+            for (int level = 0; level < levels; level++) {
+                int limit;
+
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date))) {
+                    cost += distance * provider.getDouble("cost_" + level, date);
+                    break;
+                } else {
+                    cost += limit * provider.getDouble("cost_" + level, date);
+                    distance -= limit;
+                }
+            }
+
+            ride.setCost(cost);
+        }
     }
 
     /**

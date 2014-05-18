@@ -1,13 +1,9 @@
     package models;
     import org.joda.time.DateTime;
 
-    import java.util.*;
-    import  java.io.*;
-    import  org.apache.poi.*;
-    import  org.apache.poi.hssf.usermodel.HSSFSheet;
-    import  org.apache.poi.hssf.usermodel.HSSFWorkbook;
-    import  org.apache.poi.hssf.usermodel.HSSFRow;
-    import  org.apache.poi.hssf.usermodel.HSSFCell;
+    import java.sql.Date;
+    import java.text.DateFormat;
+    import java.text.SimpleDateFormat;
 
 public class Receipt {
 
@@ -61,8 +57,8 @@ public class Receipt {
         return date;
     }
 
-    public SimpleDateFormat getDateString() {
-        return new SimpleDateFormat("dd-MM-yyyy").format(date);
+    public String getDateString() {
+        return new SimpleDateFormat("dd-MM-yyyy").format(date.toDate());
     }
 
     public void setDate(DateTime date) {
