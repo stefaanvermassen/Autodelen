@@ -90,9 +90,6 @@ POST        /pwreset                                controllers.Login.resetPassw
 GET         /pwresetrequest                         controllers.Login.resetPasswordRequest()
 POST        /pwresetrequest                         controllers.Login.resetPasswordRequestProcess()
 
-# Calendar
-GET         /calendar                               controllers.Calendar.index()
-
 # Infosessions
 GET         /infosession/new                        controllers.InfoSessions.newSession()
 POST        /infosession/new                        controllers.InfoSessions.createNewSession()

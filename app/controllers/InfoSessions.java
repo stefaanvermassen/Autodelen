@@ -596,7 +596,7 @@ public class InfoSessions extends Controller {
         if (user.getDriverLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
         if (!user.isPayedDeposit())
-            errors.add("Lidgeld nog niet betaald.");
+            errors.add("Waarborg nog niet betaald.");
         if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
