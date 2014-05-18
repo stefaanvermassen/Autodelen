@@ -17,6 +17,7 @@ import views.html.drives.drivesAdmin;
 import views.html.drives.drives;
 import views.html.drives.drivespage;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -505,7 +506,7 @@ public class Drives extends Controller {
 
     private static void calculateDriveCost(CarRide ride, DateTime date, boolean privileged) {
         if (privileged) {
-            ride.setCost(0);
+            ride.setCost(BigDecimal.ZERO);
         } else {
             SettingProvider provider = DataProvider.getSettingProvider();
 
@@ -527,7 +528,7 @@ public class Drives extends Controller {
                 }
             }
 
-            ride.setCost(cost);
+            ride.setCost(new BigDecimal(cost));
         }
     }
 

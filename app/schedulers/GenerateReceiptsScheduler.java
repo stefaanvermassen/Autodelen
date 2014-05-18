@@ -17,7 +17,9 @@ public class GenerateReceiptsScheduler implements Runnable {
             context.getRefuelDAO().endPeriod();
             context.getCarCostDAO().endPeriod();
 
-            List<User> users = context.getUserDAO().getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
+            UserDAO dao = context.getUserDAO();
+
+            List<User> users = dao.getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
             context.commit();
             for(User user : users) {
                 Receipts.generateReceipt(user, new Date(java.util.Calendar.getInstance().getTime().getTime()));

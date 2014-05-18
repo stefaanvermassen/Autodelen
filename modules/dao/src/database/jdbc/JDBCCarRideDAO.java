@@ -35,7 +35,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
         carRide.setEndMileage(rs.getInt("car_ride_end_mileage"));
         carRide.setDamaged(rs.getBoolean("car_ride_damage"));
         carRide.setRefueling(rs.getInt("car_ride_refueling"));
-        carRide.setCost(rs.getDouble("car_ride_cost"));
+        carRide.setCost(rs.getBigDecimal("car_ride_cost"));
         carRide.setBilled(rs.getDate("car_ride_billed"));
 
         return carRide;
@@ -139,7 +139,7 @@ public class JDBCCarRideDAO implements CarRideDAO {
             ps.setInt(3, carRide.getEndMileage());
             ps.setBoolean(4, carRide.isDamaged());
             ps.setInt(5, carRide.getRefueling());
-            ps.setDouble(6, carRide.getCost());
+            ps.setBigDecimal(6, carRide.getCost());
             ps.setDate(7, carRide.getBilled());
 
             ps.setInt(8, carRide.getReservation().getId());

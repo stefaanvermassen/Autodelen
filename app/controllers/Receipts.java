@@ -238,7 +238,7 @@ public class Receipts extends Controller {
         BigDecimal refuelOwner = BigDecimal.ZERO;
 
         for (Refuel refuel: refuels) {
-            if (refuel.getCarRide().getCost() == 0) {
+            if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) == 0) {
                 refuelOwner = refuelOwner.add(refuel.getAmount());
             } else {
                 refuelOthers = refuelOthers.add(refuel.getAmount());
@@ -356,9 +356,9 @@ private static BigDecimal createLoanerTable(Document document)
             add(drivesTable, "");
         }
 
-        totalCost = totalCost.add(new BigDecimal(ride.getCost()));
+        totalCost = totalCost.add(ride.getCost());
 
-        if (ride.getCost() != 0)
+        if (ride.getCost().compareTo(BigDecimal.ZERO) != 0)
             add(drivesTable, "€ " + ride.getCost(), true);
         else
             add(drivesTable, "--", true);
@@ -391,7 +391,7 @@ private static BigDecimal createLoanerTable(Document document)
     for (Refuel refuel : refuels) {
         add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
         add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
-        if (refuel.getCarRide().getCost() != 0) {
+        if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) != 0) {
             add(refuelsTable, "€ " + refuel.getAmount(), true);
             refuelTotal = refuelTotal.add(refuel.getAmount());
         } else
