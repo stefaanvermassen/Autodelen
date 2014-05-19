@@ -446,10 +446,7 @@ public class Drives extends Controller {
             if(isOwner) {
                 calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
                 dao.updateCarRide(ride);
-            } else {
-                detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
-                return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
-            }
+            } 
             // Unable to create or retrieve the drive
             if(ride == null) {
                 detailsForm.reject("Er is een fout gebeurd tijdens het opslaan van de gegevens. Gelieve de database administrator te contacteren.");
