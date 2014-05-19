@@ -6,3 +6,4 @@ source templates.sql;
 source settings.sql;
 source users.sql;
 source userroles.sql;
+source cars.sql;
