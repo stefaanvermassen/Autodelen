@@ -1,0 +1,3 @@
+INSERT INTO `infosessions` (`infosession_id`, `infosession_type`, `infosession_type_alternative`, `infosession_timestamp`, `infosession_address_id`, `infosession_host_user_id`, `infosession_max_enrollees`, `infosession_comments`, `infosession_created_at`, `infosession_updated_at`) VALUES 
+('1', 'NORMAL', '', '2014-05-20 14:00:00', '1', '1', '10', '', '2014-05-19 16:13:31', '2014-05-19 16:13:31'),
+('2', 'OWNER', '', '2014-05-27 12:00:00', '2', '1', '5', '', '2014-05-19 16:14:04', '2014-05-19 16:20:44');
