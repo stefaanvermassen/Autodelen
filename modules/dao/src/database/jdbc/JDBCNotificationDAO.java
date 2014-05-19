@@ -214,8 +214,7 @@ public class JDBCNotificationDAO implements NotificationDAO{
             PreparedStatement ps = getSetAllReadStatement();
             ps.setBoolean(1, true);
             ps.setInt(2,userId);
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when updating notification.");
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to mark notification as read", e);
         }
